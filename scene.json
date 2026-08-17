@@ -3,22 +3,25 @@
   "runtimeVersion": "7",
   "display": {
     "title": "Hackathon",
-    "description": "Empty Scene Template",
+    "description": "Escena para la Hackathon :)",
     "favicon": "favicon_asset",
     "navmapThumbnail": ""
   },
   "owner": "",
   "contact": {
-    "name": "SDK",
-    "email": ""
+    "name": "Carlos Baeza (baeza.eth)",
+    "email": "hola@cbaeza.com"
   },
   "main": "bin/index.js",
   "tags": [],
   "scene": {
     "parcels": [
-      "0,0"
+      "-26,109"
     ],
-    "base": "0,0"
+    "base": "-26,109"
+  },
+  "worldConfiguration": {
+    "name": "buidlhouse.dcl.eth"
   },
   "spawnPoints": [
     {
@@ -54,11 +57,12 @@
     "portableExperiences": "enabled",
     "nearbyVoiceChat": "enabled"
   },
-  "creator": "",
+  "creator": "0x2AEc06E4c3e85672b1BDe46CA45FB6fB574791c2",
   "skyboxConfig": {},
   "landscapeTerrain": true,
   "source": {
     "origin": "creator-hub",
-    "projectId": "5890d151-3b6c-4f2f-a703-2d277aa99f19"
-  }
+    "projectId": "7b6da7cc-505a-47f2-ada1-b12aa44ba9b4"
+  },
+  "rating": "A"
 }

@@ -453,26 +453,26 @@
         "0": {
           "json": {
             "name": "Hackathon",
-            "description": "Empty Scene Template",
-            "thumbnail": "",
+            "description": "Escena para la Hackathon :)",
+            "ageRating": "A",
             "categories": [],
-            "author": "SDK",
-            "email": "",
-            "tags": [],
+            "author": "Carlos Baeza (baeza.eth)",
+            "email": "hola@cbaeza.com",
+            "tags": [
+              ""
+            ],
             "layout": {
+              "base": {
+                "x": -26,
+                "y": 109
+              },
               "parcels": [
                 {
-                  "x": 0,
-                  "y": 0
+                  "x": -26,
+                  "y": 109
                 }
-              ],
-              "base": {
-                "x": 0,
-                "y": 0
-              }
+              ]
             },
-            "silenceVoiceChat": false,
-            "disablePortableExperiences": false,
             "spawnPoints": [
               {
                 "name": "SpawnArea1",
@@ -486,11 +486,8 @@
                     ]
                   },
                   "y": {
-                    "$case": "range",
-                    "value": [
-                      0,
-                      0
-                    ]
+                    "$case": "single",
+                    "value": 0
                   },
                   "z": {
                     "$case": "range",
@@ -508,9 +505,7 @@
               }
             ],
             "skyboxConfig": {},
-            "creator": "",
-            "disableNearbyVoiceChat": false,
-            "hideLandscapeTerrain": false
+            "creator": "0x2AEc06E4c3e85672b1BDe46CA45FB6fB574791c2"
           }
         }
       }
