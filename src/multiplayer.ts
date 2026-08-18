@@ -1,34 +1,50 @@
-import { engine, Schemas, PlayerIdentityData, Entity } from '@dcl/sdk/ecs'
-import { syncEntity, isStateSyncronized } from '@dcl/sdk/network'
+import { engine, PlayerIdentityData } from '@dcl/sdk/ecs'
 import { MessageBus } from '@dcl/sdk/message-bus'
+import { getPlayer } from '@dcl/sdk/src/players'
+import { GolemConfig, INITIAL_GOLEMS_CONFIG } from './config/golems'
+import { PlayerSquadAnnouncementDto, GolemSquadMemberDto } from './components/follower'
 
 /**
  * ============================================================================
- * INFRAESTRUCTURA BASE MULTIJUGADOR (SDK7 ECS)
+ * INFRAESTRUCTURA MULTIJUGADOR Y SINCRONIZACIÓN DE ESCUADRONES (SDK7 ECS)
  * ============================================================================
- * Este módulo contiene toda la base técnica para sincronización multijugador P2P:
- * 1. MessageBus: Comunicación de eventos efímeros en tiempo real.
- * 2. SyncEntity: Helpers para sincronizar entidades y componentes CRDT.
- * 3. Detección y listado de jugadores en la escena.
+ * Maneja la comunicación P2P mediante MessageBus para difundir y recibir
+ * los escuadrones de golems de cada jugador presente en la escena sin requerir
+ * servidores externos.
  */
 
-/**
- * Instancia de MessageBus compartida para emisión y escucha de mensajes efímeros
- * entre todos los clientes conectados a la misma sala/isla.
- *
- * Ejemplo de uso:
- * ```typescript
- * sceneMessageBus.emit('mi_evento', { data: 123 })
- * sceneMessageBus.on('mi_evento', (payload) => { ... })
- * ```
- */
 export const sceneMessageBus = new MessageBus()
 
+/** Nombres canónicos de eventos para MessageBus */
+export const SQUAD_MESSAGE_TYPES = {
+  ANNOUNCE: 'golem_squad_announce',
+  REQUEST: 'golem_squad_request'
+} as const
+
+/** Registro local en memoria de escuadrones de jugadores remotos [address -> golems] */
+const remoteSquadRegistry = new Map<string, GolemSquadMemberDto[]>()
+
+/** Callback registrado para notificar al sistema de seguimiento cuando llega un escuadrón nuevo */
+let onSquadReceivedCallback: ((ownerAddress: string, squad: GolemSquadMemberDto[]) => void) | null = null
+
 /**
- * Consulta si el estado de red CRDT local ya está sincronizado con los peers.
+ * Obtiene el identificador o dirección de wallet del jugador local.
  */
-export function isNetworkSynchronized(): boolean {
-  return isStateSyncronized()
+export function getLocalPlayerId(): string {
+  const localPlayer = getPlayer()
+  if (localPlayer && localPlayer.userId) {
+    return localPlayer.userId.toLowerCase()
+  }
+
+  // Fallback si getPlayer() aún no cargó
+  for (const [entity] of engine.getEntitiesWith(PlayerIdentityData)) {
+    const data = PlayerIdentityData.get(entity)
+    if (data && data.address) {
+      return data.address.toLowerCase()
+    }
+  }
+
+  return 'local_player'
 }
 
 /**
@@ -43,47 +59,95 @@ export function getConnectedPlayersCount(): number {
 }
 
 /**
- * Obtiene la dirección (wallet) del jugador local si está disponible.
+ * Obtiene la configuración de escuadrón registrada para un jugador remoto.
  */
-export function getLocalPlayerAddress(): string | undefined {
-  for (const [entity] of engine.getEntitiesWith(PlayerIdentityData)) {
-    const data = PlayerIdentityData.get(entity)
-    if (data && data.address) {
-      return data.address
+export function getRemoteSquad(ownerAddress: string): GolemSquadMemberDto[] | undefined {
+  return remoteSquadRegistry.get(ownerAddress.toLowerCase())
+}
+
+/**
+ * Anuncia el escuadrón actual del jugador local a todos los peers en la escena.
+ */
+export function announceLocalSquad(customSquad?: GolemConfig[]) {
+  const squadToAnnounce = customSquad || INITIAL_GOLEMS_CONFIG
+  const localId = getLocalPlayerId()
+
+  const payload: PlayerSquadAnnouncementDto = {
+    ownerAddress: localId,
+    timestamp: Date.now(),
+    golems: squadToAnnounce.map((g) => ({
+      id: g.id,
+      name: g.name,
+      affinity: g.affinity,
+      modelSrc: g.modelSrc,
+      scale: g.scale,
+      followDistance: g.followDistance,
+      moveSpeed: g.moveSpeed,
+      rotationSpeed: g.rotationSpeed
+    }))
+  }
+
+  sceneMessageBus.emit(SQUAD_MESSAGE_TYPES.ANNOUNCE, payload)
+}
+
+/**
+ * Solicita a todos los demás jugadores en la escena que anuncien sus escuadrones.
+ */
+export function requestAllSquads() {
+  const localId = getLocalPlayerId()
+  sceneMessageBus.emit(SQUAD_MESSAGE_TYPES.REQUEST, { requester: localId, timestamp: Date.now() })
+}
+
+/**
+ * Inicializa los escuchadores de MessageBus para recepción de anuncios y solicitudes.
+ */
+export function setupSquadSyncListeners(
+  onSquadReceived?: (ownerAddress: string, squad: GolemSquadMemberDto[]) => void
+) {
+  if (onSquadReceived) {
+    onSquadReceivedCallback = onSquadReceived
+  }
+
+  // 1. Escuchar anuncios de escuadrones de otros jugadores
+  sceneMessageBus.on(
+    SQUAD_MESSAGE_TYPES.ANNOUNCE,
+    (payload: PlayerSquadAnnouncementDto) => {
+      if (!payload || !payload.ownerAddress || !Array.isArray(payload.golems)) {
+        return
+      }
+
+      const senderAddress = payload.ownerAddress.toLowerCase()
+      const localId = getLocalPlayerId()
+
+      // Ignorar nuestros propios ecos
+      if (senderAddress === localId) {
+        return
+      }
+
+      // Guardar en el registro en memoria
+      remoteSquadRegistry.set(senderAddress, payload.golems)
+
+      // Notificar al suscriptor (Fábrica / Sistema de seguimiento)
+      if (onSquadReceivedCallback) {
+        onSquadReceivedCallback(senderAddress, payload.golems)
+      }
     }
-  }
-  return undefined
+  )
+
+  // 2. Escuchar solicitudes de escuadrones de jugadores recién ingresados
+  sceneMessageBus.on(
+    SQUAD_MESSAGE_TYPES.REQUEST,
+    (payload: { requester: string; timestamp: number }) => {
+      if (!payload || !payload.requester) return
+
+      const requester = payload.requester.toLowerCase()
+      const localId = getLocalPlayerId()
+
+      // Si otro jugador nos pide nuestro escuadrón, responder anunciando el nuestro
+      if (requester !== localId) {
+        announceLocalSquad()
+      }
+    }
+  )
 }
 
-/**
- * Helper para registrar una entidad para sincronización en red CRDT.
- *
- * @param entity Entidad a sincronizar.
- * @param componentIds Array con los componentId de los componentes que deben sincronizarse.
- * @param syncId ID numérico único opcional (necesario para entidades preexistentes estáticas).
- *
- * Ejemplo:
- * ```typescript
- * syncNetworkEntity(miEntidad, [Transform.componentId, MiComponente.componentId], 100)
- * ```
- */
-export function syncNetworkEntity(entity: Entity, componentIds: number[], syncId?: number) {
-  if (syncId !== undefined) {
-    syncEntity(entity, componentIds, syncId)
-  } else {
-    syncEntity(entity, componentIds)
-  }
-}
-
-/**
- * Plantilla de ejemplo para crear componentes sincronizados:
- *
- * ```typescript
- * export const CustomSharedState = engine.defineComponent('hackathon::CustomSharedState', {
- *   score: Schemas.Int,
- *   stateText: Schemas.String,
- *   isActive: Schemas.Boolean,
- *   timestamp: Schemas.Int64
- * })
- * ```
- */

@@ -11,21 +11,26 @@ import { Vector3, Color4 } from '@dcl/sdk/math'
 import { setupUi } from './ui'
 import { INITIAL_GOLEMS_CONFIG } from './config/golems'
 import { createFollowerGolem } from './objects/golemFactory'
-import { golemFollowerSystem } from './systems/followerSystem'
+import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
+import {
+  setupSquadSyncListeners,
+  announceLocalSquad,
+  requestAllSquads,
+  getLocalPlayerId
+} from './multiplayer'
 
 /**
  * ============================================================================
  * PUNTO DE ENTRADA PRINCIPAL DE LA ESCENA (SDK7 ECS)
  * ============================================================================
- * Inicializa la UI, controles móviles táctiles, suelo base, instanciación
- * de los 3 golems acompañantes de prueba y el sistema de seguimiento en fila.
+ * Inicializa la UI, controles móviles táctiles, suelo base, escuadrón local de golems,
+ * infraestructura multijugador P2P y el sistema de seguimiento en fila compartido.
  */
 export function main() {
   // 1. Inicializar la Interfaz de Usuario 2D (React-ECS)
   setupUi()
 
   // 2. Configurar controles táctiles Mobile-First
-  // Ocultar botones no utilizados (3, 4, 5, 6) para evitar el menú "+" y dejar una interfaz limpia y espaciosa
   TouchScreenControls.createOrReplace(engine.RootEntity, {
     hideJoystick: false,
     hideCrosshair: false,
@@ -40,21 +45,26 @@ export function main() {
   // 3. Suelo base limpio (Área 32x32m para pruebas en Decentraland World)
   setupBaseFloor()
 
-  // 4. Instanciar los 3 Golems seguidores de prueba (Vapor, Galvánico y Mecánico)
-  setupFollowerGolems()
+  // 4. Instanciar los 3 Golems seguidores del jugador local
+  setupLocalFollowerGolems()
 
-  // 5. Registrar el sistema de seguimiento de trayectoria en fila en el motor ECS
+  // 5. Configurar infraestructura multijugador P2P (MessageBus)
+  setupSquadSyncListeners(onRemoteSquadUpdated)
+  announceLocalSquad()
+  requestAllSquads()
+
+  // 6. Registrar el sistema de seguimiento multijugador en el motor ECS
   engine.addSystem(golemFollowerSystem)
 }
 
 /**
- * Instancia el escuadrón de los 3 golems acompañantes en posiciones iniciales.
+ * Instancia el escuadrón de los 3 golems acompañantes para el jugador local.
  */
-function setupFollowerGolems() {
+function setupLocalFollowerGolems() {
+  const localId = getLocalPlayerId()
   INITIAL_GOLEMS_CONFIG.forEach((config, index) => {
-    // Posición inicial de spawn ligeramente detrás de la posición por defecto
     const spawnPos = Vector3.create(16, 0.1, 16 - config.followDistance)
-    createFollowerGolem(config, index, spawnPos)
+    createFollowerGolem(config, index, spawnPos, localId)
   })
 }
 
@@ -78,4 +88,5 @@ function setupBaseFloor() {
     metallic: 0.1
   })
 }
+
 

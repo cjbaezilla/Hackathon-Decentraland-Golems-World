@@ -185,11 +185,13 @@ graph LR
 
 ---
 
-## 🤖 Golems Acompañantes y Misiones de Reserva
+## 🤖 Golems Acompañantes y Acompañamiento Multijugador en Tiempo Real
 
 ![Límite de Golems y Misiones](GOLEMS/golems_limite_y_misiones.png)
 
-- **Escuadrón Activo en Fila (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos. Utilizan un avanzado **Sistema de Historial de Trayectoria (*Breadcrumb Trail FIFO*)** con interpolación suave (*LERP/SLERP*), que permite que los 3 autómatas sigan la curva real del camino trazado por el maestro ($1.8\text{m}$, $3.6\text{m}$, $5.4\text{m}$), con frenado natural y zona muerta anti-vibración (*anti-jitter*).
+- **Escuadrón Activo en Fila (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos.
+- **Visualización Multijugador P2P en Tiempo Real (Multi-Trail System)**: Todos los jugadores presentes en la escena pueden ver en tiempo real los 3 golems acompañantes de cada usuario. El sistema utiliza una arquitectura distribuida que procesa trayectorias independientes para el avatar local (`engine.PlayerEntity`) y para todos los avatares remotos (`PlayerIdentityData` + `Transform`), ejecutando interpolación suave (*LERP/SLERP*) a 60 FPS con slots escalonados a $1.8\text{m}$, $3.6\text{m}$ y $5.4\text{m}$ sin saturar el bus CRDT.
+- **Handshake P2P y Etiquetas de Identificación**: Mediante eventos ligeros en `MessageBus` (`golem_squad_announce` y `golem_squad_request`), cada cliente difunde y almacena la composición del escuadrón de los demás avatares, mostrando etiquetas flotantes `Billboard` con el nombre, afinidad y la dirección abreviada de la cartera del dueño.
   - 📖 *Guías técnicas maestras:*
     - 🏭 [Guía de la Fábrica de Golems y Jerarquías](guias/guia-fabrica-de-golems-y-mecanicas.md)
     - 🤖 [Guía del Sistema de Seguimiento en Fila](guias/guia-sistema-seguimiento-y-mecanicas.md)
@@ -246,8 +248,8 @@ El proyecto implementa una arquitectura híbrida optimizada para el entorno desc
 graph TD
     subgraph Cliente_Decentraland["Cliente Decentraland (Mobile / Desktop)"]
         ECS["SDK7 ECS Engine (TypeScript)"]
-        UI["React-ECS UI (Radar, Forja, Inventario)"]
-        Multi["P2P Comms (syncEntity & MessageBus)"]
+        UI["React-ECS UI (Radar, HUD, Inventario)"]
+        Multi["P2P Comms (MessageBus Handshake & Multi-Trail)"]
     end
 
     subgraph Backend_Persistente["Backend Persistente"]
@@ -257,15 +259,16 @@ graph TD
     end
 
     ECS <-->|"Interacción Local & Audio"| UI
-    ECS <-->|"Sincronización en Vivo"| Multi
+    ECS <-->|"Sincronización P2P en Vivo"| Multi
     ECS -->|"Peticiones Firmadas (signedFetch)"| API
     API --> AUTH
     AUTH -->|"Lectura / Escritura"| DB
 ```
 
 - **Runtime de Escena**: Decentraland SDK7 (`@dcl/sdk/ecs`, `@dcl/sdk/react-ecs`, `@dcl/sdk/math`).
-- **Multijugador Efímero**: Sincronización P2P para posiciones, animaciones y eventos de combate en vivo vía `syncEntity` y `MessageBus`.
+- **Multijugador P2P Autónomo**: Difusión ligera de escuadrones con `MessageBus` y simulación local distribuida sin dependencia de servidores externos para el movimiento en vivo.
 - **Persistencia de Datos**: Peticiones firmadas con `signedFetch` hacia la API PHP para operaciones críticas (inventario, recetas de golems, expediciones y ranking).
+
 
 ---
 
@@ -335,16 +338,16 @@ Hackathon/
 ├── src/                        # Código fuente TypeScript SDK7
 │   ├── index.ts                # Inicializador principal y orquestador de sistemas
 │   ├── state.ts                # Estado global reactivo de la escena
-│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (Radar, HUD)
-│   ├── multiplayer.ts          # Gestión de red P2P y MessageBus
+│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD Multijugador, Radar)
+│   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake y registro de escuadrones)
 │   ├── config/                 # Configuraciones maestras y constantes
 │   │   └── golems.ts           # Configuración de golems, afinidades y distancias
 │   ├── components/             # Componentes ECS personalizados (Schemas)
-│   │   └── follower.ts         # GolemFollowerComponent
+│   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
 │   ├── objects/                # Patrón Factory de GameObjects
-│   │   └── golemFactory.ts     # Fábrica de entidades y billboards para Golems
+│   │   └── golemFactory.ts     # Fábrica de entidades, billboards y ciclo de vida de escuadrones
 │   └── systems/                # Sistemas ECS
-│       └── followerSystem.ts   # Sistema de seguimiento Breadcrumb Trail FIFO
+│       └── followerSystem.ts   # Sistema de seguimiento Multi-Trail FIFO LERP/SLERP
 ├── scene.json                  # Metadatos del World (25x25 parcelas, spawn, rating)
 ├── package.json                # Dependencias y scripts de construcción
 ├── tsconfig.json               # Configuración del compilador TypeScript

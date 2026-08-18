@@ -1,14 +1,17 @@
-import { engine, Transform } from '@dcl/sdk/ecs'
+import { engine, Transform, PlayerIdentityData, Entity } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
-import { GolemFollowerComponent } from '../components/follower'
-import { FOLLOW_SYSTEM_SETTINGS } from '../config/golems'
+import { GolemFollowerComponent, GolemSquadMemberDto } from '../components/follower'
+import { FOLLOW_SYSTEM_SETTINGS, INITIAL_GOLEMS_CONFIG } from '../config/golems'
+import { getLocalPlayerId, getRemoteSquad } from '../multiplayer'
+import { spawnPlayerSquad, removePlayerSquad } from '../objects/golemFactory'
 
 /**
  * ============================================================================
- * SISTEMA ECS: SEGUIMIENTO EN FILA DE GOLEMS (BREADCRUMB TRAIL SYSTEM)
+ * SISTEMA ECS: SEGUIMIENTO MULTIJUGADOR DE GOLEMS (MULTI-TRAIL SYSTEM)
  * ============================================================================
- * Registra la trayectoria histórica del avatar del maestro y mueve a los 3 golems
- * en fila india (conga/snake line) con interpolación suave LERP / SLERP.
+ * Registra las trayectorias históricas (Breadcrumbs) de todos los avatares
+ * presentes en la escena (local y remotos) y actualiza el movimiento suave
+ * de sus respectivos escuadrones de golems en fila india.
  */
 
 interface BreadcrumbNode {
@@ -16,21 +19,31 @@ interface BreadcrumbNode {
   rotation: Quaternion
 }
 
-/** Cola FIFO de migajas de posición y rotación */
-const trail: BreadcrumbNode[] = []
-let lastSampledPlayerPos: Vector3 | null = null
-let isTrailInitialized = false
+interface PlayerTrailState {
+  ownerAddress: string
+  trail: BreadcrumbNode[]
+  lastSampledPos: Vector3 | null
+  isInitialized: boolean
+}
+
+/** Mapa de colas FIFO de migajas por jugador [ownerAddress -> PlayerTrailState] */
+const playerTrails = new Map<string, PlayerTrailState>()
 
 /**
- * Reinicializa el historial de migajas alineándolo detrás del jugador.
+ * Reinicializa el historial de migajas alineándolo detrás de la posición y rotación dada.
  */
-function resetTrailBehindPlayer(playerPos: Vector3, playerRot: Quaternion) {
-  trail.length = 0
-  lastSampledPlayerPos = Vector3.clone(playerPos)
+function resetTrailBehind(
+  trailState: PlayerTrailState,
+  playerPos: Vector3,
+  playerRot: Quaternion
+) {
+  trailState.trail.length = 0
+  trailState.lastSampledPos = Vector3.clone(playerPos)
+  trailState.isInitialized = true
 
   const backwardDir = Vector3.rotate(Vector3.Backward(), playerRot)
   for (let i = 0; i < 25; i++) {
-    trail.push({
+    trailState.trail.push({
       position: Vector3.add(playerPos, Vector3.scale(backwardDir, (i + 1) * 0.3)),
       rotation: Quaternion.create(playerRot.x, playerRot.y, playerRot.z, playerRot.w)
     })
@@ -38,10 +51,28 @@ function resetTrailBehindPlayer(playerPos: Vector3, playerRot: Quaternion) {
 }
 
 /**
- * Calcula la posición y dirección tangencial a lo largo de la trayectoria histórica
- * para una distancia específica detrás del avatar.
+ * Obtiene o crea la estructura de trayectoria para un jugador.
+ */
+function getOrCreateTrailState(ownerAddress: string): PlayerTrailState {
+  const key = ownerAddress.toLowerCase()
+  let state = playerTrails.get(key)
+  if (!state) {
+    state = {
+      ownerAddress: key,
+      trail: [],
+      lastSampledPos: null,
+      isInitialized: false
+    }
+    playerTrails.set(key, state)
+  }
+  return state
+}
+
+/**
+ * Calcula la posición a lo largo de una trayectoria específica para una distancia objetivo.
  */
 function getPositionAlongTrail(
+  trail: BreadcrumbNode[],
   targetDistance: number,
   currentHeadPos: Vector3
 ): { position: Vector3; forwardDir: Vector3 } {
@@ -71,7 +102,7 @@ function getPositionAlongTrail(
     prevPos = nextPos
   }
 
-  // Si la distancia objetivo sobrepasa la longitud del historial, proyectar hacia atrás
+  // Si sobrepasa la longitud de migajas, proyectar linealmente hacia atrás
   if (trail.length >= 2) {
     const last = trail[trail.length - 1].position
     const secondLast = trail[trail.length - 2].position
@@ -87,57 +118,141 @@ function getPositionAlongTrail(
 }
 
 /**
- * Sistema principal de seguimiento que se ejecuta en cada tick del motor.
+ * Actualiza el historial de migajas de un jugador dado su Transform actual.
  */
-export function golemFollowerSystem(dt: number) {
-  // 1. Validar presencia y lectura segura del Transform del jugador (engine.PlayerEntity)
-  if (!Transform.has(engine.PlayerEntity)) {
-    return
+function updatePlayerTrail(trailState: PlayerTrailState, pos: Vector3, rot: Quaternion): Vector3 {
+  if (!trailState.isInitialized || trailState.lastSampledPos === null) {
+    resetTrailBehind(trailState, pos, rot)
+    return pos
   }
 
-  const playerTransform = Transform.get(engine.PlayerEntity)
-  const playerPos = playerTransform.position
-  const playerRot = playerTransform.rotation
+  const distFromLast = Vector3.distance(pos, trailState.lastSampledPos)
 
-  // 2. Inicialización de trayectoria
-  if (!isTrailInitialized || lastSampledPlayerPos === null) {
-    resetTrailBehindPlayer(playerPos, playerRot)
-    isTrailInitialized = true
-    return
+  // Detección de teletransporte o salto abrupto
+  if (distFromLast > FOLLOW_SYSTEM_SETTINGS.TELEPORT_DISTANCE_THRESHOLD) {
+    resetTrailBehind(trailState, pos, rot)
+    return pos
   }
 
-  // 3. Detección de teletransporte o salto de distancia abrupto
-  const distFromLastSample = Vector3.distance(playerPos, lastSampledPlayerPos)
-  if (distFromLastSample > FOLLOW_SYSTEM_SETTINGS.TELEPORT_DISTANCE_THRESHOLD) {
-    resetTrailBehindPlayer(playerPos, playerRot)
-    return
-  }
-
-  // 4. Muestreo de trayectoria: registrar nueva migaja si el avatar se desplazó
-  if (distFromLastSample >= FOLLOW_SYSTEM_SETTINGS.BREADCRUMB_MIN_DISTANCE) {
-    trail.unshift({
-      position: Vector3.clone(playerPos),
-      rotation: Quaternion.create(playerRot.x, playerRot.y, playerRot.z, playerRot.w)
+  // Registrar nueva migaja si el avatar se desplazó
+  if (distFromLast >= FOLLOW_SYSTEM_SETTINGS.BREADCRUMB_MIN_DISTANCE) {
+    trailState.trail.unshift({
+      position: Vector3.clone(pos),
+      rotation: Quaternion.create(rot.x, rot.y, rot.z, rot.w)
     })
-    lastSampledPlayerPos = Vector3.clone(playerPos)
+    trailState.lastSampledPos = Vector3.clone(pos)
 
-    if (trail.length > FOLLOW_SYSTEM_SETTINGS.MAX_BREADCRUMBS) {
-      trail.pop()
+    if (trailState.trail.length > FOLLOW_SYSTEM_SETTINGS.MAX_BREADCRUMBS) {
+      trailState.trail.pop()
     }
   }
 
-  // 5. Actualizar la posición y rotación de cada Golem seguidor
+  return pos
+}
+
+/**
+ * Callback para actualizar dinámicamente los modelos/escuadrón de un jugador remoto
+ * cuando llega un anuncio por MessageBus.
+ */
+export function onRemoteSquadUpdated(ownerAddress: string, squad: GolemSquadMemberDto[]) {
+  const normAddress = ownerAddress.toLowerCase()
+  const trailState = playerTrails.get(normAddress)
+  const basePos = trailState?.lastSampledPos || Vector3.create(16, 0.1, 16)
+
+  // Reemplazar escuadrón visual con la nueva configuración recibida
+  removePlayerSquad(normAddress)
+  spawnPlayerSquad(normAddress, squad, basePos)
+}
+
+/**
+ * Sistema principal de seguimiento multijugador ejecutado en cada frame.
+ */
+export function golemFollowerSystem(dt: number) {
+  const localId = getLocalPlayerId()
+  const activeOwners = new Set<string>()
+  const headPositions = new Map<string, Vector3>()
+
+  // --------------------------------------------------------------------------
+  // 1. PROCESAR JUGADOR LOCAL (engine.PlayerEntity)
+  // --------------------------------------------------------------------------
+  if (Transform.has(engine.PlayerEntity)) {
+    const localTransform = Transform.get(engine.PlayerEntity)
+    const localTrail = getOrCreateTrailState(localId)
+    updatePlayerTrail(localTrail, localTransform.position, localTransform.rotation)
+    activeOwners.add(localId)
+    activeOwners.add('local')
+    headPositions.set(localId, localTransform.position)
+    headPositions.set('local', localTransform.position)
+  }
+
+  // --------------------------------------------------------------------------
+  // 2. PROCESAR JUGADORES REMOTOS (PlayerIdentityData + Transform)
+  // --------------------------------------------------------------------------
+  for (const [entity] of engine.getEntitiesWith(PlayerIdentityData, Transform)) {
+    const identity = PlayerIdentityData.get(entity)
+    const playerTransform = Transform.get(entity)
+
+    const rawAddress = identity.address || `remote_${entity}`
+    const remoteAddress = rawAddress.toLowerCase()
+
+    // Evitar duplicar el procesamiento si la entidad representa al jugador local
+    if (remoteAddress === localId) {
+      continue
+    }
+
+    activeOwners.add(remoteAddress)
+    headPositions.set(remoteAddress, playerTransform.position)
+
+    const trailState = getOrCreateTrailState(remoteAddress)
+
+    // Si es la primera vez que vemos a este jugador remoto, instanciar sus 3 golems
+    if (!trailState.isInitialized) {
+      resetTrailBehind(trailState, playerTransform.position, playerTransform.rotation)
+
+      // Verificar si ya tenemos su escuadrón registrado o usar el inicial por defecto
+      const squadConfig = getRemoteSquad(remoteAddress) || INITIAL_GOLEMS_CONFIG
+      spawnPlayerSquad(remoteAddress, squadConfig, playerTransform.position)
+    } else {
+      updatePlayerTrail(trailState, playerTransform.position, playerTransform.rotation)
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 3. LIMPIEZA DE JUGADORES DESCONECTADOS
+  // --------------------------------------------------------------------------
+  for (const [trackedOwner] of playerTrails) {
+    if (!activeOwners.has(trackedOwner)) {
+      removePlayerSquad(trackedOwner)
+      playerTrails.delete(trackedOwner)
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 4. ACTUALIZACIÓN DEL MOVIMIENTO LERP/SLERP DE CADA GOLEM SEGUIDOR
+  // --------------------------------------------------------------------------
   for (const [entity] of engine.getEntitiesWith(GolemFollowerComponent, Transform)) {
     const follower = GolemFollowerComponent.get(entity)
+    const ownerKey = follower.ownerAddress.toLowerCase()
+
+    const trailState = playerTrails.get(ownerKey) || playerTrails.get(localId)
+    const headPos = headPositions.get(ownerKey) || headPositions.get(localId)
+
+    if (!trailState || !headPos || trailState.trail.length === 0) {
+      continue
+    }
+
     const currentTransform = Transform.get(entity)
 
-    // Calcular posición objetivo en la trayectoria para este golem
-    const { position: targetPos } = getPositionAlongTrail(follower.targetDistance, playerPos)
+    // Calcular posición objetivo en la trayectoria de su dueño
+    const { position: targetPos } = getPositionAlongTrail(
+      trailState.trail,
+      follower.targetDistance,
+      headPos
+    )
 
-    // Distancia al punto objetivo
     const distToTarget = Vector3.distance(currentTransform.position, targetPos)
 
-    // Zona de reposo (Idle)
+    // Zona de reposo (Idle) para evitar jitter
     if (distToTarget < FOLLOW_SYSTEM_SETTINGS.IDLE_DISTANCE_THRESHOLD) {
       if (follower.isMoving) {
         GolemFollowerComponent.getMutable(entity).isMoving = false
@@ -145,15 +260,15 @@ export function golemFollowerSystem(dt: number) {
       continue
     }
 
-    // Movimiento activo con interpolación suave LERP y SLERP
+    // Movimiento activo por interpolación
     const mutableTransform = Transform.getMutable(entity)
     const moveStep = Math.min(1.0, dt * follower.moveSpeed)
 
     mutableTransform.position = Vector3.lerp(currentTransform.position, targetPos, moveStep)
 
-    // Orientación hacia el objetivo
+    // Orientación hacia el frente del vector de movimiento
     const moveDelta = Vector3.subtract(targetPos, currentTransform.position)
-    moveDelta.y = 0 // Mantener rotación sobre el plano horizontal
+    moveDelta.y = 0
 
     if (Vector3.lengthSquared(moveDelta) > 0.001) {
       const targetRotation = Quaternion.lookRotation(Vector3.normalize(moveDelta))
@@ -166,3 +281,4 @@ export function golemFollowerSystem(dt: number) {
     }
   }
 }
+

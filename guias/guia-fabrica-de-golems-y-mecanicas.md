@@ -37,7 +37,7 @@ Esta guía documenta en detalle el diseño, arquitectura y funcionamiento del pa
 ### 1.1 Principio de Responsabilidad Única y Arquitectura Modular
 Siguiendo las recomendaciones oficiales de Decentraland ([`game-objects.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/docs/dcl-docs-main/creator/sdk7/programming-patterns/game-objects.md)), el archivo `src/index.ts` debe mantenerse limpio y actuar únicamente como inicializador y orquestador.
 
-La lógica de instanciación, asignación de componentes, cálculo de jerarquías y configuración de estilos reside de forma exclusiva en el módulo **Factory** ([`src/objects/golemFactory.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/golemFactory.ts)).
+La lógica de instanciación, asignación de componentes, cálculo de jerarquías, vinculación de dueños (`ownerAddress`) y limpieza de entidades reside de forma exclusiva en el módulo **Factory** ([`src/objects/golemFactory.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/golemFactory.ts)).
 
 ```
                     ┌───────────────────────────────┐
@@ -48,6 +48,7 @@ La lógica de instanciación, asignación de componentes, cálculo de jerarquía
                                     ▼
                     ┌───────────────────────────────┐
                     │      createFollowerGolem()    │
+                    │      spawnPlayerSquad()       │
                     │   (src/objects/golemFactory)  │
                     └───────────────┬───────────────┘
                                     │
@@ -57,16 +58,18 @@ La lógica de instanciación, asignación de componentes, cálculo de jerarquía
 ┌───────────────────────┐                       ┌───────────────────────┐
 │ Entidad Raíz Golem    │                       │ Entidad Hija Etiqueta │
 │ - Transform           │ ─── (parent) ──────── │ - Transform (local)   │
-│ - GltfContainer (.glb)│                       │ - TextShape           │
+│ - GltfContainer (.glb)│                       │ - TextShape [0x...]   │
 │ - GolemFollowerComp   │                       │ - Billboard           │
+│   (con ownerAddress)  │                       │                       │
 └───────────────────────┘                       └───────────────────────┘
 ```
 
-### 1.2 Ciclo de Vida de una Entidad Golem
-1. **Definición / Solicitud**: Se provee un objeto de configuración `GolemConfig` (generado por la forja o predefinido en la lista inicial).
-2. **Instanciación Raíz**: Se crea la entidad principal en el motor con `engine.addEntity()` y se le asocian `Transform`, `GltfContainer` y `GolemFollowerComponent`.
-3. **Instanciación de la UI In-World**: Se genera una entidad hija vinculada con `Transform.parent`, a la que se le añade `TextShape` y `Billboard`.
-4. **Registro en el Bucle ECS**: El sistema de seguimiento (`golemFollowerSystem`) detecta automáticamente la presencia de `GolemFollowerComponent` en la consulta `engine.getEntitiesWith(GolemFollowerComponent, Transform)` e inicia el movimiento coordinado.
+### 1.2 Ciclo de Vida de una Entidad Golem en Multijugador
+1. **Definición / Solicitud**: Se provee un objeto de configuración `GolemConfig` o `GolemSquadMemberDto` junto con el identificador del dueño (`ownerAddress`, ej. `'local'` o dirección de wallet `0x123...`).
+2. **Instanciación Raíz**: Se crea la entidad principal en el motor con `engine.addEntity()` y se le asocian `Transform`, `GltfContainer` y `GolemFollowerComponent` con su respectivo `ownerAddress`.
+3. **Instanciación de la UI In-World**: Se genera una entidad hija vinculada con `Transform.parent`, a la que se le añade `TextShape` con el nombre, afinidad y la dirección abreviada del dueño, orientada a cámara con `Billboard`.
+4. **Registro en el Bucle ECS**: El sistema `golemFollowerSystem` consulta `engine.getEntitiesWith(GolemFollowerComponent, Transform)` y mueve a cada golem a lo largo de la trayectoria de su dueño.
+5. **Destrucción y Limpieza**: Cuando un usuario remoto se desconecta, `removePlayerSquad(ownerAddress)` elimina sus entidades y etiquetas hijas mediante `removeEntityWithChildren()`, liberando recursos de memoria.
 
 ---
 
@@ -76,76 +79,98 @@ La lógica de instanciación, asignación de componentes, cálculo de jerarquía
 La entidad principal representa el cuerpo físico y la identidad del autómata en la escena:
 
 ```typescript
-const golemEntity = engine.addEntity()
+export function createFollowerGolem(
+  config: GolemConfig | GolemSquadMemberDto,
+  orderIndex: number,
+  spawnPosition: Vector3,
+  ownerAddress: string = 'local'
+): Entity {
+  const golemEntity = engine.addEntity()
 
-// 1. Posición, rotación y escala proporcional
-Transform.create(golemEntity, {
-  position: spawnPosition,
-  rotation: Quaternion.Identity(),
-  scale: Vector3.create(config.scale, config.scale, config.scale)
-})
+  // 1. Posición, rotación y escala proporcional
+  Transform.create(golemEntity, {
+    position: spawnPosition,
+    rotation: Quaternion.Identity(),
+    scale: Vector3.create(config.scale, config.scale, config.scale)
+  })
 
-// 2. Carga del modelo 3D binario glTF 2.0
-GltfContainer.create(golemEntity, {
-  src: config.modelSrc
-})
+  // 2. Carga del modelo 3D binario glTF 2.0
+  GltfContainer.create(golemEntity, {
+    src: config.modelSrc
+  })
 
-// 3. Componente de seguimiento en formación
-GolemFollowerComponent.create(golemEntity, {
-  golemId: config.id,
-  orderIndex,
-  targetDistance: config.followDistance,
-  moveSpeed: config.moveSpeed,
-  rotationSpeed: config.rotationSpeed,
-  isMoving: false
-})
+  // 3. Componente de seguimiento en formación con dueño
+  GolemFollowerComponent.create(golemEntity, {
+    golemId: config.id,
+    ownerAddress: ownerAddress.toLowerCase(),
+    orderIndex,
+    targetDistance: config.followDistance,
+    moveSpeed: config.moveSpeed,
+    rotationSpeed: config.rotationSpeed,
+    isMoving: false
+  })
+
+  // 4. Etiqueta flotante con nombre, afinidad y tag del dueño
+  const labelEntity = engine.addEntity()
+  Transform.create(labelEntity, {
+    parent: golemEntity,
+    position: Vector3.create(0, 1.45, 0)
+  })
+
+  const ownerTag = formatShortAddress(ownerAddress)
+  TextShape.create(labelEntity, {
+    text: `${config.name}${ownerTag}\n[${config.affinity}]`,
+    fontSize: 2.2,
+    textColor: getAffinityTextColor(config.affinity)
+  })
+
+  Billboard.create(labelEntity, {})
+
+  return golemEntity
+}
 ```
 
-### 2.2 Entidad Hija de Interfaz In-World (`labelEntity`)
-Para mostrar el nombre del golem y su afinidad elemental flotando sobre su cabeza sin interferir con la orientación del cuerpo 3D, se utiliza una **entidad hija emparentada**:
+### 2.2 Gestión de Escuadrones Completos (Spawn y Remove)
+
+La fábrica provee métodos de alto nivel para instanciar y limpiar escuadrones completos:
 
 ```typescript
-const labelEntity = engine.addEntity()
+/**
+ * Instancia el escuadrón completo de 3 golems para un jugador específico.
+ */
+export function spawnPlayerSquad(
+  ownerAddress: string,
+  squadConfig: (GolemConfig | GolemSquadMemberDto)[],
+  basePos: Vector3
+): Entity[] {
+  const entities: Entity[] = []
+  const normAddress = ownerAddress.toLowerCase()
 
-// Emparentamiento relativo a la cabeza del golem
-Transform.create(labelEntity, {
-  parent: golemEntity,
-  position: Vector3.create(0, 1.45, 0)
-})
+  squadConfig.forEach((config, index) => {
+    const spawnPos = Vector3.create(basePos.x, Math.max(0.1, basePos.y), basePos.z - config.followDistance)
+    const entity = createFollowerGolem(config, index, spawnPos, normAddress)
+    entities.push(entity)
+  })
 
-// Renderizado de texto 3D con salto de línea
-TextShape.create(labelEntity, {
-  text: `${config.name}\n[${config.affinity}]`,
-  fontSize: 2.2,
-  textColor: getAffinityTextColor(config.affinity)
-})
+  return entities
+}
 
-// Orientación automática continua hacia la cámara
-Billboard.create(labelEntity, {})
-```
+/**
+ * Elimina de forma limpia todas las entidades y etiquetas hijas de un jugador.
+ */
+export function removePlayerSquad(ownerAddress: string) {
+  const targetOwner = ownerAddress.toLowerCase()
+  const entitiesToRemove: Entity[] = []
 
-#### Ventajas del Emparentamiento con `Billboard`:
-- **Movimiento Automático**: Al desplazarse o rotar `golemEntity`, la etiqueta `labelEntity` se traslada exactamente a la misma velocidad sin necesidad de código adicional en el `engine.addSystem`.
-- **Rotación Desacoplada**: Mientras que el cuerpo del golem rota hacia la dirección de su marcha (`lookRotation`), el componente `Billboard` orienta el texto directamente hacia la cámara del usuario en cualquier ángulo (primera o tercera persona), garantizando legibilidad total.
+  for (const [entity] of engine.getEntitiesWith(GolemFollowerComponent)) {
+    const follower = GolemFollowerComponent.get(entity)
+    if (follower.ownerAddress.toLowerCase() === targetOwner) {
+      entitiesToRemove.push(entity)
+    }
+  }
 
-### 2.3 Paleta de Colores Semántica por Afinidad
-La fábrica incluye la función auxiliar `getAffinityTextColor()` para asociar cada una de las 5 afinidades del GDD con un color semántico de alta visibilidad:
-
-```typescript
-function getAffinityTextColor(affinity: GolemAffinity): Color4 {
-  switch (affinity) {
-    case GolemAffinity.STEAM:
-      return Color4.create(1.0, 0.55, 0.1, 1.0) // 💨 Naranja Fuego / Vapor (#FF8C1A)
-    case GolemAffinity.GALVANIC:
-      return Color4.create(0.2, 0.9, 1.0, 1.0)  // ⚡ Cian Eléctrico (#33E5FF)
-    case GolemAffinity.MECHANICAL:
-      return Color4.create(1.0, 0.85, 0.3, 1.0) // ⚙️ Ámbar / Dorado Engranaje (#FFD94D)
-    case GolemAffinity.LUMINOUS:
-      return Color4.create(1.0, 1.0, 0.6, 1.0)  // 💡 Amarillo Luminoso (#FFFF99)
-    case GolemAffinity.AETHER:
-      return Color4.create(0.8, 0.4, 1.0, 1.0)  // 🔮 Violeta Místico / Éter (#CC66FF)
-    default:
-      return Color4.White()
+  for (const entity of entitiesToRemove) {
+    removeEntityWithChildren(engine, entity)
   }
 }
 ```
@@ -257,7 +282,7 @@ graph TD
     B --> C["Función Hash FNV-1a (32 bits)"]
     C --> D["Derivador Algorítmico: Stats, Nombre, Afinidad, Escala"]
     D --> E["Construcción de GolemConfig"]
-    E --> F["createFollowerGolem(config, orderIndex, spawnPos)"]
+    E --> F["createFollowerGolem(config, orderIndex, spawnPos, owner)"]
     F --> G["Golem instanciado en el mundo 3D"]
 ```
 
@@ -290,8 +315,9 @@ A partir de los bits del hash determinista, se derivan automáticamente los atri
 - **Diseño Ergonómico**: A los golems acompañantes **NO se les añade `MeshCollider`**.
 - **Razón Mobile-First**: Si los 3 golems tuvieran colisionadores de bloqueo físico, podrían atrapar o bloquear accidentalmente al avatar en esquinas estrechas o pasillos, especialmente en pantallas táctiles con joystick virtual. Al no tener colisionador físico, el jugador puede moverse con total fluidez sin riesgo de atascos.
 
-### 6.2 Jerarquías Livianas (`Transform.parent`)
-- El motor Decentraland SDK7 optimiza internamente las jerarquías de entidades. El emparentamiento de la etiqueta (`labelEntity`) con el golem (`golemEntity`) no produce recálculos costosos en JavaScript, ya que el motor C++/Rust subyacente propaga la matriz de transformación automáticamente.
+### 6.2 Jerarquías Livianas y Limpieza Eficiente
+- El emparentamiento con `Billboard` garantiza visibilidad continua.
+- La función `removePlayerSquad()` garantiza la eliminación de las entidades principales y sus hijos mediante `removeEntityWithChildren()`, evitando fugas de memoria al desconectarse usuarios.
 
 ### 6.3 Cumplimiento de Restricciones Móviles
 - ✅ **Sin Luces Dinámicas**: El resplandor de los núcleos proviene de materiales PBR emisivos puros.
@@ -326,7 +352,6 @@ export const MI_NUEVO_GOLEM: GolemConfig = {
 import { createFollowerGolem } from './objects/golemFactory'
 import { MI_NUEVO_GOLEM } from './config/golems'
 
-const miGolem = createFollowerGolem(MI_NUEVO_GOLEM, 0, Vector3.create(16, 0, 16))
+const miGolem = createFollowerGolem(MI_NUEVO_GOLEM, 0, Vector3.create(16, 0, 16), 'local')
 ```
 
-El nuevo golem se integrará automáticamente al sistema de seguimiento, mostrará su etiqueta coloreada correspondiente (`Violeta Místico`) y marchará en la formación del escuadrón.

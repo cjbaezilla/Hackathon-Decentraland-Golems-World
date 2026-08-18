@@ -93,32 +93,38 @@ A continuación se detallan las distintas alternativas evaluadas para implementa
 
 ---
 
-## 3. Algoritmo Matemático y Funcionamiento del Breadcrumb Trail
+## 3. Algoritmo Matemático y Funcionamiento del Breadcrumb Trail Multi-Usuario
 
-El sistema opera dentro de `src/systems/followerSystem.ts` a través de 5 fases consecutivas:
+El sistema opera dentro de `src/systems/followerSystem.ts` a través de un flujo unificado que gestiona las trayectorias tanto del avatar local como de los avatares remotos conectados:
 
 ```
 [Inicio Tick: golemFollowerSystem(dt)]
   │
-  ├─► 1. Verificar Transform.has(engine.PlayerEntity)
+  ├─► 1. Procesar Jugador Local (engine.PlayerEntity)
+  │        ├─► updatePlayerTrail(localTrail, localPos, localRot)
+  │        └─► Registrar localId en activeOwners
   │
-  ├─► 2. Evaluar Distancia al Último Muestreo (distFromLastSample)
-  │        ├─► Si dist > 25m  ──► Resetear buffer (Teletransporte)
-  │        └─► Si dist ≥ 0.25m ──► Insertar nuevo punto: trail.unshift(playerPos)
+  ├─► 2. Procesar Jugadores Remotos (PlayerIdentityData + Transform)
+  │        ├─► Si es nuevo avatar ──► resetTrailBehind() + spawnPlayerSquad(remoteAddress, squad)
+  │        └─► Si ya existe      ──► updatePlayerTrail(trailState, remotePos, remoteRot)
   │
-  └─► 3. Para cada Golem (OrderIndex 0, 1, 2):
-           ├─► getPositionAlongTrail(targetDistance, playerPos)
+  ├─► 3. Limpieza de Desconectados
+  │        └─► Si un trackedOwner no está en activeOwners ──► removePlayerSquad() + delete trail
+  │
+  └─► 4. Para cada Golem Activo en Escena (GolemFollowerComponent):
+           ├─► Buscar PlayerTrailState según follower.ownerAddress
+           ├─► getPositionAlongTrail(trail, targetDistance, headPos)
            ├─► Evaluar distToTarget < 0.12m
            │      ├─► SÍ ──► Reposo (isMoving = false, no mutar Transform)
            │      └─► NO ──► LERP de posición + SLERP de rotación
 ```
 
 ### 3.1 Muestreo Espacial de Migajas ($\Delta d \ge 0.25\text{m}$)
-Para evitar saturar la memoria con muestras redundantes cuando el jugador está quieto o moviéndose mínimamente, solo se registra una nueva muestra si la distancia euclidiana entre la posición actual y la última muestra guardada supera el umbral:
+Para evitar saturar la memoria con muestras redundantes cuando un avatar está quieto o moviéndose mínimamente, solo se registra una nueva muestra si la distancia euclidiana entre la posición actual y la última muestra guardada supera el umbral:
 
 $$\Delta d = \sqrt{(x_{\text{jugador}} - x_{\text{último}})^2 + (z_{\text{jugador}} - z_{\text{último}})^2} \ge 0.25\text{ m}$$
 
-Cuando se cumple, se agrega la muestra al inicio de la cola (`trail.unshift`) y, si se supera el tamaño máximo (`MAX_BREADCRUMBS = 60`), se elimina la más antigua (`trail.pop()`).
+Cuando se cumple, se agrega la muestra al inicio de la cola del jugador correspondiente (`trailState.trail.unshift`) y, si se supera el tamaño máximo (`MAX_BREADCRUMBS = 60`), se elimina la más antigua (`trail.pop()`).
 
 ### 3.2 Proyección Interpolada a lo Largo de la Polilínea
 Dado un objetivo de distancia $D$ (ej. $3.6\text{m}$ para el segundo golem), la función `getPositionAlongTrail` recorre los segmentos de la polilínea formada por $P_0 (\text{posición actual}), P_1 (\text{trail}[0]), P_2 (\text{trail}[1]), \dots, P_n$:
@@ -150,11 +156,11 @@ El sistema evalúa primero la distancia al objetivo en modo solo lectura (`Trans
 - Si $\|\vec{P}_{\text{actual}} - \vec{P}_{\text{target}}\| < 0.12\text{m}$: El golem se considera en reposo. No se llama a `Transform.getMutable()`, lo que ahorra ciclos de cómputo y no envía actualizaciones redundantes al bus CRDT.
 
 ### 3.5 Recuperación Automática por Teletransporte
-Si el jugador utiliza `movePlayerTo` o cambia de zona en el mapa de $400\text{m} \times 400\text{m}$, la distancia al último punto del historial excederá instantáneamente el umbral de seguridad:
+Si cualquier jugador (local o remoto) utiliza `movePlayerTo` o cambia de zona en el mapa de $400\text{m} \times 400\text{m}$, la distancia al último punto del historial excederá instantáneamente el umbral de seguridad:
 
 $$\Delta d > \text{TELEPORT\_DISTANCE\_THRESHOLD} \ (25.0\text{ m})$$
 
-El sistema detecta esta anomalía y reinicializa inmediatamente todo el buffer de migajas alineado detrás de la nueva posición del jugador, evitando que los golems crucen todo el mapa volando en línea recta.
+El sistema detecta esta anomalía y reinicializa inmediatamente el buffer de migajas alineado detrás de la nueva posición del avatar, evitando que los golems crucen todo el mapa volando en línea recta.
 
 ---
 
@@ -202,59 +208,23 @@ src/
 ├── config/
 │   └── golems.ts           # Parámetros de golems, afinidades, distancias y velocidades
 ├── components/
-│   └── follower.ts         # Definición del componente ECS GolemFollowerComponent
+│   └── follower.ts         # Componente ECS GolemFollowerComponent (con ownerAddress y DTOs)
 ├── objects/
-│   └── golemFactory.ts     # Factory para instanciación de GltfContainer + Billboard
+│   └── golemFactory.ts     # Factory para instanciación, etiquetado y limpieza de escuadrones
 ├── systems/
-│   └── followerSystem.ts   # Sistema de muestreo de trayectoria y resolución de movimiento
-├── index.ts                # Punto de entrada y orquestador de sistemas
-├── multiplayer.ts          # Infraestructura P2P (MessageBus y SyncEntity)
+│   └── followerSystem.ts   # Sistema de seguimiento multi-usuario LERP/SLERP en tiempo real
+├── index.ts                # Punto de entrada, inicio de red y orquestador
+├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake y registro de pares)
 ├── state.ts                # Estado global reactivo
-└── ui.tsx                  # Interfaz 2D React-ECS
+└── ui.tsx                  # Interfaz 2D React-ECS con HUD multijugador superior
 ```
 
-### 5.1 `src/config/golems.ts`
-Centraliza la parametrización de los 3 golems y constantes del sistema:
-```typescript
-export const INITIAL_GOLEMS_CONFIG: GolemConfig[] = [
-  {
-    id: 'golem_steam_01',
-    name: 'Calderón de Vapor',
-    affinity: GolemAffinity.STEAM,
-    modelSrc: 'assets/models/golem_steam.glb',
-    scale: 1.1,
-    followDistance: 1.8,
-    moveSpeed: 4.5,
-    rotationSpeed: 6.0
-  },
-  {
-    id: 'golem_galvanic_01',
-    name: 'Chispazo Galvánico',
-    affinity: GolemAffinity.GALVANIC,
-    modelSrc: 'assets/models/golem_galvanic.glb',
-    scale: 0.95,
-    followDistance: 3.6,
-    moveSpeed: 4.8,
-    rotationSpeed: 6.5
-  },
-  {
-    id: 'golem_mechanical_01',
-    name: 'Acorazado Mecánico',
-    affinity: GolemAffinity.MECHANICAL,
-    modelSrc: 'assets/models/golem_mechanical.glb',
-    scale: 1.2,
-    followDistance: 5.4,
-    moveSpeed: 4.2,
-    rotationSpeed: 5.5
-  }
-]
-```
-
-### 5.2 `src/components/follower.ts`
-Define el componente ECS personalizado mediante `engine.defineComponent`:
+### 5.1 `src/components/follower.ts`
+Define el componente ECS personalizado con asociación de dueño (`ownerAddress`):
 ```typescript
 export const GolemFollowerComponent = engine.defineComponent('golems::GolemFollowerComponent', {
   golemId: Schemas.String,
+  ownerAddress: Schemas.String, // 'local' o wallet 0x...
   orderIndex: Schemas.Int,
   targetDistance: Schemas.Float,
   moveSpeed: Schemas.Float,
@@ -263,64 +233,45 @@ export const GolemFollowerComponent = engine.defineComponent('golems::GolemFollo
 })
 ```
 
-### 5.3 `src/objects/golemFactory.ts`
-Ensambla la entidad en el motor ECS y vincula una etiqueta flotante orientada a cámara (`Billboard`):
+### 5.2 `src/multiplayer.ts`
+Gestiona la difusión y escucha de escuadrones P2P con `MessageBus`:
 ```typescript
-export function createFollowerGolem(config: GolemConfig, orderIndex: number, spawnPosition: Vector3): Entity {
-  const golemEntity = engine.addEntity()
+export function announceLocalSquad(customSquad?: GolemConfig[]) { ... }
+export function requestAllSquads() { ... }
+export function setupSquadSyncListeners(onSquadReceived?: (address: string, squad: GolemSquadMemberDto[]) => void) { ... }
+```
 
-  Transform.create(golemEntity, {
-    position: spawnPosition,
-    rotation: Quaternion.Identity(),
-    scale: Vector3.create(config.scale, config.scale, config.scale)
-  })
-
-  GltfContainer.create(golemEntity, { src: config.modelSrc })
-
-  GolemFollowerComponent.create(golemEntity, {
-    golemId: config.id,
-    orderIndex,
-    targetDistance: config.followDistance,
-    moveSpeed: config.moveSpeed,
-    rotationSpeed: config.rotationSpeed,
-    isMoving: false
-  })
-
-  // Etiqueta flotante con Billboard
-  const labelEntity = engine.addEntity()
-  Transform.create(labelEntity, { parent: golemEntity, position: Vector3.create(0, 1.45, 0) })
-  TextShape.create(labelEntity, {
-    text: `${config.name}\n[${config.affinity}]`,
-    fontSize: 2.2,
-    textColor: getAffinityTextColor(config.affinity)
-  })
-  Billboard.create(labelEntity, {})
-
-  return golemEntity
-}
+### 5.3 `src/objects/golemFactory.ts`
+Ensambla entidades individuales o escuadrones completos con etiquetas Billboard:
+```typescript
+export function spawnPlayerSquad(ownerAddress: string, squadConfig: GolemConfig[], basePos: Vector3): Entity[] { ... }
+export function removePlayerSquad(ownerAddress: string): void { ... }
 ```
 
 ### 5.4 `src/systems/followerSystem.ts`
-Contiene la función `golemFollowerSystem(dt)` que se ejecuta en el bucle principal de juego mediante `engine.addSystem(golemFollowerSystem)`.
+Ejecuta la interpolación y resolución de trayectorias simultáneas para todos los jugadores en la escena mediante `golemFollowerSystem(dt)`.
 
 ### 5.5 `src/index.ts`
-Punto de entrada minimalista y limpio:
+Punto de entrada modular que orquesta controles móviles, suelo, escuadrón local, handshake multijugador y el sistema de seguimiento:
 ```typescript
 export function main() {
   setupUi()
   setupTouchControls()
   setupBaseFloor()
-  setupFollowerGolems()
+  setupLocalFollowerGolems()
+  setupSquadSyncListeners(onRemoteSquadUpdated)
+  announceLocalSquad()
+  requestAllSquads()
   engine.addSystem(golemFollowerSystem)
 }
 ```
 
 ---
 
-## 6. Guía de Pruebas, Depuración y Extensión Futura
+## 6. Guía de Pruebas y Validación Multijugador
 
-### 6.1 Cómo Probar Localmente
-1. Compilar el proyecto para verificar que no existan errores de TypeScript:
+### 6.1 Cómo Probar Localmente con Múltiples Jugadores
+1. Compilar el proyecto para verificar cero errores de TypeScript:
    ```powershell
    npm run build
    ```
@@ -328,9 +279,9 @@ export function main() {
    ```powershell
    npm start
    ```
-3. Caminar con el avatar en línea recta, realizar giros en "S", círculos y paradas en seco. Comprobar que los tres golems siguen la curvatura exacta sin cortar esquinas.
+3. Abrir **Pestaña 1 (Jugador 1)** en `http://localhost:8000` con emulación móvil (`F12` $\rightarrow$ `Ctrl + Shift + M`).
+4. Abrir **Pestaña 2 (Jugador 2)** en modo incógnito con emulación móvil.
+5. Observar en la Pestaña 1 cómo aparece el avatar del Jugador 2 con sus **3 golems detrás** etiquetados con su dirección de wallet.
+6. Mover al Jugador 2 y comprobar que los golems marchan en fila india con curvas suaves a 60 FPS.
+7. Verificar que el HUD superior muestra `👥 Jugadores: 2 | ⚡ Golems en escena: 6`.
 
-### 6.2 Futuras Integraciones y Siguientes Pasos
-- **Animaciones Esqueléticas**: Cuando se incorporen modelos 3D con *rigging*, el campo reactivo `follower.isMoving` puede utilizarse para alternar clips mediante `Animator.playSingleAnimation(golem, follower.isMoving ? 'Walk' : 'Idle')`.
-- **Integración con Combate en Tiempo Real**: Al detectar un enemigo hostil dentro del radio de agresión, cambiar el modo del golem de `Seguimiento` a `Combate`, asignando al enemigo como nuevo objetivo dinámico.
-- **Sincronización P2P en Escena**: Para que otros jugadores vean a los golems acompañantes de sus rivales, registrar la entidad con `syncNetworkEntity(golemEntity, [Transform.componentId, GolemFollowerComponent.componentId])`.
