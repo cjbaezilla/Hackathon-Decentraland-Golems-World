@@ -25,10 +25,11 @@
 9. [NPCs Hostiles y Guardianes de Zona](#-npcs-hostiles-y-guardianes-de-zona)
 10. [Progresión y Sistema de Niveles](#-progresi%C3%B3n-y-sistema-de-niveles)
 11. [Torneo Escalera Competitivo (1v1 y 2v2)](#-torneo-escalera-competitivo-1v1-y-2v2)
-12. [Arquitectura Técnica y Persistencia](#-arquitectura-t%C3%A9cnica-y-persistencia)
-13. [Diseño Mobile-First y Restricciones de Rendimiento](#-dise%C3%B1o-mobile-first-y-restricciones-de-rendimiento)
-14. [Instalación, Desarrollo y Despliegue](#-instalaci%C3%B3n-desarrollo-y-despliegue)
-15. [Estructura del Proyecto](#-estructura-del-proyecto)
+12. [Gran Arena Circular de Torneo Steampunk (Colosal 72m - Cell Games Ring)](#-gran-arena-circular-de-torneo-steampunk-colosal-72m---cell-games-ring)
+13. [Arquitectura Técnica y Persistencia](#-arquitectura-t%C3%A9cnica-y-persistencia)
+14. [Diseño Mobile-First y Restricciones de Rendimiento](#-dise%C3%B1o-mobile-first-y-restricciones-de-rendimiento)
+15. [Instalación, Desarrollo y Despliegue](#-instalaci%C3%B3n-desarrollo-y-despliegue)
+16. [Estructura del Proyecto](#-estructura-del-proyecto)
 
 ---
 
@@ -243,6 +244,18 @@ El Distrito de la Forja alberga el podio y panel interactivo de la **Escalera Co
 
 ---
 
+## 🏟️ Gran Arena Circular de Torneo Steampunk (Colosal 72m - Cell Games Ring)
+
+Ubicada en el centro geométrico del mundo (`X: 200m, Z: 200m`), esta colosal estructura de **72 metros de diámetro** ($R = 36\text{m}$) está inspirada en la arquitectura del cuadrilátero del Torneo de Cell (*Dragon Ball Z*) reinterpretada bajo una estética post-industrial de vapor y engranajes:
+
+- **Plataforma Elevada Radial (72m)**: Más de 250 losas de madera reforzada y metal elevado $+0.6\text{m}$ sobre el terreno, con 56 segmentos continuos de bordillos de adoquín.
+- **Cuatro Columnas Monumentales de 12 Metros**: En las 4 esquinas diagonales (NW, NE, SE, SW), integradas por calderas base ampliadas (1.8x), fustes triples de engranajes verticales (`Gear Shaft.glb`), doble anillo giratorio contragiro (`Gear 10 Teeth` y `Gear 8 Teeth`), farolas dobles y chimeneas superiores humeantes (`Smoker.glb`).
+- **Gran Sigilo Planetario Central**: Un engranaje central colosal (`Gear Big.glb` escala 4.8x / ~12m diámetro) girando a $+0.20\text{ rad/s}$ sincronizado con 8 engranajes satélites en formación orbital y un altar relicario con espada (`Arthur Sword.glb`).
+- **16 Balizas Perimetrales y Rampas Ceremoniales**: Pedestales de barril con números Steampunk (`00` a `08`) y 4 grandes rampas cardinales de acceso (Norte, Sur, Este, Oeste) con doble barandilla de seguridad (`Tree Fence.glb`).
+- **Guía Técnica Detallada**: Consulta [`guias/guia-arena-torneo-steampunk.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-arena-torneo-steampunk.md).
+
+---
+
 ## 🏗️ Arquitectura Técnica y Persistencia
 
 El proyecto implementa una arquitectura híbrida optimizada para el entorno descentralizado y de alto rendimiento:
@@ -316,6 +329,7 @@ npm start
 | `npm run build` | Compila el código TypeScript a JavaScript en `bin/index.js`. |
 | `npm run deploy` | Despliega la escena en el Decentraland World asignado (`golems.dcl.eth`). |
 | `npm run upgrade-sdk` | Actualiza `@dcl/sdk` a la versión más reciente disponible. |
+| `node scripts/download_steampunk_assets.js` | Descarga y organiza automáticamente los modelos 3D y texturas oficiales del paquete Steampunk de Decentraland. |
 | `node scripts/generate_models.js` | Genera proceduralmente los 25 modelos 3D GLB (glTF 2.0) organizados por tipo (`--help` para ver opciones CLI). |
 
 ---
@@ -325,6 +339,7 @@ npm start
 ```text
 Hackathon/
 ├── assets/                     # Modelos 3D (.glb), texturas, sonidos e iconos
+│   ├── asset-packs/            # Modelos oficiales de Decentraland (Steampunk pack y arena)
 │   └── models/                 # Modelos 3D GLB organizados por afinidad (25 modelos en total)
 │       ├── steam/              # Golems de Vapor (golem_steam_01.glb a 05.glb)
 │       ├── galvanic/           # Golems Galvánicos (golem_galvanic_01.glb a 05.glb)
@@ -336,6 +351,7 @@ Hackathon/
 │   ├── golems_cover.png        # Portada oficial de la experiencia
 │   └── *.png                   # Ilustraciones e infografías conceptuales
 ├── guias/                      # Guías técnicas y documentación maestra de la experiencia
+│   ├── guia-arena-torneo-steampunk.md         # Guía de la Gran Arena Circular de Torneo Steampunk (72m)
 │   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía de la Fábrica de Golems y jerarquías
 │   ├── guia-sistema-seguimiento-y-mecanicas.md # Guía del sistema de seguimiento en fila
 │   └── guia-multijugador-mobile.md             # Guía de red P2P y Mobile-First
@@ -343,6 +359,7 @@ Hackathon/
 │   ├── dcl-docs-main/          # Documentación oficial de Decentraland SDK7
 │   └── sdk-skills-main/        # Catálogo maestro de habilidades y patrones
 ├── scripts/                    # Scripts de generación de assets y utilidades
+│   ├── download_steampunk_assets.js # Descargador automatizado de modelos GLB oficiales de Decentraland
 │   ├── generate_models.js      # Generador binario procedural de modelos .glb glTF 2.0 (CLI paramétrico)
 │   └── README.md               # Manual de uso detallado del generador CLI y catálogo de modelos
 ├── src/                        # Código fuente TypeScript SDK7
@@ -351,12 +368,16 @@ Hackathon/
 │   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD Multijugador, Radar)
 │   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake y registro de escuadrones)
 │   ├── config/                 # Configuraciones maestras y constantes
+│   │   ├── arenaConfig.ts      # Configuración espacial, dimensiones y modelos de la Arena Steampunk
 │   │   └── golems.ts           # Configuración de golems, afinidades, catálogo maestro y distancias
 │   ├── components/             # Componentes ECS personalizados (Schemas)
+│   │   ├── arena.ts            # ArenaRotatorComponent (Rotación determinista continua)
 │   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
 │   ├── objects/                # Patrón Factory de GameObjects
+│   │   ├── arenaBuilder.ts     # Constructor procedimental de la Gran Arena de Torneo Steampunk
 │   │   └── golemFactory.ts     # Fábrica de entidades, billboards y ciclo de vida de escuadrones
 │   └── systems/                # Sistemas ECS
+│       ├── arenaAnimationSystem.ts # Sistema de animación continua de engranajes y coronas de la arena
 │       └── followerSystem.ts   # Sistema de seguimiento Multi-Trail FIFO LERP/SLERP
 ├── scene.json                  # Metadatos del World (25x25 parcelas, spawn, rating)
 ├── package.json                # Dependencias y scripts de construcción

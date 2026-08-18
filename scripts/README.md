@@ -1,14 +1,102 @@
-# Generador Procedural de Modelos 3D GLB para Golems
+# 🛠️ Scripts y Utilidades de Generación y Descarga de Assets 3D para Golems
 
-Este directorio contiene las herramientas y utilidades en Node.js puro para la generación procedural de modelos 3D binarios **GLB (glTF 2.0)** optimizados para **Decentraland SDK7** y compatibles al 100% con la app móvil de Decentraland (**Mobile First / Godot Explorer**).
+Este directorio contiene herramientas y utilidades en Node.js para la gestión, descarga y generación procedural de modelos 3D binarios **GLB (glTF 2.0)** optimizados para **Decentraland SDK7** y compatibles al 100% con la app móvil de Decentraland (**Mobile First / Godot Explorer**).
 
 ---
 
-## 📌 Propósito y Arquitectura
+## 📑 Tabla de Contenidos
 
-El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) construye modelos tridimensionales binarios autocontenidos sin depender de librerías externas ni utilidades pesadas de modelado:
+1. [Resumen de Scripts Disponibles](#1-resumen-de-scripts-disponibles)
+2. [`download_steampunk_assets.js`: Descargador Automatizado de Assets de Decentraland](#2-download_steampunk_assetsjs-descargador-automatizado-de-assets-de-decentraland)
+   - [2.1 Propósito y Funcionamiento](#21-propósito-y-funcionamiento)
+   - [2.2 Red de Gateways IPFS con Fallback Automático](#22-red-de-gateways-ipfs-con-fallback-automático)
+   - [2.3 Normalización de Slugs y Estructura en `assets/asset-packs/`](#23-normalización-de-slugs-y-estructura-en-assetsasset-packs)
+   - [2.4 Ejecución](#24-ejecución)
+3. [`generate_models.js`: Generador Procedural Binario de Golems](#3-generate_modelsjs-generador-procedural-binario-de-golems)
+   - [3.1 Arquitectura glTF 2.0 Binaria Pura](#31-arquitectura-gltf-20-binaria-pura)
+   - [3.2 Manual de Uso CLI](#32-manual-de-uso-cli)
+   - [3.3 Catálogo Maestro de los 25 Modelos de Golems](#33-catálogo-maestro-de-los-25-modelos-de-golems)
+4. [Integración en Decentraland SDK7 (`GltfContainer`)](#4-integración-en-decentraland-sdk7-gltfcontainer)
 
-1. **Cero Dependencias Externas**: Funciona con Node.js estándar (`fs` y `path`).
+---
+
+## 1. Resumen de Scripts Disponibles
+
+| Script | Propósito Principal | Salida en Disco |
+| :--- | :--- | :--- |
+| [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) | Descarga y organiza modelos `.glb` y texturas oficiales de DCL (Pack Steampunk) para la **Gran Arena de Torneo**. | `assets/asset-packs/<slug>/` |
+| [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera proceduralmente los 25 modelos binarios `.glb` PBR con canales emisivos para los **5 tipos de Golems**. | `assets/models/<tipo>/` |
+
+---
+
+## 2. `download_steampunk_assets.js`: Descargador Automatizado de Assets de Decentraland
+
+### 2.1 Propósito y Funcionamiento
+El script [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) automatiza la obtención de todos los modelos 3D y texturas oficiales del paquete **Steampunk** de la Fundación Decentraland necesarios para construir la Gran Arena Circular de Torneo:
+
+1. **Lectura del Catálogo Local**: Consulta `node_modules/@dcl/asset-packs/catalog.json` para extraer los hashes IPFS (`CID bafkrei...`) de cada pieza.
+2. **Filtrado Eficiente**: Descarga exclusivamente los archivos de malla `.glb` y texturas de imagen (`.png`/`.jpg`), omitiendo metadatos innecesarios para máxima velocidad.
+3. **Idempotencia**: Si el archivo ya existe localmente y su tamaño es mayor a 0 bytes, omite la descarga automáticamente.
+
+### 2.2 Red de Gateways IPFS con Fallback Automático
+Para evitar fallos por saturación o tiempo de espera en la red IPFS, el script implementa reintentos en cascada con timeout estricto de 4 segundos por petición:
+
+```javascript
+const GATEWAYS = [
+  'https://builder-api.decentraland.org/v1/storage/contents/',
+  'https://peer.decentraland.org/content/contents/',
+  'https://dweb.link/ipfs/',
+  'https://ipfs.io/ipfs/'
+]
+```
+
+### 2.3 Normalización de Slugs y Estructura en `assets/asset-packs/`
+Los assets se organizan siguiendo la convención canónica de Decentraland SDK7:
+`assets/asset-packs/<nombre_slugificado>/<archivo>.glb`
+
+```text
+assets/asset-packs/
+├── arthur_sword/             # Arthur Sword.glb (Espada relicario)
+├── barrel/                   # Barrel.glb (Pedestales y sub-tanques)
+├── ceiling_4x4m/             # Ceiling 4x4M.glb (Losas de metal)
+├── chest_gear/               # Chest Gear.glb (Cofres mecánicos)
+├── chest_plates/             # Chest Plates.glb (Blindajes de altar)
+├── chest_tube/               # Chest Tube.glb (Collares de pilares)
+├── gear_10_teeth/            # Gear 10 Teeth.glb (Engranajes de 10 dientes)
+├── gear_5_teeth/             # Gear 5 Teeth.glb (Engranajes planetarios)
+├── gear_8_teeth/             # Gear 8 Teeth.glb (Engranajes planetarios)
+├── gear_angled_10_teeth/     # Gear Angled 10 Teeth.glb (Engranajes angulares)
+├── gear_big/                 # Gear Big.glb (Engranaje central colosal)
+├── gear_shaft/               # Gear Shaft.glb (Fustes verticales de 12m)
+├── gear_small_01/02/03/      # Engranajes decorativos menores
+├── hidrant/                  # Hidrant.glb (Bocas de presión en rampas)
+├── lamp/                     # Lamp.glb (Faroles monumentales)
+├── road_angle/               # Road Angle.glb (Esquinas de bordillo)
+├── road_cobble_angled/       # Road Cobble Angled.glb (Bordillo curvo)
+├── road_cobble_straight/     # Road Cobble Straight.glb (Rampas de acceso)
+├── road_cross/               # Road Cross.glb (Intersecciones)
+├── smoker/                   # Smoker.glb (Chimeneas superiores de 12m)
+├── steampunk_number_00..08/  # Placas numéricas de combate
+├── switch/                   # Switch.glb (Consolas con interruptor)
+├── table_lamp/               # Table Lamp.glb (Farolas de balizas)
+├── tank/                     # Tank.glb (Calderas base de pilares)
+├── tree_fence/               # Tree Fence.glb (Barandillas de protección)
+└── wood_plank_floor_4x4m/    # Wood Plank Floor 4x4M.glb (Piso radial de madera)
+```
+
+### 2.4 Ejecución
+```bash
+node scripts/download_steampunk_assets.js
+```
+
+---
+
+## 3. `generate_models.js`: Generador Procedural Binario de Golems
+
+### 3.1 Arquitectura glTF 2.0 Binaria Pura
+El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) construye modelos tridimensionales binarios autocontenidos sin dependencias externas:
+
+1. **Cero Dependencias**: Funciona exclusivamente con APIs nativas de Node.js (`fs` y `path`).
 2. **Estructura Binaria glTF 2.0 Estricta**:
    - **Encabezado GLB** de 12 bytes (`glTF` magic `0x46546C67`, versión 2, longitud total).
    - **Chunk JSON** estructurado con `scenes`, `nodes`, `materials`, `meshes`, `primitives`, `accessors` y `bufferViews`.
@@ -16,90 +104,44 @@ El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/script
 3. **Materiales PBR y Canales Emisivos Puros (Mobile First)**:
    - Cumple con la restricción de **no usar luces dinámicas en escena (`PBPointLight`)** en móvil.
    - Aplica canales `emissiveFactor` nativos en el material PBR para producir visores, calderas, bobinas, faros y núcleos con brillo intenso sin penalización de rendimiento.
-4. **Organización Temática**:
-   - Crea automáticamente subdirectorios en `assets/models/<tipo>/`.
-   - Genera archivos numerados `golem_<tipo>_01.glb` a `golem_<tipo>_05.glb` y mantiene el alias canónico `golem_<tipo>.glb` para compatibilidad transparente.
 
----
-
-## 💻 Manual de Uso por Línea de Comandos (CLI)
-
-El script cuenta con un analizador de argumentos flexible que admite tanto banderas largas/cortas como sintaxis posicional directa.
-
-### Sintaxis General
+### 3.2 Manual de Uso CLI
 
 ```bash
+# Sintaxis general
 node scripts/generate_models.js [opciones]
 node scripts/generate_models.js [tipo] [cantidad]
 ```
 
-### Tabla de Opciones y Parámetros
-
-| Bandera Larga | Bandera Corta | Valores Posibles | Valor por Defecto | Descripción |
+| Opción Larga | Opción Corta | Valores Posibles | Valor por Defecto | Descripción |
 | :--- | :--- | :--- | :--- | :--- |
-| `--type <tipo>` | `-t <tipo>` | `steam`, `galvanic`, `mechanical`, `luminous`, `aether`, `all` | `all` | Especifica el tipo o afinidad elemental a generar. |
+| `--type <tipo>` | `-t <tipo>` | `steam`, `galvanic`, `mechanical`, `luminous`, `aether`, `all` | `all` | Especifica el tipo o afinidad elemental. |
 | `--count <num>` | `-c <num>` | `1` a `5` | `5` | Número de variantes a generar por tipo. |
 | `--variant <num>`| `-v <num>` | `1` a `5` | *N/A* | Genera exclusivamente una variante específica. |
-| `--output-dir <ruta>`| `-o <ruta>` | Ruta válida en disco | `assets/models` | Directorio de salida donde ubicar los modelos. |
-| `--help` | `-h` | *N/A* | *N/A* | Despliega el manual de ayuda interactivo. |
+| `--output-dir <ruta>`| `-o <ruta>` | Ruta válida en disco | `assets/models` | Directorio de salida. |
+| `--help` | `-h` | *N/A* | *N/A* | Muestra el manual de ayuda interactivo. |
 
----
-
-## 🚀 Ejemplos Prácticos de Ejecución
-
-### 1. Generar el Catálogo Completo (25 Modelos en 5 Carpetas)
+#### Ejemplos de Ejecución
 ```bash
+# Generar los 25 modelos (5 tipos x 5 variantes)
 node scripts/generate_models.js
-```
 
-### 2. Generar Solo un Tipo Específico con sus 5 Variantes
-```bash
-# Generar las 5 variantes del tipo Vapor
+# Generar solo el tipo Vapor (5 variantes)
 node scripts/generate_models.js --type steam
 
-# Generar las 5 variantes del tipo Galvánico
-node scripts/generate_models.js -t galvanic
-```
-
-### 3. Generar un Número Específico de Variantes
-```bash
-# Generar las 3 primeras variantes del tipo Mecánico
-node scripts/generate_models.js -t mechanical -c 3
-```
-
-### 4. Generar una Sola Variante de Alta Jerarquía
-```bash
-# Generar únicamente la Variante 05 (Señor del Éter Primigenio) de tipo Éter
+# Generar variante 5 del tipo Éter
 node scripts/generate_models.js --type aether --variant 5
 ```
 
-### 5. Sintaxis Posicional Rápida
-```bash
-# Tipo luminoso con 4 variantes
-node scripts/generate_models.js luminous 4
-
-# Tipo vapor con 2 variantes
-node scripts/generate_models.js steam 2
-```
-
-### 6. Consultar la Ayuda
-```bash
-node scripts/generate_models.js --help
-```
-
----
-
-## 🤖 Catálogo Maestro de los 25 Modelos Generados
-
-Cada tipo cuenta con 5 variantes geométricas y de rol diferenciadas para reflejar distintos niveles de forja y atributos:
+### 3.3 Catálogo Maestro de los 25 Modelos de Golems
 
 ```text
 assets/models/
-├── steam/        # Golems de Vapor (Calderas, chimeneas, fuego naranja)
-├── galvanic/     # Golems Galvánicos (Bobinas de Tesla, arcos voltaicos cian)
-├── mechanical/   # Golems Mecánicos (Engranajes pesados, blindaje de chatarra, ámbar)
-├── luminous/     # Golems Luminosos (Cúpulas de faro, prismas, luz solar amarilla)
-└── aether/       # Golems de Éter (Obsidiana mística, resonadores flotantes, violeta amatista)
+├── steam/        # Golems de Vapor (Calderas, chimeneas, fuego naranja #FF7000)
+├── galvanic/     # Golems Galvánicos (Bobinas de Tesla, arcos voltaicos cian #00E5FF)
+├── mechanical/   # Golems Mecánicos (Engranajes, blindaje de chatarra, ámbar #FFBF00)
+├── luminous/     # Golems Luminosos (Cúpulas de faro, prismas, luz solar #FFFF33)
+└── aether/       # Golems de Éter (Obsidiana, resonadores flotantes, violeta #B833FF)
 ```
 
 | Tipo | Archivo | Rol / Arquetipo | Paleta PBR y Emisivo | Rasgos Distintivos 3D |
@@ -132,21 +174,30 @@ assets/models/
 
 ---
 
-## 🛠️ Integración con Decentraland SDK7
+## 4. Integración en Decentraland SDK7 (`GltfContainer`)
 
-En el código TypeScript de la escena, cualquier modelo se referencia directamente por su ruta relativa en `GltfContainer`:
+Cualquier modelo descargado o generado puede instanciarse directamente mediante el componente `GltfContainer`:
 
 ```typescript
 import { engine, GltfContainer, Transform } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 
+// 1. Instanciar una pieza de la Arena Steampunk
+const arenaPillar = engine.addEntity()
+Transform.create(arenaPillar, {
+  position: Vector3.create(200, 0.6, 200),
+  scale: Vector3.create(1.8, 1.8, 1.8)
+})
+GltfContainer.create(arenaPillar, {
+  src: 'assets/asset-packs/tank/Tank.glb'
+})
+
+// 2. Instanciar un Golem acompañante
 const golem = engine.addEntity()
 Transform.create(golem, {
   position: Vector3.create(16, 0.1, 16),
   scale: Vector3.create(1.1, 1.1, 1.1)
 })
-
-// Cargar variante 03 del Golem Galvánico
 GltfContainer.create(golem, {
   src: 'assets/models/galvanic/golem_galvanic_03.glb'
 })
