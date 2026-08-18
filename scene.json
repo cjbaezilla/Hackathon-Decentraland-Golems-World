@@ -14,9 +14,9 @@
   },
   "main": "bin/index.js",
   "tags": [
+    "game",
     "golems",
     "steampunk",
-    "game",
     "multiplayer",
     "pvp",
     "crafting",
