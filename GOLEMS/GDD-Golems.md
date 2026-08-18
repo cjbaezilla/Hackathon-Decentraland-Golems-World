@@ -12,7 +12,7 @@ La intención es que una persona recién llegada entienda qué hacer en los prim
 
 ## 2. El bucle principal de juego
 
-El recorrido típico de una sesión se puede resumir en un flujo circular que se retroalimenta. Primero el jugador aparece en el Distrito de la Forja, que funciona como plaza central y zona segura. Ahí recibe el radar de calor y una breve explicación de cómo funciona. En segundo lugar sale a explorar, y el radar lo guía hacia piezas enterradas, escondidas entre los restos de maquinaria. Tercero, cuando tiene suficientes materiales, vuelve a la forja y los combina para crear un golem. Cuarto, ese golem lo acompaña a combatir contra los NPC hostiles o a enfrentarse a otros jugadores. Quinto, los golems que no lo siguen se envían a misiones de recolección que generan más materiales. Ese último paso cierra el círculo y devuelve al jugador al primer punto con más recursos de los que tenía.
+El recorrido típico de una sesión se puede resumir en un flujo circular que se retroalimenta. Primero el jugador aparece en el Distrito de la Forja, que funciona como punto de partida y zona segura en una de las esquinas del mapa. Ahí recibe el radar de calor y una breve explicación de cómo funciona. En segundo lugar sale a explorar, y el radar lo guía hacia piezas enterradas, escondidas entre los restos de maquinaria. Tercero, cuando tiene suficientes materiales, vuelve a la forja y los combina para crear un golem. Cuarto, ese golem lo acompaña a combatir contra los NPC hostiles o a enfrentarse a otros jugadores. Quinto, los golems que no lo siguen se envían a misiones de recolección que generan más materiales. Ese último paso cierra el círculo y devuelve al jugador al primer punto con más recursos de los que tenía.
 
 Lo importante de este bucle es que no tiene un final obligatorio ni una meta única. Cada jugador decide si se especializa en coleccionar piezas raras, en forjar golems con combinaciones poco comunes, en subir de nivel combatiendo o en trepar en la escalera competitiva. Las cuatro actividades se alimentan entre sí, así que una persona que solo quiere recolectar igualmente termina con materiales que puede vender o usar, y alguien que solo quiere pelear necesita recolectar para forjar mejores golems.
 
@@ -20,9 +20,13 @@ Lo importante de este bucle es que no tiene un final obligatorio ni una meta ún
 
 La experiencia se despliega en un Decentraland World de veinticinco por veinticinco parcelas, lo que equivale a un terreno de cuatrocientos por cuatrocientos metros. Son ciento sesenta mil metros cuadrados de superficie útil, y el terreno usa la configuración de paisaje natural propia de los Worlds, con colinas suaves y desniveles que dan variedad sin complicar la navegación en móvil.
 
-Dentro de ese espacio se distribuyen varias zonas temáticas que ordenan la rareza de los materiales. El Distrito de la Forja ocupa el centro del mapa y es el punto de aparición, además del lugar donde se forjan los golems y se consulta la tabla de clasificación. Al oeste quedan los chatarrales, planos y despejados, donde abundan los materiales comunes. La fábrica abandonada al noroeste concentra piezas poco comunes como transistores y manómetros. La subestación eléctrica al norte guarda bobinas de Tesla y baterías alquímicas, con un nivel de rareza más alto. La torre de radio al noreste es el hogar de las antenas y los diodos LED. Al sureste, las calderas y la fundición esconden piezas épicas como el corazón de caldera y el reactor de éter. Las ruinas arcanas del sur mezclan lo mecánico con lo mágico, y ahí aparecen el núcleo de maná condensado y el cerebro de autómata. Por último, el desierto de chatarra en el extremo suroeste es la zona de mayor riesgo y mayor recompensa, con apariciones legendarias extremadamente escasas.
+Dentro de ese espacio se distribuyen varias zonas temáticas que ordenan la rareza de los materiales. El Distrito de la Forja se ubica en la esquina suroeste del mapa, la misma donde el terreno empieza a contar desde las coordenadas cero, y funciona como punto de aparición, lugar de forja y refugio seguro donde no hay combate entre jugadores. Desde esa esquina, la dificultad del mundo crece de forma progresiva a medida que uno se aleja, como si el terreno se ordenara en anillos concéntricos alrededor del punto de partida. La regla es fácil de leer para cualquiera: cuanto más lejos de la forja, más valioso el material y más peligroso el camino.
 
-La separación por zonas cumple dos funciones. La primera es guiar el flujo de jugadores para que no todos se amontonen en el mismo punto. La segunda es crear una curva de dificultad natural: un jugador nuevo que se aventure al desierto de chatarra no morirá por ello, pero probablemente tarde más en encontrar algo útil que si se queda en los chatarrales.
+El primer anillo, pegado a la esquina de partida, reúne los chatarrales, planos y despejados, donde abundan los materiales comunes. El segundo anillo, a media distancia, alberga la fábrica abandonada con sus piezas poco comunes como transistores y manómetros. El tercer anillo, ya lejano, concentra la subestación eléctrica al norte con bobinas de Tesla y baterías alquímicas, y la torre de radio al este con antenas y diodos LED, ambas con materiales raros.
+
+Las tres esquinas restantes son el destino de quienes ya dominan el bucle básico, y cada una cumple un papel distinto. El desierto de chatarra, en la esquina noroeste, y las calderas de la fundición, en la esquina sureste, son zonas de combate libre entre jugadores, donde el PK está permitido. Ahí aparecen los materiales que no se consiguen en ningún otro lado, el corazón de caldera y el reactor de éter en la fundición, el ojo de dragón mecánico y el corazón de golem primigenio en el desierto. Esas dos esquinas están custodiadas por personajes no jugadores con golems poderosos, de nivel muy superior al de las zonas intermedias, así que entrar ahí sin preparación se castiga con la derrota. La esquina noreste, en cambio, se reserva como zona segura de minería, una reserva donde los materiales raros y algunos épicos, como el núcleo de maná condensado y el cerebro de autómata, se pueden recolectar sin exponerse al ataque de otros jugadores ni de los guardias.
+
+Esa separación por zonas cumple tres funciones a la vez. La primera es guiar el flujo de jugadores para que no todos se amontonen en el mismo punto. La segunda es crear una curva de dificultad natural, en la que un jugador nuevo puede quedarse tranquilo cerca de la forja mientras aprende. La tercera es ofrecer decisiones con riesgo real: el material más valioso exige entrar a una zona donde otro jugador puede atacarte, y quien prefiera evitar ese riesgo tiene en la reserva segura una alternativa honesta, con recompensas un poco menores pero sin miedo a morir.
 
 ## 4. El radar de calor y la recolección
 
@@ -36,9 +40,9 @@ Cada material tiene una vida útil desde que aparece hasta que desaparece si nad
 
 ## 5. Los materiales
 
-El catálogo completo tiene veinticuatro tipos de material, todos pensados como piezas de chatarra, maquinaria o utensilios que uno podría encontrar en un taller abandonado. No hay minerales en el sentido clásico, porque la identidad del juego está en reutilizar cosas cotidianas que, combinadas con magia residual, se convierten en algo extraordinario.
+El catálogo completo tiene veinticinco tipos de material, todos pensados como piezas de chatarra, maquinaria o utensilios que uno podría encontrar en un taller abandonado. No hay minerales en el sentido clásico, porque la identidad del juego está en reutilizar cosas cotidianas que, combinadas con magia residual, se convierten en algo extraordinario.
 
-Cada material tiene una rareza, un peso de aparición que define qué tan probable es que surja al momento de generar un recurso, un tiempo de reaparición, una zona donde vive y un aporte a las estadísticas del golem que lo usa. Las estadísticas del golem son cinco: ataque, defensa, vitalidad, velocidad y afinidad. La afinidad es la naturaleza elemental de la pieza, y define ventajas y desventajas en combate.
+Cada material tiene una rareza, un peso de aparición que define qué tan probable es que surja al momento de generar un recurso, un tiempo de reaparición, una zona donde vive y un aporte a las estadísticas del golem que lo usa. Las estadísticas del golem son cinco: ataque, defensa, vitalidad, velocidad y afinidad. La afinidad es la naturaleza energética de la pieza, y define ventajas y desventajas en combate.
 
 | Material | Rareza | Peso | Reaparición | Zona | Aporte principal |
 |---|---|---|---|---|---|
@@ -50,25 +54,25 @@ Cada material tiene una rareza, un peso de aparición que define qué tan probab
 | Ollas de cocinar | Común | 7% | 1 a 3 minutos | Chatarrales | Defensa |
 | Placas de latón | Común | 6% | 1 a 3 minutos | Chatarrales | Defensa |
 | Transistores | Poco común | 6% | 4 a 7 minutos | Fábrica abandonada | Ataque |
-| Bombillas de filamento | Poco común | 6% | 4 a 7 minutos | Fábrica abandonada | Vitalidad |
+| Bombillas de filamento | Poco común | 6% | 4 a 7 minutos | Fábrica abandonada | Vitalidad y afinidad luminosa |
 | Resortes de reloj | Poco común | 5% | 4 a 7 minutos | Fábrica abandonada | Velocidad |
 | Manómetros | Poco común | 5% | 4 a 7 minutos | Fábrica abandonada | Vitalidad |
 | Válvulas de vapor | Poco común | 5% | 4 a 7 minutos | Fábrica abandonada | Afinidad de vapor |
 | Lentes de televisor viejo | Poco común | 4% | 4 a 7 minutos | Fábrica abandonada | Velocidad |
-| Motor de vapor | Raro | 4% | 10 a 15 minutos | Subestación | Ataque |
-| Bobinas de Tesla | Raro | 3% | 10 a 15 minutos | Subestación | Ataque y afinidad de rayo |
+| Motor de vapor | Raro | 4% | 10 a 15 minutos | Subestación | Ataque y afinidad de vapor |
+| Bobinas de Tesla | Raro | 3% | 10 a 15 minutos | Subestación | Ataque y afinidad galvánica |
 | Antenas de radio | Raro | 3% | 10 a 15 minutos | Torre de radio | Velocidad |
-| Diodos LED | Raro | 3% | 10 a 15 minutos | Torre de radio | Afinidad de luz |
-| Baterías alquímicas | Raro | 3% | 10 a 15 minutos | Subestación | Vitalidad |
-| Engranajes de bronce perfectos | Raro | 2% | 10 a 15 minutos | Fundición | Defensa |
-| Núcleo de maná condensado | Épico | 2% | 20 a 30 minutos | Ruinas arcanas | Afinidad arcana |
-| Cerebro de autómata | Épico | 2% | 20 a 30 minutos | Ruinas arcanas | Ataque |
-| Reactor de éter | Épico | 2% | 20 a 30 minutos | Fundición | Ataque |
-| Corazón de caldera | Épico | 1% | 20 a 30 minutos | Fundición | Defensa y afinidad de fuego |
-| Ojo de dragón mecánico | Legendario | 0.5% | 45 a 60 minutos | Desierto de chatarra | Ataque y afinidad |
-| Corazón de golem primigenio | Legendario | 0.5% | 45 a 60 minutos | Desierto de chatarra | Todas las estadísticas |
+| Diodos LED | Raro | 3% | 10 a 15 minutos | Torre de radio | Afinidad luminosa |
+| Baterías alquímicas | Raro | 3% | 10 a 15 minutos | Subestación | Vitalidad y afinidad galvánica |
+| Engranajes de bronce perfectos | Raro | 2% | 10 a 15 minutos | Reserva de Minería | Defensa y afinidad mecánica |
+| Núcleo de maná condensado | Épico | 2% | 20 a 30 minutos | Reserva de Minería | Afinidad de éter |
+| Cerebro de autómata | Épico | 2% | 20 a 30 minutos | Reserva de Minería | Ataque y afinidad mecánica |
+| Reactor de éter | Épico | 2% | 20 a 30 minutos | Calderas de la Fundición (PK) | Ataque y afinidad de éter |
+| Corazón de caldera | Épico | 1% | 20 a 30 minutos | Calderas de la Fundición (PK) | Defensa y afinidad de vapor |
+| Ojo de dragón mecánico | Legendario | 0.5% | 45 a 60 minutos | Desierto de Chatarra (PK) | Ataque y afinidad de éter |
+| Corazón de golem primigenio | Legendario | 0.5% | 45 a 60 minutos | Desierto de Chatarra (PK) | Todas las estadísticas |
 
-La tabla anterior suma veinticuatro materiales, aunque he dejado el ojo de dragón mecánico y el corazón de golem primigenio como dos piezas legendarias separadas para que el desierto de chatarra tenga más de un objetivo de máxima rareza. Los porcentajes son pesos relativos, no probabilidades estrictas, y se pueden ajustar durante el balance sin tocar la lógica central.
+La tabla anterior suma veinticinco materiales, aunque he dejado el ojo de dragón mecánico y el corazón de golem primigenio como dos piezas legendarias separadas para que el desierto de chatarra tenga más de un objetivo de máxima rareza. Los porcentajes son pesos relativos, no probabilidades estrictas, y se pueden ajustar durante el balance sin tocar la lógica central.
 
 Los materiales épicos y legendarios respetan un límite de una sola instancia activa a la vez en todo el mapa. Esto significa que si el reactor de éter ya está enterrado esperando a ser encontrado, no aparecerá otro hasta que el primero sea recogido o expire. Esa regla genera tensión, porque encontrar una pieza épica es un momento que no se repite de inmediato, y crea una especie de carrera silenciosa entre jugadores que buscan lo mismo.
 
@@ -76,7 +80,7 @@ Cada material aporta además un matiz visual al golem. Las ollas y sartenes dan 
 
 ## 6. La forja y la unicidad de cada golem
 
-Forjar un golem consiste en elegir una combinación de materiales desde el inventario y confirmarla en la forja. La cantidad mínima razonable para un golem funcional ronda los cinco materiales, y el máximo lo define el número de espacios de la receta, que propongo en ocho. Dentro de esos límites, la libertad es total: puedes repetir un mismo material varias veces o buscar una mezcla equilibrada.
+Forjar un golem consiste en elegir una combinación de materiales desde el inventario y confirmarla en la forja. La cantidad mínima de una receta es de cinco materiales y la cantidad máxima es de doce, la libertad es total: puedes repetir un mismo material varias veces o buscar una mezcla equilibrada.
 
 La unicidad se resuelve con un hash determinista. La receta se serializa en un texto canónico que incluye el identificador de cada material y su cantidad, en un orden fijo. Ese texto pasa por una función de hash del estilo FNV-1a o un SHA truncado, y el número resultante se usa como semilla para derivar tres cosas: un factor de perfil que ajusta ligeramente las estadísticas base, un conjunto de rasgos visuales como el tono dominante y el tamaño relativo, y un nombre generado a partir de una tabla de prefijos y sufijos asociados a los materiales dominantes.
 
@@ -86,11 +90,11 @@ Las estadísticas base se calculan sumando los aportes de cada material, y el fa
 
 ## 7. Las estadísticas y el combate en tiempo real
 
-Cada golem tiene cinco estadísticas: ataque, que mide el daño por golpe; defensa, que reduce el daño recibido; vitalidad, que define los puntos de vida; velocidad, que determina la frecuencia de ataque y la probabilidad de esquivar; y afinidad, que es la naturaleza elemental del conjunto.
+Cada golem tiene cinco estadísticas: ataque, que mide el daño por golpe; defensa, que reduce el daño recibido; vitalidad, que define los puntos de vida; velocidad, que determina la frecuencia de ataque y la probabilidad de esquivar; y afinidad, que es la naturaleza energética del conjunto.
 
 El combate se resuelve en tiempo real por comparación de estadísticas, sin turnos. Cuando dos golems están a distancia de combate, el sistema avanza un ciclo de resolución cada fracción de segundo, usando el delta de tiempo del motor. En cada ciclo, el atacante calcula un daño restando la defensa del rival a su ataque, con un mínimo garantizado para que ningún combate se estanque, y ese daño se descuenta de la vitalidad. La velocidad marca cada cuánto tiempo puede golpear cada golem y añade una probabilidad de esquivar el golpe entrante.
 
-La afinidad introduce un sistema de ventajas de tipo piedra, papel o tijera. El rayo vence al vapor, el vapor vence al fuego, el fuego vence a lo mecánico, lo mecánico vence a lo arcano, y lo arcano vence al rayo. La luz funciona como una afinidad flexible que no tiene ventaja ni desventaja fuerte, pero aporta un pequeño bono de precisión. Cuando un golem con ventaja golpea, el daño se multiplica por un factor favorable, y cuando está en desventaja, el daño se reduce. Esto premia la variedad de recetas y evita que una sola combinación domine la tabla.
+La afinidad introduce un sistema de ventajas de tipo piedra, papel o tijera con cinco fuerzas propias de este ecosistema de chatarra: el vapor, lo mecánico, lo galvánico, lo luminoso y el éter. El vapor vence a lo mecánico porque la presión y la humedad oxidan y atascan los engranajes. Lo mecánico vence a lo galvánico porque la estructura física y el aislamiento de los engranajes absorben y desvían la corriente. Lo galvánico vence a lo luminoso porque una descarga quema el filamento y apaga el brillo. Lo luminoso vence al éter porque la luz concentrada dispersa y refracta esa energía difusa. El éter vence al vapor porque esa energía sutil condensa y suspende la presión del vapor. Cuando un golem con ventaja golpea, el daño se multiplica por un factor favorable, y cuando está en desventaja, el daño se reduce. Esto premia la variedad de recetas y evita que una sola combinación domine la tabla.
 
 El combate contra otros jugadores usa el mismo sistema, con la salvedad de que las posiciones se sincronizan por red y el resultado de cada enfrentamiento se reporta a la API para actualizar la clasificación.
 
@@ -110,7 +114,7 @@ El número de misiones simultáneas está limitado para que el sistema de recole
 
 ## 10. Los personajes no jugadores y sus golems
 
-Distribuidos por el mapa hay personajes no jugadores que patrullan rutas definidas por puntos de camino. Cada uno tiene un golem propio, o en algunos casos un pequeño grupo, con un nivel acorde a la zona donde vive. Estos NPC no buscan entablar conversación, sino que defienden su territorio. Cuando un jugador entra en su radio de agresión, el NPC y su golem inician un combate en tiempo real contra el golem o golems del jugador.
+Distribuidos por el mapa hay personajes no jugadores que patrullan rutas definidas por puntos de camino. Cada uno tiene un golem propio, o en algunos casos un pequeño grupo, con un nivel acorde a la zona donde vive. Estos NPC no buscan entablar conversación, sino que defienden su territorio. Cuando un jugador entra en su radio de agresión, el NPC y su golem inician un combate en tiempo real contra el golem o golems del jugador. Los guardias más duros se concentran en las zonas de combate libre de las esquinas noroeste y sureste, donde custodian los materiales exclusivos con golems de nivel claramente superior al de los NPC de las zonas intermedias.
 
 La resolución del combate contra NPC usa exactamente el mismo sistema de estadísticas descrito antes, lo que garantiza coherencia entre el combate contra la inteligencia artificial y el combate entre jugadores. Al vencer a un NPC, el jugador recibe puntos de experiencia y una probabilidad de obtener materiales, con una chance mayor para los NPC de zonas de rareza alta.
 
@@ -130,9 +134,9 @@ El torneo es el componente competitivo del juego. Funciona como una escalera con
 
 En el formato uno contra uno, cada jugador entra al combate con sus tres golems activos, y la batalla se resuelve en tiempo real por estadísticas hasta que todos los golems de un bando quedan fuera de combate. En el formato dos contra dos, los dos jugadores de cada equipo entran con sus golems, lo que suma seis golems por bando y doce en total, y la victoria se define por la caída de todos los golems del equipo contrario.
 
-El emparejamiento se hace a través de la API, que busca rivales con calificaciones cercanas para que cada partida sea pareja. El resultado de cada combate se reporta a la API una vez terminado, y la clasificación se actualiza. La tabla se puede consultar desde la forja central, y sirve tanto para presumir posición como para descubrir a los rivales más fuertes de la temporada.
+El emparejamiento se hace a través de la API, que busca rivales con calificaciones cercanas para que cada partida sea pareja. El resultado de cada combate se reporta a la API una vez terminado, y la clasificación se actualiza. La tabla se puede consultar desde el Distrito de la Forja, y sirve tanto para presumir posición como para descubrir a los rivales más fuertes de la temporada.
 
-El torneo no exige jugar con la cámara apuntando con precisión ni depende de reflejos de disparo, porque se resuelve por estadísticas. Eso lo hace cómodo en móvil y pone el peso de la estrategia en la composición de la receta, la afinidad elemental y la gestión de los niveles, más que en la destreza manual.
+El torneo no exige jugar con la cámara apuntando con precisión ni depende de reflejos de disparo, porque se resuelve por estadísticas. Eso lo hace cómodo en móvil y pone el peso de la estrategia en la composición de la receta, la afinidad energética y la gestión de los niveles, más que en la destreza manual.
 
 ## 13. Arquitectura del servidor y persistencia
 
