@@ -33,7 +33,7 @@ export const INITIAL_GOLEMS_CONFIG: GolemConfig[] = [
     id: 'golem_steam_01',
     name: 'Calderón de Vapor',
     affinity: GolemAffinity.STEAM,
-    modelSrc: 'assets/models/golem_steam.glb',
+    modelSrc: 'assets/models/steam/golem_steam.glb',
     scale: 1.1,
     followDistance: 1.8,
     moveSpeed: 4.5,
@@ -43,7 +43,7 @@ export const INITIAL_GOLEMS_CONFIG: GolemConfig[] = [
     id: 'golem_galvanic_01',
     name: 'Chispazo Galvánico',
     affinity: GolemAffinity.GALVANIC,
-    modelSrc: 'assets/models/golem_galvanic.glb',
+    modelSrc: 'assets/models/galvanic/golem_galvanic.glb',
     scale: 0.95,
     followDistance: 3.6,
     moveSpeed: 4.8,
@@ -53,13 +53,69 @@ export const INITIAL_GOLEMS_CONFIG: GolemConfig[] = [
     id: 'golem_mechanical_01',
     name: 'Acorazado Mecánico',
     affinity: GolemAffinity.MECHANICAL,
-    modelSrc: 'assets/models/golem_mechanical.glb',
+    modelSrc: 'assets/models/mechanical/golem_mechanical.glb',
     scale: 1.2,
     followDistance: 5.4,
     moveSpeed: 4.2,
     rotationSpeed: 5.5
   }
 ]
+
+/**
+ * Catálogo maestro de los 5 arquetipos de golems disponibles por tipo.
+ */
+export const ALL_GOLEM_TYPES_CATALOG: Record<GolemAffinity, GolemConfig> = {
+  [GolemAffinity.STEAM]: {
+    id: 'golem_steam_base',
+    name: 'Calderón de Vapor',
+    affinity: GolemAffinity.STEAM,
+    modelSrc: 'assets/models/steam/golem_steam.glb',
+    scale: 1.1,
+    followDistance: 1.8,
+    moveSpeed: 4.5,
+    rotationSpeed: 6.0
+  },
+  [GolemAffinity.GALVANIC]: {
+    id: 'golem_galvanic_base',
+    name: 'Chispazo Galvánico',
+    affinity: GolemAffinity.GALVANIC,
+    modelSrc: 'assets/models/galvanic/golem_galvanic.glb',
+    scale: 0.95,
+    followDistance: 3.6,
+    moveSpeed: 4.8,
+    rotationSpeed: 6.5
+  },
+  [GolemAffinity.MECHANICAL]: {
+    id: 'golem_mechanical_base',
+    name: 'Acorazado Mecánico',
+    affinity: GolemAffinity.MECHANICAL,
+    modelSrc: 'assets/models/mechanical/golem_mechanical.glb',
+    scale: 1.2,
+    followDistance: 5.4,
+    moveSpeed: 4.2,
+    rotationSpeed: 5.5
+  },
+  [GolemAffinity.LUMINOUS]: {
+    id: 'golem_luminous_base',
+    name: 'Faro Solar Luminoso',
+    affinity: GolemAffinity.LUMINOUS,
+    modelSrc: 'assets/models/luminous/golem_luminous.glb',
+    scale: 1.0,
+    followDistance: 3.0,
+    moveSpeed: 5.0,
+    rotationSpeed: 6.5
+  },
+  [GolemAffinity.AETHER]: {
+    id: 'golem_aether_base',
+    name: 'Autómata de Éter',
+    affinity: GolemAffinity.AETHER,
+    modelSrc: 'assets/models/aether/golem_aether.glb',
+    scale: 1.05,
+    followDistance: 4.0,
+    moveSpeed: 4.6,
+    rotationSpeed: 5.8
+  }
+}
 
 export const FOLLOW_SYSTEM_SETTINGS = {
   /** Distancia mínima recorrida por el jugador para registrar un nuevo punto de migaja (m) */

@@ -22,6 +22,8 @@ docs
 docs/**
 guias
 guias/**
+scripts
+scripts/**
 GOLEMS
 GOLEMS/**
 dclcontext

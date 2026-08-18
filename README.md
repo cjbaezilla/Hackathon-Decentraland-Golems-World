@@ -313,6 +313,7 @@ npm start
 | `npm run build` | Compila el código TypeScript a JavaScript en `bin/index.js`. |
 | `npm run deploy` | Despliega la escena en el Decentraland World asignado (`golems.dcl.eth`). |
 | `npm run upgrade-sdk` | Actualiza `@dcl/sdk` a la versión más reciente disponible. |
+| `node scripts/generate_models.js` | Genera proceduralmente los 25 modelos 3D GLB (glTF 2.0) organizados por tipo (`--help` para ver opciones CLI). |
 
 ---
 
@@ -321,7 +322,12 @@ npm start
 ```text
 Hackathon/
 ├── assets/                     # Modelos 3D (.glb), texturas, sonidos e iconos
-│   └── models/                 # Modelos 3D GLB (golem_steam, golem_galvanic, golem_mechanical)
+│   └── models/                 # Modelos 3D GLB organizados por afinidad (25 modelos en total)
+│       ├── steam/              # Golems de Vapor (golem_steam_01.glb a 05.glb)
+│       ├── galvanic/           # Golems Galvánicos (golem_galvanic_01.glb a 05.glb)
+│       ├── mechanical/         # Golems Mecánicos (golem_mechanical_01.glb a 05.glb)
+│       ├── luminous/           # Golems Luminosos (golem_luminous_01.glb a 05.glb)
+│       └── aether/             # Golems de Éter (golem_aether_01.glb a 05.glb)
 ├── GOLEMS/                     # GDD oficial, diagramas, esquemas y portada de Golems
 │   ├── GDD-Golems.md           # Documento de diseño de juego integral
 │   ├── golems_cover.png        # Portada oficial de la experiencia
@@ -334,14 +340,15 @@ Hackathon/
 │   ├── dcl-docs-main/          # Documentación oficial de Decentraland SDK7
 │   └── sdk-skills-main/        # Catálogo maestro de habilidades y patrones
 ├── scripts/                    # Scripts de generación de assets y utilidades
-│   └── generate_models.js      # Generador binario procedural de modelos .glb glTF 2.0
+│   ├── generate_models.js      # Generador binario procedural de modelos .glb glTF 2.0 (CLI paramétrico)
+│   └── README.md               # Manual de uso detallado del generador CLI y catálogo de modelos
 ├── src/                        # Código fuente TypeScript SDK7
 │   ├── index.ts                # Inicializador principal y orquestador de sistemas
 │   ├── state.ts                # Estado global reactivo de la escena
 │   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD Multijugador, Radar)
 │   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake y registro de escuadrones)
 │   ├── config/                 # Configuraciones maestras y constantes
-│   │   └── golems.ts           # Configuración de golems, afinidades y distancias
+│   │   └── golems.ts           # Configuración de golems, afinidades, catálogo maestro y distancias
 │   ├── components/             # Componentes ECS personalizados (Schemas)
 │   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
 │   ├── objects/                # Patrón Factory de GameObjects
