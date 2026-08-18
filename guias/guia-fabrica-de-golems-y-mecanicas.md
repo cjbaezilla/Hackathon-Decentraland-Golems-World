@@ -215,56 +215,76 @@ export enum GolemAffinity {
 }
 ```
 
-### 3.3 Configuración de los 3 Golems Iniciales
+### 3.3 Catálogo de Variantes y Generador Aleatorio (`generateRandomSquad`)
+
+En `src/config/golems.ts` se definen las 5 variantes temáticas para cada afinidad elemental junto con sus rutas de modelo 3D y nombres procedurales:
+
 ```typescript
-export const INITIAL_GOLEMS_CONFIG: GolemConfig[] = [
-  {
-    id: 'golem_steam_01',
-    name: 'Calderón de Vapor',
-    affinity: GolemAffinity.STEAM,
-    modelSrc: 'assets/models/golem_steam.glb',
-    scale: 1.1,
-    followDistance: 1.8,
-    moveSpeed: 4.5,
-    rotationSpeed: 6.0
-  },
-  {
-    id: 'golem_galvanic_01',
-    name: 'Chispazo Galvánico',
-    affinity: GolemAffinity.GALVANIC,
-    modelSrc: 'assets/models/golem_galvanic.glb',
-    scale: 0.95,
-    followDistance: 3.6,
-    moveSpeed: 4.8,
-    rotationSpeed: 6.5
-  },
-  {
-    id: 'golem_mechanical_01',
-    name: 'Acorazado Mecánico',
-    affinity: GolemAffinity.MECHANICAL,
-    modelSrc: 'assets/models/golem_mechanical.glb',
-    scale: 1.2,
-    followDistance: 5.4,
-    moveSpeed: 4.2,
-    rotationSpeed: 5.5
+export const SQUAD_FOLLOW_DISTANCES = [1.8, 3.6, 5.4]
+
+/**
+ * Genera un escuadrón aleatorio de 3 golems garantizando 3 TIPOS COMPLETAMENTE DISTINTOS.
+ * Selecciona al azar 3 de las 5 afinidades y una variante de modelo 3D (01 a 05) para cada una.
+ */
+export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
+  const allAffinities = [
+    GolemAffinity.STEAM,
+    GolemAffinity.GALVANIC,
+    GolemAffinity.MECHANICAL,
+    GolemAffinity.LUMINOUS,
+    GolemAffinity.AETHER
+  ]
+
+  // Barajado Fisher-Yates para selección aleatoria sin repetición
+  const shuffledAffinities = [...allAffinities]
+  for (let i = shuffledAffinities.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = shuffledAffinities[i]
+    shuffledAffinities[i] = shuffledAffinities[j]
+    shuffledAffinities[j] = temp
   }
-]
+
+  // Tomar exactamente 3 tipos distintos
+  const selectedAffinities = shuffledAffinities.slice(0, 3)
+
+  return selectedAffinities.map((affinity, index) => {
+    const variantData = GOLEM_AFFINITY_VARIANTS[affinity]
+    const variantNumber = Math.floor(Math.random() * 5) + 1 // 1 a 5
+    const variantPad = variantNumber.toString().padStart(2, '0')
+    const modelSrc = `assets/models/${variantData.folder}/golem_${variantData.folder}_${variantPad}.glb`
+    const name = variantData.names[variantNumber - 1] || `${affinity} #${variantNumber}`
+    const followDistance = SQUAD_FOLLOW_DISTANCES[index] || (index + 1) * 1.8
+
+    return {
+      id: `golem_${variantData.folder}_${variantPad}_${Date.now()}_${index}`,
+      name,
+      affinity,
+      modelSrc,
+      scale: variantData.baseScale,
+      followDistance,
+      moveSpeed: variantData.baseSpeed,
+      rotationSpeed: variantData.baseRotSpeed
+    }
+  })
+}
 ```
 
 ---
 
 ## 4. Modelos 3D `.glb` y Carga en Escena
 
-### 4.1 Vinculación con `GltfContainer`
+### 4.1 Vinculación con `GltfContainer` y Catálogo de 25 Modelos
 La fábrica utiliza el componente estándar `GltfContainer.create(golemEntity, { src: config.modelSrc })`. 
 
-Los modelos generados por [`scripts/generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) son binarios glTF 2.0 (`.glb`) autocontenidos:
+Los modelos generados por [`scripts/generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) son binarios glTF 2.0 (`.glb`) autocontenidos organizados en 5 carpetas temáticas:
 
-| Archivo | Peso | Materiales PBR | Propiedades Emisivas |
+| Afinidad / Carpeta | Modelos Disponibles | Materiales PBR | Canales Emisivos |
 | :--- | :--- | :--- | :--- |
-| `assets/models/golem_steam.glb` | 12.2 KB | Cobre, Hierro Fundido, Fuego | Horno central con `emissiveFactor: [1.0, 0.45, 0.0]` |
-| `assets/models/golem_galvanic.glb` | 11.4 KB | Acero Azulado, Cobre Bobinas | Reactor con `emissiveFactor: [0.0, 0.9, 1.0]` |
-| `assets/models/golem_mechanical.glb` | 13.3 KB | Hierro de Chatarra, Latón | Monóculo con `emissiveFactor: [1.0, 0.75, 0.0]` |
+| **Vapor** (`assets/models/steam/`) | `golem_steam_01.glb` a `05.glb` | Cobre, Hierro Fundido, Caldera | Fuego y brasas (`#FF7000`) |
+| **Galvánico** (`assets/models/galvanic/`) | `golem_galvanic_01.glb` a `05.glb` | Acero Azulado, Cobre Bobinas | Reactor eléctrico (`#00E5FF`) |
+| **Mecánico** (`assets/models/mechanical/`) | `golem_mechanical_01.glb` a `05.glb` | Hierro de Chatarra, Engranajes | Visor y monóculo ámbar (`#FFBF00`) |
+| **Luminoso** (`assets/models/luminous/`) | `golem_luminous_01.glb` a `05.glb` | Cromo Plateado, Cuarzo | Faro solar prismático (`#FFFF33`) |
+| **Éter** (`assets/models/aether/`) | `golem_aether_01.glb` a `05.glb` | Obsidiana, Resonadores Místicos | Núcleo de maná amatista (`#B833FF`) |
 
 ### 4.2 Escalas y Proporciones
 - Cada golem posee una escala configurable (`scale: 0.95` a `1.2`).

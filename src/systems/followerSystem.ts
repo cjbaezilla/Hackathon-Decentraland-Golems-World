@@ -1,7 +1,7 @@
 import { engine, Transform, PlayerIdentityData, Entity } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
 import { GolemFollowerComponent, GolemSquadMemberDto } from '../components/follower'
-import { FOLLOW_SYSTEM_SETTINGS, INITIAL_GOLEMS_CONFIG } from '../config/golems'
+import { FOLLOW_SYSTEM_SETTINGS, generateRandomSquad } from '../config/golems'
 import { getLocalPlayerId, getRemoteSquad } from '../multiplayer'
 import { spawnPlayerSquad, removePlayerSquad } from '../objects/golemFactory'
 
@@ -209,8 +209,8 @@ export function golemFollowerSystem(dt: number) {
     if (!trailState.isInitialized) {
       resetTrailBehind(trailState, playerTransform.position, playerTransform.rotation)
 
-      // Verificar si ya tenemos su escuadrón registrado o usar el inicial por defecto
-      const squadConfig = getRemoteSquad(remoteAddress) || INITIAL_GOLEMS_CONFIG
+      // Verificar si ya tenemos su escuadrón registrado o generar uno aleatorio provisional
+      const squadConfig = getRemoteSquad(remoteAddress) || generateRandomSquad(remoteAddress)
       spawnPlayerSquad(remoteAddress, squadConfig, playerTransform.position)
     } else {
       updatePlayerTrail(trailState, playerTransform.position, playerTransform.rotation)

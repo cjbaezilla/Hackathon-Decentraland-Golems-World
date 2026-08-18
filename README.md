@@ -190,16 +190,19 @@ graph LR
 ![Límite de Golems y Misiones](GOLEMS/golems_limite_y_misiones.png)
 
 - **Escuadrón Activo en Fila (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos.
+- **Asignación Aleatoria de 3 Tipos Diferentes (Por Sesión / Sin Persistencia)**: Cada jugador que ingresa o reingresa a la escena recibe automáticamente un conjunto aleatorio de **3 golems de tipos completamente distintos** (seleccionados al azar y sin duplicados entre las 5 afinidades elementales: Vapor, Galvánico, Mecánico, Luminoso y Éter). Al recargar o reincorporarse a la escena, se genera un conjunto nuevo y único en memoria volátil.
 - **Visualización Multijugador P2P en Tiempo Real (Multi-Trail System)**: Todos los jugadores presentes en la escena pueden ver en tiempo real los 3 golems acompañantes de cada usuario. El sistema utiliza una arquitectura distribuida que procesa trayectorias independientes para el avatar local (`engine.PlayerEntity`) y para todos los avatares remotos (`PlayerIdentityData` + `Transform`), ejecutando interpolación suave (*LERP/SLERP*) a 60 FPS con slots escalonados a $1.8\text{m}$, $3.6\text{m}$ y $5.4\text{m}$ sin saturar el bus CRDT.
 - **Handshake P2P y Etiquetas de Identificación**: Mediante eventos ligeros en `MessageBus` (`golem_squad_announce` y `golem_squad_request`), cada cliente difunde y almacena la composición del escuadrón de los demás avatares, mostrando etiquetas flotantes `Billboard` con el nombre, afinidad y la dirección abreviada de la cartera del dueño.
   - 📖 *Guías técnicas maestras:*
     - 🏭 [Guía de la Fábrica de Golems y Jerarquías](guias/guia-fabrica-de-golems-y-mecanicas.md)
     - 🤖 [Guía del Sistema de Seguimiento en Fila](guias/guia-sistema-seguimiento-y-mecanicas.md)
     - 🌐 [Guía de Red Multijugador y Mobile-First](guias/guia-multijugador-mobile.md)
-- **Modelos 3D de Prueba (.glb)**: Incluye 3 autómatas optimizados para móvil con materiales PBR y canales emisivos propios:
-  - ♨️ **Calderón de Vapor** (`assets/models/golem_steam.glb`): Caldera de cobre, chimenea y núcleo naranja de horno.
-  - ⚡ **Chispazo Galvánico** (`assets/models/golem_galvanic.glb`): Chasis angular, bobinas de Tesla y reactor cian eléctrico.
-  - ⚙️ **Acorazado Mecánico** (`assets/models/golem_mechanical.glb`): Blindaje de chatarra, hombreras dentadas y visor ámbar.
+- **Catálogo de 25 Modelos 3D (.glb) en 5 Carpetas Temáticas**: Incluye modelos binarios glTF 2.0 optimizados para móvil con materiales PBR y canales emisivos puros sin luces dinámicas:
+  - ♨️ **Vapor (`assets/models/steam/`)**: Cobre, calderas, chimeneas y fuego naranja (`golem_steam_01.glb` a `05.glb`).
+  - ⚡ **Galvánico (`assets/models/galvanic/`)**: Chasis angular, bobinas de Tesla y cian eléctrico (`golem_galvanic_01.glb` a `05.glb`).
+  - ⚙️ **Mecánico (`assets/models/mechanical/`)**: Blindaje de chatarra, engranajes y ámbar (`golem_mechanical_01.glb` a `05.glb`).
+  - ☀️ **Luminoso (`assets/models/luminous/`)**: Cromo plateado, faros prismáticos y luz solar (`golem_luminous_01.glb` a `05.glb`).
+  - 🔮 **Éter (`assets/models/aether/`)**: Obsidiana mística, resonadores flotantes y amatista (`golem_aether_01.glb` a `05.glb`).
 - **Golems en Reserva (Expediciones)**: Los golems que no viajan con el avatar pueden enviarse a misiones automáticas seleccionando:
   - **Zona de Destino**: Determina la tabla de botín y rareza de piezas.
   - **Duración**: Desde 15 minutos hasta 12 horas.

@@ -1,7 +1,8 @@
 import { engine, PlayerIdentityData } from '@dcl/sdk/ecs'
 import { MessageBus } from '@dcl/sdk/message-bus'
 import { getPlayer } from '@dcl/sdk/src/players'
-import { GolemConfig, INITIAL_GOLEMS_CONFIG } from './config/golems'
+import { GolemConfig, generateRandomSquad } from './config/golems'
+import { getLocalActiveSquad } from './state'
 import { PlayerSquadAnnouncementDto, GolemSquadMemberDto } from './components/follower'
 
 /**
@@ -69,8 +70,8 @@ export function getRemoteSquad(ownerAddress: string): GolemSquadMemberDto[] | un
  * Anuncia el escuadrón actual del jugador local a todos los peers en la escena.
  */
 export function announceLocalSquad(customSquad?: GolemConfig[]) {
-  const squadToAnnounce = customSquad || INITIAL_GOLEMS_CONFIG
   const localId = getLocalPlayerId()
+  const squadToAnnounce = customSquad || getLocalActiveSquad() || generateRandomSquad(localId)
 
   const payload: PlayerSquadAnnouncementDto = {
     ownerAddress: localId,

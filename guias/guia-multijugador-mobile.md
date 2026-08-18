@@ -187,17 +187,18 @@ TouchScreenControls.createOrReplace(engine.RootEntity, {
 1. **Zonas Seguras (Safe Areas)**:
    - **Evitar la esquina inferior izquierda**: Espacio ocupado por el joystick táctil.
    - **Evitar la esquina inferior derecha**: Espacio ocupado por los botones táctiles de salto y acción.
-   - **Colocar HUDs en la parte superior central o superior-derecha**: Permite al jugador visualizar estadísticas (`Jugadores conectados`, `Golems en escena`) sin interferir con sus dedos ni con los controles nativos.
+   - **Colocar HUDs en la parte superior central**: Permite al jugador visualizar estadísticas y los golems asignados sin interferir con sus dedos ni con los controles nativos.
 
 2. **Panel HUD Implementado (`src/ui.tsx`)**:
-   - Fondo translúcido oscuro con estilo *glassmorphism*.
+   - Fondo translúcido oscuro con estilo *glassmorphism* (`560px × 90px`).
    - Contadores reactivos en tiempo real con `getConnectedPlayersCount()` y conteo de entidades `GolemFollowerComponent`.
+   - Visualización del escuadrón asignado en la sesión con iconos temáticos de afinidad (`♨️ Vapor`, `⚡ Galvánico`, `⚙️ Mecánico`, `☀️ Luminoso`, `🔮 Éter`).
 
 ---
 
-## 5. Paso a Paso: Cómo Probar el Multijugador en Local
+## 5. Paso a Paso: Cómo Probar el Multijugador y la Asignación Aleatoria en Local
 
-Para verificar la sincronización entre varios jugadores sin necesidad de desplegar en producción:
+Para verificar la sincronización entre varios jugadores y la asignación aleatoria sin necesidad de desplegar en producción:
 
 1. **Iniciar el servidor local**:
    ```bash
@@ -207,14 +208,17 @@ Para verificar la sincronización entre varios jugadores sin necesidad de desple
    - El navegador abrirá una pestaña en `http://localhost:8000`.
    - Abre las Herramientas de Desarrollador (`F12`), activa el modo de emulación móvil (**Device Toolbar**, `Ctrl + Shift + M`).
    - Selecciona un perfil móvil (por ejemplo, *iPhone 14 Pro* o *Pixel 7*).
+   - Observa el HUD superior: se habrán asignado aleatoriamente **3 golems de tipos diferentes** (ej. `♨️ Vapor | ⚡ Galvánico | 🔮 Éter`).
 3. **Abrir una segunda pestaña en modo incógnito (Jugador 2)**:
    - Abre una ventana de incógnito o un navegador alternativo en `http://localhost:8000`.
    - Activa también el modo de dispositivo móvil.
+   - Observa que el Jugador 2 recibe su propio trío aleatorio independiente de 3 tipos distintos (ej. `⚙️ Mecánico | ☀️ Luminoso | ♨️ Vapor`).
 4. **Verificar la Sincronización en Tiempo Real**:
-   - Mira hacia la posición del Jugador 2: verás su avatar junto con sus **3 golems acompañantes detrás**, cada uno con su modelo 3D y etiqueta flotante `[0x...]`.
+   - Mira hacia la posición del Jugador 2: verás su avatar junto con sus **3 golems acompañantes detrás**, cada uno con su modelo 3D específico y etiqueta flotante `[0x...]`.
    - Mueve al Jugador 2: el Jugador 1 verá cómo los 3 golems siguen la trayectoria curva del Jugador 2 en perfecta fila india con LERP suave.
-   - Observa el HUD superior: reflejará `👥 Jugadores: 2 | ⚡ Golems en escena: 6`.
-   - Cierra la ventana del Jugador 2: sus golems desaparecerán de forma limpia y el HUD regresará a `👥 Jugadores: 1 | ⚡ Golems en escena: 3`.
+   - Observa el HUD superior: reflejará `👥 Jugadores: 2 | ⚡ Golems activos: 6`.
+   - Cierra la ventana del Jugador 2: sus golems desaparecerán de forma limpia y el HUD regresará a `👥 Jugadores: 1 | ⚡ Golems activos: 3`.
+   - Recarga la pestaña del Jugador 1 (`F5`): se generará un conjunto nuevo de 3 tipos aleatorios para la nueva sesión.
 
 ---
 

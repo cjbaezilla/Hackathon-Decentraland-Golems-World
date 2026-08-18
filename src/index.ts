@@ -9,7 +9,8 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Color4 } from '@dcl/sdk/math'
 import { setupUi } from './ui'
-import { INITIAL_GOLEMS_CONFIG } from './config/golems'
+import { generateRandomSquad } from './config/golems'
+import { setLocalActiveSquad } from './state'
 import { createFollowerGolem } from './objects/golemFactory'
 import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
 import {
@@ -45,7 +46,7 @@ export function main() {
   // 3. Suelo base limpio (Área 32x32m para pruebas en Decentraland World)
   setupBaseFloor()
 
-  // 4. Instanciar los 3 Golems seguidores del jugador local
+  // 4. Generar e instanciar los 3 Golems aleatorios (3 tipos distintos) del jugador local
   setupLocalFollowerGolems()
 
   // 5. Configurar infraestructura multijugador P2P (MessageBus)
@@ -58,11 +59,16 @@ export function main() {
 }
 
 /**
- * Instancia el escuadrón de los 3 golems acompañantes para el jugador local.
+ * Genera y crea el escuadrón aleatorio de 3 tipos de golems diferentes para el jugador local.
  */
 function setupLocalFollowerGolems() {
   const localId = getLocalPlayerId()
-  INITIAL_GOLEMS_CONFIG.forEach((config, index) => {
+  const randomSquad = generateRandomSquad(localId)
+
+  // Guardar en el estado de sesión en memoria
+  setLocalActiveSquad(randomSquad)
+
+  randomSquad.forEach((config, index) => {
     const spawnPos = Vector3.create(16, 0.1, 16 - config.followDistance)
     createFollowerGolem(config, index, spawnPos, localId)
   })

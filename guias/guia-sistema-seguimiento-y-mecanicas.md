@@ -184,13 +184,15 @@ El script implementa la especificación **glTF 2.0 Binary Format (GLB)** estruct
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2 Especificaciones de los 3 Golems de Prueba
+### 4.2 Especificaciones de los 25 Modelos en las 5 Afinidades
 
-| Golem | Archivo | Peso | Estilo Geométrico | Materiales PBR y Emisión |
+| Afinidad | Carpeta | Modelos | Estilo Geométrico | Materiales PBR y Canales Emisivos |
 | :--- | :--- | :--- | :--- | :--- |
-| **Calderón de Vapor** | `golem_steam.glb` | 12.2 KB | Caldera redondeada de cobre, cúpula superior, chimenea de escape y brazos con pistones. | Cobre/Latón metálico (`#B87333`), hierro fundido y horno central con emisión naranja intenso (`#FF7300`). |
-| **Chispazo Galvánico** | `golem_galvanic.glb` | 11.4 KB | Chasis angular aerodinámico, doble bobina de Tesla en hombros y brazos articulados ligeros. | Aleación azulada (`#59738C`), alambre de cobre en bobinas y núcleo eléctrico con emisión cian brillante (`#00E5FF`). |
-| **Acorazado Mecánico** | `golem_mechanical.glb` | 13.3 KB | Blindaje de placas de chatarra remachadas, hombreras dentadas de engranaje y base reforzada. | Placas de hierro desgastado (`#736B61`), engranajes de bronce y visor óptico con emisión ámbar/dorado (`#FFBF00`). |
+| **Vapor** | `assets/models/steam/` | `golem_steam_01.glb` a `05.glb` | Caldera redondeada de cobre, cúpula superior, chimenea de escape y pistones. | Cobre/Latón metálico (`#B87333`), hierro fundido y horno con fuego naranja (`#FF7000`). |
+| **Galvánico** | `assets/models/galvanic/` | `golem_galvanic_01.glb` a `05.glb` | Chasis angular aerodinámico, doble bobina de Tesla y extremidades ligeras. | Aleación azulada (`#59738C`), bobinas de cobre y reactor cian eléctrico (`#00E5FF`). |
+| **Mecánico** | `assets/models/mechanical/` | `golem_mechanical_01.glb` a `05.glb` | Blindaje de chatarra remachada, hombreras dentadas y base reforzada. | Placas de hierro desgastado (`#736B61`), engranajes y visor ámbar/dorado (`#FFBF00`). |
+| **Luminoso** | `assets/models/luminous/` | `golem_luminous_01.glb` a `05.glb` | Estructura esbelta de cromo plateado, faros reflectores y cristales de cuarzo. | Cromo pulido (`#E0E8F0`), filamentos de tungsteno y emisión solar (`#FFFF33`). |
+| **Éter** | `assets/models/aether/` | `golem_aether_01.glb` a `05.glb` | Obsidiana mística tallada, orbes de maná flotantes y anillos orbitales. | Obsidiana púrpura (`#301934`), resonadores de maná y emisión amatista (`#B833FF`). |
 
 ### 4.3 Optimización Mobile-First y Canales Emisivos
 Cumpliendo con las reglas de compatibilidad de la aplicación móvil de Decentraland ([`missing-features.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/docs/dcl-docs-main/creator/build-for-mobile/mobile-client/missing-features.md)):
@@ -206,20 +208,36 @@ El proyecto sigue el patrón de diseño por capas y objetos de juego recomendado
 ```
 src/
 ├── config/
-│   └── golems.ts           # Parámetros de golems, afinidades, distancias y velocidades
+│   └── golems.ts           # Parámetros de golems, 5 afinidades, generateRandomSquad y distancias
 ├── components/
 │   └── follower.ts         # Componente ECS GolemFollowerComponent (con ownerAddress y DTOs)
 ├── objects/
 │   └── golemFactory.ts     # Factory para instanciación, etiquetado y limpieza de escuadrones
 ├── systems/
 │   └── followerSystem.ts   # Sistema de seguimiento multi-usuario LERP/SLERP en tiempo real
-├── index.ts                # Punto de entrada, inicio de red y orquestador
+├── index.ts                # Punto de entrada, inicialización de escuadrón y orquestador
 ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake y registro de pares)
-├── state.ts                # Estado global reactivo
-└── ui.tsx                  # Interfaz 2D React-ECS con HUD multijugador superior
+├── state.ts                # Estado de sesión en memoria (sin persistencia)
+└── ui.tsx                  # Interfaz 2D React-ECS con HUD multijugador y escuadrón
 ```
 
-### 5.1 `src/components/follower.ts`
+### 5.1 `src/config/golems.ts`
+Implementa la asignación aleatoria de 3 afinidades distintas por sesión:
+```typescript
+export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
+  // Baraja las 5 afinidades y toma 3 distintas sin repetición
+  // Asigna modelo 3D (01-05), nombre temático y distancias (1.8m, 3.6m, 5.4m)
+}
+```
+
+### 5.2 `src/state.ts`
+Gestiona el escuadrón local en memoria volátil:
+```typescript
+export function setLocalActiveSquad(squad: GolemConfig[]) { sceneState.localSquad = squad }
+export function getLocalActiveSquad(): GolemConfig[] | null { return sceneState.localSquad }
+```
+
+### 5.3 `src/components/follower.ts`
 Define el componente ECS personalizado con asociación de dueño (`ownerAddress`):
 ```typescript
 export const GolemFollowerComponent = engine.defineComponent('golems::GolemFollowerComponent', {
@@ -233,7 +251,7 @@ export const GolemFollowerComponent = engine.defineComponent('golems::GolemFollo
 })
 ```
 
-### 5.2 `src/multiplayer.ts`
+### 5.4 `src/multiplayer.ts`
 Gestiona la difusión y escucha de escuadrones P2P con `MessageBus`:
 ```typescript
 export function announceLocalSquad(customSquad?: GolemConfig[]) { ... }
@@ -241,10 +259,10 @@ export function requestAllSquads() { ... }
 export function setupSquadSyncListeners(onSquadReceived?: (address: string, squad: GolemSquadMemberDto[]) => void) { ... }
 ```
 
-### 5.3 `src/objects/golemFactory.ts`
+### 5.5 `src/objects/golemFactory.ts`
 Ensambla entidades individuales o escuadrones completos con etiquetas Billboard:
 ```typescript
-export function spawnPlayerSquad(ownerAddress: string, squadConfig: GolemConfig[], basePos: Vector3): Entity[] { ... }
+export function spawnPlayerSquad(ownerAddress: string, squadConfig: (GolemConfig | GolemSquadMemberDto)[], basePos: Vector3): Entity[] { ... }
 export function removePlayerSquad(ownerAddress: string): void { ... }
 ```
 
