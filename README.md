@@ -189,7 +189,15 @@ graph LR
 
 ![Límite de Golems y Misiones](GOLEMS/golems_limite_y_misiones.png)
 
-- **Escuadrón Activo (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos. Utilizan un sistema de seguimiento por interpolación suave (*LERP*), manteniendo distancias de seguridad para no estorbar la visibilidad ni el movimiento.
+- **Escuadrón Activo en Fila (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos. Utilizan un avanzado **Sistema de Historial de Trayectoria (*Breadcrumb Trail FIFO*)** con interpolación suave (*LERP/SLERP*), que permite que los 3 autómatas sigan la curva real del camino trazado por el maestro ($1.8\text{m}$, $3.6\text{m}$, $5.4\text{m}$), con frenado natural y zona muerta anti-vibración (*anti-jitter*).
+  - 📖 *Guías técnicas maestras:*
+    - 🏭 [Guía de la Fábrica de Golems y Jerarquías](guias/guia-fabrica-de-golems-y-mecanicas.md)
+    - 🤖 [Guía del Sistema de Seguimiento en Fila](guias/guia-sistema-seguimiento-y-mecanicas.md)
+    - 🌐 [Guía de Red Multijugador y Mobile-First](guias/guia-multijugador-mobile.md)
+- **Modelos 3D de Prueba (.glb)**: Incluye 3 autómatas optimizados para móvil con materiales PBR y canales emisivos propios:
+  - ♨️ **Calderón de Vapor** (`assets/models/golem_steam.glb`): Caldera de cobre, chimenea y núcleo naranja de horno.
+  - ⚡ **Chispazo Galvánico** (`assets/models/golem_galvanic.glb`): Chasis angular, bobinas de Tesla y reactor cian eléctrico.
+  - ⚙️ **Acorazado Mecánico** (`assets/models/golem_mechanical.glb`): Blindaje de chatarra, hombreras dentadas y visor ámbar.
 - **Golems en Reserva (Expediciones)**: Los golems que no viajan con el avatar pueden enviarse a misiones automáticas seleccionando:
   - **Zona de Destino**: Determina la tabla de botín y rareza de piezas.
   - **Duración**: Desde 15 minutos hasta 12 horas.
@@ -310,18 +318,33 @@ npm start
 ```text
 Hackathon/
 ├── assets/                     # Modelos 3D (.glb), texturas, sonidos e iconos
+│   └── models/                 # Modelos 3D GLB (golem_steam, golem_galvanic, golem_mechanical)
 ├── GOLEMS/                     # GDD oficial, diagramas, esquemas y portada de Golems
 │   ├── GDD-Golems.md           # Documento de diseño de juego integral
 │   ├── golems_cover.png        # Portada oficial de la experiencia
 │   └── *.png                   # Ilustraciones e infografías conceptuales
-├── docs/                       # Documentación técnica de Decentraland
+├── guias/                      # Guías técnicas y documentación maestra de la experiencia
+│   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía de la Fábrica de Golems y jerarquías
+│   ├── guia-sistema-seguimiento-y-mecanicas.md # Guía del sistema de seguimiento en fila
+│   └── guia-multijugador-mobile.md             # Guía de red P2P y Mobile-First
+├── docs/                       # Documentación oficial de Decentraland y SDK Skills
 │   ├── dcl-docs-main/          # Documentación oficial de Decentraland SDK7
 │   └── sdk-skills-main/        # Catálogo maestro de habilidades y patrones
+├── scripts/                    # Scripts de generación de assets y utilidades
+│   └── generate_models.js      # Generador binario procedural de modelos .glb glTF 2.0
 ├── src/                        # Código fuente TypeScript SDK7
 │   ├── index.ts                # Inicializador principal y orquestador de sistemas
 │   ├── state.ts                # Estado global reactivo de la escena
 │   ├── ui.tsx                  # Interfaz de usuario con React-ECS (Radar, HUD)
-│   └── multiplayer.ts          # Gestión de red P2P y MessageBus
+│   ├── multiplayer.ts          # Gestión de red P2P y MessageBus
+│   ├── config/                 # Configuraciones maestras y constantes
+│   │   └── golems.ts           # Configuración de golems, afinidades y distancias
+│   ├── components/             # Componentes ECS personalizados (Schemas)
+│   │   └── follower.ts         # GolemFollowerComponent
+│   ├── objects/                # Patrón Factory de GameObjects
+│   │   └── golemFactory.ts     # Fábrica de entidades y billboards para Golems
+│   └── systems/                # Sistemas ECS
+│       └── followerSystem.ts   # Sistema de seguimiento Breadcrumb Trail FIFO
 ├── scene.json                  # Metadatos del World (25x25 parcelas, spawn, rating)
 ├── package.json                # Dependencias y scripts de construcción
 ├── tsconfig.json               # Configuración del compilador TypeScript
