@@ -1,5 +1,7 @@
 # Golems: Documento de Diseño y Especificación Técnica
 
+![cover](golems_cover.png)
+
 ## 1. De qué trata el juego
 
 Golems es una experiencia multijugador para Decentraland donde cada visitante entra a un mundo de chatarra, máquinas de vapor y magia residual con una misión clara: recorrer un mapa enorme, usar un radar de calor para encontrar piezas ocultas y ensamblar criaturas mecánicas únicas. La fantasía y el steampunk se cruzan en cada decisión de diseño, porque aquí no se mina mineral, se rebuscan transistores, ollas, antenas y televisores viejos entre los escombros.
@@ -10,11 +12,15 @@ Alrededor de esa idea central orbitan el combate en tiempo real basado en estad�
 
 La intención es que una persona recién llegada entienda qué hacer en los primeros dos minutos, y que quien lleva semanas jugando siga encontrando razones para volver, ya sea por una pieza legendaria que no aparece, por un golem que quiere forjar con una receta secreta o por un rival que le está ganando en la tabla.
 
+![de_que_trata](golems_de_que_trata.png)
+
 ## 2. El bucle principal de juego
 
 El recorrido típico de una sesión se puede resumir en un flujo circular que se retroalimenta. Primero el jugador aparece en el Distrito de la Forja, que funciona como punto de partida y zona segura en una de las esquinas del mapa. Ahí recibe el radar de calor y una breve explicación de cómo funciona. En segundo lugar sale a explorar, y el radar lo guía hacia piezas enterradas, escondidas entre los restos de maquinaria. Tercero, cuando tiene suficientes materiales, vuelve a la forja y los combina para crear un golem. Cuarto, ese golem lo acompaña a combatir contra los NPC hostiles o a enfrentarse a otros jugadores. Quinto, los golems que no lo siguen se envían a misiones de recolección que generan más materiales. Ese último paso cierra el círculo y devuelve al jugador al primer punto con más recursos de los que tenía.
 
 Lo importante de este bucle es que no tiene un final obligatorio ni una meta única. Cada jugador decide si se especializa en coleccionar piezas raras, en forjar golems con combinaciones poco comunes, en subir de nivel combatiendo o en trepar en la escalera competitiva. Las cuatro actividades se alimentan entre sí, así que una persona que solo quiere recolectar igualmente termina con materiales que puede vender o usar, y alguien que solo quiere pelear necesita recolectar para forjar mejores golems.
+
+![bucle_juego](golems_bucle_juego.png)
 
 ## 3. El mundo y el mapa
 
@@ -28,6 +34,9 @@ Las tres esquinas restantes son el destino de quienes ya dominan el bucle básic
 
 Esa separación por zonas cumple tres funciones a la vez. La primera es guiar el flujo de jugadores para que no todos se amontonen en el mismo punto. La segunda es crear una curva de dificultad natural, en la que un jugador nuevo puede quedarse tranquilo cerca de la forja mientras aprende. La tercera es ofrecer decisiones con riesgo real: el material más valioso exige entrar a una zona donde otro jugador puede atacarte, y quien prefiera evitar ese riesgo tiene en la reserva segura una alternativa honesta, con recompensas un poco menores pero sin miedo a morir.
 
+![map](golems_map.png)
+![map2](golems_map2.png)
+
 ## 4. El radar de calor y la recolección
 
 Los materiales no están visibles a simple vista. Están enterrados o camuflados, y solo se revelan cuando el jugador se acerca lo suficiente usando el radar de calor que aparece en la interfaz. Esta decisión tiene una razón práctica directa con la plataforma: en el cliente móvil no se puede depender del raycasting avanzado, así que en lugar de apuntar con la cámara, el jugador camina y el radar hace el trabajo de interpretar la cercanía.
@@ -37,6 +46,8 @@ El radar se dibuja como un elemento de interfaz con React ECS, y muestra una se�
 El radar funciona por distancia euclidiana entre la posición del avatar y la lista de materiales activos en ese momento. No necesita rayos, ni apuntar, ni precisión fina, lo que lo hace cómodo de usar con una sola mano en el teléfono. La recolección se resuelve con un toque sobre la pieza una vez revelada, usando una hitbox amplia que cumple con el mínimo recomendado para pantallas táctiles.
 
 Cada material tiene una vida útil desde que aparece hasta que desaparece si nadie lo recoge, y un tiempo de reaparición distinto según su rareza. Los materiales raros y épicos no aparecen todos al mismo tiempo, sino que respetan un límite de instancias simultáneas por zona, lo que mantiene la sensación de búsqueda sin saturar el mapa ni el rendimiento.
+
+![radar](golems_radar.png)
 
 ## 5. Los materiales
 
@@ -88,6 +99,8 @@ La palabra determinista es clave. La misma receta produce siempre el mismo golem
 
 Las estadísticas base se calculan sumando los aportes de cada material, y el factor de perfil del hash aplica una variación acotada que respeta el peso de la receta sin romperla. Un golem forjado con muchas sartenes y ollas saldrá naturalmente defensivo, y el hash solo matizará cuánto de defensa frente a cuánta vitalidad, manteniendo la identidad que el jugador buscó al elegir la receta.
 
+![forja](golems_forja.png)
+
 ## 7. Las estadísticas y el combate en tiempo real
 
 Cada golem tiene cinco estadísticas: ataque, que mide el daño por golpe; defensa, que reduce el daño recibido; vitalidad, que define los puntos de vida; velocidad, que determina la frecuencia de ataque y la probabilidad de esquivar; y afinidad, que es la naturaleza energética del conjunto.
@@ -97,6 +110,8 @@ El combate se resuelve en tiempo real por comparación de estadísticas, sin tur
 La afinidad introduce un sistema de ventajas de tipo piedra, papel o tijera con cinco fuerzas propias de este ecosistema de chatarra: el vapor, lo mecánico, lo galvánico, lo luminoso y el éter. El vapor vence a lo mecánico porque la presión y la humedad oxidan y atascan los engranajes. Lo mecánico vence a lo galvánico porque la estructura física y el aislamiento de los engranajes absorben y desvían la corriente. Lo galvánico vence a lo luminoso porque una descarga quema el filamento y apaga el brillo. Lo luminoso vence al éter porque la luz concentrada dispersa y refracta esa energía difusa. El éter vence al vapor porque esa energía sutil condensa y suspende la presión del vapor. Cuando un golem con ventaja golpea, el daño se multiplica por un factor favorable, y cuando está en desventaja, el daño se reduce. Esto premia la variedad de recetas y evita que una sola combinación domine la tabla.
 
 El combate contra otros jugadores usa el mismo sistema, con la salvedad de que las posiciones se sincronizan por red y el resultado de cada enfrentamiento se reporta a la API para actualizar la clasificación.
+
+![stats](golems_stats.png)
 
 ## 8. Límite de golems y comportamiento de seguimiento
 
@@ -111,6 +126,8 @@ Los golems que no siguen activamente al jugador pueden enviarse a misiones de re
 La persistencia de estas misiones se apoya en la API de PHP y MySQL, de modo que el progreso no se pierde si el jugador se desconecta. Cuando el tiempo se cumple, el jugador puede reclamar el botín desde la interfaz, y el golem vuelve a estar disponible. Existe un factor de riesgo acotado: una misión puede volver con menos material del esperado, y en casos raros con una pieza mejor de lo previsto, lo que mantiene el interés sin castigar de forma severa.
 
 El número de misiones simultáneas está limitado para que el sistema de recolección automatizado no sustituya por completo a la exploración manual. La idea es que las misiones complementen el bucle principal, no que lo reemplacen, porque recorrer el mapa con el radar es la experiencia que hace especial al juego.
+
+![limite_y_misiones](golems_limite_y_misiones.png)
 
 ## 10. Los personajes no jugadores y sus golems
 
@@ -137,6 +154,8 @@ En el formato uno contra uno, cada jugador entra al combate con sus tres golems 
 El emparejamiento se hace a través de la API, que busca rivales con calificaciones cercanas para que cada partida sea pareja. El resultado de cada combate se reporta a la API una vez terminado, y la clasificación se actualiza. La tabla se puede consultar desde el Distrito de la Forja, y sirve tanto para presumir posición como para descubrir a los rivales más fuertes de la temporada.
 
 El torneo no exige jugar con la cámara apuntando con precisión ni depende de reflejos de disparo, porque se resuelve por estadísticas. Eso lo hace cómodo en móvil y pone el peso de la estrategia en la composición de la receta, la afinidad energética y la gestión de los niveles, más que en la destreza manual.
+
+![torneo](golems_torneo.png)
 
 ## 13. Arquitectura del servidor y persistencia
 
