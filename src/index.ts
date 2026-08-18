@@ -10,8 +10,10 @@ import { generateRandomSquad } from './config/golems'
 import { setLocalActiveSquad } from './state'
 import { createFollowerGolem } from './objects/golemFactory'
 import { createTournamentArena } from './objects/arenaBuilder'
+import { createTrampoline } from './objects/trampoline'
 import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
 import { arenaAnimationSystem } from './systems/arenaAnimationSystem'
+import { trampolineSystem } from './systems/trampolineSystem'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -25,6 +27,7 @@ import {
  * ============================================================================
  * Inicializa la UI, controles móviles táctiles, escuadrón local de golems,
  * la Gran Arena Circular de Torneo Steampunk (estilo Torneo de Cell),
+ * el trampolín impulsor de vapor en el punto de spawn,
  * infraestructura multijugador P2P y sistemas ECS de animación y seguimiento.
  */
 export function main() {
@@ -49,14 +52,18 @@ export function main() {
   // 4. Instanciar la Gran Arena Circular de Torneo Steampunk en el centro del mapa (200m, 200m)
   createTournamentArena()
 
-  // 5. Configurar infraestructura multijugador P2P (MessageBus)
+  // 5. Instanciar el trampolín steampunk cerca del punto de spawn (16m, 11m)
+  createTrampoline(Vector3.create(16, 0, 11))
+
+  // 6. Configurar infraestructura multijugador P2P (MessageBus)
   setupSquadSyncListeners(onRemoteSquadUpdated)
   announceLocalSquad()
   requestAllSquads()
 
-  // 6. Registrar los sistemas de animación y seguimiento en el motor ECS
+  // 7. Registrar los sistemas de animación, seguimiento y trampolín en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(arenaAnimationSystem)
+  engine.addSystem(trampolineSystem)
 }
 
 /**
