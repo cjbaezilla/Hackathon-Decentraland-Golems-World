@@ -454,7 +454,7 @@
           "json": {
             "name": "Golems",
             "description": "Explore a vast 400x400m steampunk world, scavenge scrap with the Heat Radar, forge unique deterministic Golems, command your battle squad, send companions on automated expeditions, and compete in real-time Ladder Tournaments (1v1 & 2v2).",
-            "thumbnail": "GOLEMS/golems_cover_eng.png",
+            "thumbnail": "golems_scene_cover.png",
             "ageRating": "A",
             "categories": [
               "game"
