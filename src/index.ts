@@ -16,6 +16,8 @@ import { trampolineSystem } from './systems/trampolineSystem'
 import { GOLEM_TEAMS } from './components/combat'
 import { createForgeDistrict } from './objects/forgeDistrictBuilder'
 import { createMiningReserve } from './objects/miningReserveBuilder'
+import { createScrapDesert } from './objects/scrapDesertBuilder'
+import { createFoundryBoilers } from './objects/foundryBoilersBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -31,8 +33,11 @@ import {
  * - Interfaz de Usuario React-ECS Mobile-First.
  * - Esquema de controles táctiles para dispositivos móviles.
  * - Infraestructura multijugador P2P (MessageBus).
- * - Arquitectura y delimitación del Distrito de la Forja (0m a 80m).
- * - Arquitectura y delimitación de la Reserva de Minería Segura (260m a 400m).
+ * - Arquitectura de las 4 esquinas del mundo (400x400m):
+ *   1. Distrito de la Forja (Suroeste: 0m a 80m).
+ *   2. Reserva de Minería Segura (Noreste: 260m a 400m).
+ *   3. Desierto de Chatarra (Noroeste: 0m a 140m X, 260m a 400m Z).
+ *   4. Calderas de la Fundición (Sureste: 260m a 400m X, 0m a 140m Z).
  * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
  */
 export function main() {
@@ -55,19 +60,19 @@ export function main() {
   setupSquadSyncListeners(onRemoteSquadUpdated)
   requestAllSquads()
 
-  // 4. Instanciar la arquitectura, delimitación perimetral y escombros del Distrito de la Forja (0m a 80m)
+  // 4. Instanciar la arquitectura y delimitación de las 4 zonas maestras del mundo
   createForgeDistrict()
-
-  // 5. Instanciar la arquitectura monumental de la Reserva de Minería Segura (260m a 400m)
   createMiningReserve()
+  createScrapDesert()
+  createFoundryBoilers()
 
-  // 6. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
+  // 5. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con Forja, Reserva de Minería y sistemas activos.')
+  console.log('🤖 [Golems World] Escena principal inicializada con las 4 zonas cardinales y sistemas activos.')
 }
 
 /**

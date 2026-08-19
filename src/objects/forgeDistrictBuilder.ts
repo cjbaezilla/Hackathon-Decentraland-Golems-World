@@ -9,14 +9,14 @@ import { FORGE_DISTRICT_CONFIG } from '../config/forgeDistrictConfig'
 
 /**
  * ============================================================================
- * CONSTRUCTOR DEL DISTRITO DE LA FORJA (ZONA INICIAL 0,0 - 80m x 80m)
+ * CONSTRUCTOR DEL DISTRITO DE LA FORJA (ZONA INICIAL 0,0 - 140m x 140m)
  * ============================================================================
- * Genera de forma limpia, modular y optimizada (Mobile-First):
+ * Genera la ciudadela inicial expandida a 140m x 140m (19.600 m²):
  * 1. Plaza de Aparición (Spawn Square) en (16, 5).
- * 2. Red vial principal adoquinada (Road Network).
- * 3. Plaza Central de la Forja en (40, 40) con maquinaria monumental.
- * 4. Talleres periféricos de artesanos y calderería.
- * 5. Delimitación perimetral y Puertas monumentales (Norte y Este).
+ * 2. Red vial principal adoquinada (Ejes X=70 y Z=70 cruzando en 70,70).
+ * 3. Plaza Central de la Gran Forja en (70, 70) con maquinaria monumental.
+ * 4. 4 Talleres periféricos de artesanos, calderería y forja.
+ * 5. Delimitación perimetral y Puertas monumentales (Norte 70,140 y Este 140,70).
  * 6. Cúmulos de escombros y chatarra de transición (Wreckages).
  */
 
@@ -42,7 +42,7 @@ export function createForgeDistrict(): Entity {
   // 3. Plaza Central de la Gran Forja
   buildCentralForgeSquare(root)
 
-  // 4. Talleres y Puestos Industriales
+  // 4. Talleres y Pabellones Industriales
   buildWorkshops(root)
 
   // 5. Muros Perimetrales y Puertas de Acceso
@@ -51,7 +51,7 @@ export function createForgeDistrict(): Entity {
   // 6. Cúmulos de Escombros y Chatarra (Wreckages de Transición)
   buildTransitionWreckages(root)
 
-  console.log('🏛️ [Distrito de la Forja] Arquitectura y delimitación perimetral instanciadas con éxito.')
+  console.log('🏛️ [Distrito de la Forja] Ciudad inicial expandida a 140x140m instanciada con éxito.')
   return root
 }
 
@@ -117,69 +117,62 @@ function buildSpawnPlaza(parent: Entity) {
 }
 
 /**
- * 2. Red Vial Principal (Caminos adoquinados conectando Spawn, Plaza Central y Puertas)
+ * 2. Red Vial Principal Adoquinada (Ejes X=70 y Z=70, conectando Spawn, Plaza Central y Puertas)
  */
 function buildRoadNetwork(parent: Entity) {
   // A. Conector desde Spawn (16, 6) hacia el Norte (16, 40)
   for (let z = 10; z <= 38; z += 4) {
     spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(16, 0.02, z), Quaternion.Identity())
   }
-
-  // B. Giro en (16, 40) conectando hacia el Este hacia la Plaza Central (40, 40)
   spawnProp(parent, ASSETS.roadAngle, Vector3.create(16, 0.02, 40), Quaternion.fromEulerDegrees(0, 0, 0))
 
+  // Conector de (16, 40) a (40, 40) y subida diagonal hacia (70, 70)
   for (let x = 20; x <= 36; x += 4) {
     spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(x, 0.02, 40), Quaternion.fromEulerDegrees(0, 90, 0))
   }
-
-  // C. Eje Troncal Norte-Sur (X = 40): Desde Z = 4 hasta Z = 78
-  for (let z = 4; z <= 78; z += 4) {
-    if (z >= 36 && z <= 44) continue // El centro de la Plaza de la Forja usa cruce
-    spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(40, 0.02, z), Quaternion.Identity())
+  for (let c = 40; c <= 64; c += 6) {
+    spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(c, 0.02, c), Quaternion.fromEulerDegrees(0, 45, 0))
+    if (c % 12 === 0) {
+      spawnProp(parent, ASSETS.lamp, Vector3.create(c - 3.5, 0.02, c + 3.5))
+    }
   }
 
-  // D. Eje Troncal Este-Oeste (Z = 40): Desde X = 4 hasta X = 78
-  for (let x = 4; x <= 78; x += 4) {
-    if (x >= 36 && x <= 44) continue // El centro de la Plaza de la Forja usa cruce
-    spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(x, 0.02, 40), Quaternion.fromEulerDegrees(0, 90, 0))
+  // B. Eje Troncal Norte-Sur (X = 70): Desde Z = 4 hasta Z = 136
+  for (let z = 4; z <= 136; z += 6) {
+    if (z >= 64 && z <= 76) continue // Cruce central
+    spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(70, 0.02, z), Quaternion.Identity())
+    if (z % 24 === 0) {
+      spawnProp(parent, ASSETS.lamp, Vector3.create(73.5, 0.02, z))
+      spawnProp(parent, ASSETS.lamp, Vector3.create(66.5, 0.02, z))
+    }
   }
 
-  // E. Cruce Central Monumental en (40, 40)
-  spawnProp(parent, ASSETS.roadCross, Vector3.create(40, 0.02, 40), Quaternion.Identity())
+  // C. Eje Troncal Este-Oeste (Z = 70): Desde X = 4 hasta X = 136
+  for (let x = 4; x <= 136; x += 6) {
+    if (x >= 64 && x <= 76) continue // Cruce central
+    spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(x, 0.02, 70), Quaternion.fromEulerDegrees(0, 90, 0))
+    if (x % 24 === 0) {
+      spawnProp(parent, ASSETS.lamp, Vector3.create(x, 0.02, 73.5))
+      spawnProp(parent, ASSETS.lamp, Vector3.create(x, 0.02, 66.5))
+    }
+  }
 
-  // F. Farolas a lo largo de las avenidas principales (cada 16m)
-  const lampPositions = [
-    Vector3.create(43.5, 0.02, 20),
-    Vector3.create(36.5, 0.02, 20),
-    Vector3.create(43.5, 0.02, 60),
-    Vector3.create(36.5, 0.02, 60),
-    Vector3.create(20, 0.02, 43.5),
-    Vector3.create(20, 0.02, 36.5),
-    Vector3.create(60, 0.02, 43.5),
-    Vector3.create(60, 0.02, 36.5)
-  ]
-
-  lampPositions.forEach((pos) => {
-    spawnProp(parent, ASSETS.lamp, pos)
-  })
+  // D. Cruce Monumental en (70, 70)
+  spawnProp(parent, ASSETS.roadCross, Vector3.create(70, 0.02, 70), Quaternion.Identity())
 }
 
 /**
- * 3. Plaza Central de la Gran Forja (Hito en 40, 40)
+ * 3. Plaza Central de la Gran Forja (Hito Monumental en 70, 70)
  */
 function buildCentralForgeSquare(parent: Entity) {
   const center = FORGE_DISTRICT_CONFIG.centralForgeSquare.center
 
-  // Plataforma perimetral de la forja (4 losas circundantes de 4x4m)
-  const platformOffsets = [
-    Vector3.create(-4, 0.03, -4),
-    Vector3.create(4, 0.03, -4),
-    Vector3.create(-4, 0.03, 4),
-    Vector3.create(4, 0.03, 4)
-  ]
-
-  platformOffsets.forEach((off) => {
-    spawnProp(parent, ASSETS.floorWood4x4, Vector3.add(center, off))
+  // Plataforma monumental de la forja (3x3 losas de 4x4m = 12x12m)
+  const offsets = [-4, 0, 4]
+  offsets.forEach((dx) => {
+    offsets.forEach((dz) => {
+      spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(center.x + dx, 0.02, center.z + dz))
+    })
   })
 
   // Maquinaria central de la Forja: Gran Engranaje sobre eje de transmisión
@@ -188,28 +181,28 @@ function buildCentralForgeSquare(parent: Entity) {
     ASSETS.gearShaft,
     Vector3.create(center.x, 0.05, center.z),
     Quaternion.Identity(),
-    Vector3.create(1.5, 1.5, 1.5)
+    Vector3.create(2.2, 2.2, 2.2)
   )
   spawnProp(
     parent,
     ASSETS.gearBig,
-    Vector3.create(center.x, 0.3, center.z),
+    Vector3.create(center.x, 0.5, center.z),
     Quaternion.fromEulerDegrees(90, 0, 0),
-    Vector3.create(1.8, 1.8, 1.8)
+    Vector3.create(2.6, 2.6, 2.6)
   )
   spawnProp(
     parent,
     ASSETS.gear10Teeth,
-    Vector3.create(center.x + 1.8, 0.25, center.z),
+    Vector3.create(center.x + 2.8, 0.35, center.z),
     Quaternion.fromEulerDegrees(0, 45, 0),
-    Vector3.create(1.2, 1.2, 1.2)
+    Vector3.create(1.6, 1.6, 1.6)
   )
   spawnProp(
     parent,
     ASSETS.gearAngled10Teeth,
-    Vector3.create(center.x - 1.8, 0.25, center.z),
+    Vector3.create(center.x - 2.8, 0.35, center.z),
     Quaternion.fromEulerDegrees(45, 0, 0),
-    Vector3.create(1.2, 1.2, 1.2)
+    Vector3.create(1.6, 1.6, 1.6)
   )
 
   // 4 Chimeneas industriales de vapor en las esquinas de la plaza
@@ -219,7 +212,6 @@ function buildCentralForgeSquare(parent: Entity) {
     Vector3.create(-6.5, 0.02, 6.5),
     Vector3.create(6.5, 0.02, 6.5)
   ]
-
   smokerOffsets.forEach((off) => {
     spawnProp(parent, ASSETS.smoker, Vector3.add(center, off))
   })
@@ -228,207 +220,189 @@ function buildCentralForgeSquare(parent: Entity) {
   spawnProp(
     parent,
     ASSETS.tank,
-    Vector3.create(center.x + 6, 0.02, center.z),
+    Vector3.create(center.x + 6.5, 0.02, center.z),
     Quaternion.fromEulerDegrees(0, 90, 0),
-    Vector3.create(1.3, 1.3, 1.3)
+    Vector3.create(1.5, 1.5, 1.5)
   )
   spawnProp(
     parent,
     ASSETS.tank,
-    Vector3.create(center.x - 6, 0.02, center.z),
+    Vector3.create(center.x - 6.5, 0.02, center.z),
     Quaternion.fromEulerDegrees(0, 270, 0),
-    Vector3.create(1.3, 1.3, 1.3)
+    Vector3.create(1.5, 1.5, 1.5)
   )
 
   // Cofre de forja y mecanismos de control
-  spawnProp(parent, ASSETS.chestGear, Vector3.create(center.x, 0.05, center.z + 4), Quaternion.fromEulerDegrees(0, 180, 0))
-  spawnProp(parent, ASSETS.lever, Vector3.create(center.x + 2, 0.05, center.z + 4))
-  spawnProp(parent, ASSETS.switch, Vector3.create(center.x - 2, 0.05, center.z + 4))
+  spawnProp(parent, ASSETS.chestGear, Vector3.create(center.x, 0.05, center.z + 4.5), Quaternion.fromEulerDegrees(0, 180, 0))
+  spawnProp(parent, ASSETS.lever, Vector3.create(center.x + 2, 0.05, center.z + 4.5))
+  spawnProp(parent, ASSETS.switch, Vector3.create(center.x - 2, 0.05, center.z + 4.5))
+
+  spawnProp(parent, ASSETS.lamp, Vector3.create(center.x - 7.5, 0.02, center.z))
+  spawnProp(parent, ASSETS.lamp, Vector3.create(center.x + 7.5, 0.02, center.z))
 }
 
 /**
  * 4. Talleres y Pabellones de Artesanos Periféricos
  */
 function buildWorkshops(parent: Entity) {
-  // A. Taller Mecánico del Noroeste (22, 60)
-  const mechCenter = Vector3.create(22, 0.02, 60)
-
-  // Piso del taller (2x2 losas de 4x4m = 8x8m)
+  // A. Taller Mecánico del Noroeste (40, 105)
+  const mechCenter = FORGE_DISTRICT_CONFIG.mechanicWorkshop.center
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(mechCenter.x - 2, 0.02, mechCenter.z - 2))
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(mechCenter.x + 2, 0.02, mechCenter.z - 2))
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(mechCenter.x - 2, 0.02, mechCenter.z + 2))
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(mechCenter.x + 2, 0.02, mechCenter.z + 2))
 
-  // Techo industrial elevado sostenido
   spawnProp(parent, ASSETS.ceiling4x4, Vector3.create(mechCenter.x - 2, 4.0, mechCenter.z - 2))
   spawnProp(parent, ASSETS.ceiling4x4, Vector3.create(mechCenter.x + 2, 4.0, mechCenter.z - 2))
   spawnProp(parent, ASSETS.ceiling4x4, Vector3.create(mechCenter.x - 2, 4.0, mechCenter.z + 2))
   spawnProp(parent, ASSETS.ceiling4x4, Vector3.create(mechCenter.x + 2, 4.0, mechCenter.z + 2))
 
-  // Equipamiento de banco de trabajo y engranajes
   spawnProp(parent, ASSETS.chestTube, Vector3.create(mechCenter.x - 3, 0.02, mechCenter.z + 3))
   spawnProp(parent, ASSETS.gear8Teeth, Vector3.create(mechCenter.x + 3, 0.5, mechCenter.z + 3), Quaternion.fromEulerDegrees(0, 30, 0))
   spawnProp(parent, ASSETS.gear5Teeth, Vector3.create(mechCenter.x + 3, 0.3, mechCenter.z - 3))
   spawnProp(parent, ASSETS.barrel, Vector3.create(mechCenter.x - 3.5, 0.02, mechCenter.z - 2))
   spawnProp(parent, ASSETS.tableLamp, Vector3.create(mechCenter.x, 0.02, mechCenter.z + 3.5))
 
-  // B. Taller de Vapor y Calderería del Sureste (60, 22)
-  const steamCenter = Vector3.create(60, 0.02, 22)
-
-  // Piso del taller
+  // B. Taller de Vapor y Calderería del Sureste (105, 40)
+  const steamCenter = FORGE_DISTRICT_CONFIG.steamFoundryWorkshop.center
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(steamCenter.x - 2, 0.02, steamCenter.z - 2))
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(steamCenter.x + 2, 0.02, steamCenter.z - 2))
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(steamCenter.x - 2, 0.02, steamCenter.z + 2))
   spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(steamCenter.x + 2, 0.02, steamCenter.z + 2))
 
-  // Calderas y tanques de presión
   spawnProp(parent, ASSETS.tank, Vector3.create(steamCenter.x + 3, 0.02, steamCenter.z + 2), Quaternion.Identity())
   spawnProp(parent, ASSETS.smoker, Vector3.create(steamCenter.x - 3, 0.02, steamCenter.z + 3))
   spawnProp(parent, ASSETS.barrel, Vector3.create(steamCenter.x - 3, 0.02, steamCenter.z - 3))
   spawnProp(parent, ASSETS.barrel, Vector3.create(steamCenter.x - 2, 0.02, steamCenter.z - 3.2))
   spawnProp(parent, ASSETS.chestPlates, Vector3.create(steamCenter.x + 3, 0.02, steamCenter.z - 2), Quaternion.fromEulerDegrees(0, 180, 0))
   spawnProp(parent, ASSETS.lamp, Vector3.create(steamCenter.x - 4.5, 0.02, steamCenter.z))
+
+  // C. Pabellón de Maestros Forjadores (35, 45)
+  const mastersCenter = FORGE_DISTRICT_CONFIG.forgeMastersPavilion.center
+  spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(mastersCenter.x, 0.02, mastersCenter.z))
+  spawnProp(parent, ASSETS.chestGear, Vector3.create(mastersCenter.x - 1.5, 0.02, mastersCenter.z + 1.5))
+  spawnProp(parent, ASSETS.gearSmall01, Vector3.create(mastersCenter.x + 1.5, 0.1, mastersCenter.z + 1.5))
+  spawnProp(parent, ASSETS.tableLamp, Vector3.create(mastersCenter.x, 0.02, mastersCenter.z - 1.5))
+
+  // D. Puesto de Guardia y Vigía (105, 105)
+  const guardCenter = FORGE_DISTRICT_CONFIG.guardOutpost.center
+  spawnProp(parent, ASSETS.floorWood4x4, Vector3.create(guardCenter.x, 0.02, guardCenter.z))
+  spawnProp(parent, ASSETS.tank, Vector3.create(guardCenter.x + 2, 0.02, guardCenter.z + 2), Quaternion.Identity(), Vector3.create(1.2, 1.5, 1.2))
+  spawnProp(parent, ASSETS.lamp, Vector3.create(guardCenter.x - 2, 0.02, guardCenter.z - 2))
 }
 
 /**
- * 5. Delimitación Perimetral y Puertas Monumentales de Acceso
+ * 5. Delimitación Perimetral y Puertas Monumentales de Acceso (Fronteras Z=140 y X=140)
  */
 function buildPerimeterBarricadesAndGates(parent: Entity) {
-  // A. PUERTA NORTE ("Puerta de la Chatarra" en 40, 80)
+  // A. PUERTA NORTE ("Puerta de la Chatarra" en 70, 140)
   const northGate = FORGE_DISTRICT_CONFIG.gates.northGate.position
 
-  // Bastiones colosales a ambos lados del portal norte
-  spawnProp(parent, ASSETS.tank, Vector3.create(northGate.x - 6, 0.02, northGate.z), Quaternion.Identity(), Vector3.create(1.5, 1.8, 1.5))
-  spawnProp(parent, ASSETS.smoker, Vector3.create(northGate.x - 6, 3.6, northGate.z))
+  spawnProp(parent, ASSETS.tank, Vector3.create(northGate.x - 6, 0.02, northGate.z), Quaternion.Identity(), Vector3.create(1.6, 2.0, 1.6))
+  spawnProp(parent, ASSETS.smoker, Vector3.create(northGate.x - 6, 4.0, northGate.z))
   spawnProp(parent, ASSETS.lamp, Vector3.create(northGate.x - 4.5, 0.02, northGate.z - 1))
 
-  spawnProp(parent, ASSETS.tank, Vector3.create(northGate.x + 6, 0.02, northGate.z), Quaternion.Identity(), Vector3.create(1.5, 1.8, 1.5))
-  spawnProp(parent, ASSETS.smoker, Vector3.create(northGate.x + 6, 3.6, northGate.z))
+  spawnProp(parent, ASSETS.tank, Vector3.create(northGate.x + 6, 0.02, northGate.z), Quaternion.Identity(), Vector3.create(1.6, 2.0, 1.6))
+  spawnProp(parent, ASSETS.smoker, Vector3.create(northGate.x + 6, 4.0, northGate.z))
   spawnProp(parent, ASSETS.lamp, Vector3.create(northGate.x + 4.5, 0.02, northGate.z - 1))
 
-  // Indicador de Anillo 1 (Hacia Los Chatarrales)
+  // Indicador de Anillo 1 / Salida Norte
   spawnProp(parent, ASSETS.number01, Vector3.create(northGate.x - 3.8, 2.0, northGate.z), Quaternion.Identity(), Vector3.create(1.2, 1.2, 1.2))
 
-  // Muro perimetral Norte (Z = 80): Tramo Oeste (X: 0 a 32) y Tramo Este (X: 48 a 80)
-  for (let x = 2; x <= 32; x += 6) {
-    spawnProp(parent, ASSETS.treeFence, Vector3.create(x, 0.02, 80), Quaternion.Identity(), Vector3.create(1.5, 1.5, 1.5))
-    if (x % 12 === 0) {
-      spawnProp(parent, ASSETS.barrel, Vector3.create(x, 0.02, 78.8))
+  // Muro perimetral Norte (Z = 140m): Tramo Oeste (X: 0 a 62) y Tramo Este (X: 78 a 140)
+  for (let x = 4; x <= 62; x += 10) {
+    spawnProp(parent, ASSETS.treeFence, Vector3.create(x, 0.02, 140), Quaternion.Identity(), Vector3.create(1.8, 1.5, 1.5))
+    if (x % 20 === 0) {
+      spawnProp(parent, ASSETS.barrel, Vector3.create(x, 0.02, 138.5))
+    }
+  }
+  for (let x = 78; x <= 136; x += 10) {
+    spawnProp(parent, ASSETS.treeFence, Vector3.create(x, 0.02, 140), Quaternion.Identity(), Vector3.create(1.8, 1.5, 1.5))
+    if (x % 20 === 0) {
+      spawnProp(parent, ASSETS.barrel, Vector3.create(x, 0.02, 138.5))
     }
   }
 
-  for (let x = 48; x <= 78; x += 6) {
-    spawnProp(parent, ASSETS.treeFence, Vector3.create(x, 0.02, 80), Quaternion.Identity(), Vector3.create(1.5, 1.5, 1.5))
-    if (x % 12 === 0) {
-      spawnProp(parent, ASSETS.barrel, Vector3.create(x, 0.02, 78.8))
-    }
-  }
-
-  // B. PUERTA ESTE ("Puerta de las Calderas" en 80, 40)
+  // B. PUERTA ESTE ("Puerta de las Calderas" en 140, 70)
   const eastGate = FORGE_DISTRICT_CONFIG.gates.eastGate.position
 
-  // Bastiones colosales a ambos lados del portal este
-  spawnProp(parent, ASSETS.tank, Vector3.create(eastGate.x, 0.02, eastGate.z - 6), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.5, 1.8, 1.5))
-  spawnProp(parent, ASSETS.smoker, Vector3.create(eastGate.x, 3.6, eastGate.z - 6))
+  spawnProp(parent, ASSETS.tank, Vector3.create(eastGate.x, 0.02, eastGate.z - 6), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.6, 2.0, 1.6))
+  spawnProp(parent, ASSETS.smoker, Vector3.create(eastGate.x, 4.0, eastGate.z - 6))
   spawnProp(parent, ASSETS.lamp, Vector3.create(eastGate.x - 1, 0.02, eastGate.z - 4.5))
 
-  spawnProp(parent, ASSETS.tank, Vector3.create(eastGate.x, 0.02, eastGate.z + 6), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.5, 1.8, 1.5))
-  spawnProp(parent, ASSETS.smoker, Vector3.create(eastGate.x, 3.6, eastGate.z + 6))
+  spawnProp(parent, ASSETS.tank, Vector3.create(eastGate.x, 0.02, eastGate.z + 6), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.6, 2.0, 1.6))
+  spawnProp(parent, ASSETS.smoker, Vector3.create(eastGate.x, 4.0, eastGate.z + 6))
   spawnProp(parent, ASSETS.lamp, Vector3.create(eastGate.x - 1, 0.02, eastGate.z + 4.5))
 
-  // Indicador de Anillo 1 / Ruta Este
+  // Indicador de Anillo 1 / Salida Este
   spawnProp(parent, ASSETS.number02, Vector3.create(eastGate.x, 2.0, eastGate.z - 3.8), Quaternion.fromEulerDegrees(0, 270, 0), Vector3.create(1.2, 1.2, 1.2))
 
-  // Muro perimetral Este (X = 80): Tramo Sur (Z: 0 a 32) y Tramo Norte (Z: 48 a 80)
-  for (let z = 2; z <= 32; z += 6) {
-    spawnProp(parent, ASSETS.treeFence, Vector3.create(80, 0.02, z), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.5, 1.5, 1.5))
-    if (z % 12 === 0) {
-      spawnProp(parent, ASSETS.barrel, Vector3.create(78.8, 0.02, z))
+  // Muro perimetral Este (X = 140m): Tramo Sur (Z: 0 a 62) y Tramo Norte (Z: 78 a 140)
+  for (let z = 4; z <= 62; z += 10) {
+    spawnProp(parent, ASSETS.treeFence, Vector3.create(140, 0.02, z), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.8, 1.5, 1.5))
+    if (z % 20 === 0) {
+      spawnProp(parent, ASSETS.barrel, Vector3.create(138.5, 0.02, z))
     }
   }
-
-  for (let z = 48; z <= 78; z += 6) {
-    spawnProp(parent, ASSETS.treeFence, Vector3.create(80, 0.02, z), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.5, 1.5, 1.5))
-    if (z % 12 === 0) {
-      spawnProp(parent, ASSETS.barrel, Vector3.create(78.8, 0.02, z))
+  for (let z = 78; z <= 136; z += 10) {
+    spawnProp(parent, ASSETS.treeFence, Vector3.create(140, 0.02, z), Quaternion.fromEulerDegrees(0, 90, 0), Vector3.create(1.8, 1.5, 1.5))
+    if (z % 20 === 0) {
+      spawnProp(parent, ASSETS.barrel, Vector3.create(138.5, 0.02, z))
     }
   }
 
   // C. Delimitación de Bordes de Mundo Sur (Z = 0) y Oeste (X = 0)
-  for (let x = 4; x <= 76; x += 12) {
-    spawnProp(parent, ASSETS.barrel, Vector3.create(x, 0.02, 1.2))
+  for (let x = 4; x <= 136; x += 20) {
+    spawnProp(parent, ASSETS.barrel, Vector3.create(x, 0.02, 1.5))
   }
-  for (let z = 4; z <= 76; z += 12) {
-    spawnProp(parent, ASSETS.barrel, Vector3.create(1.2, 0.02, z))
+  for (let z = 4; z <= 136; z += 20) {
+    spawnProp(parent, ASSETS.barrel, Vector3.create(1.5, 0.02, z))
   }
 }
 
 /**
  * 6. Cúmulos de Escombros y Chatarra de Transición (Wreckages)
- * Ubicados en los exteriores de las puertas y esquinas limítrofes hacia Los Chatarrales.
  */
 function buildTransitionWreckages(parent: Entity) {
-  // A. Cúmulo de Escombros Exterior Puerta Norte (X: 34 a 46, Z: 84 a 90)
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(36, 0.02, 86), Quaternion.fromEulerDegrees(0, 15, 0))
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(44, 0.02, 87), Quaternion.fromEulerDegrees(0, -25, 0))
+  // A. Cúmulo de Escombros Exterior Puerta Norte (X: 64 a 76, Z: 144 a 150)
+  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(66, 0.02, 146), Quaternion.fromEulerDegrees(0, 15, 0))
+  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(74, 0.02, 147), Quaternion.fromEulerDegrees(0, -25, 0))
   spawnProp(
     parent,
     ASSETS.gearBig,
-    Vector3.create(35, 0.4, 88),
+    Vector3.create(65, 0.4, 148),
     Quaternion.fromEulerDegrees(65, 30, 20),
     Vector3.create(1.6, 1.6, 1.6)
   )
   spawnProp(
     parent,
     ASSETS.gear10Teeth,
-    Vector3.create(45, 0.2, 85),
+    Vector3.create(75, 0.2, 145),
     Quaternion.fromEulerDegrees(40, 110, 0),
     Vector3.create(1.3, 1.3, 1.3)
   )
-  spawnProp(parent, ASSETS.barrel, Vector3.create(43, 0.02, 89))
-  spawnProp(parent, ASSETS.gearSmall01, Vector3.create(37, 0.1, 84))
+  spawnProp(parent, ASSETS.barrel, Vector3.create(73, 0.02, 149))
 
-  // B. Cúmulo de Escombros Exterior Puerta Este (X: 84 a 90, Z: 34 a 46)
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(86, 0.02, 36), Quaternion.fromEulerDegrees(0, 75, 0))
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(87, 0.02, 44), Quaternion.fromEulerDegrees(0, 115, 0))
+  // B. Cúmulo de Escombros Exterior Puerta Este (X: 144 a 150, Z: 64 a 76)
+  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(146, 0.02, 66), Quaternion.fromEulerDegrees(0, 75, 0))
+  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(147, 0.02, 74), Quaternion.fromEulerDegrees(0, 115, 0))
   spawnProp(
     parent,
     ASSETS.tank,
-    Vector3.create(88, 0.02, 35),
+    Vector3.create(148, 0.02, 65),
     Quaternion.fromEulerDegrees(15, 45, 20),
     Vector3.create(1.2, 1.2, 1.2)
   )
-  spawnProp(
-    parent,
-    ASSETS.gearAngled10Teeth,
-    Vector3.create(85, 0.3, 45),
-    Quaternion.fromEulerDegrees(50, 0, 30),
-    Vector3.create(1.4, 1.4, 1.4)
-  )
-  spawnProp(parent, ASSETS.smoker, Vector3.create(89, 0.02, 43))
-  spawnProp(parent, ASSETS.chestGear, Vector3.create(86, 0.02, 42), Quaternion.fromEulerDegrees(0, 210, 0))
+  spawnProp(parent, ASSETS.smoker, Vector3.create(149, 0.02, 73))
 
-  // C. Bastión de Chatarra en Vértice Noreste Exterior (78..84, 78..84)
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(82, 0.02, 82), Quaternion.fromEulerDegrees(0, 45, 0))
+  // C. Bastión de Chatarra en Vértice Noreste Exterior (142, 142)
+  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(142, 0.02, 142), Quaternion.fromEulerDegrees(0, 45, 0))
   spawnProp(
     parent,
     ASSETS.gearBig,
-    Vector3.create(83, 0.5, 83),
+    Vector3.create(143, 0.5, 143),
     Quaternion.fromEulerDegrees(75, 45, 10),
     Vector3.create(2.0, 2.0, 2.0)
   )
-  spawnProp(parent, ASSETS.barrel, Vector3.create(80.5, 0.02, 82))
-  spawnProp(parent, ASSETS.barrel, Vector3.create(82, 0.02, 80.5))
-  spawnProp(parent, ASSETS.smoker, Vector3.create(84, 0.02, 84))
-
-  // D. Pequeño desguace en patio trasero del Taller Mecánico (8, 72)
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(8, 0.02, 72))
-  spawnProp(parent, ASSETS.gearSmall02, Vector3.create(9, 0.1, 73))
-  spawnProp(parent, ASSETS.gearSmall03, Vector3.create(7.5, 0.1, 71.5))
-  spawnProp(parent, ASSETS.barrel, Vector3.create(9.5, 0.02, 71))
-
-  // E. Pequeño desguace en patio trasero del Taller de Vapor (72, 8)
-  spawnProp(parent, ASSETS.woodPlanksBroken, Vector3.create(72, 0.02, 8), Quaternion.fromEulerDegrees(0, 90, 0))
-  spawnProp(parent, ASSETS.gear8Teeth, Vector3.create(73, 0.2, 9), Quaternion.fromEulerDegrees(45, 30, 0))
-  spawnProp(parent, ASSETS.barrel, Vector3.create(71, 0.02, 7.5))
+  spawnProp(parent, ASSETS.barrel, Vector3.create(140.5, 0.02, 142))
 }
