@@ -22,7 +22,9 @@ export const es: TranslationSchema = {
     speed: 'Velocidad',
     exp: 'EXP',
     kills: 'Bajas',
-    languageToggle: '🌐 ES | en'
+    languageToggle: '🌐 ES | en',
+    parcel: 'Parcela',
+    coords: 'Coord.'
   },
   zones: {
     forgeDistrict: 'Distrito de la Forja',

@@ -26,6 +26,8 @@ export interface TranslationSchema {
     exp: string
     kills: string
     languageToggle: string
+    parcel: string
+    coords: string
   }
   zones: {
     forgeDistrict: string
