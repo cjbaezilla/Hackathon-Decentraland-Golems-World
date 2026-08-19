@@ -1,9 +1,12 @@
 import { engine, Transform, PlayerIdentityData, Entity } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
+import { getPlayer } from '@dcl/sdk/src/players'
 import { GolemFollowerComponent, GolemSquadMemberDto } from '../components/follower'
 import { FOLLOW_SYSTEM_SETTINGS, generateRandomSquad } from '../config/golems'
+import { ARENA_CONFIG } from '../config/arenaConfig'
 import { getLocalPlayerId, getRemoteSquad } from '../multiplayer'
 import { spawnPlayerSquad, removePlayerSquad } from '../objects/golemFactory'
+import { isPositionInsideArena } from './golemCombatSystem'
 
 /**
  * ============================================================================
@@ -156,6 +159,20 @@ function updatePlayerTrail(trailState: PlayerTrailState, pos: Vector3, rot: Quat
  */
 export function onRemoteSquadUpdated(ownerAddress: string, squad: GolemSquadMemberDto[]) {
   const normAddress = ownerAddress.toLowerCase()
+  const localId = getLocalPlayerId().toLowerCase()
+  const localPlayer = getPlayer()
+  const localUserId = localPlayer?.userId?.toLowerCase()
+
+  // Ignorar absolutamente anuncios provenientes del cliente local
+  if (
+    normAddress === localId ||
+    normAddress === 'local_player' ||
+    normAddress === 'local' ||
+    (localUserId && normAddress === localUserId)
+  ) {
+    return
+  }
+
   const trailState = playerTrails.get(normAddress)
   const basePos = trailState?.lastSampledPos || Vector3.create(16, 0.1, 16)
 
@@ -168,7 +185,10 @@ export function onRemoteSquadUpdated(ownerAddress: string, squad: GolemSquadMemb
  * Sistema principal de seguimiento multijugador ejecutado en cada frame.
  */
 export function golemFollowerSystem(dt: number) {
-  const localId = getLocalPlayerId()
+  const localId = getLocalPlayerId().toLowerCase()
+  const localPlayer = getPlayer()
+  const localUserId = localPlayer?.userId?.toLowerCase()
+
   const activeOwners = new Set<string>()
   const headPositions = new Map<string, Vector3>()
 
@@ -179,24 +199,40 @@ export function golemFollowerSystem(dt: number) {
     const localTransform = Transform.get(engine.PlayerEntity)
     const localTrail = getOrCreateTrailState(localId)
     updatePlayerTrail(localTrail, localTransform.position, localTransform.rotation)
+    playerTrails.set('local', localTrail)
+    playerTrails.set('local_player', localTrail)
+    playerTrails.set(localId, localTrail)
     activeOwners.add(localId)
     activeOwners.add('local')
+    activeOwners.add('local_player')
     headPositions.set(localId, localTransform.position)
     headPositions.set('local', localTransform.position)
+    headPositions.set('local_player', localTransform.position)
   }
 
   // --------------------------------------------------------------------------
   // 2. PROCESAR JUGADORES REMOTOS (PlayerIdentityData + Transform)
   // --------------------------------------------------------------------------
   for (const [entity] of engine.getEntitiesWith(PlayerIdentityData, Transform)) {
+    // Si la entidad es la entidad del jugador local, ignorarla en el bucle remoto
+    if (entity === engine.PlayerEntity) {
+      continue
+    }
+
     const identity = PlayerIdentityData.get(entity)
     const playerTransform = Transform.get(entity)
 
-    const rawAddress = identity.address || `remote_${entity}`
+    const rawAddress = identity.address || ''
     const remoteAddress = rawAddress.toLowerCase()
 
     // Evitar duplicar el procesamiento si la entidad representa al jugador local
-    if (remoteAddress === localId) {
+    if (
+      !remoteAddress ||
+      remoteAddress === localId ||
+      remoteAddress === 'local' ||
+      remoteAddress === 'local_player' ||
+      (localUserId && remoteAddress === localUserId)
+    ) {
       continue
     }
 
@@ -234,14 +270,52 @@ export function golemFollowerSystem(dt: number) {
     const follower = GolemFollowerComponent.get(entity)
     const ownerKey = follower.ownerAddress.toLowerCase()
 
-    const trailState = playerTrails.get(ownerKey) || playerTrails.get(localId)
-    const headPos = headPositions.get(ownerKey) || headPositions.get(localId)
+    const trailState = playerTrails.get(ownerKey)
+    const headPos = headPositions.get(ownerKey)
 
     if (!trailState || !headPos || trailState.trail.length === 0) {
       continue
     }
 
     const currentTransform = Transform.get(entity)
+    const distToArenaCenter = Vector3.distance(
+      Vector3.create(currentTransform.position.x, 0, currentTransform.position.z),
+      Vector3.create(ARENA_CONFIG.center.x, 0, ARENA_CONFIG.center.z)
+    )
+
+    // Si el dueño se encuentra dentro de la arena
+    if (isPositionInsideArena(headPos)) {
+      // Si el golem aún no ha cruzado al interior de la plataforma (distancia > 30m o Y < 0.55m)
+      if (distToArenaCenter > 30.0 || currentTransform.position.y < (ARENA_CONFIG.platformHeight - 0.05)) {
+        const mutableTransform = Transform.getMutable(entity)
+        // Punto de destino en la plataforma dentro de la arena cerca de su dueño
+        const targetEntryPos = Vector3.create(headPos.x, ARENA_CONFIG.platformHeight, headPos.z)
+        const moveStep = Math.min(1.0, dt * (follower.moveSpeed * 1.6))
+        mutableTransform.position = Vector3.lerp(currentTransform.position, targetEntryPos, moveStep)
+
+        // Orientar hacia el interior de la arena
+        const toCenter = Vector3.subtract(ARENA_CONFIG.center, currentTransform.position)
+        toCenter.y = 0
+        if (Vector3.lengthSquared(toCenter) > 0.001) {
+          const targetRotation = Quaternion.lookRotation(Vector3.normalize(toCenter))
+          mutableTransform.rotation = Quaternion.slerp(
+            currentTransform.rotation,
+            targetRotation,
+            Math.min(1.0, dt * follower.rotationSpeed * 1.5)
+          )
+        }
+        if (!follower.isMoving) {
+          GolemFollowerComponent.getMutable(entity).isMoving = true
+        }
+        continue
+      } else {
+        // El golem ya está sobre la plataforma dentro de la arena: ceder control total a golemCombatSystem
+        if (follower.isMoving) {
+          GolemFollowerComponent.getMutable(entity).isMoving = false
+        }
+        continue
+      }
+    }
 
     // Calcular posición objetivo en la trayectoria de su dueño
     const { position: targetPos } = getPositionAlongTrail(

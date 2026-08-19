@@ -110,21 +110,55 @@ export function createFollowerGolem(
     isMoving: false
   })
 
-  // 4. Etiqueta flotante con nombre, afinidad y tag del dueño
+  // 4. Componente de combate con estadísticas RPG completas y equipo canónico
+  const maxHp = config.maxHp || 120
+  const currentHp = config.currentHp !== undefined ? config.currentHp : maxHp
+  const attack = config.attack || 25
+  const defense = config.defense || 12
+  const speed = config.speed || 15
+  const expReward = config.expReward || 50
+  const currentExp = config.currentExp || 0
+  const level = config.level || 1
+
+  GolemCombatComponent.create(golemEntity, {
+    golemId: config.id,
+    teamId,
+    ownerAddress: ownerAddress.toLowerCase(),
+    affinity: config.affinity,
+    maxHp,
+    currentHp,
+    attack,
+    defense,
+    speed,
+    expReward,
+    currentExp,
+    level,
+    state: GolemCombatState.FOLLOWING,
+    targetGolemId: '',
+    attackCooldownTimer: 0,
+    lastAttackerId: '',
+    lastAttackedTimestamp: 0,
+    isDefeated: false
+  })
+
+  // 5. Etiqueta flotante con salud ASCII en tiempo real, nivel y afinidad
   const labelEntity = engine.addEntity()
   Transform.create(labelEntity, {
     parent: golemEntity,
-    position: Vector3.create(0, 1.45, 0)
+    position: Vector3.create(0, 1.5, 0)
   })
 
   const ownerTag = formatShortAddress(ownerAddress)
+  const hpBar = getHealthBarAscii(currentHp, maxHp)
+
   TextShape.create(labelEntity, {
-    text: `${config.name}${ownerTag}\n[${config.affinity}]`,
-    fontSize: 2.2,
+    text: `${config.name}${ownerTag} [${config.affinity}]\nNv.${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
+    fontSize: 2.1,
     textColor: getAffinityTextColor(config.affinity)
   })
 
   Billboard.create(labelEntity, {})
+  golemLabelMap.set(golemEntity, labelEntity)
 
   return golemEntity
 }
@@ -145,10 +179,14 @@ export function spawnPlayerSquad(
 ): Entity[] {
   const entities: Entity[] = []
   const normAddress = ownerAddress.toLowerCase()
+  const teamId =
+    normAddress === 'local' || normAddress === 'local_player'
+      ? GOLEM_TEAMS.PLAYER
+      : `${GOLEM_TEAMS.REMOTE_PREFIX}${normAddress}`
 
   squadConfig.forEach((config, index) => {
     const spawnPos = Vector3.create(basePos.x, Math.max(0.1, basePos.y), basePos.z - config.followDistance)
-    const entity = createFollowerGolem(config, index, spawnPos, normAddress)
+    const entity = createFollowerGolem(config, index, spawnPos, normAddress, teamId)
     entities.push(entity)
   })
 
@@ -170,10 +208,14 @@ export function removePlayerSquad(ownerAddress: string) {
   }
 
   for (const entity of entitiesToRemove) {
+    golemLabelMap.delete(entity)
     removeEntityWithChildren(engine, entity)
   }
 }
 ```
+
+> [!TIP]
+> Para conocer a fondo el ciclo de vida de los golems en batalla, consulte la [Guía Técnica del Sistema de Combate y Batallas](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-sistema-combate-y-batallas.md).
 
 ---
 

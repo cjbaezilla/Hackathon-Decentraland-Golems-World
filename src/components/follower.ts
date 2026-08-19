@@ -36,6 +36,14 @@ export interface GolemSquadMemberDto {
   followDistance: number
   moveSpeed: number
   rotationSpeed: number
+  attack: number
+  defense: number
+  maxHp: number
+  currentHp: number
+  speed: number
+  expReward: number
+  currentExp: number
+  level: number
 }
 
 /**

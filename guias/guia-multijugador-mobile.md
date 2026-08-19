@@ -134,6 +134,14 @@ export interface GolemSquadMemberDto {
   followDistance: number
   moveSpeed: number
   rotationSpeed: number
+  maxHp?: number
+  currentHp?: number
+  attack?: number
+  defense?: number
+  speed?: number
+  expReward?: number
+  currentExp?: number
+  level?: number
 }
 
 export interface PlayerSquadAnnouncementDto {
@@ -145,7 +153,18 @@ export interface PlayerSquadAnnouncementDto {
 
 ---
 
-### 3.3 Simulación Local Distribuida (Multi-Trail System)
+### 3.3 Eventos de Combate P2P en Tiempo Real
+Para gestionar las batallas en la Gran Arena, `src/multiplayer.ts` difunde y escucha eventos de ataque y derrota en el canal `MessageBus`:
+
+1. **Ataques (`golem_combat_attack`)**: Difunde el daño infligido, el multiplicador elemental del pentágono y la salud restante calculada por el cliente atacante (`GolemAttackMessageDto`).
+2. **Bajas (`golem_combat_defeat`)**: Difunde la destrucción de una unidad a 0 HP y la experiencia otorgada (`GolemDefeatMessageDto`).
+
+> [!IMPORTANT]
+> **Filtrado Estricto de Identidad Local**: Para evitar que el cliente local interprete su propia entidad `PlayerIdentityData` como un jugador remoto (lo que generaría un escuadrón clonado fantasma), `followerSystem.ts` descarta explícitamente `engine.PlayerEntity`, `localId` y la dirección de wallet local (`getPlayer()?.userId`).
+
+---
+
+### 3.4 Simulación Local Distribuida (Multi-Trail System)
 
 Para evitar saturar la red sincronizando 60 veces por segundo la posición de cada golem mediante CRDT, se adoptó la **Simulación Local Distribuida**:
 
@@ -187,12 +206,12 @@ TouchScreenControls.createOrReplace(engine.RootEntity, {
 1. **Zonas Seguras (Safe Areas)**:
    - **Evitar la esquina inferior izquierda**: Espacio ocupado por el joystick táctil.
    - **Evitar la esquina inferior derecha**: Espacio ocupado por los botones táctiles de salto y acción.
-   - **Colocar HUDs en la parte superior central**: Permite al jugador visualizar estadísticas y los golems asignados sin interferir con sus dedos ni con los controles nativos.
+   - **Colocar HUDs en la parte superior central**: Permite al jugador visualizar estadísticas y los golems asignados sin interferir con sus dedos, el chat o los controles nativos.
 
-2. **Panel HUD Implementado (`src/ui.tsx`)**:
-   - Fondo translúcido oscuro con estilo *glassmorphism* (`560px × 90px`).
-   - Contadores reactivos en tiempo real con `getConnectedPlayersCount()` y conteo de entidades `GolemFollowerComponent`.
-   - Visualización del escuadrón asignado en la sesión con iconos temáticos de afinidad (`♨️ Vapor`, `⚡ Galvánico`, `⚙️ Mecánico`, `☀️ Luminoso`, `🔮 Éter`).
+2. **Panel HUD Consolidado (`src/ui.tsx`)**:
+   - Cabecera compacta superior (`width: 780px`, `top: 10px`) con contadores de jugadores, golems, bajas y EXP acumulada.
+   - 3 tarjetas de escuadrón sincronizadas en tiempo real con `GolemCombatComponent` que muestran la barra de vida ASCII `[████████░░]`, nivel, estadísticas RPG (ATK, DEF, SPD) y registro de combate en vivo.
+   - Botón táctil grande de reaparición si el escuadrón es derrotado.
 
 ---
 

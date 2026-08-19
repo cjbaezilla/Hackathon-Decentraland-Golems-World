@@ -17,6 +17,7 @@ Esta guía documenta en profundidad la arquitectura, algoritmos matemáticos, mo
    - [3.3 Suavizado de Movimiento (LERP) y Orientación (SLERP)](#33-suavizado-de-movimiento-lerp-y-orientación-slerp)
    - [3.4 Zona Muerta Anti-Jitter y Optimización CRDT](#34-zona-muerta-anti-jitter-y-optimización-crdt)
    - [3.5 Recuperación Automática por Teletransporte](#35-recuperación-automática-por-teletransporte)
+   - [3.6 Transición Espacial y Salto hacia la Gran Arena Elevada (0.6m)](#36-transición-espacial-y-salto-hacia-la-gran-arena-elevada-06m)
 4. [Modelos 3D Procedurales glTF 2.0 (.glb)](#4-modelos-3d-procedurales-gltf-20-glb)
    - [4.1 Arquitectura del Generador Binario (`generate_models.js`)](#41-arquitectura-del-generador-binario-generate_modelsjs)
    - [4.2 Especificaciones de los 3 Golems de Prueba](#42-especificaciones-de-los-3-golems-de-prueba)
@@ -161,6 +162,13 @@ Si cualquier jugador (local o remoto) utiliza `movePlayerTo` o cambia de zona en
 $$\Delta d > \text{TELEPORT\_DISTANCE\_THRESHOLD} \ (25.0\text{ m})$$
 
 El sistema detecta esta anomalía y reinicializa inmediatamente el buffer de migajas alineado detrás de la nueva posición del avatar, evitando que los golems crucen todo el mapa volando en línea recta.
+
+### 3.6 Transición Espacial y Salto hacia la Gran Arena Elevada (0.6m)
+Al ingresar el avatar a la **Gran Arena Circular Steampunk** (`X: 200m, Z: 200m`, radio de combate $\le 35\text{m}$):
+1. **Detección Perimetral**: `isPositionInsideArena(headPos)` detecta el cruce de la frontera.
+2. **Propulsión y Elevación Vertical**: Si los golems se encuentran rezagados fuera del ring ($d > 30\text{m}$ o $Y < 0.55\text{m}$), el sistema los propulsa y eleva suavemente hacia la plataforma elevada (`platformHeight: 0.6m`).
+3. **Cesión de Control a Combate**: Una vez sobre la plataforma dentro del radio de combate, `followerSystem` desactiva el movimiento de seguimiento y cede el control táctico a [`golemCombatSystem.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/systems/golemCombatSystem.ts) ([guia-sistema-combate-y-batallas.md](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-sistema-combate-y-batallas.md)).
+4. **Retorno a Formación**: Al salir el maestro de la arena, los golems retoman su marcha en fila detrás del jugador automáticamente.
 
 ---
 

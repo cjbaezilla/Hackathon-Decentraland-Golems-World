@@ -247,11 +247,13 @@ Ubicadas en Norte, Sur, Este y Oeste ($R = 36.0\text{m}$ a $43.5\text{m}$):
 
 ## 6. Integración con el Sistema de Combate y Torneos (Golems Ladder)
 
-La arena se encuentra preparada para la integración con los subsistemas de juego de Golems:
-- **Combates 1v1**: Cada duelista se ubica en un extremo de la arena con su escuadrón de 3 golems acompañantes.
-- **Combates 2v2**: 4 jugadores y hasta 12 golems simultáneos operando en el área de 72m con total fluidez.
-- **Regla de Ring-Out**: Si un golem o jugador es empujado fuera de la plataforma ($d > 36.0\text{m}$ y $Y < 0.3\text{m}$), se declara caída y penalización de vitalidad.
-- **Sincronización P2P**: Las posiciones de combate y los impactos se transmiten por `MessageBus` (`golem_attack_event`, `golem_damage_tick`).
+La arena se encuentra completamente integrada con el sistema de combate en tiempo real de **Golems** ([guia-sistema-combate-y-batallas.md](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-sistema-combate-y-batallas.md)):
+- **Transición Automática**: Al cruzar el perímetro de $35\text{m}$, el sistema de seguimiento [`followerSystem.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/systems/followerSystem.ts) eleva y propulsa a los golems sobre la plataforma ($Y = 0.6\text{m}$) y cede el control al sistema [`golemCombatSystem.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/systems/golemCombatSystem.ts).
+- **Modo "Free For All" (FFA)**: Todos los golems presentes en la arena seleccionan objetivos tácticos según el Pentágono de Afinidades (ventaja $\times 1.40$) y autodefensa reactiva.
+- **Inmunidad de Equipo (`GOLEM_TEAMS`)**: Los 3 golems de un jugador comparten `teamId: 'TEAM_PLAYER'`, impidiendo cualquier fuego amigo.
+- **Separación Física Anti-Apilamiento**: Repulsión horizontal Boids (`MIN_SEPARATION: 1.6m`) y aproximación con anillo perimetral (`1.8m`) para evitar que los modelos 3D se encimen.
+- **Sincronización P2P**: Los eventos de ataque (`golem_combat_attack`) y derrota (`golem_combat_defeat`) se transmiten por `MessageBus` en tiempo real.
+- **Regla de Ring-Out**: Si un golem o jugador es empujado fuera de la plataforma ($d > 35.0\text{m}$), el sistema lo regresa al modo seguidor.
 
 ---
 

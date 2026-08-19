@@ -4,14 +4,15 @@ import { getPlayer } from '@dcl/sdk/src/players'
 import { GolemConfig, generateRandomSquad } from './config/golems'
 import { getLocalActiveSquad } from './state'
 import { PlayerSquadAnnouncementDto, GolemSquadMemberDto } from './components/follower'
+import { GolemAttackMessageDto, GolemDefeatMessageDto } from './components/combat'
 
 /**
  * ============================================================================
- * INFRAESTRUCTURA MULTIJUGADOR Y SINCRONIZACIÓN DE ESCUADRONES (SDK7 ECS)
+ * INFRAESTRUCTURA MULTIJUGADOR Y SINCRONIZACIÓN DE ESCUADRONES Y COMBATE
  * ============================================================================
  * Maneja la comunicación P2P mediante MessageBus para difundir y recibir
- * los escuadrones de golems de cada jugador presente en la escena sin requerir
- * servidores externos.
+ * los escuadrones de golems con sus estadísticas completas y los eventos
+ * de combate en tiempo real (ataques, daño, derrotas y EXP).
  */
 
 export const sceneMessageBus = new MessageBus()
@@ -19,29 +20,41 @@ export const sceneMessageBus = new MessageBus()
 /** Nombres canónicos de eventos para MessageBus */
 export const SQUAD_MESSAGE_TYPES = {
   ANNOUNCE: 'golem_squad_announce',
-  REQUEST: 'golem_squad_request'
+  REQUEST: 'golem_squad_request',
+  ATTACK: 'golem_combat_attack',
+  DEFEAT: 'golem_combat_defeat'
 } as const
 
 /** Registro local en memoria de escuadrones de jugadores remotos [address -> golems] */
 const remoteSquadRegistry = new Map<string, GolemSquadMemberDto[]>()
 
-/** Callback registrado para notificar al sistema de seguimiento cuando llega un escuadrón nuevo */
+/** Callbacks registrados para notificar a los sistemas ECS */
 let onSquadReceivedCallback: ((ownerAddress: string, squad: GolemSquadMemberDto[]) => void) | null = null
+let onAttackReceivedCallback: ((attack: GolemAttackMessageDto) => void) | null = null
+let onDefeatReceivedCallback: ((defeat: GolemDefeatMessageDto) => void) | null = null
+
+let cachedLocalId: string | null = null
 
 /**
- * Obtiene el identificador o dirección de wallet del jugador local.
+ * Obtiene el identificador o dirección de wallet del jugador local de forma consistente.
  */
 export function getLocalPlayerId(): string {
+  if (cachedLocalId && cachedLocalId !== 'local_player') {
+    return cachedLocalId
+  }
+
   const localPlayer = getPlayer()
   if (localPlayer && localPlayer.userId) {
-    return localPlayer.userId.toLowerCase()
+    cachedLocalId = localPlayer.userId.toLowerCase()
+    return cachedLocalId
   }
 
   // Fallback si getPlayer() aún no cargó
   for (const [entity] of engine.getEntitiesWith(PlayerIdentityData)) {
     const data = PlayerIdentityData.get(entity)
     if (data && data.address) {
-      return data.address.toLowerCase()
+      cachedLocalId = data.address.toLowerCase()
+      return cachedLocalId
     }
   }
 
@@ -67,7 +80,7 @@ export function getRemoteSquad(ownerAddress: string): GolemSquadMemberDto[] | un
 }
 
 /**
- * Anuncia el escuadrón actual del jugador local a todos los peers en la escena.
+ * Anuncia el escuadrón actual del jugador local con sus estadísticas completas.
  */
 export function announceLocalSquad(customSquad?: GolemConfig[]) {
   const localId = getLocalPlayerId()
@@ -84,7 +97,15 @@ export function announceLocalSquad(customSquad?: GolemConfig[]) {
       scale: g.scale,
       followDistance: g.followDistance,
       moveSpeed: g.moveSpeed,
-      rotationSpeed: g.rotationSpeed
+      rotationSpeed: g.rotationSpeed,
+      attack: g.attack,
+      defense: g.defense,
+      maxHp: g.maxHp,
+      currentHp: g.currentHp,
+      speed: g.speed,
+      expReward: g.expReward,
+      currentExp: g.currentExp,
+      level: g.level
     }))
   }
 
@@ -100,7 +121,32 @@ export function requestAllSquads() {
 }
 
 /**
- * Inicializa los escuchadores de MessageBus para recepción de anuncios y solicitudes.
+ * Difunde un ataque asestado por un golem a todos los peers.
+ */
+export function broadcastGolemAttack(attack: GolemAttackMessageDto) {
+  sceneMessageBus.emit(SQUAD_MESSAGE_TYPES.ATTACK, attack)
+}
+
+/**
+ * Difunde la derrota de un golem y la recompensa de experiencia.
+ */
+export function broadcastGolemDefeat(defeat: GolemDefeatMessageDto) {
+  sceneMessageBus.emit(SQUAD_MESSAGE_TYPES.DEFEAT, defeat)
+}
+
+/**
+ * Configura los escuchadores de combate multijugador.
+ */
+export function setupCombatSyncListeners(
+  onAttack?: (attack: GolemAttackMessageDto) => void,
+  onDefeat?: (defeat: GolemDefeatMessageDto) => void
+) {
+  if (onAttack) onAttackReceivedCallback = onAttack
+  if (onDefeat) onDefeatReceivedCallback = onDefeat
+}
+
+/**
+ * Inicializa los escuchadores de MessageBus para sincronización total de escuadrones y combate.
  */
 export function setupSquadSyncListeners(
   onSquadReceived?: (ownerAddress: string, squad: GolemSquadMemberDto[]) => void
@@ -147,6 +193,37 @@ export function setupSquadSyncListeners(
       // Si otro jugador nos pide nuestro escuadrón, responder anunciando el nuestro
       if (requester !== localId) {
         announceLocalSquad()
+      }
+    }
+  )
+
+  // 3. Escuchar ataques de combate entre golems
+  sceneMessageBus.on(
+    SQUAD_MESSAGE_TYPES.ATTACK,
+    (payload: GolemAttackMessageDto) => {
+      if (!payload || !payload.attackerId || !payload.targetId) return
+
+      const localId = getLocalPlayerId()
+      // Si el evento provino de nosotros mismos, ya lo procesamos localmente
+      if (payload.attackerOwner.toLowerCase() === localId) return
+
+      if (onAttackReceivedCallback) {
+        onAttackReceivedCallback(payload)
+      }
+    }
+  )
+
+  // 4. Escuchar derrotas de golems y recompensas de EXP
+  sceneMessageBus.on(
+    SQUAD_MESSAGE_TYPES.DEFEAT,
+    (payload: GolemDefeatMessageDto) => {
+      if (!payload || !payload.defeatedId) return
+
+      const localId = getLocalPlayerId()
+      if (payload.killerOwner.toLowerCase() === localId) return
+
+      if (onDefeatReceivedCallback) {
+        onDefeatReceivedCallback(payload)
       }
     }
   )

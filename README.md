@@ -157,32 +157,38 @@ Existen **25 tipos de materiales**, clasificados en 5 niveles de rareza. Los mat
 
 ---
 
-## ⚔️ Estadísticas, Afinidades y Combate en Tiempo Real
+## ⚔️ Estadísticas, Afinidades y Combate en Tiempo Real (FFA en la Gran Arena)
 
 ![Estadísticas y Combate](GOLEMS/golems_stats.png)
 
-Cada golem posee 5 estadísticas clave:
-- **Ataque (ATK)**: Daño base emitido por golpe.
-- **Defensa (DEF)**: Reducción directa del daño recibido.
-- **Vitalidad (HP)**: Puntos totales de salud del autómata.
-- **Velocidad (SPD)**: Frecuencia de ciclo de ataque y probabilidad porcentual de esquivar.
-- **Afinidad Elemental (AFF)**: Naturaleza energética del golem.
+Cada golem posee 5 estadísticas fundamentales generadas proceduralmente o por forja:
+- **Ataque (ATK)**: Daño base emitido por golpe ($20-38$).
+- **Defensa (DEF)**: Reducción directa del daño recibido ($10-22$).
+- **Vitalidad (HP)**: Puntos totales de salud del autómata ($100-160$).
+- **Velocidad (SPD)**: Frecuencia de ataque ($T_{\text{cooldown}} = 2.2\text{s} / (1 + \text{SPD}\times 0.04)$) y velocidad de traslación.
+- **Afinidad Elemental (AFF)**: Naturaleza energética del golem (`STEAM`, `MECHANICAL`, `GALVANIC`, `LUMINOUS`, `AETHER`).
 
 ### El Pentágono de Afinidades Elementales
 
-El sistema de combate incorpora un pentágono de ventajas/desventajas energéticas:
+El sistema de combate incorpora un pentágono cíclico de ventajas y desventajas energéticas:
 
 ```mermaid
 graph LR
-    VAPOR["💨 Vapor"] -->|"Oxida e inhabilita"| MECANICO["⚙️ Mecánico"]
-    MECANICO -->|"Aísla y desvía"| GALVANICO["⚡ Galvánico"]
-    GALVANICO -->|"Sobrecarga filamentos"| LUMINOSO["💡 Luminoso"]
-    LUMINOSO -->|"Dispersa y refracta"| ETER["🔮 Éter"]
-    ETER -->|"Condensa la presión"| VAPOR
+    VAPOR["💨 Vapor"] -->|"Oxida e inhabilita (x1.40)"| MECANICO["⚙️ Mecánico"]
+    MECANICO -->|"Aísla y desvía (x1.40)"| GALVANICO["⚡ Galvánico"]
+    GALVANICO -->|"Sobrecarga filamentos (x1.40)"| LUMINOSO["💡 Luminoso"]
+    LUMINOSO -->|"Dispersa y refracta (x1.40)"| ETER["🔮 Éter"]
+    ETER -->|"Condensa la presión (x1.40)"| VAPOR
 ```
 
-- **Ventaja de Afinidad**: Multiplicador de daño `×1.40` al golpear al tipo débil.
+- **Ventaja de Afinidad**: Multiplicador de daño `×1.40` al golpear al tipo débil con texto dorado `⚡ CRÍTICO`.
 - **Desventaja de Afinidad**: Reducción de daño a `×0.75` al golpear al tipo fuerte.
+- **Ecuación de Daño por Tick**: $\text{Daño} = \max\left(2, \text{round}\big((\text{ATK} - \text{DEF} \times 0.5) \times \text{Multiplicador}\big)\right)$.
+- **Arquitectura de Equipos Canónicos (`GOLEM_TEAMS`)**: Inmunidad total a fuego amigo (`TEAM_PLAYER` vs `TEAM_REMOTE_*`).
+- **Separación Física Boids & Anillo de Combate**: Repulsión horizontal (`1.6m`) y parada a distancia (`1.8m`) para evitar encimamiento entre modelos 3D.
+- **Sincronización P2P por MessageBus**: Difusión instantánea de ataques (`golem_combat_attack`) y derrotas (`golem_combat_defeat`).
+- **Progresión y Recompensas**: $+60$ a $+120$ EXP por baja; subir de nivel restaura salud e incrementa ATK, DEF y HP.
+- 📖 *Guía técnica maestra:* [Guía del Sistema de Combate y Batallas FFA](guias/guia-sistema-combate-y-batallas.md).
 
 ---
 
@@ -193,8 +199,10 @@ graph LR
 - **Escuadrón Activo en Fila (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos.
 - **Asignación Aleatoria de 3 Tipos Diferentes (Por Sesión / Sin Persistencia)**: Cada jugador que ingresa o reingresa a la escena recibe automáticamente un conjunto aleatorio de **3 golems de tipos completamente distintos** (seleccionados al azar y sin duplicados entre las 5 afinidades elementales: Vapor, Galvánico, Mecánico, Luminoso y Éter). Al recargar o reincorporarse a la escena, se genera un conjunto nuevo y único en memoria volátil.
 - **Visualización Multijugador P2P en Tiempo Real (Multi-Trail System)**: Todos los jugadores presentes en la escena pueden ver en tiempo real los 3 golems acompañantes de cada usuario. El sistema utiliza una arquitectura distribuida que procesa trayectorias independientes para el avatar local (`engine.PlayerEntity`) y para todos los avatares remotos (`PlayerIdentityData` + `Transform`), ejecutando interpolación suave (*LERP/SLERP*) a 60 FPS con slots escalonados a $1.8\text{m}$, $3.6\text{m}$ y $5.4\text{m}$ sin saturar el bus CRDT.
-- **Handshake P2P y Etiquetas de Identificación**: Mediante eventos ligeros en `MessageBus` (`golem_squad_announce` y `golem_squad_request`), cada cliente difunde y almacena la composición del escuadrón de los demás avatares, mostrando etiquetas flotantes `Billboard` con el nombre, afinidad y la dirección abreviada de la cartera del dueño.
+- **Handshake P2P y Etiquetas de Identificación**: Mediante eventos ligeros en `MessageBus` (`golem_squad_announce` y `golem_squad_request`), cada cliente difunde y almacena la composición del escuadrón de los demás avatares, mostrando etiquetas flotantes `Billboard` con el nombre, afinidad, nivel, barra de vida ASCII `[████████░░]` y la dirección abreviada de la cartera del dueño.
   - 📖 *Guías técnicas maestras:*
+    - ⚔️ [Guía del Sistema de Combate y Batallas FFA](guias/guia-sistema-combate-y-batallas.md)
+    - 🏟️ [Guía de la Gran Arena Circular de Torneo Steampunk (72m)](guias/guia-arena-torneo-steampunk.md)
     - 🏭 [Guía de la Fábrica de Golems y Jerarquías](guias/guia-fabrica-de-golems-y-mecanicas.md)
     - 🤖 [Guía del Sistema de Seguimiento en Fila](guias/guia-sistema-seguimiento-y-mecanicas.md)
     - 🌐 [Guía de Red Multijugador y Mobile-First](guias/guia-multijugador-mobile.md)
@@ -351,6 +359,7 @@ Hackathon/
 │   ├── golems_cover.png        # Portada oficial de la experiencia
 │   └── *.png                   # Ilustraciones e infografías conceptuales
 ├── guias/                      # Guías técnicas y documentación maestra de la experiencia
+│   ├── guia-sistema-combate-y-batallas.md     # Guía completa del Sistema de Combate en Tiempo Real y FFA
 │   ├── guia-arena-torneo-steampunk.md         # Guía de la Gran Arena Circular de Torneo Steampunk (72m)
 │   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía de la Fábrica de Golems y jerarquías
 │   ├── guia-sistema-seguimiento-y-mecanicas.md # Guía del sistema de seguimiento en fila
@@ -364,21 +373,25 @@ Hackathon/
 │   └── README.md               # Manual de uso detallado del generador CLI y catálogo de modelos
 ├── src/                        # Código fuente TypeScript SDK7
 │   ├── index.ts                # Inicializador principal y orquestador de sistemas
-│   ├── state.ts                # Estado global reactivo de la escena
-│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD Multijugador, Radar)
-│   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake y registro de escuadrones)
+│   ├── state.ts                # Estado global reactivo de la escena (EXP, kills, logs, salud)
+│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD Superior consolidado, Radar)
+│   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake, ataques y derrotas)
 │   ├── config/                 # Configuraciones maestras y constantes
 │   │   ├── arenaConfig.ts      # Configuración espacial, dimensiones y modelos de la Arena Steampunk
-│   │   └── golems.ts           # Configuración de golems, afinidades, catálogo maestro y distancias
+│   │   └── golems.ts           # Configuración de golems, afinidades, pentágono y generador RPG
 │   ├── components/             # Componentes ECS personalizados (Schemas)
 │   │   ├── arena.ts            # ArenaRotatorComponent (Rotación determinista continua)
+│   │   ├── combat.ts           # GolemCombatComponent, FloatingDamageComponent y GOLEM_TEAMS
 │   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
 │   ├── objects/                # Patrón Factory de GameObjects
 │   │   ├── arenaBuilder.ts     # Constructor procedimental de la Gran Arena de Torneo Steampunk
-│   │   └── golemFactory.ts     # Fábrica de entidades, billboards y ciclo de vida de escuadrones
+│   │   ├── golemFactory.ts     # Fábrica de entidades, billboards, salud ASCII y números flotantes
+│   │   └── trampoline.ts       # Trampolín propulsor steampunk de vapor
 │   └── systems/                # Sistemas ECS
 │       ├── arenaAnimationSystem.ts # Sistema de animación continua de engranajes y coronas de la arena
-│       └── followerSystem.ts   # Sistema de seguimiento Multi-Trail FIFO LERP/SLERP
+│       ├── followerSystem.ts   # Sistema de seguimiento Multi-Trail FIFO LERP/SLERP y salto a arena
+│       ├── golemCombatSystem.ts# Sistema ECS de Combate FFA, IA táctica, anillo y repulsión Boids
+│       └── trampolineSystem.ts # Sistema de detección y salto del trampolín
 ├── scene.json                  # Metadatos del World (25x25 parcelas, spawn, rating)
 ├── package.json                # Dependencias y scripts de construcción
 ├── tsconfig.json               # Configuración del compilador TypeScript

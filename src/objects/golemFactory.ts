@@ -8,21 +8,29 @@ import {
   removeEntityWithChildren
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
-import { GolemConfig, GolemAffinity } from '../config/golems'
+import { GolemConfig, GolemAffinity, generateRandomStats } from '../config/golems'
 import { GolemFollowerComponent, GolemSquadMemberDto } from '../components/follower'
+import {
+  GolemCombatComponent,
+  GolemCombatState,
+  FloatingDamageComponent,
+  GOLEM_TEAMS
+} from '../components/combat'
+import { ARENA_CONFIG } from '../config/arenaConfig'
 
 /**
  * ============================================================================
- * FÁBRICA DE GOLEMS MULTIJUGADOR (GOLEM FACTORY)
+ * FÁBRICA DE GOLEMS MULTIJUGADOR Y COMBATE (GOLEM FACTORY)
  * ============================================================================
  * Instancia las entidades de los golems con sus modelos 3D GLTF, escala,
- * componentes de seguimiento asociados al dueño (local o remoto) y etiquetas flotantes.
+ * componentes de seguimiento y combate asociados al dueño (local, remoto o sparring)
+ * y etiquetas flotantes interactivas con barras de salud en tiempo real.
  */
 
 /**
  * Devuelve el color de texto representativo según la afinidad elemental del golem.
  */
-function getAffinityTextColor(affinity: string): Color4 {
+export function getAffinityTextColor(affinity: string): Color4 {
   switch (affinity) {
     case GolemAffinity.STEAM:
     case 'Vapor':
@@ -49,6 +57,7 @@ function getAffinityTextColor(affinity: string): Color4 {
  */
 function formatShortAddress(address: string): string {
   if (!address || address === 'local' || address === 'local_player') return ''
+  if (address.startsWith('sparring_bot')) return ' [🤖 Sparring]'
   if (address.length > 10) {
     return ` [${address.substring(0, 6)}...]`
   }
@@ -56,18 +65,57 @@ function formatShortAddress(address: string): string {
 }
 
 /**
- * Crea una entidad de golem seguidor asociada a un jugador (local o remoto).
- *
- * @param config Configuración del golem (modelo, escala, velocidad, distancia).
- * @param orderIndex Índice en la fila de seguimiento (0, 1, 2).
- * @param spawnPosition Posición inicial de aparición en el mundo.
- * @param ownerAddress Identificador o dirección de wallet del dueño.
+ * Genera una barra de vida ASCII visual para la etiqueta flotante.
+ */
+export function getHealthBarAscii(currentHp: number, maxHp: number): string {
+  const safeMax = Math.max(1, maxHp)
+  const ratio = Math.max(0, Math.min(1, currentHp / safeMax))
+  const totalBlocks = 10
+  const filledBlocks = Math.round(ratio * totalBlocks)
+  const emptyBlocks = totalBlocks - filledBlocks
+  return '█'.repeat(filledBlocks) + '░'.repeat(emptyBlocks)
+}
+
+/**
+ * Mapa en memoria de etiquetas flotantes asociadas a cada golem [golemEntity -> labelEntity].
+ */
+const golemLabelMap = new Map<Entity, Entity>()
+
+/**
+ * Actualiza el texto de la etiqueta flotante de un golem con su vida actual y nivel.
+ */
+export function updateGolemFloatingLabel(
+  golemEntity: Entity,
+  name: string,
+  affinity: string,
+  level: number,
+  currentHp: number,
+  maxHp: number,
+  ownerAddress: string
+) {
+  const labelEntity = golemLabelMap.get(golemEntity)
+  if (!labelEntity) return
+
+  if (TextShape.has(labelEntity)) {
+    const ownerTag = formatShortAddress(ownerAddress)
+    const hpBar = getHealthBarAscii(currentHp, maxHp)
+    const hpInt = Math.max(0, Math.round(currentHp))
+    const maxHpInt = Math.round(maxHp)
+
+    TextShape.getMutable(labelEntity).text =
+      `${name}${ownerTag} [${affinity}]\nNv.${level} [${hpBar}] ${hpInt}/${maxHpInt}`
+  }
+}
+
+/**
+ * Crea una entidad de golem seguidor y de combate asociada a un jugador (local, remoto o sparring).
  */
 export function createFollowerGolem(
   config: GolemConfig | GolemSquadMemberDto,
   orderIndex: number,
   spawnPosition: Vector3,
-  ownerAddress: string = 'local'
+  ownerAddress: string = 'local',
+  teamId: string = GOLEM_TEAMS.PLAYER
 ): Entity {
   const golemEntity = engine.addEntity()
 
@@ -94,21 +142,55 @@ export function createFollowerGolem(
     isMoving: false
   })
 
-  // 4. Etiqueta flotante con nombre, afinidad y dueño (Billboard)
+  // 4. Componente de combate con estadísticas completas y asignación de equipo canónico
+  const maxHp = config.maxHp || 120
+  const currentHp = config.currentHp !== undefined ? config.currentHp : maxHp
+  const attack = config.attack || 25
+  const defense = config.defense || 12
+  const speed = config.speed || 15
+  const expReward = config.expReward || 50
+  const currentExp = config.currentExp || 0
+  const level = config.level || 1
+
+  GolemCombatComponent.create(golemEntity, {
+    golemId: config.id,
+    teamId,
+    ownerAddress: ownerAddress.toLowerCase(),
+    affinity: config.affinity,
+    maxHp,
+    currentHp,
+    attack,
+    defense,
+    speed,
+    expReward,
+    currentExp,
+    level,
+    state: GolemCombatState.FOLLOWING,
+    targetGolemId: '',
+    attackCooldownTimer: 0,
+    lastAttackerId: '',
+    lastAttackedTimestamp: 0,
+    isDefeated: false
+  })
+
+  // 5. Etiqueta flotante con barra de salud, nivel y afinidad (Billboard)
   const labelEntity = engine.addEntity()
   Transform.create(labelEntity, {
     parent: golemEntity,
-    position: Vector3.create(0, 1.45, 0)
+    position: Vector3.create(0, 1.5, 0)
   })
 
   const ownerTag = formatShortAddress(ownerAddress)
+  const hpBar = getHealthBarAscii(currentHp, maxHp)
+
   TextShape.create(labelEntity, {
-    text: `${config.name}${ownerTag}\n[${config.affinity}]`,
-    fontSize: 2.2,
+    text: `${config.name}${ownerTag} [${config.affinity}]\nNv.${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
+    fontSize: 2.1,
     textColor: getAffinityTextColor(config.affinity)
   })
 
   Billboard.create(labelEntity, {})
+  golemLabelMap.set(golemEntity, labelEntity)
 
   return golemEntity
 }
@@ -123,10 +205,14 @@ export function spawnPlayerSquad(
 ): Entity[] {
   const entities: Entity[] = []
   const normAddress = ownerAddress.toLowerCase()
+  const teamId =
+    normAddress === 'local' || normAddress === 'local_player'
+      ? GOLEM_TEAMS.PLAYER
+      : `${GOLEM_TEAMS.REMOTE_PREFIX}${normAddress}`
 
   squadConfig.forEach((config, index) => {
     const spawnPos = Vector3.create(basePos.x, Math.max(0.1, basePos.y), basePos.z - config.followDistance)
-    const entity = createFollowerGolem(config, index, spawnPos, normAddress)
+    const entity = createFollowerGolem(config, index, spawnPos, normAddress, teamId)
     entities.push(entity)
   })
 
@@ -148,7 +234,44 @@ export function removePlayerSquad(ownerAddress: string) {
   }
 
   for (const entity of entitiesToRemove) {
+    golemLabelMap.delete(entity)
     removeEntityWithChildren(engine, entity)
   }
 }
+
+/**
+ * Genera un número de daño flotante animado sobre la posición del impacto.
+ */
+export function spawnFloatingDamage(position: Vector3, amount: number, isAdvantage: boolean = false) {
+  const damageEntity = engine.addEntity()
+
+  Transform.create(damageEntity, {
+    position: Vector3.create(
+      position.x + (Math.random() - 0.5) * 0.4,
+      position.y + 1.2,
+      position.z + (Math.random() - 0.5) * 0.4
+    )
+  })
+
+  const textPrefix = isAdvantage ? '⚡ CRÍTICO -' : '-'
+  const textColor = isAdvantage
+    ? Color4.create(1.0, 0.9, 0.1, 1.0) // Amarillo dorado
+    : Color4.create(1.0, 0.25, 0.25, 1.0) // Rojo
+
+  TextShape.create(damageEntity, {
+    text: `${textPrefix}${Math.round(amount)}`,
+    fontSize: isAdvantage ? 3.0 : 2.4,
+    textColor
+  })
+
+  Billboard.create(damageEntity, {})
+
+  FloatingDamageComponent.create(damageEntity, {
+    lifetime: 1.2,
+    initialY: position.y + 1.2,
+    riseSpeed: 1.1
+  })
+}
+
+
 

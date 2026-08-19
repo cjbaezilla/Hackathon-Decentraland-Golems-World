@@ -12,8 +12,10 @@ import { createFollowerGolem } from './objects/golemFactory'
 import { createTournamentArena } from './objects/arenaBuilder'
 import { createTrampoline } from './objects/trampoline'
 import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
+import { golemCombatSystem } from './systems/golemCombatSystem'
 import { arenaAnimationSystem } from './systems/arenaAnimationSystem'
 import { trampolineSystem } from './systems/trampolineSystem'
+import { GOLEM_TEAMS } from './components/combat'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -25,10 +27,10 @@ import {
  * ============================================================================
  * PUNTO DE ENTRADA PRINCIPAL DE LA ESCENA (SDK7 ECS)
  * ============================================================================
- * Inicializa la UI, controles móviles táctiles, escuadrón local de golems,
- * la Gran Arena Circular de Torneo Steampunk (estilo Torneo de Cell),
- * el trampolín impulsor de vapor en el punto de spawn,
- * infraestructura multijugador P2P y sistemas ECS de animación y seguimiento.
+ * Inicializa la UI Steampunk, controles táctiles Mobile-First, escuadrón local de
+ * golems con estadísticas aleatorias RPG, la Gran Arena Circular de Torneo (Free For All),
+ * trampolín impulsor de vapor, infraestructura multijugador P2P y sistemas ECS de animación,
+ * seguimiento y combate.
  */
 export function main() {
   // 1. Inicializar la Interfaz de Usuario 2D (React-ECS)
@@ -55,13 +57,14 @@ export function main() {
   // 5. Instanciar el trampolín steampunk cerca del punto de spawn (16m, 11m)
   createTrampoline(Vector3.create(16, 0, 11))
 
-  // 6. Configurar infraestructura multijugador P2P (MessageBus)
+  // 7. Configurar infraestructura multijugador P2P (MessageBus)
   setupSquadSyncListeners(onRemoteSquadUpdated)
   announceLocalSquad()
   requestAllSquads()
 
-  // 7. Registrar los sistemas de animación, seguimiento y trampolín en el motor ECS
+  // 8. Registrar los sistemas de animación, seguimiento, combate y trampolín en el motor ECS
   engine.addSystem(golemFollowerSystem)
+  engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
 }
@@ -78,9 +81,10 @@ function setupLocalFollowerGolems() {
 
   randomSquad.forEach((config, index) => {
     const spawnPos = Vector3.create(16, 0.1, 16 - config.followDistance)
-    createFollowerGolem(config, index, spawnPos, localId)
+    createFollowerGolem(config, index, spawnPos, localId, GOLEM_TEAMS.PLAYER)
   })
 }
+
 
 
 
