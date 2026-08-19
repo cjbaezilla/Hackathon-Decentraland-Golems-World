@@ -25,6 +25,7 @@ import { createAbandonedFactory } from './objects/abandonedFactoryBuilder'
 import { createTournamentArena } from './objects/arenaBuilder'
 import { createSouthCorridor } from './objects/southCorridorBuilder'
 import { createTrampoline } from './objects/trampoline'
+import { createTradingPosts } from './objects/tradingPostsBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -88,7 +89,10 @@ export function main() {
   // 5. Instanciar el trampolín de vapor steampunk en Parcela [0, 0] (5.1m, 7.1m)
   createTrampoline(Vector3.create(5.1, 0, 7.1))
 
-  // 6. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
+  // 6. Instanciar los 5 puestos de comercio steampunk equidistantes en el bulevar de la Forja
+  createTradingPosts()
+
+  // 7. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)

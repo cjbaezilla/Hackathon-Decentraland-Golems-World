@@ -61,6 +61,7 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │   │   ├── chatarralesConfig.ts            # Coordenadas y assets de Los Chatarrales (0..140, 140..260)
 │   │   ├── abandonedFactoryConfig.ts       # Coordenadas y assets de la Fábrica Abandonada (140..260, 140..260)
 │   │   ├── southCorridorConfig.ts          # Coordenadas y assets del Corredor Sur y Parcela 13,1 (140..260, 0..140)
+│   │   ├── tradingPostsConfig.ts           # Coordenadas y assets de los 5 Puestos de Comercio (25..58, 6..11)
 │   │   └── arenaConfig.ts                  # Parámetros geométricos de la Gran Arena Central (200, 200)
 │   └── objects/
 │       ├── forgeDistrictBuilder.ts         # Fábrica constructora del Distrito de la Forja
@@ -72,6 +73,7 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │       ├── chatarralesBuilder.ts           # Fábrica constructora de Los Chatarrales
 │       ├── abandonedFactoryBuilder.ts      # Fábrica constructora de la Fábrica Abandonada
 │       ├── southCorridorBuilder.ts         # Fábrica constructora del Corredor Sur y Parcela 13,1
+│       ├── tradingPostsBuilder.ts          # Fábrica constructora de los 5 Puestos de Comercio
 │       └── arenaBuilder.ts                 # Fábrica constructora de la Gran Arena de Torneo
 ```
 
@@ -135,6 +137,14 @@ Las cuatro esquinas del mapa están diseñadas con **dimensiones simétricas id�
   - *Taller de Vapor y Calderería* `(105, 40)`: Tanques de presión y cofres de placas blindadas.
   - *Pabellón de Maestros Forjadores* `(35, 45)`: Mesas de ensamble de golems.
   - *Puesto de Guardia y Vigía* `(105, 105)`: Plataforma con farolas de vigilancia y suministros.
+- **Bulevar Comercial de Puestos de Intercambio (Trading Posts)**:
+  - 5 Quioscos modulares steampunk equidistantes (separados exactamente por $8.30\text{m}$) ubicados en la zona intermedia entre el área de spawn y la calzada central:
+    - *Puesto #01*: Parcela `[1, 0]` • `(X: 30.00m, Z: 7.00m)` con marcador `SteamPunk_Number_01`.
+    - *Puesto #02*: Parcela `[2, 0]` • `(X: 38.25m, Z: 7.90m)` con marcador `SteamPunk_Number_02`.
+    - *Puesto #03*: Parcela `[2, 0]` • `(X: 46.50m, Z: 8.80m)` con marcador `SteamPunk_Number_03`.
+    - *Puesto #04*: Parcela `[3, 0]` • `(X: 54.75m, Z: 9.70m)` con marcador `SteamPunk_Number_04`.
+    - *Puesto #05*: Parcela `[3, 0]` • `(X: 63.00m, Z: 10.60m)` con marcador `SteamPunk_Number_05`.
+- **Trampolín de Vapor**: Parcela `[0, 0]` • `(X: 5.1m, Z: 7.1m)` para propulsión vertical en la plaza inicial.
 - **Escombros y Transición**: Cúmulos de tablones rotos y engranajes semienterrados en los exteriores de las puertas `(70, 146)` y `(146, 70)`.
 
 ---
