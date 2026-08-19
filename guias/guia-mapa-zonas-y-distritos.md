@@ -105,11 +105,13 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │  DISTRITO DE LA FORJA (Suroeste)     │  CALDERAS DE FUNDICIÓN (Sureste)     │
 │  - Dimensiones: 140m x 140m          │  - Dimensiones: 140m x 140m          │
 │  - X: [0..140m] | Z: [0..140m]       │  - X: [260..400m] | Z: [0..140m]     │
-│  - Spawn Inicial: (16m, 5m)          │  - Hito: Gran Horno Central (330, 70)│
+│  - Spawn Inicial: (16m, 6m)          │  - Hito: Gran Horno Central (330, 70)│
 │  - Plaza Mayor Forja: (70, 70)       │  - Reactor de Éter (370, 100)        │
 │  - Puerta Norte: (70, 140) [01]      │  - Pabellón Enfriamiento (295, 40)   │
 │  - Puerta Este: (140, 70) [02]       │  - Portal: (270, 130) [Marcador 07]  │
-│  - ZONA SEGURA ABSOLUTA (Hub Inicial)│  - ZONA PK LIBRE (Épicos de Caldera) │
+│  - Bulevar Sur & Paseo Oeste (10 P.) │  - ZONA PK LIBRE (Épicos de Caldera) │
+│  - Trampolín de Vapor: (5.1m, 7.1m)  │                                      │
+│  - ZONA SEGURA ABSOLUTA (Hub Inicial)│                                      │
 └──────────────────────────────────────┴──────────────────────────────────────┘
 (0m, 0m)                                                                     (400m, 0m)
 ```
@@ -137,13 +139,19 @@ Las cuatro esquinas del mapa están diseñadas con **dimensiones simétricas id�
   - *Taller de Vapor y Calderería* `(105, 40)`: Tanques de presión y cofres de placas blindadas.
   - *Pabellón de Maestros Forjadores* `(35, 45)`: Mesas de ensamble de golems.
   - *Puesto de Guardia y Vigía* `(105, 105)`: Plataforma con farolas de vigilancia y suministros.
-- **Bulevar Comercial de Puestos de Intercambio (Trading Posts)**:
-  - 5 Quioscos modulares steampunk equidistantes (separados exactamente por $8.30\text{m}$) ubicados en la zona intermedia entre el área de spawn y la calzada central:
+- **Bulevares y Paseos Comerciales de Intercambio (10 Trading Posts)**:
+  - *Sector 1 — Bulevar Comercial Sur (Eje X: 30.0m a 63.0m, Z: 7.0m a 10.6m)*:
     - *Puesto #01*: Parcela `[1, 0]` • `(X: 30.00m, Z: 7.00m)` con marcador `SteamPunk_Number_01`.
     - *Puesto #02*: Parcela `[2, 0]` • `(X: 38.25m, Z: 7.90m)` con marcador `SteamPunk_Number_02`.
     - *Puesto #03*: Parcela `[2, 0]` • `(X: 46.50m, Z: 8.80m)` con marcador `SteamPunk_Number_03`.
     - *Puesto #04*: Parcela `[3, 0]` • `(X: 54.75m, Z: 9.70m)` con marcador `SteamPunk_Number_04`.
     - *Puesto #05*: Parcela `[3, 0]` • `(X: 63.00m, Z: 10.60m)` con marcador `SteamPunk_Number_05`.
+  - *Sector 2 — Paseo Comercial Oeste (Eje X: 6.4m, Z: 28.3m a 62.9m)*:
+    - *Puesto #06*: Parcela `[0, 1]` • `(X: 6.40m, Z: 28.30m)` con marcador `SteamPunk_Number_06` (orientado al este).
+    - *Puesto #07*: Parcela `[0, 2]` • `(X: 6.40m, Z: 36.95m)` con marcador `SteamPunk_Number_07` (orientado al este).
+    - *Puesto #08*: Parcela `[0, 2]` • `(X: 6.40m, Z: 45.60m)` con marcador `SteamPunk_Number_08` (orientado al este).
+    - *Puesto #09*: Parcela `[0, 3]` • `(X: 6.40m, Z: 54.25m)` con marcador `SteamPunk_Number_01` (orientado al este).
+    - *Puesto #10*: Parcela `[0, 3]` • `(X: 6.40m, Z: 62.90m)` con marcador `SteamPunk_Number_02` (orientado al este).
 - **Trampolín de Vapor**: Parcela `[0, 0]` • `(X: 5.1m, Z: 7.1m)` para propulsión vertical en la plaza inicial.
 - **Escombros y Transición**: Cúmulos de tablones rotos y engranajes semienterrados en los exteriores de las puertas `(70, 146)` y `(146, 70)`.
 
@@ -257,7 +265,7 @@ El espacio central entre las 4 esquinas simétricas ($81.600\text{ m²}$ restant
 
 | Zona / Distrito | Rango X (m) | Rango Z (m) | Superficie (m²) | Parcelas DCL | Nivel de Riesgo | Afinidad y Materiales Dominantes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Distrito de la Forja** | `0` a `140` | `0` a `140` | 19.600 m² | `0,0` a `8,8` | 🟢 Seguro (Spawn) | Taller, Yunque de Forja, Spawn, Gestión de Misiones |
+| **Distrito de la Forja** | `0` a `140` | `0` a `140` | 19.600 m² | `0,0` a `8,8` | 🟢 Seguro (Spawn) | Taller, Yunque de Forja, Spawn, 10 Puestos de Comercio (Bulevar Sur y Paseo Oeste), Trampolín de Vapor, Gestión de Misiones |
 | **Desierto de Chatarra** | `0` a `140` | `260` a `400` | 19.600 m² | `0,16` a `8,24` | 🔴 Peligro (PK) | Legendarios (`ojo_dragon`, `corazon_primigenio`) |
 | **Reserva de Minería** | `260` a `400` | `260` a `400` | 19.600 m² | `16,16` a `24,24`| 🟢 Seguro (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) |
 | **Calderas Fundición** | `260` a `400` | `0` a `140` | 19.600 m² | `16,0` a `24,8` | 🔴 Peligro (PK) | Épicos (`corazon_caldera`, `reactor_eter`) |
