@@ -37,7 +37,7 @@ import { t, onLanguageChange } from '../i18n'
  * @returns Entidad raíz del trampolín creado.
  */
 export function createTrampoline(
-  position: Vector3 = Vector3.create(16, 0, 11),
+  position: Vector3 = Vector3.create(5.1, 0, 7.1),
   customImpulse?: Vector3
 ): Entity {
   const root = engine.addEntity()

@@ -85,8 +85,8 @@ export function main() {
   createTournamentArena()
   createSouthCorridor()
 
-  // 5. Instanciar el trampolín de vapor steampunk cerca del punto de spawn (16m, 11m)
-  createTrampoline(Vector3.create(16, 0, 11))
+  // 5. Instanciar el trampolín de vapor steampunk en Parcela [0, 0] (5.1m, 7.1m)
+  createTrampoline(Vector3.create(5.1, 0, 7.1))
 
   // 6. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
   engine.addSystem(golemFollowerSystem)
