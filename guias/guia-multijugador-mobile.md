@@ -213,6 +213,9 @@ TouchScreenControls.createOrReplace(engine.RootEntity, {
    - 3 tarjetas de escuadrón sincronizadas en tiempo real con `GolemCombatComponent` que muestran la barra de vida ASCII `[████████░░]`, nivel, estadísticas RPG (ATK, DEF, SPD) y registro de combate en vivo.
    - Botón táctil grande de reaparición si el escuadrón es derrotado.
 
+3. **Selector Táctil de Idioma Bilingüe (`LanguageToggle`)**:
+   - Ubicado en la esquina superior derecha (`top: 24px, right: 32px`) con un área táctil amplia de $140 \times 46\text{ px}$ (`pointerFilter: 'block'`), permitiendo a los jugadores alternar entre Español e Inglés sin interferir con la jugabilidad táctil ([guia-soporte-bilingue-i18n.md](guia-soporte-bilingue-i18n.md)).
+
 ---
 
 ## 5. Paso a Paso: Cómo Probar el Multijugador y la Asignación Aleatoria en Local

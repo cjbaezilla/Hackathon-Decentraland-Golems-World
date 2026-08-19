@@ -18,6 +18,7 @@ import {
   getVulnerableAffinity,
   getAffinityMultiplier
 } from '../config/golems'
+import { t, getLocalizedAffinity } from '../i18n'
 import {
   setIsInsideArena,
   getIsInsideArena,
@@ -203,7 +204,7 @@ function handleRemoteDefeatReceived(defeat: GolemDefeatMessageDto) {
     if (combat.golemId === defeat.defeatedId) {
       updateLocalGolemHp(defeat.defeatedId, 0)
       removeEntityWithChildren(engine, entity)
-      addCombatLog(`💥 ¡Un golem ha caído en la arena!`, '#FF6666')
+      addCombatLog(t('combat.golemFallen'), '#FF6666')
       break
     }
   }
@@ -255,9 +256,9 @@ export function golemCombatSystem(dt: number) {
     if (isLocalPlayerInArena !== getIsInsideArena()) {
       setIsInsideArena(isLocalPlayerInArena)
       if (isLocalPlayerInArena) {
-        addCombatLog('⚔️ ¡Entraste a la Arena! Tus golems inician combate FFA.', '#FFD700')
+        addCombatLog(t('combat.arenaEnter'), '#FFD700')
       } else {
-        addCombatLog('🛡️ Saliste de la Arena. Tus golems vuelven a seguirte.', '#00E5FF')
+        addCombatLog(t('combat.arenaExit'), '#00E5FF')
       }
     }
   }
@@ -544,9 +545,17 @@ export function golemCombatSystem(dt: number) {
         spawnFloatingDamage(chosenTarget.position, finalDamage, isAdvantage)
 
         // Registrar en el log de combate
-        const advantageText = isAdvantage ? '⚡ [VENTAJA ELEMENTAL]' : ''
+        const advantageText = isAdvantage ? t('combat.elementalAdvantage') : ''
+        const attackerAff = getLocalizedAffinity(combat.affinity)
+        const targetAff = getLocalizedAffinity(chosenTarget.affinity)
+
         addCombatLog(
-          `⚔️ ${combat.affinity} atacó a ${chosenTarget.affinity} (-${finalDamage} HP) ${advantageText}`,
+          t('combat.attackLog', {
+            attacker: attackerAff,
+            target: targetAff,
+            damage: finalDamage,
+            advantage: advantageText
+          }).trim(),
           isAdvantage ? '#FFD700' : '#FF9999'
         )
 
@@ -575,7 +584,14 @@ export function golemCombatSystem(dt: number) {
             incrementPlayerKills()
           }
 
-          addCombatLog(`🏆 ¡${combat.affinity} destruyó a ${chosenTarget.affinity}! (+${expAwarded} EXP)`, '#00FFAA')
+          addCombatLog(
+            t('combat.defeatLog', {
+              attacker: attackerAff,
+              target: targetAff,
+              exp: expAwarded
+            }),
+            '#00FFAA'
+          )
 
           // Difundir derrota
           broadcastGolemDefeat({

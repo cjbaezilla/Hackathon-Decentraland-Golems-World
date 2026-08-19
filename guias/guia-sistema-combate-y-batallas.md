@@ -372,3 +372,4 @@ El cambio de comportamiento entre caminar por el mundo y batallar en la arena es
 | [`src/state.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/state.ts) | Estado de sesión en memoria: EXP acumulada, contador de bajas, subida de nivel y logs de combate. |
 | [`src/multiplayer.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/multiplayer.ts) | Difusión y escucha de eventos de ataque y derrota por `MessageBus`. |
 | [`src/ui.tsx`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/ui.tsx) | Interfaz gráfica HUD superior 2D con renderizado React-ECS en tiempo real. |
+| [`src/i18n/`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/i18n/index.ts) | Motor de internacionalización y traducciones dinámicas de combate y afinidades ([guia-soporte-bilingue-i18n.md](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-soporte-bilingue-i18n.md)). |

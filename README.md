@@ -4,6 +4,7 @@
 
 [![Decentraland SDK7](https://img.shields.io/badge/Decentraland-SDK7-ff2d55.svg)](https://docs.decentraland.org)
 [![Decentraland World](https://img.shields.io/badge/World-golems.dcl.eth-6366f1.svg)](https://decentraland.org)
+[![Dual Language](https://img.shields.io/badge/Language-ES%20%7C%20EN%20(i18n)-8b5cf6.svg)](guias/guia-soporte-bilingue-i18n.md)
 [![Mobile First](https://img.shields.io/badge/Platform-Mobile%20First%20%26%20Desktop-10b981.svg)](https://docs.decentraland.org/creator/build-for-mobile/)
 [![Grid Size](https://img.shields.io/badge/Grid-25x25%20(400m%20x%20400m)-f59e0b.svg)](https://docs.decentraland.org)
 [![Backend](https://img.shields.io/badge/Backend-PHP%20%26%20MySQL%20(SignedFetch)-3b82f6.svg)](https://docs.decentraland.org)
@@ -363,6 +364,7 @@ Hackathon/
 │   ├── golems_cover.png        # Portada oficial de la experiencia
 │   └── *.png                   # Ilustraciones e infografías conceptuales
 ├── guias/                      # Guías técnicas y documentación maestra de la experiencia
+│   ├── guia-soporte-bilingue-i18n.md          # Guía del Sistema Bilingüe e Internacionalización (ES / EN)
 │   ├── guia-sistema-combate-y-batallas.md     # Guía completa del Sistema de Combate en Tiempo Real y FFA
 │   ├── guia-arena-torneo-steampunk.md         # Guía de la Gran Arena Circular de Torneo Steampunk (72m)
 │   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía de la Fábrica de Golems y jerarquías
@@ -378,8 +380,12 @@ Hackathon/
 ├── src/                        # Código fuente TypeScript SDK7
 │   ├── index.ts                # Inicializador principal y orquestador de sistemas
 │   ├── state.ts                # Estado global reactivo de la escena (EXP, kills, logs, salud)
-│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD Superior consolidado, Radar)
+│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD, Selector de Idioma táctil)
 │   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake, ataques y derrotas)
+│   ├── i18n/                   # Motor de internacionalización y diccionarios bilingües
+│   │   ├── types.ts            # Esquemas de tipos y TranslationSchema
+│   │   ├── index.ts            # Motor t(), toggleLanguage() y suscripciones reactivas
+│   │   └── locales/            # Diccionarios canónicos tipados (es.ts y en.ts)
 │   ├── config/                 # Configuraciones maestras y constantes
 │   │   ├── arenaConfig.ts      # Configuración espacial, dimensiones y modelos de la Arena Steampunk
 │   │   └── golems.ts           # Configuración de golems, afinidades, pentágono y generador RPG

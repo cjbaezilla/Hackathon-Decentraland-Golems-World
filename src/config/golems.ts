@@ -6,6 +6,8 @@
  * velocidades de interpolación (LERP/SLERP) y catálogo de las 5 afinidades.
  */
 
+import { getLocalizedGolemName, getLocalizedAffinity, Language } from '../i18n'
+
 export enum GolemAffinity {
   STEAM = 'Vapor',
   GALVANIC = 'Galvánico',
@@ -37,6 +39,8 @@ export interface GolemConfig extends GolemStats {
   moveSpeed: number
   /** Velocidad de giro/orientación (factor SLERP) */
   rotationSpeed: number
+  /** Índice de variante visual (0 a 4) para traducciones dinámicas */
+  variantIndex?: number
 }
 
 /**
@@ -304,9 +308,10 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
   return selectedAffinities.map((affinity, index) => {
     const variantData = GOLEM_AFFINITY_VARIANTS[affinity]
     const variantNumber = Math.floor(Math.random() * 5) + 1 // 1 a 5
+    const variantIndex = variantNumber - 1
     const variantPad = variantNumber.toString().padStart(2, '0')
     const modelSrc = `assets/models/${variantData.folder}/golem_${variantData.folder}_${variantPad}.glb`
-    const name = variantData.names[variantNumber - 1] || `${affinity} #${variantNumber}`
+    const name = getLocalizedGolemName(affinity, variantIndex)
     const followDistance = SQUAD_FOLLOW_DISTANCES[index] || (index + 1) * 1.8
     const stats = generateRandomStats(affinity)
 
@@ -319,9 +324,20 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
       followDistance,
       moveSpeed: variantData.baseSpeed,
       rotationSpeed: variantData.baseRotSpeed,
+      variantIndex,
       ...stats
     }
   })
+}
+
+/**
+ * Obtiene el nombre y afinidad traducidos de un golem para mostrar en la interfaz o etiquetas.
+ */
+export function getGolemDisplayName(golem: { name?: string; affinity: string; variantIndex?: number }, lang?: Language): string {
+  if (golem.variantIndex !== undefined) {
+    return getLocalizedGolemName(golem.affinity, golem.variantIndex, lang)
+  }
+  return golem.name || getLocalizedAffinity(golem.affinity, lang)
 }
 
 export const FOLLOW_SYSTEM_SETTINGS = {

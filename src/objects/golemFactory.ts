@@ -17,6 +17,7 @@ import {
   GOLEM_TEAMS
 } from '../components/combat'
 import { ARENA_CONFIG } from '../config/arenaConfig'
+import { t, getLocalizedAffinity } from '../i18n'
 
 /**
  * ============================================================================
@@ -101,9 +102,11 @@ export function updateGolemFloatingLabel(
     const hpBar = getHealthBarAscii(currentHp, maxHp)
     const hpInt = Math.max(0, Math.round(currentHp))
     const maxHpInt = Math.round(maxHp)
+    const levelTag = t('common.levelShort')
+    const affTag = getLocalizedAffinity(affinity)
 
     TextShape.getMutable(labelEntity).text =
-      `${name}${ownerTag} [${affinity}]\nNv.${level} [${hpBar}] ${hpInt}/${maxHpInt}`
+      `${name}${ownerTag} [${affTag}]\n${levelTag}${level} [${hpBar}] ${hpInt}/${maxHpInt}`
   }
 }
 

@@ -150,9 +150,11 @@ export function createFollowerGolem(
 
   const ownerTag = formatShortAddress(ownerAddress)
   const hpBar = getHealthBarAscii(currentHp, maxHp)
+  const levelTag = t('common.levelShort')
+  const affTag = getLocalizedAffinity(config.affinity)
 
   TextShape.create(labelEntity, {
-    text: `${config.name}${ownerTag} [${config.affinity}]\nNv.${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
+    text: `${config.name}${ownerTag} [${affTag}]\n${levelTag}${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
     fontSize: 2.1,
     textColor: getAffinityTextColor(config.affinity)
   })
@@ -163,6 +165,8 @@ export function createFollowerGolem(
   return golemEntity
 }
 ```
+
+> 🌐 **Soporte Bilingüe e Internacionalización**: Para conocer los mecanismos de suscripción reactiva y traducción dinámica de nombres y etiquetas, consulte la [Guía Maestra de Soporte Bilingüe e i18n](guia-soporte-bilingue-i18n.md).
 
 ### 2.2 Gestión de Escuadrones Completos (Spawn y Remove)
 

@@ -18,6 +18,7 @@ import { Vector3, Quaternion, Color3, Color4 } from '@dcl/sdk/math'
 import { TrampolineComponent } from '../components/trampoline'
 import { ArenaRotatorComponent } from '../components/arena'
 import { launchPlayerWithTrampoline } from '../systems/trampolineSystem'
+import { t, onLanguageChange } from '../i18n'
 
 /**
  * ============================================================================
@@ -86,7 +87,7 @@ export function createTrampoline(
     },
     {
       button: InputAction.IA_POINTER,
-      hoverText: '¡Saltar por los aires! (Trampolín de Vapor)',
+      hoverText: t('trampoline.hoverText'),
       maxDistance: 8
     }
   )
@@ -158,12 +159,23 @@ export function createTrampoline(
     position: Vector3.create(0, 2.7, 0),
     scale: Vector3.create(0.8, 0.8, 0.8)
   })
+  const updateSignText = () => {
+    if (TextShape.has(signEntity)) {
+      TextShape.getMutable(signEntity).text = `${t('trampoline.signTitle')}\n${t('trampoline.signSubtitle')}`
+    }
+  }
+
   TextShape.create(signEntity, {
-    text: '♨️ TRAMPOLÍN DE VAPOR ⚡\n¡Pisa o toca para volar por los aires!',
+    text: `${t('trampoline.signTitle')}\n${t('trampoline.signSubtitle')}`,
     fontSize: 2.8,
     textColor: Color4.create(1.0, 0.85, 0.25, 1.0)
   })
   Billboard.create(signEntity)
+
+  // Suscribir al cambio de idioma para actualizar en tiempo real
+  onLanguageChange(() => {
+    updateSignText()
+  })
 
   // 8. Registrar el componente TrampolineComponent en la entidad raíz
   // Impulso (50% del salto extremo): Y=160 (elevación contundente), Z=90 (fuerte avance balístico hacia el norte)

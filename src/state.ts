@@ -1,4 +1,5 @@
 import { GolemConfig } from './config/golems'
+import { t } from './i18n'
 
 /**
  * ============================================================================
@@ -136,7 +137,7 @@ export function addLocalGolemExp(golemId: string, exp: number) {
       golem.currentHp = golem.maxHp
       golem.attack = Math.round(golem.attack * 1.12)
       golem.defense = Math.round(golem.defense * 1.1)
-      addCombatLog(`⭐ ¡${golem.name} subió al Nivel ${golem.level}!`, '#FFE600')
+      addCombatLog(t('combat.levelUp', { name: golem.name, level: golem.level }), '#FFE600')
     }
   }
 }

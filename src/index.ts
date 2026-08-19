@@ -24,6 +24,7 @@ import { createChatarrales } from './objects/chatarralesBuilder'
 import { createAbandonedFactory } from './objects/abandonedFactoryBuilder'
 import { createTournamentArena } from './objects/arenaBuilder'
 import { createSouthCorridor } from './objects/southCorridorBuilder'
+import { createTrampoline } from './objects/trampoline'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -84,7 +85,10 @@ export function main() {
   createTournamentArena()
   createSouthCorridor()
 
-  // 5. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
+  // 5. Instanciar el trampolín de vapor steampunk cerca del punto de spawn (16m, 11m)
+  createTrampoline(Vector3.create(16, 0, 11))
+
+  // 6. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
