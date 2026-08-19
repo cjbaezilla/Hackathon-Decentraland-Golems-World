@@ -131,7 +131,14 @@ export const es: TranslationSchema = {
     golemsText: 'No podrás explorar muy lejos sin un escuadrón. En la Forja puedes combinar entre 5 y 12 piezas de chatarra. Cada receta única engendra un golem con afinidad elemental: Vapor vence a Mecánico, Mecánico a Galvánico, Galvánico a Luminoso, Luminoso a Éter y Éter a Vapor. ¡En la Gran Arena central (200m, 200m) probarás su valía!',
     zonesText: 'El Distrito de la Forja (Suroeste) y la Reserva Minera (Noreste) son zonas seguras. Pero ten mucho cuidado si vas al Desierto de Chatarra (Noroeste) o a las Calderas (Sureste): son zonas PK sin ley donde los materiales legendarios y los combates a muerte están a la orden del día.',
     tipsText: 'Consejo de viejo chatarrero: aprovecha los trampolines de vapor para desplazarte a toda velocidad. Y jamás descartes piezas comunes como tubos o resortes: una buena combinación puede crear un golem más veloz y equilibrado que un coloso pesado.',
-    backButton: '◀ Volver a preguntar'
+    backButton: '◀ Volver a preguntar',
+    optReplayCinematic: '🎬 Ver presentación del campamento'
+  },
+  cinematic: {
+    title: '⚙️ SILAS, EL SOBREVIVIENTE',
+    subtitle: 'Tu guía y mentor en el Distrito de la Forja y los Páramos',
+    skipButton: 'Saltar ⏭️',
+    hintPrompt: '💡 ¡Toca a Silas para iniciar tu aventura de forja!'
   }
 }
 

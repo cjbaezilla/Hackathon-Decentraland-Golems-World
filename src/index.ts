@@ -2,7 +2,8 @@ import {
   engine,
   Transform,
   InputAction,
-  TouchScreenControls
+  TouchScreenControls,
+  timers
 } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { setupUi } from './ui'
@@ -28,6 +29,7 @@ import { createTrampoline } from './objects/trampoline'
 import { createTradingPosts } from './objects/tradingPostsBuilder'
 import { createWreckageLab } from './objects/wreckageLabBuilder'
 import { createWelcomeNpc, welcomeNpcAnimationSystem } from './objects/welcomeNpc'
+import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinematics/silasCinematic'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -100,14 +102,20 @@ export function main() {
   // 8. Instanciar al NPC de bienvenida Silas el Sobreviviente en Parcela [0, 0] (15.8m, 5.9m sobre el piso de madera)
   createWelcomeNpc(Vector3.create(15.8, 0.25, 5.9))
 
-  // 9. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS
+  // 9. Inicializar la cámara cinemática de presentación de Silas
+  initSilasCinematicCamera()
+
+  // 10. Disparo adaptativo de la cinemática de Silas: detecta plataforma (4.5s en móvil / 1.5s en desktop)
+  scheduleSilasIntroCinematic()
+
+  // 11. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
   engine.addSystem(welcomeNpcAnimationSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente y sistemas activos.')
+  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente, cinemática de presentación y sistemas activos.')
 }
 
 /**

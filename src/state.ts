@@ -27,6 +27,8 @@ export interface SceneState {
   combatLogs: CombatLogEntry[]
   isNpcDialogOpen: boolean
   npcDialogStep: NpcDialogStep
+  isCinematicActive: boolean
+  hasPlayedSilasIntro: boolean
 }
 
 export const sceneState: SceneState = {
@@ -37,7 +39,37 @@ export const sceneState: SceneState = {
   playerTotalKills: 0,
   combatLogs: [],
   isNpcDialogOpen: false,
-  npcDialogStep: 'intro'
+  npcDialogStep: 'intro',
+  isCinematicActive: false,
+  hasPlayedSilasIntro: false
+}
+
+/**
+ * Consulta si la cinemática de cámara está activa.
+ */
+export function getIsCinematicActive(): boolean {
+  return sceneState.isCinematicActive
+}
+
+/**
+ * Establece el estado activo de la cinemática de cámara.
+ */
+export function setIsCinematicActive(active: boolean) {
+  sceneState.isCinematicActive = active
+}
+
+/**
+ * Consulta si ya se reprodujo la cinemática inicial de Silas en la sesión.
+ */
+export function getHasPlayedSilasIntro(): boolean {
+  return sceneState.hasPlayedSilasIntro
+}
+
+/**
+ * Marca si la cinemática inicial de Silas ya fue reproducida.
+ */
+export function setHasPlayedSilasIntro(played: boolean) {
+  sceneState.hasPlayedSilasIntro = played
 }
 
 /**

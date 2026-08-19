@@ -105,6 +105,13 @@ export interface TranslationSchema {
     zonesText: string
     tipsText: string
     backButton: string
+    optReplayCinematic: string
+  }
+  cinematic: {
+    title: string
+    subtitle: string
+    skipButton: string
+    hintPrompt: string
   }
 }
 

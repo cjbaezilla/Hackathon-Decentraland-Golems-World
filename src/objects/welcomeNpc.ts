@@ -225,9 +225,26 @@ export function updateWelcomeNpcLanguage() {
 }
 
 /**
+ * Obtiene la entidad del avatar de Silas para seguimiento de cámara o interacción.
+ */
+export function getSilasAvatarEntity(): Entity | null {
+  return silasNpcEntity
+}
+
+/**
+ * Dispara inmediatamente el emote de saludo de Silas (usado en cinemáticas).
+ */
+export function triggerSilasWaveEmote() {
+  if (silasNpcEntity && AvatarShape.has(silasNpcEntity)) {
+    const avatar = AvatarShape.getMutable(silasNpcEntity)
+    avatar.expressionTriggerId = 'wave'
+    avatar.expressionTriggerTimestamp = (avatar.expressionTriggerTimestamp ?? 0) + 1
+  }
+}
+
+/**
  * Sistema ECS para dotar de vida a Silas:
  * - Emotes periódicos (saludo con la mano cuando el jugador está en las inmediaciones).
- * - Orientación suave hacia el jugador si está dentro de un radio de 6 metros.
  */
 export function welcomeNpcAnimationSystem(dt: number) {
   if (!silasNpcEntity || !AvatarShape.has(silasNpcEntity)) return
@@ -258,3 +275,4 @@ export function welcomeNpcAnimationSystem(dt: number) {
     }
   }
 }
+

@@ -131,7 +131,14 @@ export const en: TranslationSchema = {
     golemsText: 'You will not get far out there without a squad. In the Forge you can combine 5 to 12 scrap components. Each unique recipe yields a golem with elemental affinity: Steam beats Mechanical, Mechanical beats Galvanic, Galvanic beats Luminous, Luminous beats Aether, and Aether beats Steam. In the Grand Arena at (200m, 200m) you will test their might!',
     zonesText: 'The Forge District (Southwest) and Mining Reserve (Northeast) are safe havens. But beware if you venture into the Scrap Desert (Northwest) or Foundry Boilers (Southeast): they are lawless free-PK zones where legendary loot and deadly battles reign.',
     tipsText: 'A veteran scrapper tip: use steam trampolines to travel at high speeds across the terrain. And never discard common parts like copper pipes or clock springs: a smart combination can create a faster, better-balanced golem than an unwieldy colossus.',
-    backButton: '◀ Ask something else'
+    backButton: '◀ Ask something else',
+    optReplayCinematic: '🎬 Replay camp showcase'
+  },
+  cinematic: {
+    title: '⚙️ SILAS, THE SURVIVOR',
+    subtitle: 'Your veteran mentor in the Forge District and Wastelands',
+    skipButton: 'Skip ⏭️',
+    hintPrompt: '💡 Tap on Silas to begin your crafting adventure!'
   }
 }
 

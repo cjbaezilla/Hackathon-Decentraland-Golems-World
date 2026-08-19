@@ -8,9 +8,11 @@ import {
   getNpcDialogStep,
   setNpcDialogStep,
   closeNpcDialog,
+  getIsCinematicActive,
   NpcDialogStep
 } from './state'
 import { updateWelcomeNpcLanguage } from './objects/welcomeNpc'
+import { playSilasCinematic, stopSilasCinematic } from './cinematics/silasCinematic'
 
 /**
  * ============================================================================
@@ -376,27 +378,60 @@ export const NpcDialog = () => {
             />
           </UiEntity>
 
-          {/* Fila 3: Salir */}
+          {/* Fila 3: Ver Cinemática y Salir */}
           <UiEntity
             uiTransform={{
               width: '100%',
-              height: 38,
-              justifyContent: 'center',
-              alignItems: 'center',
-              pointerFilter: 'block'
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              margin: { bottom: 4 }
             }}
-            uiBackground={{
-              color: Color4.create(0.2, 0.16, 0.18, 0.9)
-            }}
-            onMouseDown={() => {
-              closeNpcDialog()
-            }}
-            uiText={{
-              value: t('npc.optClose'),
-              fontSize: 13,
-              color: Color4.create(0.85, 0.85, 0.85, 1.0)
-            }}
-          />
+          >
+            {/* Opción para repetir la cinemática de Silas */}
+            <UiEntity
+              uiTransform={{
+                width: '64%',
+                height: 38,
+                justifyContent: 'center',
+                alignItems: 'center',
+                pointerFilter: 'block'
+              }}
+              uiBackground={{
+                color: Color4.create(0.18, 0.26, 0.36, 0.95)
+              }}
+              onMouseDown={() => {
+                closeNpcDialog()
+                playSilasCinematic()
+              }}
+              uiText={{
+                value: t('npc.optReplayCinematic'),
+                fontSize: 13,
+                color: Color4.create(0.4, 0.9, 1.0, 1.0)
+              }}
+            />
+
+            {/* Opción Salir */}
+            <UiEntity
+              uiTransform={{
+                width: '34%',
+                height: 38,
+                justifyContent: 'center',
+                alignItems: 'center',
+                pointerFilter: 'block'
+              }}
+              uiBackground={{
+                color: Color4.create(0.2, 0.16, 0.18, 0.9)
+              }}
+              onMouseDown={() => {
+                closeNpcDialog()
+              }}
+              uiText={{
+                value: t('npc.optClose'),
+                fontSize: 13,
+                color: Color4.create(0.85, 0.85, 0.85, 1.0)
+              }}
+            />
+          </UiEntity>
         </UiEntity>
       ) : (
         /* Botón de retroceso a la rama principal */
@@ -421,6 +456,119 @@ export const NpcDialog = () => {
           }}
         />
       )}
+    </UiEntity>
+  )
+}
+
+/**
+ * Superposición Cinemática de Cámara (Letterbox Bars + Banner Narrativo + Botón Táctil de Salto)
+ */
+export const CinematicOverlay = () => {
+  if (!getIsCinematicActive()) return null
+
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        width: '100%',
+        height: '100%',
+        pointerFilter: 'none',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}
+    >
+      {/* Franja Cinemática Superior */}
+      <UiEntity
+        uiTransform={{
+          width: '100%',
+          height: 64,
+          pointerFilter: 'none'
+        }}
+        uiBackground={{
+          color: Color4.create(0.02, 0.03, 0.05, 0.88)
+        }}
+      />
+
+      {/* Franja Cinemática Inferior y Tarjeta Narrativa */}
+      <UiEntity
+        uiTransform={{
+          width: '100%',
+          minHeight: 160,
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: { top: 14, bottom: 18, left: 24, right: 24 },
+          pointerFilter: 'none'
+        }}
+        uiBackground={{
+          color: Color4.create(0.04, 0.06, 0.09, 0.94)
+        }}
+      >
+        {/* Título de la Cinemática */}
+        <UiEntity
+          uiTransform={{
+            height: 28,
+            margin: { bottom: 4 }
+          }}
+          uiText={{
+            value: t('cinematic.title'),
+            fontSize: 21,
+            color: Color4.create(1.0, 0.85, 0.35, 1.0),
+            textAlign: 'middle-center'
+          }}
+        />
+
+        {/* Subtítulo Descriptivo */}
+        <UiEntity
+          uiTransform={{
+            height: 22,
+            margin: { bottom: 4 }
+          }}
+          uiText={{
+            value: t('cinematic.subtitle'),
+            fontSize: 14,
+            color: Color4.create(0.45, 0.88, 1.0, 0.95),
+            textAlign: 'middle-center'
+          }}
+        />
+
+        {/* Prompt Orientativo */}
+        <UiEntity
+          uiTransform={{
+            height: 20,
+            margin: { bottom: 10 }
+          }}
+          uiText={{
+            value: t('cinematic.hintPrompt'),
+            fontSize: 13,
+            color: Color4.create(0.9, 0.95, 0.8, 0.9),
+            textAlign: 'middle-center'
+          }}
+        />
+
+        {/* Botón Táctil Mobile-First de Salto (Skip) */}
+        <UiEntity
+          uiTransform={{
+            width: 170,
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.24, 0.16, 0.1, 0.95)
+          }}
+          onMouseDown={() => {
+            stopSilasCinematic()
+          }}
+          uiText={{
+            value: t('cinematic.skipButton'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.85, 0.4, 1.0)
+          }}
+        />
+      </UiEntity>
     </UiEntity>
   )
 }
@@ -469,6 +617,9 @@ export const uiComponent = () => {
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />
+
+      {/* Superposición Cinemática de Presentación de Silas */}
+      <CinematicOverlay />
     </UiEntity>
   )
 }

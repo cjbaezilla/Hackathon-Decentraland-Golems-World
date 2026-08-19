@@ -16,6 +16,7 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 | **06** | **Sistema de Seguimiento y Mecánicas de Escuadrón** | Acompañamiento en fila de hasta 3 golems, interpolación Multi-Trail FIFO LERP/SLERP, evasión de obstáculos y transición fluida a combate. | [📖 Leer Guía](guia-sistema-seguimiento-y-mecanicas.md) |
 | **07** | **Multijugador P2P y Optimización Mobile-First** | Arquitectura de red P2P (`MessageBus`), gestión de controles táctiles (`TouchScreenControls`), hitboxes amplias y restricciones del cliente móvil. | [📖 Leer Guía](guia-multijugador-mobile.md) |
 | **08** | **Soporte Bilingüe e Internacionalización (i18n)** | Motor dinámico `src/i18n`, selector de idioma táctil en HUD, diccionarios canónicos tipados (ES/EN) y suscripciones reactivas en tiempo real. | [📖 Leer Guía](guia-soporte-bilingue-i18n.md) |
+| **09** | **Sistema de Cámaras, Cinemáticas y Presentación** | Cámara orbital SDK7 con `VirtualCamera`, `lookAtEntity`, bloqueo de avatar con `InputModifier`, botón de salto Mobile-First y presentación de Silas. | [📖 Leer Guía](guia-cinematicas-y-camaras.md) |
 
 ---
 
@@ -44,3 +45,6 @@ Estándares y restricciones para el desarrollo multijugador P2P y compatibilidad
 
 ### 8. [guia-soporte-bilingue-i18n.md](guia-soporte-bilingue-i18n.md)
 Manual del subsistema de internacionalización (`src/i18n`). Establece la regla de cero textos hardcodeados, la estructura de `TranslationSchema`, funciones auxiliares `t()` y `toggleLanguage()`, y la integración con la interfaz de usuario en React-ECS y rótulos 3D.
+
+### 9. [guia-cinematicas-y-camaras.md](guia-cinematicas-y-camaras.md)
+Manual técnico del sistema de cinemáticas y cámaras virtuales. Detalla la orquestación de `VirtualCamera` y `MainCamera`, fórmulas de la trayectoria orbital, bloqueo seguro de avatar con `InputModifier`, superposición UI con botón táctil de salto y repetición desde el diálogo con Silas.
