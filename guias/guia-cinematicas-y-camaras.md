@@ -81,12 +81,12 @@ Los textos de la cinemática se obtienen del módulo `src/i18n`:
 
 ---
 
-## 📱 6. Detección de Plataforma y Retardo Adaptativo en Móvil (`scheduleSilasIntroCinematic`)
+## 📱 6. Disparo Inmediato por Interacción Reactiva y Limpieza ECS (`scheduleSilasIntroCinematic`)
 
-Para asegurar que los jugadores en dispositivos móviles tengan una experiencia suave y sin saltos de fotogramas, el sistema utiliza el módulo `@dcl/sdk/platform`:
+Para asegurar una experiencia fluida tanto en dispositivos móviles como en escritorio:
 
-1. **Resolución Asíncrona de Plataforma**: `getPlatform()` e `isMobile()` se consultan periódicamente durante los primeros 2 segundos de carga.
-2. **Retardo Adaptativo**:
-   - **Móvil (Godot Explorer / App Móvil)**: Se aplica un retardo de **`4.5 segundos`** (`4500ms`) antes de iniciar la cinemática. Esto permite que el cliente móvil termine de compilar shaders, renderizar la geometría del terreno y desplegar los joysticks virtuales antes de tomar control de la cámara.
-   - **Escritorio / Web**: Se aplica un retardo ágil de **`1.5 segundos`** (`1500ms`).
+1. **Disparo Inmediato al Primer Toque/Pulsación**: En el primer instante exacto en el que el motor detecta una interacción del jugador (`inputSystem.getInputCommand(InputAction.IA_ANY, PointerEventType.PET_DOWN)` como tap táctil, clic, WASD, salto o puntero), la cinemática arranca de inmediato sin retardos artificiales.
+2. **Limpieza Automática del Sistema ECS**: Al dispararse la cinemática, el sistema `playerInputDetectionSystem` se desregistra de inmediato mediante `engine.removeSystem()`, evitando ejecuciones innecesarias en cada frame.
+3. **Temporizador de Seguridad de Respaldo (Fallback)**: Si el jugador se encuentra inactivo durante la carga inicial (`20s` en móvil / `8s` en escritorio), el temporizador de seguridad inicia la cinemática y limpia los escuchadores para garantizar que nunca se omita.
+
 

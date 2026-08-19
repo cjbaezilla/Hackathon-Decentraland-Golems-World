@@ -105,7 +105,7 @@ export function main() {
   // 9. Inicializar la cámara cinemática de presentación de Silas
   initSilasCinematicCamera()
 
-  // 10. Disparo adaptativo de la cinemática de Silas: detecta plataforma (4.5s en móvil / 1.5s en desktop)
+  // 10. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
   scheduleSilasIntroCinematic()
 
   // 11. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS

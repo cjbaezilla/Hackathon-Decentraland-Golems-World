@@ -15,7 +15,7 @@ const translations: Record<Language, TranslationSchema> = {
   en
 }
 
-let activeLanguage: Language = 'es'
+let activeLanguage: Language = 'en'
 const listeners: Array<(lang: Language) => void> = []
 
 /**
