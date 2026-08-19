@@ -62,6 +62,7 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │   │   ├── abandonedFactoryConfig.ts       # Coordenadas y assets de la Fábrica Abandonada (140..260, 140..260)
 │   │   ├── southCorridorConfig.ts          # Coordenadas y assets del Corredor Sur y Parcela 13,1 (140..260, 0..140)
 │   │   ├── tradingPostsConfig.ts           # Coordenadas y assets de los 5 Puestos de Comercio (25..58, 6..11)
+│   │   ├── wreckageLabConfig.ts            # Coordenadas y assets del Laboratorio Wreckage Lab (16..36, 30..39)
 │   │   └── arenaConfig.ts                  # Parámetros geométricos de la Gran Arena Central (200, 200)
 │   └── objects/
 │       ├── forgeDistrictBuilder.ts         # Fábrica constructora del Distrito de la Forja
@@ -74,6 +75,7 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │       ├── abandonedFactoryBuilder.ts      # Fábrica constructora de la Fábrica Abandonada
 │       ├── southCorridorBuilder.ts         # Fábrica constructora del Corredor Sur y Parcela 13,1
 │       ├── tradingPostsBuilder.ts          # Fábrica constructora de los 5 Puestos de Comercio
+│       ├── wreckageLabBuilder.ts           # Fábrica constructora del Laboratorio Wreckage Lab (Creación de Golems)
 │       └── arenaBuilder.ts                 # Fábrica constructora de la Gran Arena de Torneo
 ```
 
@@ -152,6 +154,13 @@ Las cuatro esquinas del mapa están diseñadas con **dimensiones simétricas id�
     - *Puesto #08*: Parcela `[0, 2]` • `(X: 6.40m, Z: 45.60m)` con marcador `SteamPunk_Number_08` (orientado al este).
     - *Puesto #09*: Parcela `[0, 3]` • `(X: 6.40m, Z: 54.25m)` con marcador `SteamPunk_Number_01` (orientado al este).
     - *Puesto #10*: Parcela `[0, 3]` • `(X: 6.40m, Z: 62.90m)` con marcador `SteamPunk_Number_02` (orientado al este).
+- **Laboratorio Steampunk de Creación de Golems (*Wreckage Lab*)**:
+  - *Ubicación*: Parcelas `[1, 2]` y `[2, 2]` • $X: [25.0\text{m} \rightarrow 45.0\text{m}]$, $Z: [30.0\text{m} \rightarrow 38.5\text{m}]$, anclaje frontal en `(24.9m, 38.3m)`.
+  - *Estructura*: Pabellón monumental de desguace ($20\text{m} \times 8.5\text{m}$) con 8 columnas mecánicas de transmisión (`Gear Shaft.glb`), 6 paneles de cubierta industrial (`Ceiling 4x4M.glb`) a 4.1m y cerramientos de valla.
+  - *Flujo y Zonas*:
+    1. *Ala Oeste (Ingreso)*: Tolvas de descarga de chatarra (`Chest Plates.glb`, `Chest Tube.glb`), barriles de combustible, cascada de engranajes transportadores y panel de pesaje `SteamPunk_Number_01`.
+    2. *Núcleo Central (Fusión)*: Tanque caldera presurizado masivo (`Tank.glb`), 2 chimeneas de humo activas (`Smoker.glb`), tren de transmisión mecánica con engranaje horizontal monumental (`Gear Big.glb`) y consola maestra de control.
+    3. *Ala Este (Salida y Despliegue)*: Podio elevado con prototipo de golem de vapor en exhibición (`golem_steam.glb`), hidrante de purga (`Hidrant.glb`), barriles de enfriamiento y placa `SteamPunk_Number_02`.
 - **Trampolín de Vapor**: Parcela `[0, 0]` • `(X: 5.1m, Z: 7.1m)` para propulsión vertical en la plaza inicial.
 - **Escombros y Transición**: Cúmulos de tablones rotos y engranajes semienterrados en los exteriores de las puertas `(70, 146)` y `(146, 70)`.
 

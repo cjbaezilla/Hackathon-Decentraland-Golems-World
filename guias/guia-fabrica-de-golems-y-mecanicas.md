@@ -29,6 +29,7 @@ Esta guía documenta en detalle el diseño, arquitectura y funcionamiento del pa
    - [6.2 Jerarquías Livianas (`Transform.parent`)](#62-jerarquías-livianas-transformparent)
    - [6.3 Cumplimiento de Restricciones Móviles](#63-cumplimiento-de-restricciones-móviles)
 7. [Guía Paso a Paso para Desarrolladores: Cómo Añadir un Nuevo Golem](#7-guía-paso-a-paso-para-desarrolladores-cómo-añadir-un-nuevo-golem)
+8. [Estructura Físico-Espacial en Escena: El Laboratorio Steampunk (Wreckage Lab)](#8-estructura-físico-espacial-en-escena-el-laboratorio-steampunk-wreckage-lab)
 
 ---
 
@@ -420,4 +421,37 @@ import { MI_NUEVO_GOLEM } from './config/golems'
 
 const miGolem = createFollowerGolem(MI_NUEVO_GOLEM, 0, Vector3.create(16, 0, 16), 'local')
 ```
+
+---
+
+## 8. Estructura Físico-Espacial en Escena: El Laboratorio Steampunk (*Wreckage Lab*)
+
+Para conectar la lógica de forja algorítmica con el mundo 3D inmersivo, se ha diseñado y construido la estructura física del **Laboratorio de Desguace y Creación de Golems (*Wreckage Lab*)** en el Distrito de la Forja (Parcelas `[1, 2]` y `[2, 2]` • $X: [25.0\text{m} \rightarrow 45.0\text{m}]$, $Z: [30.0\text{m} \rightarrow 38.5\text{m}]$):
+
+```
+ (Acceso Frontal Norte Z ≈ 38.3m)
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                      ACCESO FRONTAL Y SEÑALIZACIÓN                     │
+ ├───────────────────┬───────────────────────────────┬────────────────────┤
+ │  ALA OESTE        │  NÚCLEO CENTRAL               │  ALA ESTE          │
+ │  (Entrada         │  (Crisol de Fusión            │  (Salida y Bahía   │
+ │   Ingredientes)   │   y Transmisión)              │   de Activación)   │
+ │  X: 25.0m - 28.5m │  X: 33.0m - 37.0m             │  X: 39.0m - 44.8m  │
+ │  Z: 30.0m - 38.0m │  Z: 30.0m - 38.0m             │  Z: 30.0m - 38.0m  │
+ │                   │                               │                    │
+ │  • Tolvas Chatarra│  • Tanque Caldera Masivo      │  • Podio Elevado   │
+ │  • Cintas Engran. │  • Chimeneas Smokers          │  • Golem Prototipo │
+ │  • Barriles Fuel  │  • Engranaje Horizontal Masivo│  • Templado Hidr.  │
+ │  • Consola Carga  │  • Consola Maestra de Mando   │  • Barriles Enfr.  │
+ │  • Marcador [01]  │                               │  • Marcador [02]   │
+ └───────────────────┴───────────────────────────────┴────────────────────┘
+```
+
+- **Archivos Modulares**:
+  - [`src/config/wreckageLabConfig.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/config/wreckageLabConfig.ts): Coordenadas espaciales, límites y catálogo de modelos `.glb`.
+  - [`src/objects/wreckageLabBuilder.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/wreckageLabBuilder.ts): Fábrica constructora modular con cimentación mixta, 8 columnas mecánicas y 6 módulos de techo industrial.
+- **Flujo Espacial de Creación**:
+  1. **Ingreso (Ala Oeste)**: El jugador deposita las piezas en las tolvas escalonadas, reguladas por una cascada de engranajes y panel dosificador.
+  2. **Fusión (Núcleo Central)**: La caldera de vapor a alta presión funde los componentes mientras el tren de engranajes monumentales transmite la energía mecánica.
+  3. **Activación (Ala Este)**: El nuevo golem emerge en el podio elevado para su inspección técnica, enfriamiento y vinculación con el jugador.
 

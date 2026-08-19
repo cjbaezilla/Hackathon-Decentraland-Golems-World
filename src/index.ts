@@ -26,6 +26,7 @@ import { createTournamentArena } from './objects/arenaBuilder'
 import { createSouthCorridor } from './objects/southCorridorBuilder'
 import { createTrampoline } from './objects/trampoline'
 import { createTradingPosts } from './objects/tradingPostsBuilder'
+import { createWreckageLab } from './objects/wreckageLabBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -92,7 +93,10 @@ export function main() {
   // 6. Instanciar los 5 puestos de comercio steampunk equidistantes en el bulevar de la Forja
   createTradingPosts()
 
-  // 7. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
+  // 7. Instanciar el Laboratorio Steampunk de Creación de Golems (Wreckage Lab) en Parcelas [1, 2] y [2, 2]
+  createWreckageLab()
+
+  // 8. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
