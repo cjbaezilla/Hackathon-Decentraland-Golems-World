@@ -23,6 +23,7 @@ import { createRadioTower } from './objects/radioTowerBuilder'
 import { createChatarrales } from './objects/chatarralesBuilder'
 import { createAbandonedFactory } from './objects/abandonedFactoryBuilder'
 import { createTournamentArena } from './objects/arenaBuilder'
+import { createSouthCorridor } from './objects/southCorridorBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -38,7 +39,7 @@ import {
  * - Interfaz de Usuario React-ECS Mobile-First.
  * - Esquema de controles táctiles para dispositivos móviles.
  * - Infraestructura multijugador P2P (MessageBus).
- * - Arquitectura completa del Mundo de Golems (400x400m / 9 Zonas):
+ * - Arquitectura completa del Mundo de Golems (400x400m / 9 Zonas + Corredores):
  *   1. Distrito de la Forja (Suroeste: 0..140m X, 0..140m Z).
  *   2. Desierto de Chatarra (Noroeste: 0..140m X, 260..400m Z).
  *   3. Reserva de Minería Segura (Noreste: 260..400m X, 260..400m Z).
@@ -48,6 +49,7 @@ import {
  *   7. Los Chatarrales (Oeste: 0..140m X, 140..260m Z).
  *   8. Fábrica Abandonada (Anillo 2: 140..260m X, 140..260m Z).
  *   9. Gran Arena Circular Steampunk (Centro: 200m, 200m - Ø 72m).
+ *   10. Corredor y Gran Vía del Sur (Parcelas 13,1 en 212, 24 y enlace Forja-Calderas).
  * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
  */
 export function main() {
@@ -70,7 +72,7 @@ export function main() {
   setupSquadSyncListeners(onRemoteSquadUpdated)
   requestAllSquads()
 
-  // 4. Instanciar la arquitectura y delimitación de las 9 zonas del mundo completo
+  // 4. Instanciar la arquitectura y delimitación de todas las zonas y corredores
   createForgeDistrict()
   createMiningReserve()
   createScrapDesert()
@@ -80,6 +82,7 @@ export function main() {
   createChatarrales()
   createAbandonedFactory()
   createTournamentArena()
+  createSouthCorridor()
 
   // 5. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
   engine.addSystem(golemFollowerSystem)

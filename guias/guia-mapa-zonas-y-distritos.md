@@ -1,6 +1,6 @@
 # 🗺️ Guía Maestra: Mapa, Distritos, Zonas y Coordenadas del Mundo de Golems (Grid 25x25 / 400m × 400m)
 
-Esta guía técnica y documental detalla exhaustivamente la arquitectura espacial, zonificación, límites métricos, sistemas de coordenadas, distribución de distritos, trazado vial y catálogo de archivos constructores del mapa de **Golems** en Decentraland SDK7.
+Esta guía técnica y documental detalla exhaustivamente la arquitectura espacial, zonificación, límites métricos, sistemas de coordenadas, distribución de distritos, trazado vial y catálogo completo de archivos constructores y assets del mapa de **Golems** en Decentraland SDK7.
 
 ---
 
@@ -15,13 +15,15 @@ Esta guía técnica y documental detalla exhaustivamente la arquitectura espacia
    - [4.3 Reserva de Minería Segura (Noreste: 260..400m X, 260..400m Z)](#43-reserva-de-minería-segura-noreste-260400m-x-260400m-z)
    - [4.4 Calderas de la Fundición (Sureste: 260..400m X, 0..140m Z)](#44-calderas-de-la-fundición-sureste-260400m-x-0140m-z)
 5. [Zonas Intermedias, Anillos Concéntricos y Centro](#5-zonas-intermedias-anillos-concéntricos-y-centro)
-   - [5.1 Los Chatarrales (Anillo 1 - Comunes)](#51-los-chatarrales-anillo-1---comunes)
-   - [5.2 Fábrica Abandonada (Anillo 2 - Poco Comunes)](#52-fábrica-abandonada-anillo-2---poco-comunes)
-   - [5.3 Subestación Eléctrica (Norte)](#53-subestación-eléctrica-norte)
-   - [5.4 Torre de Radio (Este)](#54-torre-de-radio-este)
-   - [5.5 Gran Arena Circular de Torneo Steampunk (Centro 200m, 200m)](#55-gran-arena-circular-de-torneo-steampunk-centro-200m-200m)
+   - [5.1 Los Chatarrales (Oeste: 0..140m X, 140..260m Z)](#51-los-chatarrales-oeste-0140m-x-140260m-z)
+   - [5.2 Fábrica Abandonada (Anillo 2: 140..260m X, 140..260m Z)](#52-fábrica-abandonada-anillo-2-140260m-x-140260m-z)
+   - [5.3 Subestación Eléctrica (Norte: 140..260m X, 280..400m Z)](#53-subestación-eléctrica-norte-140260m-x-280400m-z)
+   - [5.4 Torre de Radio (Este: 280..400m X, 140..260m Z)](#54-torre-de-radio-este-280400m-x-140260m-z)
+   - [5.5 Gran Arena Circular de Torneo Steampunk (Centro: 200m, 200m)](#55-gran-arena-circular-de-torneo-steampunk-centro-200m-200m)
+   - [5.6 Corredor y Gran Vía del Sur (Parcelas 13,1 - X: 140..260m, Z: 0..140m)](#56-corredor-y-gran-vía-del-sur-parcelas-131---x-140260m-z-0140m)
 6. [Tabla de Coordenadas, Superficies y Niveles de Riesgo](#6-tabla-de-coordenadas-superficies-y-niveles-de-riesgo)
-7. [Patrones de Construcción y Principios Mobile-First](#7-patrones-de-construcción-y-principios-mobile-first)
+7. [Catálogo Completo de Modelos 3D y Assets Utilizados](#7-catálogo-completo-de-modelos-3d-y-assets-utilizados)
+8. [Patrones de Construcción y Principios Mobile-First](#8-patrones-de-construcción-y-principios-mobile-first)
 
 ---
 
@@ -54,12 +56,22 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │   │   ├── scrapDesertConfig.ts            # Coordenadas y assets del Desierto de Chatarra (0..140, 260..400)
 │   │   ├── miningReserveConfig.ts          # Coordenadas y assets de la Reserva de Minería (260..400, 260..400)
 │   │   ├── foundryBoilersConfig.ts         # Coordenadas y assets de las Calderas de Fundición (260..400, 0..140)
+│   │   ├── substationConfig.ts             # Coordenadas y assets de la Subestación Eléctrica (140..260, 280..400)
+│   │   ├── radioTowerConfig.ts             # Coordenadas y assets de la Torre de Radio (280..400, 140..260)
+│   │   ├── chatarralesConfig.ts            # Coordenadas y assets de Los Chatarrales (0..140, 140..260)
+│   │   ├── abandonedFactoryConfig.ts       # Coordenadas y assets de la Fábrica Abandonada (140..260, 140..260)
+│   │   ├── southCorridorConfig.ts          # Coordenadas y assets del Corredor Sur y Parcela 13,1 (140..260, 0..140)
 │   │   └── arenaConfig.ts                  # Parámetros geométricos de la Gran Arena Central (200, 200)
 │   └── objects/
 │       ├── forgeDistrictBuilder.ts         # Fábrica constructora del Distrito de la Forja
 │       ├── scrapDesertBuilder.ts           # Fábrica constructora del Desierto de Chatarra
 │       ├── miningReserveBuilder.ts         # Fábrica constructora de la Reserva de Minería
 │       ├── foundryBoilersBuilder.ts        # Fábrica constructora de las Calderas de la Fundición
+│       ├── substationBuilder.ts            # Fábrica constructora de la Subestación Eléctrica
+│       ├── radioTowerBuilder.ts            # Fábrica constructora de la Torre de Radio
+│       ├── chatarralesBuilder.ts           # Fábrica constructora de Los Chatarrales
+│       ├── abandonedFactoryBuilder.ts      # Fábrica constructora de la Fábrica Abandonada
+│       ├── southCorridorBuilder.ts         # Fábrica constructora del Corredor Sur y Parcela 13,1
 │       └── arenaBuilder.ts                 # Fábrica constructora de la Gran Arena de Torneo
 ```
 
@@ -186,29 +198,33 @@ El espacio central entre las 4 esquinas simétricas ($81.600\text{ m²}$ restant
                   ┌─────────────┴─────────────┐
                   │    FÁBRICA ABANDONADA     │
                   │    (Poco Comunes)         │
+                  └─────────────┬─────────────┘
+                  ┌─────────────┴─────────────┐
+                  │  CORREDOR Y GRAN VÍA SUR  │
+                  │  (Parcela 13,1 / Enlace)  │
                   └───────────────────────────┘
-                  (X: 140..260m, Z: 140..260m)
+                  (X: 140..260m, Z: 0..140m)
 ```
 
-### 5.1 Los Chatarrales (Anillo 1 - Comunes)
-- **Ubicación**: Pasillos abiertos y llanuras entre el Distrito de la Forja y los anillos exteriores.
+### 5.1 Los Chatarrales (Oeste: `0..140m X`, `140..260m Z`)
+- **Ubicación**: Llanura abierta de recolección de chatarra básica entre la Forja y el Desierto.
 - **Materiales**: `alambre_cobre`, `tornillos_pernos`, `engranajes_desgastados`, `tubos_cobre`, `sartenes`, `ollas_cocinar`, `placas_laton`.
-- **Dinámica**: Terreno despejado y seguro para familiarizarse con el radar de calor.
+- **Hitos**: Campamento de Chatarreros `(70, 200)` techado con bancos de clasificación, Depósito de Latón `(40, 170)`, Taller de Fundición Menor `(100, 230)` y Calzada Troncal Norte-Sur $X=70$.
 
-### 5.2 Fábrica Abandonada (Anillo 2 - Poco Comunes)
-- **Ubicación**: Anillo concéntrico intermedio alrededor del centro.
+### 5.2 Fábrica Abandonada (Anillo 2: `140..260m X`, `140..260m Z`)
+- **Ubicación**: Anillo industrial concéntrico que circunda la Gran Arena Central.
 - **Materiales**: `transistores`, `bombillas_filamento`, `resortes_reloj`, `manometros`, `valvulas_vapor`, `lentes_tv_viejo`.
-- **Dinámica**: Estructuras derruidas y componentes de nivel medio.
+- **Hitos**: Nave de Montaje Colapsada `(200, 150)`, Pabellón de Calderas Industriales `(150, 200)`, Almacén de Transistores `(250, 200)` y calzadas de acceso a las rampas de la Arena.
 
-### 5.3 Subestación Eléctrica (Norte)
-- **Ubicación**: Sector Norte `X: 140m a 260m`, `Z: 280m a 400m`.
+### 5.3 Subestación Eléctrica (Norte: `140..260m X`, `280..400m Z`)
+- **Ubicación**: Sector Norte del mundo, complejo de alta tensión.
 - **Materiales**: `motor_vapor`, `bobinas_tesla`, `baterias_alquimicas`.
-- **Dinámica**: Complejo de alta tensión con afinidad galvánica y vapor.
+- **Hitos**: Plataforma Central de Transformadores Galvánicos `(200, 340)`, Banco de Baterías Alquímicas `(170, 320)` y Estación de Motores de Vapor `(230, 360)`.
 
-### 5.4 Torre de Radio (Este)
-- **Ubicación**: Sector Este `X: 280m a 400m`, `Z: 140m a 260m`.
+### 5.4 Torre de Radio (Este: `280..400m X`, `140..260m Z`)
+- **Ubicación**: Sector Este del mundo, complejo de telecomunicaciones.
 - **Materiales**: `antenas_radio`, `diodos_led`.
-- **Dinámica**: Torres de comunicación y materiales luminosos de velocidad.
+- **Hitos**: Gran Mástil de Transmisión a 8m de altura `(340, 200)`, Estación de Señales LED `(320, 230)` y Puesto de Escucha `(360, 170)`.
 
 ### 5.5 Gran Arena Circular de Torneo Steampunk (Centro: `200m, 200m`)
 - **Ubicación**: Coordenadas exactas `(X: 200.0m, Y: 0.0m, Z: 200.0m)`.
@@ -216,6 +232,14 @@ El espacio central entre las 4 esquinas simétricas ($81.600\text{ m²}$ restant
 - **Hitos**: 4 Pilares monumentales de esquina de 12m de altura, sistema planetario de engranajes centrales giratorios, 16 balizas perimetrales y 4 grandes rampas cardinales (Norte, Sur, Este, Oeste).
 - **Función**: Sede del Torneo Escalera competitivo 1v1 (3 vs 3 golems) y 2v2 (6 vs 6 golems).
 - **Guía Técnica de la Arena**: [`guias/guia-arena-torneo-steampunk.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-arena-torneo-steampunk.md).
+
+### 5.6 Corredor y Gran Vía del Sur (Parcelas `13,1` - `X: 140..260m, Z: 0..140m`)
+- **Ubicación**: Corredor intermedio sur entre el Distrito de la Forja (Oeste) y las Calderas de Fundición (Este).
+- **Hitos Arquitectónicos**:
+  - **Puesto de Control y Baliza del Sur (Parcela `13, 1` en `X: 212m, Z: 24m`)**: Plataforma techada (8x8m) con baliza de transmisión de engranajes (`Gear Big`, `Gear Shaft`), tanques de vapor, chimenea humeante, cofres de suministros, hidrante y farolas de señalización.
+  - **Gran Vía Sur ($X = 200\text{m}, Z \in [4\text{m}, 150\text{m}]$)**: Calzada adoquinada recta con farolas gemelas cada 24m que conecta el borde sur del mundo directamente con la Fábrica y la Rampa Sur de la Gran Arena.
+  - **Gran Cruce del Sur (`(200, 70)`)**: Intersección monumental con la calzada transversal $Z=70$ que une la Puerta Este de la Forja con las Calderas.
+  - **Estación de Reabastecimiento de Vapor Sur (`(170, 40)`)**: Depósito de combustible y tanques de presión.
 
 ---
 
@@ -227,15 +251,51 @@ El espacio central entre las 4 esquinas simétricas ($81.600\text{ m²}$ restant
 | **Desierto de Chatarra** | `0` a `140` | `260` a `400` | 19.600 m² | `0,16` a `8,24` | 🔴 Peligro (PK) | Legendarios (`ojo_dragon`, `corazon_primigenio`) |
 | **Reserva de Minería** | `260` a `400` | `260` a `400` | 19.600 m² | `16,16` a `24,24`| 🟢 Seguro (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) |
 | **Calderas Fundición** | `260` a `400` | `0` a `140` | 19.600 m² | `16,0` a `24,8` | 🔴 Peligro (PK) | Épicos (`corazon_caldera`, `reactor_eter`) |
-| **Los Chatarrales** | Pasillos | Pasillos | ~25.000 m² | Anillo 1 | 🟢 Muy Bajo | Comunes (Alambre, Tornillos, Ollas, Latón) |
-| **Fábrica Abandonada** | `140` a `260` | `140` a `260`| ~20.000 m² | Anillo 2 | 🟡 Medio | Poco Comunes (Transistores, Manómetros, Válvulas) |
-| **Subestación Eléctrica**| `140` a `260` | `280` a `400`| ~14.400 m² | Norte | 🟠 Alto | Raros Galvánicos (Bobinas Tesla, Baterías) |
-| **Torre de Radio** | `280` a `400` | `140` a `260`| ~14.400 m² | Este | 🟠 Alto | Raros Luminosos (Antenas de Radio, Diodos LED) |
+| **Corredor y Gran Vía Sur**| `140` a `260`| `0` a `140` | ~16.800 m² | `9,0` a `15,8` (incl. `13,1`)| 🟢 Seguro (Tránsito) | Puesto de Control `(212, 24)`, Cruce `(200, 70)`, Depósito Vapor |
+| **Los Chatarrales** | `0` a `140` | `140` a `260` | ~16.800 m² | `0,9` a `8,15` | 🟢 Muy Bajo | Comunes (Alambre, Tornillos, Ollas, Latón) |
+| **Fábrica Abandonada** | `140` a `260` | `140` a `260`| ~20.000 m² | `9,9` a `15,15`| 🟡 Medio | Poco Comunes (Transistores, Manómetros, Válvulas) |
+| **Subestación Eléctrica**| `140` a `260` | `280` a `400`| ~14.400 m² | `9,17` a `15,24`| 🟠 Alto | Raros Galvánicos (Bobinas Tesla, Baterías) |
+| **Torre de Radio** | `280` a `400` | `140` a `260`| ~14.400 m² | `17,9` a `24,15`| 🟠 Alto | Raros Luminosos (Antenas de Radio, Diodos LED) |
 | **Gran Arena Torneo** | `164` a `236` | `164` a `236`| ~4.071 m² | Centro `12,12` | 🏆 Torneo Escalera | Arena Circular Steampunk 72m diámetro |
 
 ---
 
-## 7. Patrones de Construcción y Principios Mobile-First
+## 7. Catálogo Completo de Modelos 3D y Assets Utilizados
+
+Todos los modelos 3D son archivos binarios glTF 2.0 (`.glb`) autocontenidos en `assets/asset-packs/`:
+
+| Categoría | Nombre del Modelo | Ruta de Archivo GLB | Usos Principales en el Mapa |
+| :--- | :--- | :--- | :--- |
+| **Pisos y Calzadas** | Wood Plank Floor 4x4M | `assets/asset-packs/wood_plank_floor_4x4m/Wood Plank Floor 4x4M.glb` | Plataformas de talleres, puestos de control y bases |
+| **Pisos y Calzadas** | Wood Planks Broken 4x4M | `assets/asset-packs/wood_planks_broken_4x4m/Wood Planks Broken_4x4M.glb` | Cúmulos de escombros, wreckages y bordes |
+| **Pisos y Calzadas** | Ceiling 4x4M | `assets/asset-packs/ceiling_4x4m/Ceiling 4x4M.glb` | Techos elevados de pabellones y talleres |
+| **Pisos y Calzadas** | Road Cobble Straight | `assets/asset-packs/road_cobble_straight/Road Cobble Straight.glb` | Calzadas adoquinadas rectas (Grandes Vías) |
+| **Pisos y Calzadas** | Road Cross | `assets/asset-packs/road_cross/Road Cross.glb` | Cruces viales monumentales |
+| **Pisos y Calzadas** | Road Angle / Angled | `assets/asset-packs/road_angle/Road Angle.glb` | Curvas y bifurcaciones viales |
+| **Estructuras Pesadas**| Tank | `assets/asset-packs/tank/Tank.glb` | Tanques gigantes de vapor, bastiones y calderas |
+| **Estructuras Pesadas**| Smoker | `assets/asset-packs/smoker/Smoker.glb` | Chimeneas industriales con emisión de vapor |
+| **Estructuras Pesadas**| Tree Fence | `assets/asset-packs/tree_fence/Tree Fence.glb` | Vallas perimetrales y delimitación de distritos |
+| **Estructuras Pesadas**| Barrel | `assets/asset-packs/barrel/Barrel.glb` | Barriles de combustible, escoria y barricadas |
+| **Estructuras Pesadas**| Hidrant | `assets/asset-packs/hidrant/Hidrant.glb` | Hidrantes de refrigeración en talleres y spawn |
+| **Iluminación** | Lamp | `assets/asset-packs/lamp/Lamp.glb` | Farolas de calzada para avenidas y accesos |
+| **Iluminación** | Table Lamp | `assets/asset-packs/table_lamp/Table Lamp.glb` | Lámparas para bancos de trabajo y relés |
+| **Mecanismos** | Gear Shaft | `assets/asset-packs/gear_shaft/Gear Shaft.glb` | Ejes verticales de transmisión y mástiles |
+| **Mecanismos** | Gear Big | `assets/asset-packs/gear_big/Gear Big.glb` | Ruedas colosales de engranaje de 2.6m |
+| **Mecanismos** | Gear 10 Teeth | `assets/asset-packs/gear_10_teeth/Gear 10 Teeth.glb` | Engranajes medianos de tracción |
+| **Mecanismos** | Gear 8 Teeth | `assets/asset-packs/gear_8_teeth/Gear 8 Teeth.glb` | Engranajes de transmisión media |
+| **Mecanismos** | Gear 5 Teeth | `assets/asset-packs/gear_5_teeth/Gear 5 Teeth.glb` | Engranajes pequeños de precisión |
+| **Mecanismos** | Gear Angled 10 Teeth | `assets/asset-packs/gear_angled_10_teeth/Gear Angled 10 Teeth.glb` | Engranajes cónicos y bobinas galvánicas |
+| **Mecanismos** | Gear Small 01, 02, 03 | `assets/asset-packs/gear_small_0*/Gear Small_0*.glb` | Engranajes de relojería y catalogación |
+| **Almacenamiento** | Chest Gear | `assets/asset-packs/chest_gear/Chest Gear.glb` | Cofres de herramientas y componentes |
+| **Almacenamiento** | Chest Plates | `assets/asset-packs/chest_plates/Chest Plates.glb` | Cofres de blindaje y placas |
+| **Almacenamiento** | Chest Tube | `assets/asset-packs/chest_tube/Chest Tube.glb` | Cofres de condensadores y tuberías |
+| **Interactivos/Control**| Switch & Lever | `assets/asset-packs/switch/Switch.glb`, `.../lever/Lever.glb` | Palancas e interruptores de control |
+| **Señalización** | SteamPunk Numbers 00..08 | `assets/asset-packs/steampunk_number_0*/SteamPunk_Number_0*.glb` | Marcadores numéricos de puertas y balizas |
+| **Reliquias** | Arthur Sword | `assets/asset-packs/arthur_sword/Arthur Sword.glb` | Reliquias de prospección y leyendas |
+
+---
+
+## 8. Patrones de Construcción y Principios Mobile-First
 
 1. **Arquitectura Modular (Factory Pattern)**:
    - Todo el entorno 3D está descompuesto en fábricas independientes dentro de `src/objects/`.
