@@ -75,18 +75,21 @@ La experiencia se ubica en el Decentraland World `golems.dcl.eth`, compuesto por
 
 ![Mapa de Zonas](GOLEMS/golems_map.png)
 
-### Distribución Espacial de Zonas
+> 📘 **Documentación Detallada del Mapa**: Para conocer todas las cotas métricas, arquitectura de archivos, hitos y diagramas ASCII detallados, consulta la [Guía Maestra: Mapa, Distritos, Zonas y Coordenadas](guias/guia-mapa-zonas-y-distritos.md).
 
-| Zona | Ubicación (Coords Metros) | Nivel de Riesgo | Materiales Principales | Descripción |
-| :--- | :--- | :--- | :--- | :--- |
-| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(80,80)` | 🟢 Zona Segura (No PK) | Ninguno (Taller) | Punto de aparición inicial, yunques de forja, gestión de misiones y tablón de torneos. |
-| **Los Chatarrales** | Anillo Interior `(80,0)` a `(160,160)` | 🟢 Dificultad Baja | Comunes (Alambre, Tornillos, Ollas) | Terreno llano e ideal para novatos con alta tasa de reaparición de chatarra básica. |
-| **Fábrica Abandonada** | Anillo Medio `(160,0)` a `(260,260)` | 🟡 Dificultad Media | Poco Comunes (Transistores, Manómetros) | Estructuras industriales derruidas con materiales de estadísticas avanzadas. |
-| **Subestación Eléctrica** | Sector Norte `(140,280)` a `(260,400)` | 🟠 Dificultad Alta | Raros (Bobinas Tesla, Baterías, Motores) | Complejo de alta tensión con componentes de afinidad galvánica y vapor. |
-| **Torre de Radio** | Sector Este `(280,140)` a `(400,260)` | 🟠 Dificultad Alta | Raros (Antenas de radio, Diodos LED) | Antiguas antenas de telecomunicación con materiales de afinidad luminosa. |
-| **Reserva de Minería** | Esquina Noreste `(300,300)` a `(400,400)` | 🟢 Zona Segura (No PK) | Raros y Épicos (Núcleo Maná, Cerebro Autómata) | Cantera protegida donde recolectar materiales de alto valor sin peligro de asalto. |
-| **Calderas de la Fundición** | Esquina Sureste `(300,0)` a `(400,100)` | 🔴 Zona PK Libre | Épicos (Reactor de Éter, Corazón de Caldera) | Zona volcánica e industrial hostil; custodiada por NPCs élite y con combate entre jugadores habilitado. |
-| **Desierto de Chatarra** | Esquina Noroeste `(0,300)` a `(100,400)` | 🔴 Zona PK Libre | Legendarios (Ojo de Dragón, Corazón Primigenio) | Páramo desolado de máxima dificultad con las piezas más codiciadas de todo el mundo. |
+### Distribución Espacial de Zonas y las 4 Esquinas Simétricas (140m × 140m c/u)
+
+| Zona | Ubicación (Coords Metros) | Dimensión | Nivel de Riesgo | Materiales Principales | Descripción |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Punto de aparición inicial `(16, 5)`, Plaza Mayor `(70, 70)`, 4 talleres, gestión de misiones y puertas `(70, 140)` y `(140, 70)`. |
+| **Desierto de Chatarra** | Esquina Noroeste `(0,260)` a `(140,400)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Legendarios (`ojo_dragon`, `corazon_primigenio`) | Páramo desolado de máxima dificultad, Cráter del Autómata Primigenio `(70, 330)`, Nido del Dragón y portal `(130, 270)`. |
+| **Reserva de Minería** | Esquina Noreste `(260,260)` a `(400,400)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) | Cantera protegida de éter `(340, 340)`, taller de relojería, pozo profundo, refugio de exploradores y portal `(270, 270)`. |
+| **Calderas de la Fundición** | Esquina Sureste `(260,0)` a `(400,140)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Épicos (`corazon_caldera`, `reactor_eter`) | Complejo volcánico y térmico, Gran Horno Central `(330, 70)`, Reactor de Éter y portal `(270, 130)`. |
+| **Los Chatarrales** | Pasillos y Anillo Interior | ~25.000 m² | 🟢 Dificultad Baja | Comunes (Alambre, Tornillos, Ollas) | Terreno llano e ideal para novatos con alta tasa de reaparición de chatarra básica. |
+| **Fábrica Abandonada** | Anillo Medio `(140,140)` a `(260,260)` | ~20.000 m² | 🟡 Dificultad Media | Poco Comunes (Transistores, Manómetros) | Estructuras industriales derruidas con materiales de estadísticas avanzadas. |
+| **Subestación Eléctrica** | Sector Norte `(140,280)` a `(260,400)` | ~14.400 m² | 🟠 Dificultad Alta | Raros (Bobinas Tesla, Baterías, Motores) | Complejo de alta tensión con componentes de afinidad galvánica y vapor. |
+| **Torre de Radio** | Sector Este `(280,140)` a `(400,260)` | ~14.400 m² | 🟠 Dificultad Alta | Raros (Antenas de radio, Diodos LED) | Antiguas antenas de telecomunicación con materiales de afinidad luminosa. |
+| **Gran Arena de Torneo** | Centro `(164,164)` a `(236,236)` | ~4.071 m² (Ø 72m) | 🏆 Competitivo | Torneo Escalera 1v1 y 2v2 | Colosal plataforma circular de torneo steampunk en `(200, 200)`. |
 
 ![Detalle del Mapa y Anillos](GOLEMS/golems_map2.png)
 
