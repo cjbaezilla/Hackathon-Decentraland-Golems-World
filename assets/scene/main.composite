@@ -2986,29 +2986,20 @@
                 "default": true,
                 "position": {
                   "x": {
-                    "$case": "range",
-                    "value": [
-                      14,
-                      18
-                    ]
+                    "$case": "single",
+                    "value": 12.2
                   },
                   "y": {
-                    "$case": "range",
-                    "value": [
-                      0,
-                      0
-                    ]
+                    "$case": "single",
+                    "value": 0
                   },
                   "z": {
-                    "$case": "range",
-                    "value": [
-                      4,
-                      6
-                    ]
+                    "$case": "single",
+                    "value": 2
                   }
                 },
                 "cameraTarget": {
-                  "x": 16,
+                  "x": 12.2,
                   "y": 1,
                   "z": 16
                 }
