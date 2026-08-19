@@ -113,5 +113,25 @@ export const en: TranslationSchema = {
     insufficientMaterials: 'Requires between 5 and 12 materials',
     successCraft: 'New golem successfully forged!',
     slotsCount: 'Parts: {count}/12'
+  },
+  npc: {
+    name: 'Silas',
+    role: 'Wasteland Survivor',
+    floatingLabel: '⚙️ Silas • Wasteland Survivor',
+    hoverText: 'Talk to Silas',
+    companionName: 'Piston',
+    dialogTitle: '⚙️ SILAS, THE SURVIVOR',
+    dialogIntro: 'Well, well, another newcomer who made it in one piece to the Forge! I am Silas. I have been surviving for years in this wasteland of scrap and steam. If you want to last more than two days alive out here, you better listen closely.',
+    optLore: '📖 What is this place and how do I survive?',
+    optGolems: '🤖 How do I craft and fight with Golems?',
+    optZones: '🗺️ What dangers and zones are on the map?',
+    optTips: '💡 Give me a survival tip',
+    optClose: '🚪 Thanks Silas, I will be on my way!',
+    loreText: 'Before the Great Overload, this land was a colossal network of foundries and workshops. When the reactors collapsed, residual magical energy fused with scrap metal, bringing the first automatons to life. To survive, use your heat radar: it tracks buried parts that rise from the earth as you approach.',
+    golemsText: 'You will not get far out there without a squad. In the Forge you can combine 5 to 12 scrap components. Each unique recipe yields a golem with elemental affinity: Steam beats Mechanical, Mechanical beats Galvanic, Galvanic beats Luminous, Luminous beats Aether, and Aether beats Steam. In the Grand Arena at (200m, 200m) you will test their might!',
+    zonesText: 'The Forge District (Southwest) and Mining Reserve (Northeast) are safe havens. But beware if you venture into the Scrap Desert (Northwest) or Foundry Boilers (Southeast): they are lawless free-PK zones where legendary loot and deadly battles reign.',
+    tipsText: 'A veteran scrapper tip: use steam trampolines to travel at high speeds across the terrain. And never discard common parts like copper pipes or clock springs: a smart combination can create a faster, better-balanced golem than an unwieldy colossus.',
+    backButton: '◀ Ask something else'
   }
 }
+

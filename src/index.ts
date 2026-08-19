@@ -27,6 +27,7 @@ import { createSouthCorridor } from './objects/southCorridorBuilder'
 import { createTrampoline } from './objects/trampoline'
 import { createTradingPosts } from './objects/tradingPostsBuilder'
 import { createWreckageLab } from './objects/wreckageLabBuilder'
+import { createWelcomeNpc, welcomeNpcAnimationSystem } from './objects/welcomeNpc'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -53,7 +54,7 @@ import {
  *   8. Fábrica Abandonada (Anillo 2: 140..260m X, 140..260m Z).
  *   9. Gran Arena Circular Steampunk (Centro: 200m, 200m - Ø 72m).
  *   10. Corredor y Gran Vía del Sur (Parcelas 13,1 en 212, 24 y enlace Forja-Calderas).
- * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
+ * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate, trampolines y NPCs).
  */
 export function main() {
   // 1. Inicializar la Interfaz de Usuario 2D (React-ECS)
@@ -96,13 +97,17 @@ export function main() {
   // 7. Instanciar el Laboratorio Steampunk de Creación de Golems (Wreckage Lab) en Parcelas [1, 2] y [2, 2]
   createWreckageLab()
 
-  // 8. Registrar los sistemas de seguimiento, combate, animación y trampolín en el motor ECS
+  // 8. Instanciar al NPC de bienvenida Silas el Sobreviviente en Parcela [0, 0] (15.8m, 5.9m sobre el piso de madera)
+  createWelcomeNpc(Vector3.create(15.8, 0.25, 5.9))
+
+  // 9. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
+  engine.addSystem(welcomeNpcAnimationSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas y sistemas activos.')
+  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente y sistemas activos.')
 }
 
 /**

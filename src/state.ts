@@ -16,6 +16,8 @@ export interface CombatLogEntry {
   timestamp: number
 }
 
+export type NpcDialogStep = 'intro' | 'lore' | 'golems' | 'zones' | 'tips'
+
 export interface SceneState {
   isInitialized: boolean
   localSquad: GolemConfig[] | null
@@ -23,6 +25,8 @@ export interface SceneState {
   playerTotalExp: number
   playerTotalKills: number
   combatLogs: CombatLogEntry[]
+  isNpcDialogOpen: boolean
+  npcDialogStep: NpcDialogStep
 }
 
 export const sceneState: SceneState = {
@@ -31,8 +35,48 @@ export const sceneState: SceneState = {
   isInsideArena: false,
   playerTotalExp: 0,
   playerTotalKills: 0,
-  combatLogs: []
+  combatLogs: [],
+  isNpcDialogOpen: false,
+  npcDialogStep: 'intro'
 }
+
+/**
+ * Abre la ventana modal de diálogo del NPC.
+ */
+export function openNpcDialog(step: NpcDialogStep = 'intro') {
+  sceneState.isNpcDialogOpen = true
+  sceneState.npcDialogStep = step
+}
+
+/**
+ * Cierra la ventana modal de diálogo del NPC.
+ */
+export function closeNpcDialog() {
+  sceneState.isNpcDialogOpen = false
+  sceneState.npcDialogStep = 'intro'
+}
+
+/**
+ * Consulta si el diálogo del NPC está abierto.
+ */
+export function getIsNpcDialogOpen(): boolean {
+  return sceneState.isNpcDialogOpen
+}
+
+/**
+ * Obtiene el paso o rama activa de diálogo del NPC.
+ */
+export function getNpcDialogStep(): NpcDialogStep {
+  return sceneState.npcDialogStep
+}
+
+/**
+ * Cambia la rama o paso activo del diálogo del NPC.
+ */
+export function setNpcDialogStep(step: NpcDialogStep) {
+  sceneState.npcDialogStep = step
+}
+
 
 /**
  * Establece el escuadrón local activo en la sesión actual.

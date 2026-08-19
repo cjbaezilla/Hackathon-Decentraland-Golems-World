@@ -113,5 +113,25 @@ export const es: TranslationSchema = {
     insufficientMaterials: 'Se requieren entre 5 y 12 materiales',
     successCraft: '¡Nuevo golem forjado exitosamente!',
     slotsCount: 'Piezas: {count}/12'
+  },
+  npc: {
+    name: 'Silas',
+    role: 'Sobreviviente del Páramo',
+    floatingLabel: '⚙️ Silas • Sobreviviente del Páramo',
+    hoverText: 'Hablar con Silas',
+    companionName: 'Pistón',
+    dialogTitle: '⚙️ SILAS, EL SOBREVIVIENTE',
+    dialogIntro: '¡Vaya, otro forastero que llega entero a la Forja! Soy Silas. Llevo años sobreviviendo en este páramo de chatarra y vapor. Si quieres durar aquí más de dos días con vida, te conviene escuchar con atención.',
+    optLore: '📖 ¿Qué es este lugar y cómo sobrevivo?',
+    optGolems: '🤖 ¿Cómo creo y combato con Golems?',
+    optZones: '🗺️ ¿Qué peligros y zonas hay en el mapa?',
+    optTips: '💡 Dame un consejo de supervivencia',
+    optClose: '🚪 ¡Gracias Silas, volveré luego!',
+    loreText: 'Antes de la Gran Sobrecarga, este mundo era una red colosal de fundiciones y talleres. Cuando los reactores colapsaron, la energía mágica residual se fusionó con la chatarra, dando vida a los primeros autómatas. Para sobrevivir, usa tu radar de calor: detectará piezas enterradas que emergen cuando te acercas.',
+    golemsText: 'No podrás explorar muy lejos sin un escuadrón. En la Forja puedes combinar entre 5 y 12 piezas de chatarra. Cada receta única engendra un golem con afinidad elemental: Vapor vence a Mecánico, Mecánico a Galvánico, Galvánico a Luminoso, Luminoso a Éter y Éter a Vapor. ¡En la Gran Arena central (200m, 200m) probarás su valía!',
+    zonesText: 'El Distrito de la Forja (Suroeste) y la Reserva Minera (Noreste) son zonas seguras. Pero ten mucho cuidado si vas al Desierto de Chatarra (Noroeste) o a las Calderas (Sureste): son zonas PK sin ley donde los materiales legendarios y los combates a muerte están a la orden del día.',
+    tipsText: 'Consejo de viejo chatarrero: aprovecha los trampolines de vapor para desplazarte a toda velocidad. Y jamás descartes piezas comunes como tubos o resortes: una buena combinación puede crear un golem más veloz y equilibrado que un coloso pesado.',
+    backButton: '◀ Volver a preguntar'
   }
 }
+

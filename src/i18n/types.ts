@@ -87,4 +87,24 @@ export interface TranslationSchema {
     successCraft: string
     slotsCount: string
   }
+  npc: {
+    name: string
+    role: string
+    floatingLabel: string
+    hoverText: string
+    companionName: string
+    dialogTitle: string
+    dialogIntro: string
+    optLore: string
+    optGolems: string
+    optZones: string
+    optTips: string
+    optClose: string
+    loreText: string
+    golemsText: string
+    zonesText: string
+    tipsText: string
+    backButton: string
+  }
 }
+

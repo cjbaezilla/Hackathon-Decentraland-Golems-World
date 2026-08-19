@@ -3,6 +3,14 @@ import { Color4 } from '@dcl/sdk/math'
 import { GolemAffinity } from './config/golems'
 import { t, toggleLanguage, getLanguage } from './i18n'
 import { getPlayerLocationInfo } from './utils/location'
+import {
+  getIsNpcDialogOpen,
+  getNpcDialogStep,
+  setNpcDialogStep,
+  closeNpcDialog,
+  NpcDialogStep
+} from './state'
+import { updateWelcomeNpcLanguage } from './objects/welcomeNpc'
 
 /**
  * ============================================================================
@@ -127,6 +135,7 @@ export const LanguageToggle = () => {
       }}
       onMouseDown={() => {
         toggleLanguage()
+        updateWelcomeNpcLanguage()
       }}
       uiText={{
         value: isEs ? '🌐 ES | en' : '🌐 es | EN',
@@ -134,6 +143,285 @@ export const LanguageToggle = () => {
         color: isEs ? Color4.create(1.0, 0.85, 0.3, 1.0) : Color4.create(0.4, 0.9, 1.0, 1.0)
       }}
     />
+  )
+}
+
+/**
+ * Componente de Diálogo Interactivo con Silas el Sobreviviente (Mobile-First / RPG Modal)
+ */
+export const NpcDialog = () => {
+  if (!getIsNpcDialogOpen()) return null
+
+  const step: NpcDialogStep = getNpcDialogStep()
+
+  // Determina el texto a mostrar según la rama activa
+  let bodyContent = t('npc.dialogIntro')
+  if (step === 'lore') bodyContent = t('npc.loreText')
+  else if (step === 'golems') bodyContent = t('npc.golemsText')
+  else if (step === 'zones') bodyContent = t('npc.zonesText')
+  else if (step === 'tips') bodyContent = t('npc.tipsText')
+
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { bottom: 40 },
+        width: 860,
+        minHeight: 320,
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        padding: { top: 18, bottom: 18, left: 24, right: 24 },
+        pointerFilter: 'block'
+      }}
+      uiBackground={{
+        color: Color4.create(0.06, 0.08, 0.12, 0.96)
+      }}
+    >
+      {/* Cabecera del Diálogo: Nombre, Rol y Botón de Cierre */}
+      <UiEntity
+        uiTransform={{
+          width: '100%',
+          height: 38,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          margin: { bottom: 12 }
+        }}
+      >
+        <UiEntity
+          uiTransform={{
+            flexDirection: 'row',
+            alignItems: 'center'
+          }}
+        >
+          <UiEntity
+            uiText={{
+              value: t('npc.dialogTitle'),
+              fontSize: 18,
+              color: Color4.create(1.0, 0.85, 0.35, 1.0),
+              textAlign: 'middle-left'
+            }}
+          />
+          <UiEntity
+            uiTransform={{ margin: { left: 12 } }}
+            uiText={{
+              value: `[ ${t('npc.role')} ]`,
+              fontSize: 13,
+              color: Color4.create(0.4, 0.9, 1.0, 0.85),
+              textAlign: 'middle-left'
+            }}
+          />
+        </UiEntity>
+
+        {/* Botón Táctil de Cerrar (✖) */}
+        <UiEntity
+          uiTransform={{
+            width: 38,
+            height: 34,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.24, 0.1, 0.1, 0.9)
+          }}
+          onMouseDown={() => {
+            closeNpcDialog()
+          }}
+          uiText={{
+            value: '✖',
+            fontSize: 16,
+            color: Color4.create(1.0, 0.4, 0.4, 1.0)
+          }}
+        />
+      </UiEntity>
+
+      {/* Cuerpo del Diálogo / Narrativa */}
+      <UiEntity
+        uiTransform={{
+          width: '100%',
+          minHeight: 90,
+          padding: { top: 10, bottom: 10, left: 14, right: 14 },
+          margin: { bottom: 16 },
+          justifyContent: 'center',
+          alignItems: 'flex-start'
+        }}
+        uiBackground={{
+          color: Color4.create(0.12, 0.15, 0.2, 0.85)
+        }}
+      >
+        <UiEntity
+          uiTransform={{
+            width: '100%'
+          }}
+          uiText={{
+            value: bodyContent,
+            fontSize: 15,
+            color: Color4.create(0.95, 0.95, 0.95, 1.0),
+            textAlign: 'top-left'
+          }}
+        />
+      </UiEntity>
+
+      {/* Opciones de Conversación / Respuestas Táctiles */}
+      {step === 'intro' ? (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            alignItems: 'stretch'
+          }}
+        >
+          {/* Fila 1: Lore y Golems */}
+          <UiEntity
+            uiTransform={{
+              width: '100%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              margin: { bottom: 8 }
+            }}
+          >
+            <UiEntity
+              uiTransform={{
+                width: '49%',
+                height: 42,
+                justifyContent: 'center',
+                alignItems: 'center',
+                pointerFilter: 'block'
+              }}
+              uiBackground={{
+                color: Color4.create(0.16, 0.22, 0.3, 0.95)
+              }}
+              onMouseDown={() => {
+                setNpcDialogStep('lore')
+              }}
+              uiText={{
+                value: t('npc.optLore'),
+                fontSize: 13,
+                color: Color4.create(1.0, 0.9, 0.4, 1.0)
+              }}
+            />
+            <UiEntity
+              uiTransform={{
+                width: '49%',
+                height: 42,
+                justifyContent: 'center',
+                alignItems: 'center',
+                pointerFilter: 'block'
+              }}
+              uiBackground={{
+                color: Color4.create(0.16, 0.22, 0.3, 0.95)
+              }}
+              onMouseDown={() => {
+                setNpcDialogStep('golems')
+              }}
+              uiText={{
+                value: t('npc.optGolems'),
+                fontSize: 13,
+                color: Color4.create(1.0, 0.9, 0.4, 1.0)
+              }}
+            />
+          </UiEntity>
+
+          {/* Fila 2: Zonas y Consejos */}
+          <UiEntity
+            uiTransform={{
+              width: '100%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              margin: { bottom: 8 }
+            }}
+          >
+            <UiEntity
+              uiTransform={{
+                width: '49%',
+                height: 42,
+                justifyContent: 'center',
+                alignItems: 'center',
+                pointerFilter: 'block'
+              }}
+              uiBackground={{
+                color: Color4.create(0.16, 0.22, 0.3, 0.95)
+              }}
+              onMouseDown={() => {
+                setNpcDialogStep('zones')
+              }}
+              uiText={{
+                value: t('npc.optZones'),
+                fontSize: 13,
+                color: Color4.create(1.0, 0.9, 0.4, 1.0)
+              }}
+            />
+            <UiEntity
+              uiTransform={{
+                width: '49%',
+                height: 42,
+                justifyContent: 'center',
+                alignItems: 'center',
+                pointerFilter: 'block'
+              }}
+              uiBackground={{
+                color: Color4.create(0.16, 0.22, 0.3, 0.95)
+              }}
+              onMouseDown={() => {
+                setNpcDialogStep('tips')
+              }}
+              uiText={{
+                value: t('npc.optTips'),
+                fontSize: 13,
+                color: Color4.create(1.0, 0.9, 0.4, 1.0)
+              }}
+            />
+          </UiEntity>
+
+          {/* Fila 3: Salir */}
+          <UiEntity
+            uiTransform={{
+              width: '100%',
+              height: 38,
+              justifyContent: 'center',
+              alignItems: 'center',
+              pointerFilter: 'block'
+            }}
+            uiBackground={{
+              color: Color4.create(0.2, 0.16, 0.18, 0.9)
+            }}
+            onMouseDown={() => {
+              closeNpcDialog()
+            }}
+            uiText={{
+              value: t('npc.optClose'),
+              fontSize: 13,
+              color: Color4.create(0.85, 0.85, 0.85, 1.0)
+            }}
+          />
+        </UiEntity>
+      ) : (
+        /* Botón de retroceso a la rama principal */
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.18, 0.28, 0.38, 0.95)
+          }}
+          onMouseDown={() => {
+            setNpcDialogStep('intro')
+          }}
+          uiText={{
+            value: t('npc.backButton'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.95, 0.5, 1.0)
+          }}
+        />
+      )}
+    </UiEntity>
   )
 }
 
@@ -162,7 +450,7 @@ export const TopHeaderBar = () => {
 
 /**
  * Componente raíz de UI limpio, listo para albergar los subsistemas del juego final
- * (Radar térmico, Forja de Golems, Inventario de Chatarra, Escuadrón y Misiones).
+ * (Radar térmico, Forja de Golems, Inventario de Chatarra, Escuadrón y Diálogo de NPCs).
  */
 export const uiComponent = () => {
   return (
@@ -179,7 +467,8 @@ export const uiComponent = () => {
       {/* Barra Superior con Indicador de Tilemap y Selector de Idioma */}
       <TopHeaderBar />
 
-      {/* Contenedor principal de interfaz limpio */}
+      {/* Modal de Diálogo de Silas el Sobreviviente */}
+      <NpcDialog />
     </UiEntity>
   )
 }

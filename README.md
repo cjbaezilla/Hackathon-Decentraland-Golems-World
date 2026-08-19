@@ -82,7 +82,7 @@ La experiencia se ubica en el Decentraland World `golems.dcl.eth`, compuesto por
 
 | Zona | Ubicación (Coords Metros) | Dimensión | Nivel de Riesgo | Materiales Principales | Descripción |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Punto de aparición inicial `(16, 5)`, Plaza Mayor `(70, 70)`, 4 talleres, gestión de misiones y puertas `(70, 140)` y `(140, 70)`. |
+| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Punto de spawn `(12.2, 2.0)`, **Silas el Sobreviviente** en `(15.8, 5.9)`, Plaza Mayor `(70, 70)`, 4 talleres, Wreckage Lab `[1,2]` y puertas. |
 | **Desierto de Chatarra** | Esquina Noroeste `(0,260)` a `(140,400)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Legendarios (`ojo_dragon`, `corazon_primigenio`) | Páramo desolado de máxima dificultad, Cráter del Autómata Primigenio `(70, 330)`, Nido del Dragón y portal `(130, 270)`. |
 | **Reserva de Minería** | Esquina Noreste `(260,260)` a `(400,400)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) | Cantera protegida de éter `(340, 340)`, taller de relojería, pozo profundo, refugio de exploradores y portal `(270, 270)`. |
 | **Calderas de la Fundición** | Esquina Sureste `(260,0)` a `(400,140)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Épicos (`corazon_caldera`, `reactor_eter`) | Complejo volcánico y térmico, Gran Horno Central `(330, 70)`, Reactor de Éter y portal `(270, 130)`. |
@@ -364,12 +364,15 @@ Hackathon/
 │   ├── golems_cover.png        # Portada oficial de la experiencia
 │   └── *.png                   # Ilustraciones e infografías conceptuales
 ├── guias/                      # Guías técnicas y documentación maestra de la experiencia
-│   ├── guia-soporte-bilingue-i18n.md          # Guía del Sistema Bilingüe e Internacionalización (ES / EN)
-│   ├── guia-sistema-combate-y-batallas.md     # Guía completa del Sistema de Combate en Tiempo Real y FFA
+│   ├── README.md               # Índice Maestro y Directorio de Todas las Guías Técnicas
+│   ├── guia-npc-bienvenida-silas.md           # Guía Maestra del NPC Silas el Sobreviviente y Campamento
+│   ├── guia-mapa-zonas-y-distritos.md         # Guía Maestra del Mapa 25x25, 9 Zonas, Trampolines y Puestos
 │   ├── guia-arena-torneo-steampunk.md         # Guía de la Gran Arena Circular de Torneo Steampunk (72m)
-│   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía de la Fábrica de Golems y jerarquías
-│   ├── guia-sistema-seguimiento-y-mecanicas.md # Guía del sistema de seguimiento en fila
-│   └── guia-multijugador-mobile.md             # Guía de red P2P y Mobile-First
+│   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía del Wreckage Lab y Forja de Golems
+│   ├── guia-sistema-combate-y-batallas.md     # Guía del Sistema de Combate en Tiempo Real y FFA
+│   ├── guia-sistema-seguimiento-y-mecanicas.md # Guía del sistema de seguimiento Multi-Trail FIFO LERP
+│   ├── guia-multijugador-mobile.md             # Guía de red P2P MessageBus y Mobile-First
+│   └── guia-soporte-bilingue-i18n.md          # Guía del Sistema Bilingüe e Internacionalización (ES / EN)
 ├── docs/                       # Documentación oficial de Decentraland y SDK Skills
 │   ├── dcl-docs-main/          # Documentación oficial de Decentraland SDK7
 │   └── sdk-skills-main/        # Catálogo maestro de habilidades y patrones
@@ -379,8 +382,8 @@ Hackathon/
 │   └── README.md               # Manual de uso detallado del generador CLI y catálogo de modelos
 ├── src/                        # Código fuente TypeScript SDK7
 │   ├── index.ts                # Inicializador principal y orquestador de sistemas
-│   ├── state.ts                # Estado global reactivo de la escena (EXP, kills, logs, salud)
-│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD, Selector de Idioma táctil)
+│   ├── state.ts                # Estado global reactivo de la escena (EXP, kills, logs, diálogo NPC)
+│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD, Selector de Idioma, Modal Silas)
 │   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake, ataques y derrotas)
 │   ├── i18n/                   # Motor de internacionalización y diccionarios bilingües
 │   │   ├── types.ts            # Esquemas de tipos y TranslationSchema
@@ -394,7 +397,10 @@ Hackathon/
 │   │   ├── combat.ts           # GolemCombatComponent, FloatingDamageComponent y GOLEM_TEAMS
 │   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
 │   ├── objects/                # Patrón Factory de GameObjects
+│   │   ├── welcomeNpc.ts       # Fábrica del NPC de Bienvenida Silas, campamento y animación reactiva
 │   │   ├── arenaBuilder.ts     # Constructor procedimental de la Gran Arena de Torneo Steampunk
+│   │   ├── wreckageLabBuilder.ts# Constructor del Laboratorio de Desguace (Wreckage Lab)
+│   │   ├── tradingPostsBuilder.ts# Constructor de los 5 puestos de comercio steampunk
 │   │   ├── golemFactory.ts     # Fábrica de entidades, billboards, salud ASCII y números flotantes
 │   │   └── trampoline.ts       # Trampolín propulsor steampunk de vapor
 │   └── systems/                # Sistemas ECS
