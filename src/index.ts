@@ -6,11 +6,9 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { setupUi } from './ui'
-import { generateRandomSquad } from './config/golems'
+import { GolemConfig, generateRandomSquad } from './config/golems'
 import { setLocalActiveSquad } from './state'
-import { createFollowerGolem } from './objects/golemFactory'
-import { createTournamentArena } from './objects/arenaBuilder'
-import { createTrampoline } from './objects/trampoline'
+import { createFollowerGolem, removePlayerSquad } from './objects/golemFactory'
 import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
 import { golemCombatSystem } from './systems/golemCombatSystem'
 import { arenaAnimationSystem } from './systems/arenaAnimationSystem'
@@ -27,10 +25,11 @@ import {
  * ============================================================================
  * PUNTO DE ENTRADA PRINCIPAL DE LA ESCENA (SDK7 ECS)
  * ============================================================================
- * Inicializa la UI Steampunk, controles táctiles Mobile-First, escuadrón local de
- * golems con estadísticas aleatorias RPG, la Gran Arena Circular de Torneo (Free For All),
- * trampolín impulsor de vapor, infraestructura multijugador P2P y sistemas ECS de animación,
- * seguimiento y combate.
+ * Escena base limpia para el desarrollo del juego final:
+ * - Interfaz de Usuario React-ECS Mobile-First.
+ * - Esquema de controles táctiles para dispositivos móviles.
+ * - Infraestructura multijugador P2P (MessageBus).
+ * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
  */
 export function main() {
   // 1. Inicializar la Interfaz de Usuario 2D (React-ECS)
@@ -48,42 +47,45 @@ export function main() {
     ]
   })
 
-  // 3. Generar e instanciar los 3 Golems aleatorios (3 tipos distintos) del jugador local
-  setupLocalFollowerGolems()
-
-  // 4. Instanciar la Gran Arena Circular de Torneo Steampunk en el centro del mapa (200m, 200m)
-  createTournamentArena()
-
-  // 5. Instanciar el trampolín steampunk cerca del punto de spawn (16m, 11m)
-  createTrampoline(Vector3.create(16, 0, 11))
-
-  // 7. Configurar infraestructura multijugador P2P (MessageBus)
+  // 3. Configurar infraestructura multijugador P2P (MessageBus)
   setupSquadSyncListeners(onRemoteSquadUpdated)
-  announceLocalSquad()
   requestAllSquads()
 
-  // 8. Registrar los sistemas de animación, seguimiento, combate y trampolín en el motor ECS
+  // 4. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
+
+  console.log('🤖 [Golems World] Escena principal inicializada con sistemas activos y mundo limpio.')
 }
 
 /**
- * Genera y crea el escuadrón aleatorio de 3 tipos de golems diferentes para el jugador local.
+ * Función utilitaria para invocar o reaparecer el escuadrón de golems del jugador bajo demanda
+ * (utilizada por la forja, misiones o eventos de juego).
  */
-function setupLocalFollowerGolems() {
+export function spawnLocalPlayerSquad(customSquad?: GolemConfig[]) {
   const localId = getLocalPlayerId()
-  const randomSquad = generateRandomSquad(localId)
+  removePlayerSquad(localId)
+  removePlayerSquad('local')
 
-  // Guardar en el estado de sesión en memoria
-  setLocalActiveSquad(randomSquad)
+  const squadToSpawn = customSquad || generateRandomSquad(localId)
+  setLocalActiveSquad(squadToSpawn)
 
-  randomSquad.forEach((config, index) => {
-    const spawnPos = Vector3.create(16, 0.1, 16 - config.followDistance)
+  let spawnBase = Vector3.create(16, 0.1, 16)
+  if (Transform.has(engine.PlayerEntity)) {
+    const pPos = Transform.get(engine.PlayerEntity).position
+    spawnBase = Vector3.create(pPos.x, Math.max(0.1, pPos.y), pPos.z)
+  }
+
+  squadToSpawn.forEach((config, index) => {
+    const spawnPos = Vector3.create(spawnBase.x, spawnBase.y, spawnBase.z - config.followDistance)
     createFollowerGolem(config, index, spawnPos, localId, GOLEM_TEAMS.PLAYER)
   })
+
+  announceLocalSquad(squadToSpawn)
 }
+
 
 
 
