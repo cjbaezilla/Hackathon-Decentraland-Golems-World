@@ -159,6 +159,16 @@ function buildRoadNetwork(parent: Entity) {
 
   // D. Cruce Monumental en (70, 70)
   spawnProp(parent, ASSETS.roadCross, Vector3.create(70, 0.02, 70), Quaternion.Identity())
+
+  // E. Calzada / Bulevar Sur-Central (Continuación de camino entre X: 19.1m [Parcela 1,1] y X: 66.5m [Parcela 4,1] en Z ≈ 25.5m)
+  // Conecta la ruta de Spawn (X: 16m) con el Eje Troncal Central (X: 70m) atravesando las parcelas [1,1], [2,1], [3,1] y [4,1]
+  for (let x = 19; x <= 67; x += 4) {
+    spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(x, 0.02, 25.5), Quaternion.fromEulerDegrees(0, 90, 0))
+    if (x === 27 || x === 43 || x === 59) {
+      spawnProp(parent, ASSETS.lamp, Vector3.create(x, 0.02, 29.0))
+      spawnProp(parent, ASSETS.lamp, Vector3.create(x, 0.02, 22.0))
+    }
+  }
 }
 
 /**

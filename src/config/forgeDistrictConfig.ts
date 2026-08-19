@@ -28,6 +28,14 @@ export const FORGE_DISTRICT_CONFIG = {
     radius: 12
   },
 
+  // Calzada / Bulevar Sur-Central (Conector Este-Oeste entre Parcela [1, 1] y Parcela [4, 1])
+  southCentralRoad: {
+    startX: 19.1,
+    endX: 66.5,
+    z: 25.5,
+    name: 'Bulevar Sur-Central (Parcelas [1,1] a [4,1])'
+  },
+
   // Talleres y Pabellones Satélites
   mechanicWorkshop: {
     center: Vector3.create(40, 0.05, 105),

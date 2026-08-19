@@ -134,6 +134,7 @@ Las cuatro esquinas del mapa están diseñadas con **dimensiones simétricas id�
   - 4 chimeneas industriales humeantes (`Smoker.glb`), tanques gigantes de vapor (`Tank.glb`), cofres de forja y mecanismos de palancas.
 - **Red Vial y Puertas de Acceso**:
   - Ejes troncales ortogonales $X=70$ y $Z=70$ cruzando en `(70, 70)`.
+  - **Calzada Sur-Central (Bulevar de Enlace [1,1] a [4,1])**: Camino adoquinado este-oeste continuo a lo largo de $Z \approx 25.5\text{m}$ desde $X = 19.1\text{m}$ (Parcela `[1, 1]`, empalme con ruta de Spawn $X=16\text{m}$) hasta $X = 66.5\text{m}$ (Parcela `[4, 1]`, empalme con Troncal Norte-Sur $X=70\text{m}$), equipado con farolas industriales triples a ambos márgenes.
   - **Puerta Norte ("Puerta de la Chatarra") en `(70, 140)`**: Bastiones industriales con marcador `SteamPunk_Number_01`.
   - **Puerta Este ("Puerta de las Calderas") en `(140, 70)`**: Bastiones industriales con marcador `SteamPunk_Number_02`.
 - **4 Talleres Satélites**:
