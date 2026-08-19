@@ -18,6 +18,11 @@ import { createForgeDistrict } from './objects/forgeDistrictBuilder'
 import { createMiningReserve } from './objects/miningReserveBuilder'
 import { createScrapDesert } from './objects/scrapDesertBuilder'
 import { createFoundryBoilers } from './objects/foundryBoilersBuilder'
+import { createSubstation } from './objects/substationBuilder'
+import { createRadioTower } from './objects/radioTowerBuilder'
+import { createChatarrales } from './objects/chatarralesBuilder'
+import { createAbandonedFactory } from './objects/abandonedFactoryBuilder'
+import { createTournamentArena } from './objects/arenaBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -33,11 +38,16 @@ import {
  * - Interfaz de Usuario React-ECS Mobile-First.
  * - Esquema de controles táctiles para dispositivos móviles.
  * - Infraestructura multijugador P2P (MessageBus).
- * - Arquitectura de las 4 esquinas del mundo (400x400m):
- *   1. Distrito de la Forja (Suroeste: 0m a 80m).
- *   2. Reserva de Minería Segura (Noreste: 260m a 400m).
- *   3. Desierto de Chatarra (Noroeste: 0m a 140m X, 260m a 400m Z).
- *   4. Calderas de la Fundición (Sureste: 260m a 400m X, 0m a 140m Z).
+ * - Arquitectura completa del Mundo de Golems (400x400m / 9 Zonas):
+ *   1. Distrito de la Forja (Suroeste: 0..140m X, 0..140m Z).
+ *   2. Desierto de Chatarra (Noroeste: 0..140m X, 260..400m Z).
+ *   3. Reserva de Minería Segura (Noreste: 260..400m X, 260..400m Z).
+ *   4. Calderas de la Fundición (Sureste: 260..400m X, 0..140m Z).
+ *   5. Subestación Eléctrica (Norte: 140..260m X, 280..400m Z).
+ *   6. Torre de Radio (Este: 280..400m X, 140..260m Z).
+ *   7. Los Chatarrales (Oeste: 0..140m X, 140..260m Z).
+ *   8. Fábrica Abandonada (Anillo 2: 140..260m X, 140..260m Z).
+ *   9. Gran Arena Circular Steampunk (Centro: 200m, 200m - Ø 72m).
  * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
  */
 export function main() {
@@ -60,11 +70,16 @@ export function main() {
   setupSquadSyncListeners(onRemoteSquadUpdated)
   requestAllSquads()
 
-  // 4. Instanciar la arquitectura y delimitación de las 4 zonas maestras del mundo
+  // 4. Instanciar la arquitectura y delimitación de las 9 zonas del mundo completo
   createForgeDistrict()
   createMiningReserve()
   createScrapDesert()
   createFoundryBoilers()
+  createSubstation()
+  createRadioTower()
+  createChatarrales()
+  createAbandonedFactory()
+  createTournamentArena()
 
   // 5. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
   engine.addSystem(golemFollowerSystem)
@@ -72,7 +87,7 @@ export function main() {
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con las 4 zonas cardinales y sistemas activos.')
+  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas y sistemas activos.')
 }
 
 /**
