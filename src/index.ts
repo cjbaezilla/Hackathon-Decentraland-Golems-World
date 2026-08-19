@@ -14,6 +14,7 @@ import { golemCombatSystem } from './systems/golemCombatSystem'
 import { arenaAnimationSystem } from './systems/arenaAnimationSystem'
 import { trampolineSystem } from './systems/trampolineSystem'
 import { GOLEM_TEAMS } from './components/combat'
+import { createForgeDistrict } from './objects/forgeDistrictBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -29,6 +30,7 @@ import {
  * - Interfaz de Usuario React-ECS Mobile-First.
  * - Esquema de controles táctiles para dispositivos móviles.
  * - Infraestructura multijugador P2P (MessageBus).
+ * - Arquitectura y delimitación del Distrito de la Forja (0m a 80m).
  * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
  */
 export function main() {
@@ -51,13 +53,16 @@ export function main() {
   setupSquadSyncListeners(onRemoteSquadUpdated)
   requestAllSquads()
 
-  // 4. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
+  // 4. Instanciar la arquitectura, delimitación perimetral y escombros del Distrito de la Forja
+  createForgeDistrict()
+
+  // 5. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con sistemas activos y mundo limpio.')
+  console.log('🤖 [Golems World] Escena principal inicializada con el Distrito de la Forja y sistemas activos.')
 }
 
 /**
