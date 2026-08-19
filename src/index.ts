@@ -15,6 +15,7 @@ import { arenaAnimationSystem } from './systems/arenaAnimationSystem'
 import { trampolineSystem } from './systems/trampolineSystem'
 import { GOLEM_TEAMS } from './components/combat'
 import { createForgeDistrict } from './objects/forgeDistrictBuilder'
+import { createMiningReserve } from './objects/miningReserveBuilder'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -31,6 +32,7 @@ import {
  * - Esquema de controles táctiles para dispositivos móviles.
  * - Infraestructura multijugador P2P (MessageBus).
  * - Arquitectura y delimitación del Distrito de la Forja (0m a 80m).
+ * - Arquitectura y delimitación de la Reserva de Minería Segura (260m a 400m).
  * - Registro de sistemas ECS (animación, seguimiento de acompañantes, combate y trampolines).
  */
 export function main() {
@@ -53,16 +55,19 @@ export function main() {
   setupSquadSyncListeners(onRemoteSquadUpdated)
   requestAllSquads()
 
-  // 4. Instanciar la arquitectura, delimitación perimetral y escombros del Distrito de la Forja
+  // 4. Instanciar la arquitectura, delimitación perimetral y escombros del Distrito de la Forja (0m a 80m)
   createForgeDistrict()
 
-  // 5. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
+  // 5. Instanciar la arquitectura monumental de la Reserva de Minería Segura (260m a 400m)
+  createMiningReserve()
+
+  // 6. Registrar los sistemas de seguimiento, combate y animación en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con el Distrito de la Forja y sistemas activos.')
+  console.log('🤖 [Golems World] Escena principal inicializada con Forja, Reserva de Minería y sistemas activos.')
 }
 
 /**
