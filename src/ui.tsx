@@ -824,6 +824,16 @@ export const CinematicOverlay = () => {
     subtitle = t('cinematic.marketSouthSubtitle')
     hint = null
     showSkipButton = false
+  } else if (cinematicType === 'hideout') {
+    title = t('cinematic.hideoutTitle')
+    subtitle = t('cinematic.hideoutSubtitle')
+    hint = null
+    showSkipButton = false
+  } else if (cinematicType === 'factory') {
+    title = t('cinematic.factoryTitle')
+    subtitle = t('cinematic.factorySubtitle')
+    hint = null
+    showSkipButton = false
   }
 
   return (

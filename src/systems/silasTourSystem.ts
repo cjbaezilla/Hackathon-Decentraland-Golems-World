@@ -22,7 +22,9 @@ import {
   activateTourFollowCamera,
   updateTourFollowCamera,
   deactivateTourFollowCamera,
+  playHideoutCinematic,
   playMarketWestCinematic,
+  playFactoryCinematic,
   playMarketSouthCinematic
 } from '../cinematics/marketCinematic'
 
@@ -41,7 +43,7 @@ export interface TourWaypointNode {
   walkSpeed: number
   speechKey: string
   stopAction?: 'none' | 'dialog_hideout' | 'dialog_market_west' | 'dialog_factory' | 'dialog_market_south' | 'dialog_finish'
-  triggerOrbitalCamera?: 'none' | 'market_west' | 'market_south'
+  triggerOrbitalCamera?: 'none' | 'hideout' | 'market_west' | 'factory' | 'market_south'
 }
 
 /**
@@ -62,7 +64,8 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(9.7, 0.25, 15.5),
     walkSpeed: 2.4,
     speechKey: 'tour.subtitleWp2',
-    stopAction: 'dialog_hideout'
+    stopAction: 'dialog_hideout',
+    triggerOrbitalCamera: 'hideout'
   },
   // WP 2: Salida del escondite hacia la calle principal (Img 3)
   {
@@ -111,7 +114,8 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(42.4, 0.25, 25.8),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp8',
-    stopAction: 'dialog_factory'
+    stopAction: 'dialog_factory',
+    triggerOrbitalCamera: 'factory'
   },
   // WP 8: Descenso hacia los Puestos de Mercado Sur (Img 9)
   {
@@ -312,9 +316,19 @@ export function silasTourSystem(dt: number) {
       orientSilasTowardsPlayer()
 
       // Si tiene cámara orbital asignada, dispararla
-      if (wp.triggerOrbitalCamera === 'market_west') {
+      if (wp.triggerOrbitalCamera === 'hideout') {
+        playHideoutCinematic(() => {
+          openNpcDialog('tourHideout')
+          orientSilasTowardsPlayer()
+        })
+      } else if (wp.triggerOrbitalCamera === 'market_west') {
         playMarketWestCinematic(() => {
           openNpcDialog('tourMarketWest')
+          orientSilasTowardsPlayer()
+        })
+      } else if (wp.triggerOrbitalCamera === 'factory') {
+        playFactoryCinematic(() => {
+          openNpcDialog('tourFactory')
           orientSilasTowardsPlayer()
         })
       } else if (wp.triggerOrbitalCamera === 'market_south') {

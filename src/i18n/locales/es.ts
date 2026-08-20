@@ -179,7 +179,11 @@ export const es: TranslationSchema = {
     marketWestTitle: '🏬 PASEO COMERCIAL OESTE',
     marketWestSubtitle: 'Quioscos de intercambio y trueque de repuestos mecánicos #06 al #10',
     marketSouthTitle: '🏬 BULEVAR COMERCIAL SUR',
-    marketSouthSubtitle: 'Puestos de pertrechos y suministros #01 al #05 de la Forja'
+    marketSouthSubtitle: 'Puestos de pertrechos y suministros #01 al #05 de la Forja',
+    hideoutTitle: '🏚️ ESCONDITE Y BÓVEDA DEL JUGADOR',
+    hideoutSubtitle: 'Refugio personal y 3 cofres seguros de almacenamiento de chatarra',
+    factoryTitle: '🏭 FÁBRICA Y LABORATORIO DE GOLEMS',
+    factorySubtitle: 'Crisol de forja alquímica determinista y podio de ensamblaje'
   },
   map: {
     title: 'MAPA DEL MUNDO',

@@ -80,29 +80,33 @@ El sistema (`src/systems/silasTourSystem.ts`) orquesta una máquina de estados q
 | :--- | :--- | :--- | :--- | :--- |
 | **WP 0** | `[0, 0]` | `(15.8m, 5.9m)` | Inicio del Tour | Silas invita al jugador a seguirlo. |
 | **WP 1** | `[0, 0]` | `(15.8m, 10.3m)` | Marcha Norte | Subtítulo: Te llevaré a conocer tu refugio personal. |
-| **WP 2** | `[0, 0]` | `(9.7m, 15.5m)` | **Parada 1: Escondite** | **3 Cofres de Bóveda**: Común (Sur), Raro (Centro) y Épico/Legendario (Norte). |
+| **WP 2** | `[0, 0]` | `(9.7m, 15.5m)` | **Parada 1: Escondite** | **3 Cofres de Bóveda** + **Cámara Orbital Panorámica 1** (Refugio y Cofres Seguros). |
 | **WP 3** | `[0, 1]` | `(15.7m, 21.9m)` | Marcha Calle Norte | Subtítulo: Nos dirigimos al concurrido Paseo Comercial. |
 | **WP 4** | `[0, 1]` | `(15.4m, 25.8m)` | Marcha Aproximación | Subtítulo: Camino de abastecimiento de repuestos. |
-| **WP 5** | `[0, 1]` | `(10.6m, 29.0m)` | **Parada 2: Mercado Oeste** | Quioscos 06 al 10 + **Cámara Orbital Panorámica 1**. |
+| **WP 5** | `[0, 1]` | `(10.6m, 29.0m)` | **Parada 2: Mercado Oeste** | Quioscos 06 al 10 + **Cámara Orbital Panorámica 2**. |
 | **WP 6** | `[0, 1]` | `(15.6m, 29.4m)` | Marcha Hacia el Este | Subtítulo: Te mostraré la Fábrica de Golems. |
 | **WP 7** | `[1, 1]` | `(23.6m, 25.8m)` | Marcha Corredor Central | Subtítulo: Siente el calor de las calderas y turbinas. |
-| **WP 8** | `[2, 1]` | `(42.4m, 25.8m)` | **Parada 3: Fábrica Golems** | Forja determinista, combinaciones 5-12 y afinidades. |
-| **WP 9** | `[1, 0]` | `(30.0m, 11.5m)` | **Parada 4: Mercado Sur** | Quioscos 01 al 05 + **Cámara Orbital Panorámica 2**. |
+| **WP 8** | `[2, 1]` | `(42.4m, 25.8m)` | **Parada 3: Fábrica Golems** | Forja determinista + **Cámara Orbital Panorámica 3** (Crisol, turbinas y podio prototipo). |
+| **WP 9** | `[1, 0]` | `(30.0m, 11.5m)` | **Parada 4: Mercado Sur** | Quioscos 01 al 05 + **Cámara Orbital Panorámica 4**. |
 | **WP 10**| `[1, 0]` | `(16.0m, 9.8m)` | Marcha Regreso | Subtítulo: Ya estamos regresando a mi campamento. |
 | **WP 11**| `[0, 0]` | `(15.8m, 5.9m)` | **Parada 5: Retorno Final** | Silas regresa a su puesto, gira $180^\circ$, saluda y gradúa al jugador. |
 
 ---
 
-## 6. Cámaras Cinemáticas y Barridos Orbitales del Mercado
+## 6. Cámaras Cinemáticas y Barridos Orbitales del Tour
 
 Implementadas en `src/cinematics/marketCinematic.ts`:
 
 1. **Cámara de Seguimiento Continuo (`activateTourFollowCamera`)**:  
    Mantiene una `VirtualCamera` en tercera persona centrada en Silas ($Y+2.5\text{m}, Z-3.8\text{m}$ con interpolación suave), asegurando que el jugador visualice a Silas y el camino a cada paso.
-2. **Cámara Orbital Paseo Oeste (`playMarketWestCinematic`)**:  
-   Barrido cinemático de 4.5s sobre los quioscos 06 al 10 en el eje Z ($25\text{m} \rightarrow 58\text{m}$).
-3. **Cámara Orbital Bulevar Sur (`playMarketSouthCinematic`)**:  
-   Barrido cinemático de 4.5s sobre los quioscos 01 al 05 en el eje X ($25\text{m} \rightarrow 66\text{m}$).
+2. **Cámara Orbital Escondite del Jugador (`playHideoutCinematic`)**:  
+   Barrido cinemático de 4.8s enfocado en el refugio y los 3 cofres de la bóveda en el eje Z ($12.8\text{m} \rightarrow 22.6\text{m}$).
+3. **Cámara Orbital Paseo Oeste (`playMarketWestCinematic`)**:  
+   Barrido cinemático de 4.8s sobre los quioscos 06 al 10 en el eje Z ($25\text{m} \rightarrow 58\text{m}$).
+4. **Cámara Orbital Fábrica de Golems (`playFactoryCinematic`)**:  
+   Barrido cinemático de 4.8s elevado de este a oeste ($X=44.5\text{m} \rightarrow 26.0\text{m}$) enfocado en el crisol de forja y podio prototipo.
+5. **Cámara Orbital Bulevar Sur (`playMarketSouthCinematic`)**:  
+   Barrido cinemático de 4.8s sobre los quioscos 01 al 05 en el eje X ($26\text{m} \rightarrow 65\text{m}$).
 
 ---
 

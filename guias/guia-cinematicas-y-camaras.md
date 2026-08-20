@@ -89,4 +89,20 @@ Para asegurar una experiencia fluida tanto en dispositivos móviles como en escr
 2. **Limpieza Automática del Sistema ECS**: Al dispararse la cinemática, el sistema `playerInputDetectionSystem` se desregistra de inmediato mediante `engine.removeSystem()`, evitando ejecuciones innecesarias en cada frame.
 3. **Temporizador de Seguridad de Respaldo (Fallback)**: Si el jugador se encuentra inactivo durante la carga inicial (`20s` en móvil / `8s` en escritorio), el temporizador de seguridad inicia la cinemática y limpia los escuchadores para garantizar que nunca se omita.
 
+---
+
+## 🎥 7. Cámaras Orbitales Panorámicas del Tour Guiado de Silas (`src/cinematics/marketCinematic.ts`)
+
+Durante el recorrido por el Distrito de la Forja, el sistema de navegación ECS ejecuta 4 barridos orbitales panorámicos dedicados al alcanzar cada punto de interés clave:
+
+| Punto de Interés | Función de Disparo | Entidad de Enfoque | Trayectoria del Barrido Orbital | Contenido Enfocado |
+| :--- | :--- | :--- | :--- | :--- |
+| **Parada 1: Escondite** (`9.7m, 15.5m`) | `playHideoutCinematic()` | `(6.0m, 1.6m, 17.7m)` | Eje Z: $12.8\text{m} \rightarrow 22.6\text{m}$ con elevación sinusoidal | Refugio del jugador, mobiliario y los 3 cofres de la bóveda (Sur/Común, Centro/Raro, Norte/Épico-Legendario). |
+| **Parada 2: Paseo Oeste** (`10.6m, 29.0m`) | `playMarketWestCinematic()` | `(6.4m, 1.6m, 45.6m)` | Eje Z: $25.0\text{m} \rightarrow 58.0\text{m}$ con arco este-oeste | Quioscos de intercambio y trueque de repuestos mecánicos #06 al #10. |
+| **Parada 3: Fábrica de Golems** (`42.4m, 25.8m`) | `playFactoryCinematic()` | `(35.0m, 2.0m, 34.0m)` | Eje X: $44.5\text{m} \rightarrow 26.0\text{m}$ elevado frontal | Crisol central de fusión, chimeneas de vapor, engranajes y podio con el golem prototipo. |
+| **Parada 4: Bulevar Sur** (`30.0m, 11.5m`) | `playMarketSouthCinematic()` | `(46.5m, 1.6m, 8.8m)` | Eje X: $26.0\text{m} \rightarrow 65.0\text{m}$ mirando al sur | Puestos de pertrechos, suministros y conexiones #01 al #05 de la Forja. |
+
+Al finalizar cada barrido orbital (o si el jugador finaliza el tour), la cámara restaura automáticamente la `VirtualCamera` de seguimiento en tercera persona (`tourFollowCamera`) centrada en Silas o la vista natural del jugador.
+
+
 

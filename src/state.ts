@@ -33,7 +33,7 @@ export type NpcDialogStep =
   | 'tourMarketSouth'
   | 'tourFinish'
 
-export type CinematicType = 'silas_intro' | 'market_west' | 'market_south' | null
+export type CinematicType = 'silas_intro' | 'market_west' | 'market_south' | 'hideout' | 'factory' | null
 
 export interface SceneState {
   isInitialized: boolean

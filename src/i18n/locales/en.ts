@@ -179,7 +179,11 @@ export const en: TranslationSchema = {
     marketWestTitle: '🏬 WEST MARKET PROMENADE',
     marketWestSubtitle: 'Mechanical parts exchange and trade kiosks #06 to #10',
     marketSouthTitle: '🏬 SOUTH MARKET BOULEVARD',
-    marketSouthSubtitle: 'Forge supply and outfitting booths #01 to #05'
+    marketSouthSubtitle: 'Forge supply and outfitting booths #01 to #05',
+    hideoutTitle: '🏚️ USER HIDEOUT & VAULT',
+    hideoutSubtitle: 'Personal shelter and 3 secure vault chests for scrap storage',
+    factoryTitle: '🏭 GOLEM FACTORY & LABORATORY',
+    factorySubtitle: 'Deterministic alchemical forge crucible and assembly podium'
   },
   map: {
     title: 'WORLD MAP',

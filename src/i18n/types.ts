@@ -153,6 +153,10 @@ export interface TranslationSchema {
     marketWestSubtitle: string
     marketSouthTitle: string
     marketSouthSubtitle: string
+    hideoutTitle: string
+    hideoutSubtitle: string
+    factoryTitle: string
+    factorySubtitle: string
   }
   map: {
     title: string
