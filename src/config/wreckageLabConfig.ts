@@ -61,6 +61,6 @@ export const WRECKAGE_LAB_CONFIG = {
     number02: 'assets/asset-packs/steampunk_number_02/SteamPunk_Number_02.glb',
 
     // Prototipo de Golem de muestra para la bahía de salida
-    prototypeGolem: 'assets/golems/steam/golem_003.glb'
+    prototypeGolem: 'assets/models/steam/golem_003.glb'
   }
 }

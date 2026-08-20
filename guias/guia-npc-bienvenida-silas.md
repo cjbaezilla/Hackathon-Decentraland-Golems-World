@@ -250,7 +250,7 @@ Para integrar al personaje de forma orgánica con la escena, su base incluye un 
 | **Cofre de Repuestos**| `assets/asset-packs/chest_gear/Chest Gear.glb`| `(+1.2, 0, +0.3)` | $0.9\times$ | Alijo con engranajes rescatados |
 | **Mesa de Barril** | `assets/asset-packs/barrel/Barrel.glb` | `(+1.0, 0, -0.9)` | $0.85\times$| Mesa auxiliar de trabajo |
 | **Farol de Aceite** | `assets/asset-packs/table_lamp/Table Lamp.glb`| `(+1.0, 0.75, -0.9)`| $0.9\times$ | Iluminación de baliza nocturna |
-| **Golem «Pistón»** | `assets/golems/steam/golem_003.glb` | `(-0.95, 0, -0.65)` | $0.65\times$| Mini-golem de vapor leal a Silas |
+| **Golem «Pistón»** | `assets/models/steam/golem_003.glb` | `(-0.95, 0, -0.65)` | $0.65\times$| Mini-golem de vapor leal a Silas |
 
 ---
 

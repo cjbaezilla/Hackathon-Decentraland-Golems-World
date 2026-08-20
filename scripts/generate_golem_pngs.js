@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer-core');
  * ============================================================================
  * GENERADOR AUTOMÁTICO DE IMÁGENES PNG PARA GOLEMS (150 MODELOS 3D)
  * ============================================================================
- * Escanea la carpeta assets/golems/<afinidad>/*.glb, renderiza cada modelo 3D
+ * Escanea la carpeta assets/models/<afinidad>/*.glb, renderiza cada modelo 3D
  * en WebGL con un fondo temático acorde a la afinidad elemental del golem
  * y guarda las imágenes resultantes en formato PNG dentro de GOLEMS/golems_imgs/.
  */
@@ -47,7 +47,7 @@ const AFFINITY_THEMES = {
 };
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const GOLEMS_ASSETS_DIR = path.join(PROJECT_ROOT, 'assets', 'golems');
+const GOLEMS_ASSETS_DIR = path.join(PROJECT_ROOT, 'assets', 'models');
 const DEFAULT_OUTPUT_DIR = path.join(PROJECT_ROOT, 'GOLEMS', 'golems_imgs');
 
 // Parsear argumentos CLI
@@ -238,7 +238,7 @@ async function generateAllPNGs() {
 
     for (const file of files) {
       const golemId = path.basename(file, '.glb');
-      const glbUrl = `http://localhost:${options.port}/assets/golems/${affinity}/${file}`;
+      const glbUrl = `http://localhost:${options.port}/assets/models/${affinity}/${file}`;
       
       const htmlContent = `
       <!DOCTYPE html>

@@ -190,7 +190,7 @@ export const SQUAD_FOLLOW_DISTANCES = [1.8, 3.6, 5.4]
 /**
  * Números de receta (001–150) agrupados por afinidad, generados desde el
  * catálogo oficial `GOLEMS/Golems-Recetas-150_eng.md`. Cada número mapea a:
- *   assets/golems/<afinidad>/golem_<NNN>.glb
+ *   assets/models/<afinidad>/golem_<NNN>.glb
  */
 export const GOLEM_RECIPES_BY_AFFINITY: Record<GolemAffinity, number[]> = {
   [GolemAffinity.STEAM]: [3, 5, 7, 12, 14, 21, 23, 24, 27, 28, 31, 32, 33, 39, 42, 43, 45, 46, 54, 55, 62, 63, 64, 75, 76, 79, 83, 85, 92, 93, 96, 98, 100, 101, 103, 105, 107, 109, 114, 117, 118, 119, 122, 130, 138, 144],
@@ -324,7 +324,7 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
     const variantIndex = variantNumber - 1
     const recipesForAffinity = GOLEM_RECIPES_BY_AFFINITY[affinity]
     const recipeNumber = recipesForAffinity[Math.floor(Math.random() * recipesForAffinity.length)]
-    const modelSrc = `assets/golems/${variantData.folder}/golem_${String(recipeNumber).padStart(3, '0')}.glb`
+    const modelSrc = `assets/models/${variantData.folder}/golem_${String(recipeNumber).padStart(3, '0')}.glb`
     const name = getLocalizedGolemName(affinity, variantIndex)
     const followDistance = SQUAD_FOLLOW_DISTANCES[index] || (index + 1) * 1.8
     const stats = generateRandomStats(affinity)

@@ -38,7 +38,7 @@ Node.js: `fs` y `path`):
 
 `generate_models.js` actúa como **orquestador**: importa estos módulos, parsea las recetas,
 ensambla cada golem combinando las formas de sus materiales con la paleta de su afinidad y
-escribe los `.glb` resultantes en `assets/golems/<afinidad>/golem_<NNN>.glb`.
+escribe los `.glb` resultantes en `assets/models/<afinidad>/golem_<NNN>.glb`.
 
 ---
 
@@ -361,7 +361,7 @@ node scripts/generate_models.js [--type steam] [--recipe 1] [--output-dir ...]
         │     f. addMeshNode() × 3 (body/detail/glow)
         │     g. buildGlbBuffer()
         │
-        └─ 4. Escribir assets/golems/<afinidad>/golem_<NNN>.glb
+        └─ 4. Escribir assets/models/<afinidad>/golem_<NNN>.glb
 ```
 
 ---
@@ -406,7 +406,7 @@ Para validar los `.glb` generados (cabecera y conteo de triángulos) puede usars
 ```bash
 node scripts/generate_models.js
 
-node -e "const fs=require('fs'),p=require('path');let n=0,t=0;function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);e.isDirectory()?w(f):e.name.endsWith('.glb')&&(n++,(()=>{const b=fs.readFileSync(f);if(b.readUInt32LE(0)!==0x46546C67){console.log('BAD',f);return}const j=JSON.parse(b.slice(20,20+b.readUInt32LE(12)).toString('utf8'));for(const a of j.accessors)if(a.type==='SCALAR')t+=a.count/3})())}}w('assets/golems');console.log('modelos',n,'triángulos totales',t)"
+node -e "const fs=require('fs'),p=require('path');let n=0,t=0;function w(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){const f=p.join(d,e.name);e.isDirectory()?w(f):e.name.endsWith('.glb')&&(n++,(()=>{const b=fs.readFileSync(f);if(b.readUInt32LE(0)!==0x46546C67){console.log('BAD',f);return}const j=JSON.parse(b.slice(20,20+b.readUInt32LE(12)).toString('utf8'));for(const a of j.accessors)if(a.type==='SCALAR')t+=a.count/3})())}}w('assets/models');console.log('modelos',n,'triángulos totales',t)"
 ```
 
 Resultado esperado: `modelos 150` y un total de triángulos bajo (cada golem ≤ ~5 000).

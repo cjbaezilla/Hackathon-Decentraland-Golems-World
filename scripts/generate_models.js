@@ -10,7 +10,7 @@ const path = require('path')
  * formas de los 46 materiales que lo componen y aplicando el esquema de color
  * de su afinidad elemental (Steam / Galvanic / Mechanical / Luminous / Aether).
  *
- * Salida: assets/golems/<afinidad>/golem_<NNN>.glb (glTF 2.0 binario, low-poly).
+ * Salida: assets/models/<afinidad>/golem_<NNN>.glb (glTF 2.0 binario, low-poly).
  */
 
 const { GlbBuilder } = require('./lib/glbBuilder')
@@ -316,7 +316,7 @@ OPCIONES:
                             (Por defecto: 'all')
   -r, --recipe <num>        Genera únicamente la receta específica (1 a 150).
   -o, --output-dir <path>   Directorio base de salida.
-                            (Por defecto: assets/golems)
+                            (Por defecto: assets/models)
   -h, --help                Muestra este mensaje de ayuda.
 
 EJEMPLOS:
@@ -337,7 +337,7 @@ function parseCliArgs() {
   const options = {
     type: 'all',
     recipe: null,
-    outputDir: path.join(__dirname, '..', 'assets', 'golems'),
+    outputDir: path.join(__dirname, '..', 'assets', 'models'),
     help: false
   }
 

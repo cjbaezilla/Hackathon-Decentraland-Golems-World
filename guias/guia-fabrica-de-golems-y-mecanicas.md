@@ -300,7 +300,7 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
     const variantIndex = variantNumber - 1
     const recipesForAffinity = GOLEM_RECIPES_BY_AFFINITY[affinity]
     const recipeNumber = recipesForAffinity[Math.floor(Math.random() * recipesForAffinity.length)]
-    const modelSrc = `assets/golems/${variantData.folder}/golem_${String(recipeNumber).padStart(3, '0')}.glb`
+    const modelSrc = `assets/models/${variantData.folder}/golem_${String(recipeNumber).padStart(3, '0')}.glb`
     const name = variantData.names[variantNumber - 1] || `${affinity} #${variantNumber}`
     const followDistance = SQUAD_FOLLOW_DISTANCES[index] || (index + 1) * 1.8
 
@@ -325,15 +325,15 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
 ### 4.1 Vinculación con `GltfContainer` y Catálogo de 150 Modelos (uno por receta)
 La fábrica utiliza el componente estándar `GltfContainer.create(golemEntity, { src: config.modelSrc })`. 
 
-Los modelos generados por [`scripts/generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) son binarios glTF 2.0 (`.glb`) autocontenidos, **uno por cada una de las 150 recetas deterministas** del catálogo oficial, organizados por afinidad en `assets/golems/<afinidad>/golem_<NNN>.glb`. Cada golem se ensambla desde las siluetas de los materiales de su receta y se colorea con el esquema de clases de su afinidad (ver [`scripts/lib/README.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/lib/README.md)):
+Los modelos generados por [`scripts/generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) son binarios glTF 2.0 (`.glb`) autocontenidos, **uno por cada una de las 150 recetas deterministas** del catálogo oficial, organizados por afinidad en `assets/models/<afinidad>/golem_<NNN>.glb`. Cada golem se ensambla desde las siluetas de los materiales de su receta y se colorea con el esquema de clases de su afinidad (ver [`scripts/lib/README.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/lib/README.md)):
 
 | Afinidad / Carpeta | Modelos Disponibles | Materiales PBR | Canales Emisivos |
 | :--- | :--- | :--- | :--- |
-| **Vapor** (`assets/golems/steam/`) | 46 golems (`golem_003.glb`, `golem_005.glb`, …) | Cobre, Hierro Fundido, Caldera | Fuego y brasas (`#FF7000`) |
-| **Galvánico** (`assets/golems/galvanic/`) | 29 golems (`golem_001.glb`, `golem_009.glb`, …) | Acero Azulado, Cobre Bobinas | Reactor eléctrico (`#00E5FF`) |
-| **Mecánico** (`assets/golems/mechanical/`) | 22 golems (`golem_004.glb`, `golem_010.glb`, …) | Hierro de Chatarra, Engranajes | Visor y monóculo ámbar (`#FFBF00`) |
-| **Luminoso** (`assets/golems/luminous/`) | 21 golems (`golem_002.glb`, `golem_006.glb`, …) | Cromo Plateado, Cuarzo | Faro solar prismático (`#FFFF33`) |
-| **Éter** (`assets/golems/aether/`) | 32 golems (`golem_013.glb`, `golem_015.glb`, …) | Obsidiana, Resonadores Místicos | Núcleo de maná amatista (`#B833FF`) |
+| **Vapor** (`assets/models/steam/`) | 46 golems (`golem_003.glb`, `golem_005.glb`, …) | Cobre, Hierro Fundido, Caldera | Fuego y brasas (`#FF7000`) |
+| **Galvánico** (`assets/models/galvanic/`) | 29 golems (`golem_001.glb`, `golem_009.glb`, …) | Acero Azulado, Cobre Bobinas | Reactor eléctrico (`#00E5FF`) |
+| **Mecánico** (`assets/models/mechanical/`) | 22 golems (`golem_004.glb`, `golem_010.glb`, …) | Hierro de Chatarra, Engranajes | Visor y monóculo ámbar (`#FFBF00`) |
+| **Luminoso** (`assets/models/luminous/`) | 21 golems (`golem_002.glb`, `golem_006.glb`, …) | Cromo Plateado, Cuarzo | Faro solar prismático (`#FFFF33`) |
+| **Éter** (`assets/models/aether/`) | 32 golems (`golem_013.glb`, `golem_015.glb`, …) | Obsidiana, Resonadores Místicos | Núcleo de maná amatista (`#B833FF`) |
 
 ### 4.2 Escalas y Proporciones
 - Cada golem posee una escala configurable (`scale: 0.95` a `1.2`).
@@ -371,7 +371,7 @@ function calcularHashReceta(recetaCanonica: string): number {
 ### 5.2 Derivación de Parámetros para la Factory
 A partir de los bits del hash determinista, se derivan automáticamente los atributos requeridos por `GolemConfig`:
 1. **Afinidad Dominante**: Evaluada por la suma de aportes de las piezas (Vapor, Galvánico, Mecánico, etc.).
-2. **Modelo 3D**: Seleccionado aleatoriamente entre las recetas de la afinidad dominante (`assets/golems/<afinidad>/golem_<NNN>.glb`).
+2. **Modelo 3D**: Seleccionado aleatoriamente entre las recetas de la afinidad dominante (`assets/models/<afinidad>/golem_<NNN>.glb`).
 3. **Escala Relativa**: Calculada entre $0.9\text{m}$ y $1.3\text{m}$ a partir del peso de las piezas.
 4. **Nombre Procedural**: Combinación de prefijo de afinidad y sufijo estructural (ej. *«Calderón Blindado»*).
 5. **Velocidad de Movimiento**: Proporcional a la estadística `SPD` resultante ($4.0 + \text{SPD} \times 0.05$).
@@ -400,7 +400,7 @@ A partir de los bits del hash determinista, se derivan automáticamente los atri
 Para agregar un nuevo tipo o variante de Golem en el proyecto:
 
 ### Paso 1: Generar o Añadir el Modelo 3D `.glb`
-Añadir la silueta del nuevo golem en `scripts/lib/itemShapes.js` y su slot en `ITEM_SLOT_MAP` dentro de `scripts/generate_models.js` (o colocar el archivo `.glb` directamente en `assets/golems/<afinidad>/`).
+Añadir la silueta del nuevo golem en `scripts/lib/itemShapes.js` y su slot en `ITEM_SLOT_MAP` dentro de `scripts/generate_models.js` (o colocar el archivo `.glb` directamente en `assets/models/<afinidad>/`).
 
 ### Paso 2: Registrar la Configuración en `src/config/golems.ts`
 ```typescript
@@ -408,7 +408,7 @@ export const MI_NUEVO_GOLEM: GolemConfig = {
   id: 'golem_aether_091',
   name: 'Titán de Éter',
   affinity: GolemAffinity.AETHER,
-  modelSrc: 'assets/golems/aether/golem_091.glb',
+  modelSrc: 'assets/models/aether/golem_091.glb',
   scale: 1.25,
   followDistance: 1.8,
   moveSpeed: 4.6,

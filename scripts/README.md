@@ -44,7 +44,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | Script | Propósito Principal | Salida en Disco |
 | :--- | :--- | :--- |
 | [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) | Descarga y organiza modelos `.glb` y texturas oficiales de DCL (Pack Steampunk) para la **Gran Arena de Torneo**. | `assets/asset-packs/<slug>/` |
-| [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera **150 modelos binarios `.glb`** (uno por cada receta determinista) ensamblados desde las formas de sus materiales y coloreados por afinidad elemental. | `assets/golems/<afinidad>/` |
+| [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera **150 modelos binarios `.glb`** (uno por cada receta determinista) ensamblados desde las formas de sus materiales y coloreados por afinidad elemental. | `assets/models/<afinidad>/` |
 | [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) | Genera proceduralmente los 46 modelos binarios `.glb` PBR organizados por rareza para los **materiales coleccionables**. | `assets/items/<rareza>/` |
 | [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) | Genera las 46 fichas HTML estáticas bilingües (EN/ES) con visor 3D, navegación secuencial y botón de copiado de fotogramas a PNG. | `showcase/<rareza>/` y `showcase/index.html` |
 | [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 46 ítems 3D con fondo temático y resplandor según su rareza. | `showcase/<rareza>/<item_id>.png` |
@@ -146,7 +146,7 @@ node scripts/generate_models.js [afinidad]
 | :--- | :--- | :--- | :--- | :--- |
 | `--type <afinidad>` | `-t <afinidad>` | `steam`, `galvanic`, `mechanical`, `luminous`, `aether`, `all` | `all` | Especifica la afinidad elemental a generar. |
 | `--recipe <num>` | `-r <num>` | `1` a `150` | *N/A* | Genera únicamente la receta específica. |
-| `--output-dir <ruta>` | `-o <ruta>` | Ruta válida en disco | `assets/golems` | Directorio base de salida. |
+| `--output-dir <ruta>` | `-o <ruta>` | Ruta válida en disco | `assets/models` | Directorio base de salida. |
 | `--help` | `-h` | *N/A* | *N/A* | Muestra el manual de ayuda interactivo. |
 
 #### Ejemplos de Ejecución
@@ -164,7 +164,7 @@ node scripts/generate_models.js --recipe 1
 ### 3.3 Catálogo de los 150 Modelos (por receta y afinidad)
 
 ```text
-assets/golems/
+assets/models/
 ├── steam/        # 46 golems de Vapor (golem_003.glb, golem_005.glb, ... #FF7000)
 ├── galvanic/     # 29 golems Galvánicos (golem_001.glb, golem_009.glb, ... #00E5FF)
 ├── mechanical/   # 22 golems Mecánicos (golem_004.glb, golem_010.glb, ... #FFBF00)
@@ -179,11 +179,11 @@ se colorea con el esquema de clases de su afinidad:
 
 | Afinidad | Carpeta | Color de clase | Ejemplos de recetas |
 | :--- | :--- | :--- | :--- |
-| ♨️ **Vapor** | `assets/golems/steam/` | Naranja fuego `#FF7000` | `golem_003.glb`, `golem_005.glb`, `golem_012.glb` |
-| ⚡ **Galvánico** | `assets/golems/galvanic/` | Cian eléctrico `#00E5FF` | `golem_001.glb`, `golem_009.glb`, `golem_041.glb` |
-| ⚙️ **Mecánico** | `assets/golems/mechanical/` | Ámbar dorado `#FFBF00` | `golem_004.glb`, `golem_010.glb`, `golem_044.glb` |
-| ☀️ **Luminoso** | `assets/golems/luminous/` | Luz solar `#FFFF33` | `golem_002.glb`, `golem_006.glb`, `golem_052.glb` |
-| 🔮 **Éter** | `assets/golems/aether/` | Violeta amatista `#B833FF` | `golem_013.glb`, `golem_015.glb`, `golem_091.glb` |
+| ♨️ **Vapor** | `assets/models/steam/` | Naranja fuego `#FF7000` | `golem_003.glb`, `golem_005.glb`, `golem_012.glb` |
+| ⚡ **Galvánico** | `assets/models/galvanic/` | Cian eléctrico `#00E5FF` | `golem_001.glb`, `golem_009.glb`, `golem_041.glb` |
+| ⚙️ **Mecánico** | `assets/models/mechanical/` | Ámbar dorado `#FFBF00` | `golem_004.glb`, `golem_010.glb`, `golem_044.glb` |
+| ☀️ **Luminoso** | `assets/models/luminous/` | Luz solar `#FFFF33` | `golem_002.glb`, `golem_006.glb`, `golem_052.glb` |
+| 🔮 **Éter** | `assets/models/aether/` | Violeta amatista `#B833FF` | `golem_013.glb`, `golem_015.glb`, `golem_091.glb` |
 
 > 📚 Para entender cómo se montan los slots (cabeza, núcleo, torso, hombros, brazos, piernas),
 > el mapeo de ítem → slot, el esquema de color y el parser de recetas, consulta
@@ -329,7 +329,7 @@ node scripts/generate_item_pngs.js
 ## 7. `generate_golem_pngs.js`: Generador de Renders PNG por Afinidad Elemental para Golems (150 Imágenes)
 
 ### 7.1 Propósito y Arquitectura Técnica
-El script [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) automatiza la captura y renderizado tridimensional en alta resolución (1024×1024 px) de los **150 modelos de Golems** alojados en `assets/golems/<afinidad>/*.glb`:
+El script [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) automatiza la captura y renderizado tridimensional en alta resolución (1024×1024 px) de los **150 modelos de Golems** alojados en `assets/models/<afinidad>/*.glb`:
 
 1. **Servidor HTTP Local Estático**: Inicia un servidor HTTP local en el puerto `8990` para servir los modelos `.glb` sin problemas de CORS ni restricciones del protocolo `file://`.
 2. **Navegador Headless con Aceleración GPU**: Utiliza `puppeteer-core` conectado a Microsoft Edge o Chrome local con argumentos WebGL `--use-gl=angle` y `--enable-webgl`.
@@ -407,7 +407,7 @@ Transform.create(golem, {
   scale: Vector3.create(1.1, 1.1, 1.1)
 })
 GltfContainer.create(golem, {
-  src: 'assets/golems/galvanic/golem_001.glb'
+  src: 'assets/models/galvanic/golem_001.glb'
 })
 
 // 3. Instanciar un Ítem Coleccionable Épico (Reactor de Éter)

@@ -196,11 +196,11 @@ El script implementa la especificación **glTF 2.0 Binary Format (GLB)** estruct
 
 | Afinidad | Carpeta | Modelos | Estilo Geométrico | Materiales PBR y Canales Emisivos |
 | :--- | :--- | :--- | :--- | :--- |
-| **Vapor** | `assets/golems/steam/` | 46 golems (`golem_003.glb`, `golem_005.glb`, …) | Caldera redondeada de cobre, cúpula superior, chimenea de escape y pistones, ensamblados desde las piezas de su receta. | Cobre/Latón metálico (`#B87333`), hierro fundido y horno con fuego naranja (`#FF7000`). |
-| **Galvánico** | `assets/golems/galvanic/` | 29 golems (`golem_001.glb`, `golem_009.glb`, …) | Chasis angular aerodinámico, doble bobina de Tesla y extremidades ligeras. | Aleación azulada (`#59738C`), bobinas de cobre y reactor cian eléctrico (`#00E5FF`). |
-| **Mecánico** | `assets/golems/mechanical/` | 22 golems (`golem_004.glb`, `golem_010.glb`, …) | Blindaje de chatarra remachada, hombreras dentadas y base reforzada. | Placas de hierro desgastado (`#736B61`), engranajes y visor ámbar/dorado (`#FFBF00`). |
-| **Luminoso** | `assets/golems/luminous/` | 21 golems (`golem_002.glb`, `golem_006.glb`, …) | Estructura esbelta de cromo plateado, faros reflectores y cristales de cuarzo. | Cromo pulido (`#E0E8F0`), filamentos de tungsteno y emisión solar (`#FFFF33`). |
-| **Éter** | `assets/golems/aether/` | 32 golems (`golem_013.glb`, `golem_015.glb`, …) | Obsidiana mística tallada, orbes de maná flotantes y anillos orbitales. | Obsidiana púrpura (`#301934`), resonadores de maná y emisión amatista (`#B833FF`). |
+| **Vapor** | `assets/models/steam/` | 46 golems (`golem_003.glb`, `golem_005.glb`, …) | Caldera redondeada de cobre, cúpula superior, chimenea de escape y pistones, ensamblados desde las piezas de su receta. | Cobre/Latón metálico (`#B87333`), hierro fundido y horno con fuego naranja (`#FF7000`). |
+| **Galvánico** | `assets/models/galvanic/` | 29 golems (`golem_001.glb`, `golem_009.glb`, …) | Chasis angular aerodinámico, doble bobina de Tesla y extremidades ligeras. | Aleación azulada (`#59738C`), bobinas de cobre y reactor cian eléctrico (`#00E5FF`). |
+| **Mecánico** | `assets/models/mechanical/` | 22 golems (`golem_004.glb`, `golem_010.glb`, …) | Blindaje de chatarra remachada, hombreras dentadas y base reforzada. | Placas de hierro desgastado (`#736B61`), engranajes y visor ámbar/dorado (`#FFBF00`). |
+| **Luminoso** | `assets/models/luminous/` | 21 golems (`golem_002.glb`, `golem_006.glb`, …) | Estructura esbelta de cromo plateado, faros reflectores y cristales de cuarzo. | Cromo pulido (`#E0E8F0`), filamentos de tungsteno y emisión solar (`#FFFF33`). |
+| **Éter** | `assets/models/aether/` | 32 golems (`golem_013.glb`, `golem_015.glb`, …) | Obsidiana mística tallada, orbes de maná flotantes y anillos orbitales. | Obsidiana púrpura (`#301934`), resonadores de maná y emisión amatista (`#B833FF`). |
 
 ### 4.3 Optimización Mobile-First y Canales Emisivos
 Cumpliendo con las reglas de compatibilidad de la aplicación móvil de Decentraland ([`missing-features.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/docs/dcl-docs-main/creator/build-for-mobile/mobile-client/missing-features.md)):

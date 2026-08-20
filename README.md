@@ -415,11 +415,11 @@ graph LR
     - 🤖 [Single-File Following System Guide](guias/guia-sistema-seguimiento-y-mecanicas.md)
     - 🌐 [Multiplayer Network and Mobile-First Guide](guias/guia-multijugador-mobile.md)
 - **Catalog of 150 Recipe-Based Golem Models (.glb) in 5 Affinity Folders**: Each of the 150 deterministic recipes from the official catalog produces its own mobile-optimized glTF 2.0 binary model, assembled from the shapes of its constituent materials and colored by its elemental affinity class (PBR materials with pure emissive channels, no dynamic lights):
-  - ♨️ **Steam (`assets/golems/steam/`, 46 golems)**: Copper, boilers, chimneys, and orange fire (`#FF7000`).
-  - ⚡ **Galvanic (`assets/golems/galvanic/`, 29 golems)**: Angular chassis, Tesla coils, and electric cyan (`#00E5FF`).
-  - ⚙️ **Mechanical (`assets/golems/mechanical/`, 22 golems)**: Scrap armor, gears, and amber (`#FFBF00`).
-  - ☀️ **Luminous (`assets/golems/luminous/`, 21 golems)**: Silver chrome, prismatic headlights, and sunlight (`#FFFF33`).
-  - 🔮 **Aether (`assets/golems/aether/`, 32 golems)**: Mystical obsidian, floating resonators, and amethyst (`#B833FF`).
+  - ♨️ **Steam (`assets/models/steam/`, 46 golems)**: Copper, boilers, chimneys, and orange fire (`#FF7000`).
+  - ⚡ **Galvanic (`assets/models/galvanic/`, 29 golems)**: Angular chassis, Tesla coils, and electric cyan (`#00E5FF`).
+  - ⚙️ **Mechanical (`assets/models/mechanical/`, 22 golems)**: Scrap armor, gears, and amber (`#FFBF00`).
+  - ☀️ **Luminous (`assets/models/luminous/`, 21 golems)**: Silver chrome, prismatic headlights, and sunlight (`#FFFF33`).
+  - 🔮 **Aether (`assets/models/aether/`, 32 golems)**: Mystical obsidian, floating resonators, and amethyst (`#B833FF`).
 - **Reserve Golems (Expeditions)**: Golems not travelling with the avatar can be sent on automated missions by selecting:
   - **Destination Zone**: Determines the loot table and part rarity.
   - **Duration**: From 15 minutes to 12 hours.
