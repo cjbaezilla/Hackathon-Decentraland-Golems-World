@@ -2,7 +2,7 @@
 
 > **Estado**: Documento Oficial de Referencia Técnica — **Golems World (Decentraland SDK7)**  
 > **Ámbito**: Sistema de Forja Determinista, Hash FNV-1a de 32 bits, Balance de Atributos, Afinidades Elementales y Generación Procedural.  
-> **Ficheros de Referencia**: [`GDD-Golems.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/GDD-Golems.md) / [`GDD-Golems_eng.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/GDD-Golems_eng.md), [`Golems-Recetas-150.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/Golems-Recetas-150.md) (ES) / [`Golems-Recipes-150_eng.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/Golems-Recipes-150_eng.md) (EN)
+> **Ficheros de Referencia**: [`GDD-Golems.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/GDD-Golems.md) / [`GDD-Golems_eng.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/GDD-Golems_eng.md), [`Golems-Recetas-150.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/Golems-Recetas-150.md) (ES) / [`Golems-Recetas-150_eng.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/GOLEMS/Golems-Recetas-150_eng.md) (EN)
 
 ---
 

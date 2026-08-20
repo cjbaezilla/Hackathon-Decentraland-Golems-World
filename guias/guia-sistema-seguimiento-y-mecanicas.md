@@ -174,7 +174,7 @@ Al ingresar el avatar a la **Gran Arena Circular Steampunk** (`X: 200m, Z: 200m`
 
 ## 4. Modelos 3D Procedurales glTF 2.0 (.glb)
 
-Para validar la experiencia visual sin depender de descargas externas ni assets de terceros, se desarrolló un generador de archivos binarios GLB en Node.js ([scripts/generate_models.js](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js)).
+Para validar la experiencia visual sin depender de descargas externas ni assets de terceros, se desarrolló un generador de archivos binarios GLB en Node.js ([scripts/generate_models.js](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js)). La arquitectura interna del generador (constructor GLB, catálogo de formas de ítems, paleta de afinidades y parser de recetas) está documentada en [`scripts/lib/README.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/lib/README.md).
 
 ### 4.1 Arquitectura del Generador Binario (`generate_models.js`)
 El script implementa la especificación **glTF 2.0 Binary Format (GLB)** estructurando los buffers de memoria directamente:
@@ -192,20 +192,20 @@ El script implementa la especificación **glTF 2.0 Binary Format (GLB)** estruct
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2 Especificaciones de los 25 Modelos en las 5 Afinidades
+### 4.2 Especificaciones de los 150 Modelos (uno por receta)
 
 | Afinidad | Carpeta | Modelos | Estilo Geométrico | Materiales PBR y Canales Emisivos |
 | :--- | :--- | :--- | :--- | :--- |
-| **Vapor** | `assets/models/steam/` | `golem_steam_01.glb` a `05.glb` | Caldera redondeada de cobre, cúpula superior, chimenea de escape y pistones. | Cobre/Latón metálico (`#B87333`), hierro fundido y horno con fuego naranja (`#FF7000`). |
-| **Galvánico** | `assets/models/galvanic/` | `golem_galvanic_01.glb` a `05.glb` | Chasis angular aerodinámico, doble bobina de Tesla y extremidades ligeras. | Aleación azulada (`#59738C`), bobinas de cobre y reactor cian eléctrico (`#00E5FF`). |
-| **Mecánico** | `assets/models/mechanical/` | `golem_mechanical_01.glb` a `05.glb` | Blindaje de chatarra remachada, hombreras dentadas y base reforzada. | Placas de hierro desgastado (`#736B61`), engranajes y visor ámbar/dorado (`#FFBF00`). |
-| **Luminoso** | `assets/models/luminous/` | `golem_luminous_01.glb` a `05.glb` | Estructura esbelta de cromo plateado, faros reflectores y cristales de cuarzo. | Cromo pulido (`#E0E8F0`), filamentos de tungsteno y emisión solar (`#FFFF33`). |
-| **Éter** | `assets/models/aether/` | `golem_aether_01.glb` a `05.glb` | Obsidiana mística tallada, orbes de maná flotantes y anillos orbitales. | Obsidiana púrpura (`#301934`), resonadores de maná y emisión amatista (`#B833FF`). |
+| **Vapor** | `assets/golems/steam/` | 46 golems (`golem_003.glb`, `golem_005.glb`, …) | Caldera redondeada de cobre, cúpula superior, chimenea de escape y pistones, ensamblados desde las piezas de su receta. | Cobre/Latón metálico (`#B87333`), hierro fundido y horno con fuego naranja (`#FF7000`). |
+| **Galvánico** | `assets/golems/galvanic/` | 29 golems (`golem_001.glb`, `golem_009.glb`, …) | Chasis angular aerodinámico, doble bobina de Tesla y extremidades ligeras. | Aleación azulada (`#59738C`), bobinas de cobre y reactor cian eléctrico (`#00E5FF`). |
+| **Mecánico** | `assets/golems/mechanical/` | 22 golems (`golem_004.glb`, `golem_010.glb`, …) | Blindaje de chatarra remachada, hombreras dentadas y base reforzada. | Placas de hierro desgastado (`#736B61`), engranajes y visor ámbar/dorado (`#FFBF00`). |
+| **Luminoso** | `assets/golems/luminous/` | 21 golems (`golem_002.glb`, `golem_006.glb`, …) | Estructura esbelta de cromo plateado, faros reflectores y cristales de cuarzo. | Cromo pulido (`#E0E8F0`), filamentos de tungsteno y emisión solar (`#FFFF33`). |
+| **Éter** | `assets/golems/aether/` | 32 golems (`golem_013.glb`, `golem_015.glb`, …) | Obsidiana mística tallada, orbes de maná flotantes y anillos orbitales. | Obsidiana púrpura (`#301934`), resonadores de maná y emisión amatista (`#B833FF`). |
 
 ### 4.3 Optimización Mobile-First y Canales Emisivos
 Cumpliendo con las reglas de compatibilidad de la aplicación móvil de Decentraland ([`missing-features.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/docs/dcl-docs-main/creator/build-for-mobile/mobile-client/missing-features.md)):
 - **Sin Luces Dinámicas**: No se emplean componentes de luz (`PBPointLight`), los cuales fallan en móvil. El brillo visual de los núcleos de los golems proviene exclusivamente de canales `emissiveFactor` en el material PBR, soportados nativamente en el renderizador Godot de la app móvil.
-- **Bajo Conteo Poligonal**: Menos de 400 polígonos por modelo, garantizando 60 FPS estables incluso en dispositivos móviles de gama media/baja.
+- **Bajo Conteo Poligonal**: Entre ~2 000 y ~5 000 triángulos por golem (media ~2 500), garantizando 60 FPS estables incluso en dispositivos móviles de gama media/baja.
 
 ---
 

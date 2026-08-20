@@ -3,1124 +3,341 @@ const path = require('path')
 
 /**
  * ============================================================================
- * GENERADOR PROCEDURAL DE MODELOS 3D GLB (glTF 2.0) PARA GOLEMS
+ * GENERADOR PROCEDURAL DE GOLEMS (150 RECETAS DETERMINISTAS)
  * ============================================================================
- * Genera archivos binarios GLB optimizados para Decentraland SDK7 y Mobile First,
- * con materiales PBR metálicos y canales emisivos puros sin luces dinámicas.
+ * Ensambla un golem por cada una de las 150 recetas del catálogo oficial
+ * (`GOLEMS/Golems-Recetas-150_eng.md`), construyendo su silueta a partir de las
+ * formas de los 46 materiales que lo componen y aplicando el esquema de color
+ * de su afinidad elemental (Steam / Galvanic / Mechanical / Luminous / Aether).
  *
- * Soporta parámetros en línea por CLI para generar variantes por tipo, cantidad,
- * variantes individuales y directorios personalizados.
+ * Salida: assets/golems/<afinidad>/golem_<NNN>.glb (glTF 2.0 binario, low-poly).
  */
 
-class GlbBuilder {
-  constructor() {
-    this.json = {
-      asset: { version: '2.0', generator: 'GolemsProceduralGlbGenerator_v2' },
-      scenes: [{ nodes: [0] }],
-      scene: 0,
-      nodes: [{ name: 'Root', children: [] }],
-      materials: [],
-      meshes: [],
-      accessors: [],
-      bufferViews: [],
-      buffers: [{ byteLength: 0 }]
-    }
-    this.bufferChunks = []
-    this.totalBufferLength = 0
+const { GlbBuilder } = require('./lib/glbBuilder')
+const { getItemShapes } = require('./lib/itemShapes')
+const { getAffinityPalette } = require('./lib/affinityPalette')
+const { parseRecipes, getRecipesByAffinity } = require('./lib/golemRecipes')
+
+// ============================================================================
+// TRANSFORMACIÓN Y MEDIDAS DE DESCRIPTORES DE PRIMITIVAS
+// ============================================================================
+
+const DIM_KEYS = {
+  box: ['w', 'h', 'd'],
+  cyl: ['rT', 'rB', 'h'],
+  cone: ['r', 'h'],
+  sphere: ['r'],
+  torus: ['R', 'r'],
+  gear: ['outer', 'root', 'h'],
+  hex: ['r', 'h'],
+  octa: ['size']
+}
+
+function transformShape(d, s, tx, ty, tz) {
+  const nd = Object.assign({}, d)
+  const keys = DIM_KEYS[d.t]
+  if (keys) {
+    for (const k of keys) nd[k] = d[k] * s
   }
+  nd.x = d.x * s + tx
+  nd.y = d.y * s + ty
+  nd.z = d.z * s + tz
+  return nd
+}
 
-  addBufferData(buffer, target = undefined) {
-    const padLength = (4 - (buffer.length % 4)) % 4
-    let alignedBuffer = buffer
-    if (padLength > 0) {
-      alignedBuffer = Buffer.concat([buffer, Buffer.alloc(padLength)])
+function transformShapes(list, s, tx, ty, tz) {
+  return list.map((d) => transformShape(d, s, tx, ty, tz))
+}
+
+function halfExtents(d) {
+  switch (d.t) {
+    case 'box':
+      return [d.w / 2, d.h / 2, d.d / 2]
+    case 'cyl':
+    case 'cone': {
+      const r = d.t === 'cyl' ? Math.max(d.rT, d.rB) : d.r
+      if (d.axis === 'x') return [d.h / 2, r, r]
+      if (d.axis === 'z') return [r, r, d.h / 2]
+      return [r, d.h / 2, r]
     }
-
-    const byteOffset = this.totalBufferLength
-    const byteLength = buffer.length
-
-    this.bufferChunks.push(alignedBuffer)
-    this.totalBufferLength += alignedBuffer.length
-    this.json.buffers[0].byteLength = this.totalBufferLength
-
-    const bufferViewIndex = this.json.bufferViews.length
-    const bufferView = {
-      buffer: 0,
-      byteOffset,
-      byteLength
+    case 'sphere':
+      return [d.r, d.r, d.r]
+    case 'torus': {
+      const R = d.R + d.r
+      if (d.axis === 'x') return [d.r, R, R]
+      if (d.axis === 'z') return [R, R, d.r]
+      return [R, d.r, R]
     }
-    if (target) {
-      bufferView.target = target
+    case 'gear':
+    case 'hex': {
+      const r = d.t === 'gear' ? d.outer : d.r
+      if (d.axis === 'x') return [d.h / 2, r, r]
+      if (d.axis === 'y') return [r, d.h / 2, r]
+      return [r, r, d.h / 2]
     }
-    this.json.bufferViews.push(bufferView)
-    return bufferViewIndex
+    case 'octa':
+      return [d.size / 2, d.size / 2, d.size / 2]
+    default:
+      return [0.1, 0.1, 0.1]
   }
+}
 
-  addMaterial({ name, baseColor = [0.8, 0.8, 0.8, 1.0], roughness = 0.5, metallic = 0.5, emissive = [0, 0, 0] }) {
-    const matIndex = this.json.materials.length
-    this.json.materials.push({
-      name,
-      pbrMetallicRoughness: {
-        baseColorFactor: baseColor,
-        roughnessFactor: roughness,
-        metallicFactor: metallic
-      },
-      emissiveFactor: emissive
-    })
-    return matIndex
+function computeBounds(list) {
+  let minX = Infinity, minY = Infinity, minZ = Infinity
+  let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity
+  for (const d of list) {
+    const he = halfExtents(d)
+    minX = Math.min(minX, d.x - he[0]); maxX = Math.max(maxX, d.x + he[0])
+    minY = Math.min(minY, d.y - he[1]); maxY = Math.max(maxY, d.y + he[1])
+    minZ = Math.min(minZ, d.z - he[2]); maxZ = Math.max(maxZ, d.z + he[2])
   }
-
-  createBoxMesh(width, height, depth, offsetX = 0, offsetY = 0, offsetZ = 0) {
-    const hw = width / 2
-    const hh = height / 2
-    const hd = depth / 2
-
-    const positions = []
-    const normals = []
-    const indices = []
-
-    const faces = [
-      // Frente (+Z)
-      { norm: [0, 0, 1], v: [[-hw, -hh, hd], [hw, -hh, hd], [hw, hh, hd], [-hw, hh, hd]] },
-      // Atrás (-Z)
-      { norm: [0, 0, -1], v: [[hw, -hh, -hd], [-hw, -hh, -hd], [-hw, hh, -hd], [hw, hh, -hd]] },
-      // Arriba (+Y)
-      { norm: [0, 1, 0], v: [[-hw, hh, hd], [hw, hh, hd], [hw, hh, -hd], [-hw, hh, -hd]] },
-      // Abajo (-Y)
-      { norm: [0, -1, 0], v: [[-hw, -hh, -hd], [hw, -hh, -hd], [hw, -hh, hd], [-hw, -hh, hd]] },
-      // Derecha (+X)
-      { norm: [1, 0, 0], v: [[hw, -hh, hd], [hw, -hh, -hd], [hw, hh, -hd], [hw, hh, hd]] },
-      // Izquierda (-X)
-      { norm: [-1, 0, 0], v: [[-hw, -hh, -hd], [-hw, -hh, hd], [-hw, hh, hd], [-hw, -hh, -hd]] }
-    ]
-
-    let vOffset = 0
-    for (const f of faces) {
-      for (const p of f.v) {
-        positions.push(p[0] + offsetX, p[1] + offsetY, p[2] + offsetZ)
-        normals.push(...f.norm)
-      }
-      indices.push(vOffset, vOffset + 1, vOffset + 2, vOffset, vOffset + 2, vOffset + 3)
-      vOffset += 4
-    }
-
-    return { positions, normals, indices }
+  const sx = maxX - minX
+  const sy = maxY - minY
+  const sz = maxZ - minZ
+  return {
+    minX, minY, minZ, maxX, maxY, maxZ,
+    cx: (minX + maxX) / 2,
+    cy: (minY + maxY) / 2,
+    cz: (minZ + maxZ) / 2,
+    maxDim: Math.max(sx, sy, sz, 0.001)
   }
+}
 
-  createCylinderMesh(radius, height, segments = 12, offsetX = 0, offsetY = 0, offsetZ = 0) {
-    const hh = height / 2
-    const positions = []
-    const normals = []
-    const indices = []
-
-    for (let i = 0; i <= segments; i++) {
-      const angle = (i / segments) * Math.PI * 2
-      const x = Math.cos(angle) * radius
-      const z = Math.sin(angle) * radius
-      const nx = Math.cos(angle)
-      const nz = Math.sin(angle)
-
-      positions.push(x + offsetX, hh + offsetY, z + offsetZ)
-      normals.push(nx, 0, nz)
-
-      positions.push(x + offsetX, -hh + offsetY, z + offsetZ)
-      normals.push(nx, 0, nz)
-    }
-
-    for (let i = 0; i < segments; i++) {
-      const i1 = i * 2
-      const i2 = i * 2 + 1
-      const i3 = (i + 1) * 2
-      const i4 = (i + 1) * 2 + 1
-
-      indices.push(i1, i3, i2)
-      indices.push(i2, i3, i4)
-    }
-
-    return { positions, normals, indices }
-  }
-
-  combineGeometries(geomList) {
-    const positions = []
-    const normals = []
-    const indices = []
-    let vertexCount = 0
-
-    for (const g of geomList) {
-      if (!g || !g.positions) continue
-      positions.push(...g.positions)
-      normals.push(...g.normals)
-      for (const idx of g.indices) {
-        indices.push(idx + vertexCount)
-      }
-      vertexCount += g.positions.length / 3
-    }
-
-    return { positions, normals, indices }
-  }
-
-  addMeshNode(name, combinedGeom, materialIndex) {
-    if (!combinedGeom || combinedGeom.positions.length === 0) return -1
-
-    const posBuffer = Buffer.alloc(combinedGeom.positions.length * 4)
-    let minX = Infinity, minY = Infinity, minZ = Infinity
-    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity
-
-    for (let i = 0; i < combinedGeom.positions.length; i += 3) {
-      const x = combinedGeom.positions[i]
-      const y = combinedGeom.positions[i + 1]
-      const z = combinedGeom.positions[i + 2]
-
-      if (x < minX) minX = x
-      if (y < minY) minY = y
-      if (z < minZ) minZ = z
-      if (x > maxX) maxX = x
-      if (y > maxY) maxY = y
-      if (z > maxZ) maxZ = z
-
-      posBuffer.writeFloatLE(x, i * 4)
-      posBuffer.writeFloatLE(y, (i + 1) * 4)
-      posBuffer.writeFloatLE(z, (i + 2) * 4)
-    }
-
-    const normBuffer = Buffer.alloc(combinedGeom.normals.length * 4)
-    for (let i = 0; i < combinedGeom.normals.length; i++) {
-      normBuffer.writeFloatLE(combinedGeom.normals[i], i * 4)
-    }
-
-    const indBuffer = Buffer.alloc(combinedGeom.indices.length * 2)
-    for (let i = 0; i < combinedGeom.indices.length; i++) {
-      indBuffer.writeUInt16LE(combinedGeom.indices[i], i * 2)
-    }
-
-    const posView = this.addBufferData(posBuffer, 34962)
-    const normView = this.addBufferData(normBuffer, 34962)
-    const indView = this.addBufferData(indBuffer, 34963)
-
-    const posAcc = this.json.accessors.length
-    this.json.accessors.push({
-      bufferView: posView,
-      byteOffset: 0,
-      componentType: 5126,
-      count: combinedGeom.positions.length / 3,
-      type: 'VEC3',
-      max: [maxX, maxY, maxZ],
-      min: [minX, minY, minZ]
-    })
-
-    const normAcc = this.json.accessors.length
-    this.json.accessors.push({
-      bufferView: normView,
-      byteOffset: 0,
-      componentType: 5126,
-      count: combinedGeom.normals.length / 3,
-      type: 'VEC3'
-    })
-
-    const indAcc = this.json.accessors.length
-    this.json.accessors.push({
-      bufferView: indView,
-      byteOffset: 0,
-      componentType: 5123,
-      count: combinedGeom.indices.length,
-      type: 'SCALAR'
-    })
-
-    const meshIndex = this.json.meshes.length
-    this.json.meshes.push({
-      name: `${name}_Mesh`,
-      primitives: [{
-        attributes: {
-          POSITION: posAcc,
-          NORMAL: normAcc
-        },
-        indices: indAcc,
-        material: materialIndex,
-        mode: 4
-      }]
-    })
-
-    const nodeIndex = this.json.nodes.length
-    this.json.nodes.push({
-      name,
-      mesh: meshIndex
-    })
-    this.json.nodes[0].children.push(nodeIndex)
-
-    return nodeIndex
-  }
-
-  buildGlbBuffer() {
-    const jsonString = JSON.stringify(this.json)
-    const jsonBuffer = Buffer.from(jsonString, 'utf8')
-    const jsonPad = (4 - (jsonBuffer.length % 4)) % 4
-    const paddedJsonBuffer = jsonPad > 0 ? Buffer.concat([jsonBuffer, Buffer.alloc(jsonPad, 0x20)]) : jsonBuffer
-
-    const binBuffer = Buffer.concat(this.bufferChunks)
-    const binPad = (4 - (binBuffer.length % 4)) % 4
-    const paddedBinBuffer = binPad > 0 ? Buffer.concat([binBuffer, Buffer.alloc(binPad, 0x00)]) : binBuffer
-
-    const totalLength = 12 + 8 + paddedJsonBuffer.length + 8 + paddedBinBuffer.length
-
-    const header = Buffer.alloc(12)
-    header.writeUInt32LE(0x46546C67, 0)
-    header.writeUInt32LE(2, 4)
-    header.writeUInt32LE(totalLength, 8)
-
-    const jsonChunkHeader = Buffer.alloc(8)
-    jsonChunkHeader.writeUInt32LE(paddedJsonBuffer.length, 0)
-    jsonChunkHeader.writeUInt32LE(0x4E4F534A, 4)
-
-    const binChunkHeader = Buffer.alloc(8)
-    binChunkHeader.writeUInt32LE(paddedBinBuffer.length, 0)
-    binChunkHeader.writeUInt32LE(0x004E4942, 4)
-
-    return Buffer.concat([
-      header,
-      jsonChunkHeader,
-      paddedJsonBuffer,
-      binChunkHeader,
-      paddedBinBuffer
-    ])
+// Reducción low-poly para golems (los ítems se ven de cerca, los golems no):
+// se limitan los segmentos de cilindros, esferas y toros sin cambiar la silueta.
+function renderDescriptor(glb, d) {
+  switch (d.t) {
+    case 'box': return glb.createBoxMesh(d.w, d.h, d.d, d.x, d.y, d.z)
+    case 'cyl': return glb.createCylinderMesh(d.rT, d.rB, d.h, Math.min(d.seg, 10), d.x, d.y, d.z, d.axis, d.capTop, d.capBottom)
+    case 'cone': return glb.createConeMesh(d.r, d.h, Math.min(d.seg, 8), d.x, d.y, d.z, d.axis)
+    case 'sphere': return glb.createSphereMesh(d.r, Math.min(d.lat, 6), Math.min(d.lon, 8), d.x, d.y, d.z)
+    case 'torus': return glb.createTorusMesh(d.R, d.r, Math.min(d.sR, 12), Math.min(d.sT, 6), d.x, d.y, d.z, d.axis)
+    case 'gear': return glb.createGearMesh(d.outer, d.root, d.h, d.teeth, d.x, d.y, d.z, d.axis)
+    case 'hex': return glb.createHexPrismMesh(d.r, d.h, d.x, d.y, d.z, d.axis)
+    case 'octa': return glb.createOctahedronMesh(d.size, d.x, d.y, d.z)
+    default: return null
   }
 }
 
 // ============================================================================
-// GENERADORES POR TIPO Y VARIANTE (1 a 5)
+// MAPA DE SLOTS POR ÍTEM (dónde se monta cada material en el esqueleto)
 // ============================================================================
 
+const ITEM_SLOT_MAP = {
+  // COMUNES
+  alambre_cobre: 'arm',
+  tornillos_pernos: 'leg',
+  engranajes_desgastados: 'shoulder',
+  tubos_cobre: 'leg',
+  sartenes: 'torso',
+  ollas_cocinar: 'head',
+  placas_laton: 'torso',
+  clavos_oxidados: 'leg',
+  latas_conserva: 'torso',
+  cadenas_hierro: 'leg',
+  tuercas_gigantes: 'shoulder',
+  tapas_alcantarilla: 'torso',
+  cables_deshilachados: 'accent',
+  residuos_carbon: 'foot',
+  // POCO COMUNES
+  transistores: 'accent',
+  bombillas_filamento: 'eye',
+  resortes_reloj: 'leg',
+  manometros: 'torso',
+  valvulas_vapor: 'shoulder',
+  lentes_tv_viejo: 'eye',
+  fusibles_fundidos: 'arm',
+  relojes_bolsillo: 'eye',
+  brujulas_magneticas: 'torso',
+  tubos_vacio: 'eye',
+  palancas_interruptor: 'arm',
+  // RAROS
+  motor_vapor: 'core',
+  bobinas_tesla: 'shoulder',
+  antenas_radio: 'back',
+  diodos_led: 'accent',
+  baterias_alquimicas: 'core',
+  engranajes_bronce: 'shoulder',
+  dinamo_galvanica: 'arm',
+  cristal_fuerza: 'accent',
+  giroscopio_precision: 'shoulder',
+  condensador_presion: 'core',
+  // ÉPICOS
+  nucleo_mana: 'core',
+  cerebro_automata: 'head',
+  reactor_eter: 'core',
+  corazon_caldera: 'core',
+  bateria_plasma: 'core',
+  matriz_optica_solar: 'back',
+  embolo_titanio: 'leg',
+  // LEGENDARIOS
+  ojo_dragon: 'eye',
+  corazon_primigenio: 'core',
+  singularidad_eterica: 'core',
+  relicario_astral: 'torso'
+}
+
+const SLOT_KEYS = ['head', 'eye', 'core', 'torso', 'shoulder', 'arm', 'leg', 'foot', 'back', 'accent']
+
+function bucketize(components) {
+  const buckets = {}
+  for (const k of SLOT_KEYS) buckets[k] = []
+  for (const c of components) {
+    const slot = ITEM_SLOT_MAP[c.id] || 'accent'
+    const times = Math.min(c.qty, 6)
+    for (let i = 0; i < times; i++) buckets[slot].push(c.id)
+  }
+  return buckets
+}
+
+function resolveItem(buckets, chain, signatureId) {
+  for (const key of chain) {
+    if (buckets[key] && buckets[key].length) {
+      return { id: buckets[key].shift(), fromBucket: key }
+    }
+  }
+  return { id: signatureId, fromBucket: 'reuse' }
+}
+
 /**
- * 1. TIPO VAPOR (STEAM) - Cobre, calderas, chimeneas y fuego naranja
+ * Coloca un ítem (recoloreado) en una posición del esqueleto con un tamaño
+ * objetivo, devolviendo sus descriptores transformados por grupo.
  */
-function generateSteamGolem(variant = 1) {
+function placeItem(itemId, x, y, z, targetSize) {
+  const shapes = getItemShapes(itemId)
+  const all = shapes.body.concat(shapes.detail, shapes.glow)
+  const b = computeBounds(all)
+  const s = targetSize / b.maxDim
+  const tx = x - b.cx * s
+  const ty = y - b.cy * s
+  const tz = z - b.cz * s
+  return {
+    body: transformShapes(shapes.body, s, tx, ty, tz),
+    detail: transformShapes(shapes.detail, s, tx, ty, tz),
+    glow: transformShapes(shapes.glow, s, tx, ty, tz)
+  }
+}
+
+// ============================================================================
+// ENSAMBLAJE DEL GOLEM
+// ============================================================================
+
+function buildGolem(recipe) {
   const glb = new GlbBuilder()
+  const palette = getAffinityPalette(recipe.affinity)
+  const matBody = glb.addMaterial(palette.materials.body)
+  const matDetail = glb.addMaterial(palette.materials.detail)
+  const matGlow = glb.addMaterial(palette.materials.glow)
 
-  const matBody = glb.addMaterial({
-    name: 'Steam_Copper_Alloy',
-    baseColor: [0.72 + variant * 0.02, 0.44 - variant * 0.01, 0.20, 1.0],
-    roughness: 0.4,
-    metallic: 0.75
-  })
-
-  const matIron = glb.addMaterial({
-    name: 'Steam_Cast_Iron',
-    baseColor: [0.2 + variant * 0.01, 0.2 + variant * 0.01, 0.22, 1.0],
-    roughness: 0.7,
-    metallic: 0.8
-  })
-
-  const matGlow = glb.addMaterial({
-    name: 'Steam_Furnace_Glow',
-    baseColor: [1.0, 0.4 + (variant % 2) * 0.1, 0.05, 1.0],
-    roughness: 0.1,
-    metallic: 0.0,
-    emissive: [1.0, 0.45, 0.0]
-  })
+  const h = recipe.height
+  const buckets = bucketize(recipe.components)
+  const signatureId = recipe.components[0].id
 
   const bodyGeoms = []
-  const ironGeoms = []
+  const detailGeoms = []
   const glowGeoms = []
 
-  switch (variant) {
-    case 1: // 01 - Calderón Estándar (Equilibrado)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.7, 0.6, 0.55, 0, 0.65, 0),
-        glb.createBoxMesh(0.45, 0.35, 0.4, 0, 1.05, 0),
-        glb.createBoxMesh(0.2, 0.2, 0.25, -0.42, 0.85, 0),
-        glb.createBoxMesh(0.2, 0.2, 0.25, 0.42, 0.85, 0)
-      )
-      ironGeoms.push(
-        glb.createCylinderMesh(0.08, 0.4, 8, 0.2, 1.25, -0.1),
-        glb.createBoxMesh(0.18, 0.5, 0.18, -0.48, 0.55, 0),
-        glb.createBoxMesh(0.18, 0.5, 0.18, 0.48, 0.55, 0),
-        glb.createBoxMesh(0.14, 0.15, 0.2, -0.48, 0.25, 0.05),
-        glb.createBoxMesh(0.14, 0.15, 0.2, 0.48, 0.25, 0.05),
-        glb.createBoxMesh(0.22, 0.4, 0.24, -0.22, 0.2, 0),
-        glb.createBoxMesh(0.22, 0.4, 0.24, 0.22, 0.2, 0),
-        glb.createBoxMesh(0.24, 0.1, 0.35, -0.22, 0.05, 0.05),
-        glb.createBoxMesh(0.24, 0.1, 0.35, 0.22, 0.05, 0.05)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.35, 0.25, 0.08, 0, 0.65, 0.26),
-        glb.createBoxMesh(0.25, 0.1, 0.06, 0, 1.05, 0.19)
-      )
-      break
-
-    case 2: // 02 - Caldera Pesada Blindada (Tanque)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.85, 0.7, 0.65, 0, 0.7, 0),
-        glb.createBoxMesh(0.5, 0.35, 0.45, 0, 1.15, 0),
-        glb.createBoxMesh(0.32, 0.28, 0.35, -0.55, 0.95, 0),
-        glb.createBoxMesh(0.32, 0.28, 0.35, 0.55, 0.95, 0)
-      )
-      ironGeoms.push(
-        glb.createCylinderMesh(0.1, 0.45, 8, -0.2, 1.35, -0.15),
-        glb.createCylinderMesh(0.1, 0.45, 8, 0.2, 1.35, -0.15),
-        glb.createBoxMesh(0.24, 0.55, 0.24, -0.55, 0.55, 0),
-        glb.createBoxMesh(0.24, 0.55, 0.24, 0.55, 0.55, 0),
-        glb.createBoxMesh(0.28, 0.38, 0.3, -0.26, 0.2, 0),
-        glb.createBoxMesh(0.28, 0.38, 0.3, 0.26, 0.2, 0),
-        glb.createBoxMesh(0.32, 0.12, 0.42, -0.26, 0.06, 0.05),
-        glb.createBoxMesh(0.32, 0.12, 0.42, 0.26, 0.06, 0.05)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.45, 0.35, 0.1, 0, 0.68, 0.31),
-        glb.createCylinderMesh(0.08, 0.08, 8, -0.12, 1.15, 0.22),
-        glb.createCylinderMesh(0.08, 0.08, 8, 0.12, 1.15, 0.22)
-      )
-      break
-
-    case 3: // 03 - Vástago a Presión (Ágil / Velocidad)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.55, 0.65, 0.45, 0, 0.75, 0),
-        glb.createBoxMesh(0.35, 0.4, 0.35, 0, 1.2, 0),
-        glb.createCylinderMesh(0.07, 0.5, 8, 0, 1.55, -0.1) // Chimenea alta
-      )
-      ironGeoms.push(
-        glb.createBoxMesh(0.14, 0.6, 0.14, -0.38, 0.65, 0),
-        glb.createBoxMesh(0.14, 0.6, 0.14, 0.38, 0.65, 0),
-        glb.createBoxMesh(0.16, 0.5, 0.16, -0.16, 0.25, 0),
-        glb.createBoxMesh(0.16, 0.5, 0.16, 0.16, 0.25, 0),
-        glb.createBoxMesh(0.18, 0.08, 0.3, -0.16, 0.04, 0.05),
-        glb.createBoxMesh(0.18, 0.08, 0.3, 0.16, 0.04, 0.05)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.1, 0.1, 8, 0, 0.8, 0.22),
-        glb.createBoxMesh(0.22, 0.06, 0.06, 0, 1.22, 0.18)
-      )
-      break
-
-    case 4: // 04 - Mortero de Vapor (Artillero / Cañones)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.75, 0.6, 0.6, 0, 0.68, 0),
-        glb.createBoxMesh(0.45, 0.3, 0.4, 0, 1.05, 0)
-      )
-      ironGeoms.push(
-        glb.createCylinderMesh(0.14, 0.65, 8, -0.5, 0.65, 0.15), // Cañón vapor izq
-        glb.createCylinderMesh(0.14, 0.65, 8, 0.5, 0.65, 0.15),  // Cañón vapor der
-        glb.createBoxMesh(0.22, 0.4, 0.24, -0.22, 0.2, 0),
-        glb.createBoxMesh(0.22, 0.4, 0.24, 0.22, 0.2, 0),
-        glb.createBoxMesh(0.25, 0.1, 0.35, -0.22, 0.05, 0.05),
-        glb.createBoxMesh(0.25, 0.1, 0.35, 0.22, 0.05, 0.05),
-        glb.createCylinderMesh(0.12, 0.4, 8, 0, 1.25, -0.2) // Doble escape trasero
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.35, 0.25, 0.08, 0, 0.65, 0.28),
-        glb.createCylinderMesh(0.08, 0.08, 8, -0.5, 0.65, 0.48),
-        glb.createCylinderMesh(0.08, 0.08, 8, 0.5, 0.65, 0.48)
-      )
-      break
-
-    case 5: // 05 - Coloso de Fundición Suprema (Élite)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.85, 0.75, 0.65, 0, 0.75, 0),
-        glb.createBoxMesh(0.5, 0.4, 0.45, 0, 1.25, 0),
-        glb.createBoxMesh(0.3, 0.3, 0.3, -0.58, 1.05, 0),
-        glb.createBoxMesh(0.3, 0.3, 0.3, 0.58, 1.05, 0)
-      )
-      ironGeoms.push(
-        glb.createCylinderMesh(0.09, 0.5, 8, -0.25, 1.5, -0.15),
-        glb.createCylinderMesh(0.12, 0.6, 8, 0, 1.55, -0.2),
-        glb.createCylinderMesh(0.09, 0.5, 8, 0.25, 1.5, -0.15),
-        glb.createBoxMesh(0.25, 0.6, 0.25, -0.58, 0.6, 0),
-        glb.createBoxMesh(0.25, 0.6, 0.25, 0.58, 0.6, 0),
-        glb.createBoxMesh(0.26, 0.45, 0.28, -0.25, 0.22, 0),
-        glb.createBoxMesh(0.26, 0.45, 0.28, 0.25, 0.22, 0),
-        glb.createBoxMesh(0.3, 0.12, 0.4, -0.25, 0.06, 0.05),
-        glb.createBoxMesh(0.3, 0.12, 0.4, 0.25, 0.06, 0.05)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.48, 0.38, 0.1, 0, 0.75, 0.31),
-        glb.createBoxMesh(0.3, 0.12, 0.06, 0, 1.25, 0.21),
-        glb.createBoxMesh(0.1, 0.1, 0.1, -0.58, 1.22, 0),
-        glb.createBoxMesh(0.1, 0.1, 0.1, 0.58, 1.22, 0)
-      )
-      break
+  const addPart = (part) => {
+    for (const d of part.body) bodyGeoms.push(renderDescriptor(glb, d))
+    for (const d of part.detail) detailGeoms.push(renderDescriptor(glb, d))
+    for (const d of part.glow) glowGeoms.push(renderDescriptor(glb, d))
   }
 
-  glb.addMeshNode('SteamBody', glb.combineGeometries(bodyGeoms), matBody)
-  glb.addMeshNode('SteamIron', glb.combineGeometries(ironGeoms), matIron)
-  glb.addMeshNode('SteamGlow', glb.combineGeometries(glowGeoms), matGlow)
+  // --- Slots estructurales (siempre presentes, con fallback a la firma) ---
+  const head = resolveItem(buckets, ['head', 'torso', 'core', 'eye'], signatureId)
+  const core = resolveItem(buckets, ['core', 'torso', 'head'], signatureId)
+  const torso = resolveItem(buckets, ['torso', 'core', 'head'], signatureId)
+  const shoulderL = resolveItem(buckets, ['shoulder', 'arm', 'torso'], signatureId)
+  const shoulderR = resolveItem(buckets, ['shoulder', 'arm', 'torso'], signatureId)
+  const legL = resolveItem(buckets, ['leg', 'arm', 'torso'], signatureId)
+  const legR = resolveItem(buckets, ['leg', 'arm', 'torso'], signatureId)
 
-  return glb.buildGlbBuffer()
-}
+  addPart(placeItem(head.id, 0, 0.95 * h, 0, 0.40 * h))
+  addPart(placeItem(core.id, 0, 0.55 * h, 0, 0.44 * h))
+  addPart(placeItem(torso.id, 0, 0.58 * h, 0, 0.48 * h))
+  addPart(placeItem(shoulderL.id, -0.42 * h, 0.82 * h, 0, 0.34 * h))
+  addPart(placeItem(shoulderR.id, 0.42 * h, 0.82 * h, 0, 0.34 * h))
+  addPart(placeItem(legL.id, -0.2 * h, 0.28 * h, 0, 0.46 * h))
+  addPart(placeItem(legR.id, 0.2 * h, 0.28 * h, 0, 0.46 * h))
 
-/**
- * 2. TIPO GALVÁNICO (GALVANIC) - Acero azulado, bobinas Tesla y cian eléctrico
- */
-function generateGalvanicGolem(variant = 1) {
-  const glb = new GlbBuilder()
+  // --- Slots opcionales (solo si existen ítems de ese tipo) ---
+  const armL = resolveItem(buckets, ['arm'], null)
+  if (armL) addPart(placeItem(armL.id, -0.5 * h, 0.48 * h, 0, 0.34 * h))
+  const armR = resolveItem(buckets, ['arm'], null)
+  if (armR) addPart(placeItem(armR.id, 0.5 * h, 0.48 * h, 0, 0.34 * h))
 
-  const matBody = glb.addMaterial({
-    name: 'Galvanic_Alloy',
-    baseColor: [0.32 + variant * 0.02, 0.42 + variant * 0.01, 0.55, 1.0],
-    roughness: 0.3,
-    metallic: 0.85
-  })
+  const eye = resolveItem(buckets, ['eye'], null)
+  if (eye) addPart(placeItem(eye.id, 0, 0.95 * h, 0.18 * h, 0.14 * h))
 
-  const matCoil = glb.addMaterial({
-    name: 'Tesla_Copper_Coil',
-    baseColor: [0.85, 0.55, 0.25, 1.0],
-    roughness: 0.5,
-    metallic: 0.6
-  })
+  const footL = resolveItem(buckets, ['foot'], null)
+  if (footL) addPart(placeItem(footL.id, -0.2 * h, 0.06 * h, 0.06 * h, 0.22 * h))
+  const footR = resolveItem(buckets, ['foot'], null)
+  if (footR) addPart(placeItem(footR.id, 0.2 * h, 0.06 * h, 0.06 * h, 0.22 * h))
 
-  const matGlow = glb.addMaterial({
-    name: 'Galvanic_Electric_Glow',
-    baseColor: [0.1, 0.9, 1.0, 1.0],
-    roughness: 0.1,
-    metallic: 0.0,
-    emissive: [0.0, 0.9, 1.0]
-  })
+  const back = resolveItem(buckets, ['back'], null)
+  if (back) addPart(placeItem(back.id, 0, 0.85 * h, -0.35 * h, 0.36 * h))
 
-  const bodyGeoms = []
-  const coilGeoms = []
-  const glowGeoms = []
+  // --- Ojo emisivo de identidad (siempre presente, antisaturación) ---
+  glowGeoms.push(glb.createSphereMesh(0.05 * h, 6, 8, 0, 0.95 * h, 0.18 * h))
 
-  switch (variant) {
-    case 1: // 01 - Chispazo Clásico
-      bodyGeoms.push(
-        glb.createBoxMesh(0.65, 0.45, 0.45, 0, 0.8, 0),
-        glb.createBoxMesh(0.4, 0.3, 0.35, 0, 0.48, 0),
-        glb.createBoxMesh(0.35, 0.3, 0.35, 0, 1.15, 0),
-        glb.createBoxMesh(0.14, 0.55, 0.14, -0.42, 0.65, 0),
-        glb.createBoxMesh(0.14, 0.55, 0.14, 0.42, 0.65, 0),
-        glb.createBoxMesh(0.16, 0.45, 0.18, -0.18, 0.22, 0),
-        glb.createBoxMesh(0.16, 0.45, 0.18, 0.18, 0.22, 0)
-      )
-      coilGeoms.push(
-        glb.createCylinderMesh(0.09, 0.35, 8, -0.38, 1.1, 0),
-        glb.createCylinderMesh(0.09, 0.35, 8, 0.38, 1.1, 0),
-        glb.createBoxMesh(0.15, 0.3, 0.15, 0, 0.85, -0.26)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.12, 0.1, 8, 0, 0.8, 0.22),
-        glb.createBoxMesh(0.24, 0.08, 0.06, 0, 1.18, 0.18),
-        glb.createBoxMesh(0.06, 0.06, 0.06, -0.38, 1.3, 0),
-        glb.createBoxMesh(0.06, 0.06, 0.06, 0.38, 1.3, 0)
-      )
-      break
-
-    case 2: // 02 - Acorazado Dinamo (Tanque de Alta Tensión)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.8, 0.6, 0.55, 0, 0.75, 0),
-        glb.createBoxMesh(0.45, 0.35, 0.4, 0, 1.2, 0),
-        glb.createBoxMesh(0.22, 0.5, 0.22, -0.52, 0.6, 0),
-        glb.createBoxMesh(0.22, 0.5, 0.22, 0.52, 0.6, 0),
-        glb.createBoxMesh(0.24, 0.42, 0.24, -0.22, 0.21, 0),
-        glb.createBoxMesh(0.24, 0.42, 0.24, 0.22, 0.21, 0)
-      )
-      coilGeoms.push(
-        glb.createCylinderMesh(0.12, 0.4, 8, -0.45, 1.15, 0),
-        glb.createCylinderMesh(0.12, 0.4, 8, 0.45, 1.15, 0),
-        glb.createCylinderMesh(0.15, 0.4, 8, 0, 0.8, -0.3)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.35, 0.35, 0.1, 0, 0.75, 0.26),
-        glb.createBoxMesh(0.3, 0.1, 0.06, 0, 1.22, 0.19)
-      )
-      break
-
-    case 3: // 03 - Relámpago Veloz (Ágil / Dípolo)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.5, 0.55, 0.4, 0, 0.8, 0),
-        glb.createBoxMesh(0.3, 0.35, 0.3, 0, 1.22, 0),
-        glb.createBoxMesh(0.12, 0.6, 0.12, -0.35, 0.7, 0),
-        glb.createBoxMesh(0.12, 0.6, 0.12, 0.35, 0.7, 0),
-        glb.createBoxMesh(0.14, 0.5, 0.14, -0.16, 0.25, 0),
-        glb.createBoxMesh(0.14, 0.5, 0.14, 0.16, 0.25, 0)
-      )
-      coilGeoms.push(
-        glb.createCylinderMesh(0.06, 0.5, 8, -0.2, 1.45, 0),
-        glb.createCylinderMesh(0.06, 0.5, 8, 0.2, 1.45, 0)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.1, 0.08, 8, 0, 0.8, 0.2),
-        glb.createBoxMesh(0.2, 0.06, 0.06, 0, 1.24, 0.15),
-        glb.createBoxMesh(0.08, 0.08, 0.08, -0.2, 1.72, 0),
-        glb.createBoxMesh(0.08, 0.08, 0.08, 0.2, 1.72, 0)
-      )
-      break
-
-    case 4: // 04 - Conductor de Rayos (Artillero / Bobina de Arco)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.7, 0.5, 0.5, 0, 0.75, 0),
-        glb.createBoxMesh(0.4, 0.3, 0.4, 0, 1.12, 0),
-        glb.createBoxMesh(0.18, 0.5, 0.18, -0.45, 0.62, 0),
-        glb.createBoxMesh(0.18, 0.5, 0.18, 0.45, 0.62, 0)
-      )
-      coilGeoms.push(
-        glb.createCylinderMesh(0.1, 0.6, 8, -0.45, 0.75, 0.3), // Bobina arma izq
-        glb.createCylinderMesh(0.1, 0.6, 8, 0.45, 0.75, 0.3),  // Bobina arma der
-        glb.createCylinderMesh(0.14, 0.4, 8, 0, 0.85, -0.28)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.14, 0.08, 8, 0, 0.75, 0.24),
-        glb.createBoxMesh(0.08, 0.08, 0.08, -0.45, 0.75, 0.62),
-        glb.createBoxMesh(0.08, 0.08, 0.08, 0.45, 0.75, 0.62)
-      )
-      break
-
-    case 5: // 05 - Titán Galvánico de Tesla (Élite)
-      bodyGeoms.push(
-        glb.createBoxMesh(0.8, 0.65, 0.6, 0, 0.8, 0),
-        glb.createBoxMesh(0.46, 0.36, 0.42, 0, 1.28, 0),
-        glb.createBoxMesh(0.28, 0.28, 0.28, -0.55, 1.02, 0),
-        glb.createBoxMesh(0.28, 0.28, 0.28, 0.55, 1.02, 0)
-      )
-      coilGeoms.push(
-        glb.createCylinderMesh(0.1, 0.45, 8, -0.55, 1.35, 0),
-        glb.createCylinderMesh(0.1, 0.45, 8, 0.55, 1.35, 0),
-        glb.createCylinderMesh(0.08, 0.4, 8, 0, 1.55, -0.1),
-        glb.createBoxMesh(0.2, 0.4, 0.2, 0, 0.8, -0.32)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.18, 0.1, 8, 0, 0.8, 0.29),
-        glb.createBoxMesh(0.32, 0.1, 0.06, 0, 1.28, 0.2),
-        glb.createBoxMesh(0.1, 0.1, 0.1, -0.55, 1.6, 0),
-        glb.createBoxMesh(0.1, 0.1, 0.1, 0.55, 1.6, 0)
-      )
-      break
-  }
-
-  glb.addMeshNode('GalvanicBody', glb.combineGeometries(bodyGeoms), matBody)
-  glb.addMeshNode('GalvanicCoils', glb.combineGeometries(coilGeoms), matCoil)
-  glb.addMeshNode('GalvanicGlow', glb.combineGeometries(glowGeoms), matGlow)
-
-  return glb.buildGlbBuffer()
-}
-
-/**
- * 3. TIPO MECÁNICO (MECHANICAL) - Chatarra remachada, latón/bronce y ámbar dorado
- */
-function generateMechanicalGolem(variant = 1) {
-  const glb = new GlbBuilder()
-
-  const matArmor = glb.addMaterial({
-    name: 'Scrap_Iron_Armor',
-    baseColor: [0.44 + variant * 0.02, 0.40, 0.36, 1.0],
-    roughness: 0.65,
-    metallic: 0.75
-  })
-
-  const matBronze = glb.addMaterial({
-    name: 'Brass_Gears',
-    baseColor: [0.75, 0.62, 0.28, 1.0],
-    roughness: 0.45,
-    metallic: 0.7
-  })
-
-  const matGlow = glb.addMaterial({
-    name: 'Mechanical_Optic_Glow',
-    baseColor: [1.0, 0.8, 0.1, 1.0],
-    roughness: 0.2,
-    metallic: 0.1,
-    emissive: [1.0, 0.75, 0.0]
-  })
-
-  const armorGeoms = []
-  const gearGeoms = []
-  const glowGeoms = []
-
-  switch (variant) {
-    case 1: // 01 - Acorazado Clásico
-      armorGeoms.push(
-        glb.createBoxMesh(0.75, 0.55, 0.6, 0, 0.65, 0),
-        glb.createBoxMesh(0.4, 0.3, 0.4, 0, 1.02, 0),
-        glb.createBoxMesh(0.24, 0.48, 0.24, -0.48, 0.55, 0),
-        glb.createBoxMesh(0.24, 0.48, 0.24, 0.48, 0.55, 0),
-        glb.createBoxMesh(0.22, 0.22, 0.25, -0.48, 0.22, 0.05),
-        glb.createBoxMesh(0.22, 0.22, 0.25, 0.48, 0.22, 0.05),
-        glb.createBoxMesh(0.25, 0.38, 0.28, -0.22, 0.2, 0),
-        glb.createBoxMesh(0.25, 0.38, 0.28, 0.22, 0.2, 0),
-        glb.createBoxMesh(0.28, 0.12, 0.38, -0.22, 0.06, 0.05),
-        glb.createBoxMesh(0.28, 0.12, 0.38, 0.22, 0.06, 0.05)
-      )
-      gearGeoms.push(
-        glb.createBoxMesh(0.28, 0.25, 0.32, -0.46, 0.88, 0),
-        glb.createBoxMesh(0.28, 0.25, 0.32, 0.46, 0.88, 0),
-        glb.createBoxMesh(0.5, 0.35, 0.08, 0, 0.65, 0.31),
-        glb.createCylinderMesh(0.18, 0.08, 10, 0, 0.75, -0.32)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.09, 0.08, 8, 0, 1.05, 0.22),
-        glb.createCylinderMesh(0.06, 0.06, 8, -0.15, 0.72, 0.33),
-        glb.createCylinderMesh(0.06, 0.06, 8, 0.15, 0.72, 0.33)
-      )
-      break
-
-    case 2: // 02 - Bastión de Chatarra (Tanque Pesado)
-      armorGeoms.push(
-        glb.createBoxMesh(0.9, 0.65, 0.7, 0, 0.7, 0),
-        glb.createBoxMesh(0.48, 0.32, 0.45, 0, 1.12, 0),
-        glb.createBoxMesh(0.3, 0.5, 0.3, -0.58, 0.55, 0),
-        glb.createBoxMesh(0.3, 0.5, 0.3, 0.58, 0.55, 0),
-        glb.createBoxMesh(0.3, 0.4, 0.32, -0.25, 0.2, 0),
-        glb.createBoxMesh(0.3, 0.4, 0.32, 0.25, 0.2, 0)
-      )
-      gearGeoms.push(
-        glb.createBoxMesh(0.36, 0.32, 0.4, -0.58, 0.95, 0),
-        glb.createBoxMesh(0.36, 0.32, 0.4, 0.58, 0.95, 0),
-        glb.createBoxMesh(0.65, 0.45, 0.12, 0, 0.7, 0.36)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.28, 0.1, 0.08, 0, 1.12, 0.24),
-        glb.createCylinderMesh(0.12, 0.08, 8, 0, 0.7, 0.38)
-      )
-      break
-
-    case 3: // 03 - Engranaje Relojero (Ágil / Alta Precisión)
-      armorGeoms.push(
-        glb.createBoxMesh(0.55, 0.6, 0.45, 0, 0.75, 0),
-        glb.createBoxMesh(0.35, 0.32, 0.35, 0, 1.18, 0),
-        glb.createBoxMesh(0.15, 0.55, 0.15, -0.38, 0.65, 0),
-        glb.createBoxMesh(0.15, 0.55, 0.15, 0.38, 0.65, 0),
-        glb.createBoxMesh(0.16, 0.48, 0.16, -0.16, 0.24, 0),
-        glb.createBoxMesh(0.16, 0.48, 0.16, 0.16, 0.24, 0)
-      )
-      gearGeoms.push(
-        glb.createCylinderMesh(0.14, 0.06, 10, -0.38, 0.98, 0),
-        glb.createCylinderMesh(0.14, 0.06, 10, 0.38, 0.98, 0),
-        glb.createCylinderMesh(0.16, 0.06, 10, 0, 0.8, -0.24)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.08, 0.06, 8, 0, 1.18, 0.18),
-        glb.createCylinderMesh(0.06, 0.06, 8, 0, 0.8, 0.24)
-      )
-      break
-
-    case 4: // 04 - Martillo Neumático Mecánico (Artillero / Demoledor)
-      armorGeoms.push(
-        glb.createBoxMesh(0.8, 0.6, 0.55, 0, 0.68, 0),
-        glb.createBoxMesh(0.42, 0.3, 0.4, 0, 1.05, 0),
-        glb.createBoxMesh(0.28, 0.35, 0.35, -0.52, 0.3, 0.1), // Maza de impacto izq
-        glb.createBoxMesh(0.28, 0.35, 0.35, 0.52, 0.3, 0.1)   // Maza de impacto der
-      )
-      gearGeoms.push(
-        glb.createBoxMesh(0.32, 0.28, 0.35, -0.5, 0.9, 0),
-        glb.createBoxMesh(0.32, 0.28, 0.35, 0.5, 0.9, 0),
-        glb.createBoxMesh(0.55, 0.3, 0.1, 0, 0.68, 0.3)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.1, 0.08, 8, 0, 1.05, 0.22),
-        glb.createBoxMesh(0.1, 0.1, 0.1, -0.52, 0.3, 0.3),
-        glb.createBoxMesh(0.1, 0.1, 0.1, 0.52, 0.3, 0.3)
-      )
-      break
-
-    case 5: // 05 - Gran Autómata de Relojería (Élite)
-      armorGeoms.push(
-        glb.createBoxMesh(0.85, 0.7, 0.65, 0, 0.78, 0),
-        glb.createBoxMesh(0.48, 0.38, 0.42, 0, 1.26, 0),
-        glb.createBoxMesh(0.26, 0.55, 0.26, -0.55, 0.65, 0),
-        glb.createBoxMesh(0.26, 0.55, 0.26, 0.55, 0.65, 0)
-      )
-      gearGeoms.push(
-        glb.createCylinderMesh(0.2, 0.08, 12, -0.55, 1.05, 0),
-        glb.createCylinderMesh(0.2, 0.08, 12, 0.55, 1.05, 0),
-        glb.createCylinderMesh(0.24, 0.08, 12, 0, 0.8, -0.34),
-        glb.createBoxMesh(0.6, 0.4, 0.12, 0, 0.78, 0.34)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.12, 0.08, 8, 0, 1.26, 0.22),
-        glb.createCylinderMesh(0.08, 0.08, 8, -0.15, 0.78, 0.4),
-        glb.createCylinderMesh(0.08, 0.08, 8, 0.15, 0.78, 0.4)
-      )
-      break
-  }
-
-  glb.addMeshNode('MechanicalArmor', glb.combineGeometries(armorGeoms), matArmor)
-  glb.addMeshNode('MechanicalGears', glb.combineGeometries(gearGeoms), matBronze)
-  glb.addMeshNode('MechanicalGlow', glb.combineGeometries(glowGeoms), matGlow)
-
-  return glb.buildGlbBuffer()
-}
-
-/**
- * 4. TIPO LUMINOSO (LUMINOUS) - Cromo plateado, diodos y luz solar amarilla
- */
-function generateLuminousGolem(variant = 1) {
-  const glb = new GlbBuilder()
-
-  const matChrome = glb.addMaterial({
-    name: 'Polished_Chrome',
-    baseColor: [0.85, 0.88 + variant * 0.02, 0.92, 1.0],
-    roughness: 0.15,
-    metallic: 0.95
-  })
-
-  const matGoldTrim = glb.addMaterial({
-    name: 'Beacon_Gold_Trim',
-    baseColor: [0.92, 0.8, 0.35, 1.0],
-    roughness: 0.3,
-    metallic: 0.8
-  })
-
-  const matGlow = glb.addMaterial({
-    name: 'Solar_Luminous_Glow',
-    baseColor: [1.0, 1.0, 0.25, 1.0],
-    roughness: 0.05,
-    metallic: 0.0,
-    emissive: [1.0, 1.0, 0.15]
-  })
-
-  const chromeGeoms = []
-  const goldGeoms = []
-  const glowGeoms = []
-
-  switch (variant) {
-    case 1: // 01 - Faro Solar Estándar
-      chromeGeoms.push(
-        glb.createBoxMesh(0.6, 0.5, 0.45, 0, 0.75, 0),
-        glb.createBoxMesh(0.35, 0.22, 0.3, 0, 0.44, 0),
-        glb.createCylinderMesh(0.09, 0.5, 8, -0.4, 0.65, 0),
-        glb.createCylinderMesh(0.09, 0.5, 8, 0.4, 0.65, 0),
-        glb.createBoxMesh(0.12, 0.14, 0.14, -0.4, 0.32, 0.02),
-        glb.createBoxMesh(0.12, 0.14, 0.14, 0.4, 0.32, 0.02),
-        glb.createBoxMesh(0.18, 0.44, 0.18, -0.18, 0.22, 0),
-        glb.createBoxMesh(0.18, 0.44, 0.18, 0.18, 0.22, 0),
-        glb.createBoxMesh(0.2, 0.08, 0.3, -0.18, 0.04, 0.04),
-        glb.createBoxMesh(0.2, 0.08, 0.3, 0.18, 0.04, 0.04)
-      )
-      goldGeoms.push(
-        glb.createCylinderMesh(0.22, 0.2, 8, 0, 1.18, 0),
-        glb.createBoxMesh(0.22, 0.18, 0.24, -0.42, 0.92, 0),
-        glb.createBoxMesh(0.22, 0.18, 0.24, 0.42, 0.92, 0),
-        glb.createBoxMesh(0.32, 0.3, 0.06, 0, 0.75, -0.24)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.16, 0.18, 8, 0, 1.18, 0.08),
-        glb.createCylinderMesh(0.14, 0.08, 8, 0, 0.78, 0.22),
-        glb.createBoxMesh(0.08, 0.08, 0.08, -0.42, 1.02, 0),
-        glb.createBoxMesh(0.08, 0.08, 0.08, 0.42, 1.02, 0)
-      )
-      break
-
-    case 2: // 02 - Reflector Acorazado (Tanque Prisma)
-      chromeGeoms.push(
-        glb.createBoxMesh(0.75, 0.6, 0.55, 0, 0.75, 0),
-        glb.createBoxMesh(0.2, 0.5, 0.2, -0.48, 0.6, 0),
-        glb.createBoxMesh(0.2, 0.5, 0.2, 0.48, 0.6, 0),
-        glb.createBoxMesh(0.22, 0.45, 0.22, -0.2, 0.22, 0),
-        glb.createBoxMesh(0.22, 0.45, 0.22, 0.2, 0.22, 0)
-      )
-      goldGeoms.push(
-        glb.createBoxMesh(0.48, 0.35, 0.4, 0, 1.2, 0),
-        glb.createBoxMesh(0.3, 0.25, 0.3, -0.5, 0.95, 0),
-        glb.createBoxMesh(0.3, 0.25, 0.3, 0.5, 0.95, 0)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.32, 0.32, 0.1, 0, 0.75, 0.28),
-        glb.createBoxMesh(0.36, 0.15, 0.08, 0, 1.2, 0.21)
-      )
-      break
-
-    case 3: // 03 - Centella Fotónica (Ágil / Prisma)
-      chromeGeoms.push(
-        glb.createBoxMesh(0.48, 0.55, 0.38, 0, 0.8, 0),
-        glb.createCylinderMesh(0.08, 0.55, 8, -0.34, 0.7, 0),
-        glb.createCylinderMesh(0.08, 0.55, 8, 0.34, 0.7, 0),
-        glb.createBoxMesh(0.14, 0.5, 0.14, -0.15, 0.25, 0),
-        glb.createBoxMesh(0.14, 0.5, 0.14, 0.15, 0.25, 0)
-      )
-      goldGeoms.push(
-        glb.createCylinderMesh(0.18, 0.3, 8, 0, 1.25, 0),
-        glb.createBoxMesh(0.1, 0.3, 0.08, -0.2, 1.48, -0.05),
-        glb.createBoxMesh(0.1, 0.3, 0.08, 0.2, 1.48, -0.05)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.12, 0.08, 8, 0, 0.8, 0.2),
-        glb.createBoxMesh(0.24, 0.06, 0.06, 0, 1.25, 0.12),
-        glb.createBoxMesh(0.08, 0.08, 0.08, 0, 1.5, 0)
-      )
-      break
-
-    case 4: // 04 - Proyector de Plasma Solar (Artillero / Láser)
-      chromeGeoms.push(
-        glb.createBoxMesh(0.68, 0.52, 0.48, 0, 0.75, 0),
-        glb.createBoxMesh(0.16, 0.5, 0.16, -0.42, 0.65, 0),
-        glb.createBoxMesh(0.16, 0.5, 0.16, 0.42, 0.65, 0)
-      )
-      goldGeoms.push(
-        glb.createCylinderMesh(0.2, 0.25, 8, 0, 1.15, 0),
-        glb.createCylinderMesh(0.12, 0.65, 8, -0.42, 0.7, 0.25), // Cañón láser izq
-        glb.createCylinderMesh(0.12, 0.65, 8, 0.42, 0.7, 0.25)   // Cañón láser der
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.16, 0.08, 8, 0, 0.75, 0.25),
-        glb.createCylinderMesh(0.08, 0.08, 8, -0.42, 0.7, 0.6),
-        glb.createCylinderMesh(0.08, 0.08, 8, 0.42, 0.7, 0.6)
-      )
-      break
-
-    case 5: // 05 - Corona de Helios Suprema (Élite)
-      chromeGeoms.push(
-        glb.createBoxMesh(0.75, 0.65, 0.55, 0, 0.8, 0),
-        glb.createBoxMesh(0.22, 0.55, 0.22, -0.5, 0.65, 0),
-        glb.createBoxMesh(0.22, 0.55, 0.22, 0.5, 0.65, 0)
-      )
-      goldGeoms.push(
-        glb.createCylinderMesh(0.26, 0.25, 8, 0, 1.28, 0),
-        glb.createBoxMesh(0.28, 0.28, 0.28, -0.5, 1.02, 0),
-        glb.createBoxMesh(0.28, 0.28, 0.28, 0.5, 1.02, 0),
-        glb.createBoxMesh(0.08, 0.35, 0.08, -0.22, 1.55, 0),
-        glb.createBoxMesh(0.08, 0.45, 0.08, 0, 1.62, 0),
-        glb.createBoxMesh(0.08, 0.35, 0.08, 0.22, 1.55, 0)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.2, 0.1, 8, 0, 0.8, 0.28),
-        glb.createBoxMesh(0.3, 0.1, 0.08, 0, 1.28, 0.18),
-        glb.createBoxMesh(0.1, 0.1, 0.1, -0.5, 1.22, 0),
-        glb.createBoxMesh(0.1, 0.1, 0.1, 0.5, 1.22, 0)
-      )
-      break
-  }
-
-  glb.addMeshNode('LuminousChrome', glb.combineGeometries(chromeGeoms), matChrome)
-  glb.addMeshNode('LuminousGold', glb.combineGeometries(goldGeoms), matGoldTrim)
-  glb.addMeshNode('LuminousGlow', glb.combineGeometries(glowGeoms), matGlow)
-
-  return glb.buildGlbBuffer()
-}
-
-/**
- * 5. TIPO ÉTER (AETHER) - Obsidiana mística, resonadores flotantes y amatista violeta
- */
-function generateAetherGolem(variant = 1) {
-  const glb = new GlbBuilder()
-
-  const matObsidian = glb.addMaterial({
-    name: 'Obsidian_Aether_Alloy',
-    baseColor: [0.18 + variant * 0.01, 0.14, 0.26 + variant * 0.02, 1.0],
-    roughness: 0.25,
-    metallic: 0.85
-  })
-
-  const matRunic = glb.addMaterial({
-    name: 'Runic_Aether_Engravings',
-    baseColor: [0.65, 0.45, 0.78, 1.0],
-    roughness: 0.4,
-    metallic: 0.65
-  })
-
-  const matGlow = glb.addMaterial({
-    name: 'Aether_Arcane_Glow',
-    baseColor: [0.85, 0.25, 1.0, 1.0],
-    roughness: 0.1,
-    metallic: 0.0,
-    emissive: [0.8, 0.15, 1.0]
-  })
-
-  const obsidianGeoms = []
-  const runicGeoms = []
-  const glowGeoms = []
-
-  switch (variant) {
-    case 1: // 01 - Autómata de Éter Estándar
-      obsidianGeoms.push(
-        glb.createBoxMesh(0.62, 0.55, 0.48, 0, 0.72, 0),
-        glb.createBoxMesh(0.2, 0.12, 0.2, 0, 1.02, 0),
-        glb.createBoxMesh(0.36, 0.32, 0.36, 0, 1.2, 0),
-        glb.createBoxMesh(0.15, 0.52, 0.15, -0.45, 0.62, 0),
-        glb.createBoxMesh(0.15, 0.52, 0.15, 0.45, 0.62, 0),
-        glb.createBoxMesh(0.12, 0.18, 0.14, -0.45, 0.28, 0.02),
-        glb.createBoxMesh(0.12, 0.18, 0.14, 0.45, 0.28, 0.02),
-        glb.createBoxMesh(0.18, 0.46, 0.2, -0.2, 0.23, 0),
-        glb.createBoxMesh(0.18, 0.46, 0.2, 0.2, 0.23, 0),
-        glb.createBoxMesh(0.22, 0.08, 0.32, -0.2, 0.04, 0.04),
-        glb.createBoxMesh(0.22, 0.08, 0.32, 0.2, 0.04, 0.04)
-      )
-      runicGeoms.push(
-        glb.createBoxMesh(0.18, 0.3, 0.18, -0.46, 0.98, 0),
-        glb.createBoxMesh(0.18, 0.3, 0.18, 0.46, 0.98, 0),
-        glb.createBoxMesh(0.08, 0.22, 0.08, -0.16, 1.42, -0.05),
-        glb.createBoxMesh(0.08, 0.22, 0.08, 0.16, 1.42, -0.05),
-        glb.createCylinderMesh(0.2, 0.06, 10, 0, 0.75, -0.26)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.22, 0.22, 0.12, 0, 0.72, 0.22),
-        glb.createBoxMesh(0.26, 0.07, 0.06, 0, 1.22, 0.19),
-        glb.createBoxMesh(0.08, 0.08, 0.08, -0.46, 1.15, 0),
-        glb.createBoxMesh(0.08, 0.08, 0.08, 0.46, 1.15, 0),
-        glb.createCylinderMesh(0.08, 0.08, 8, 0, 0.75, -0.28)
-      )
-      break
-
-    case 2: // 02 - Monolito de Vacío (Tanque de Éter)
-      obsidianGeoms.push(
-        glb.createBoxMesh(0.8, 0.65, 0.6, 0, 0.75, 0),
-        glb.createBoxMesh(0.45, 0.35, 0.4, 0, 1.22, 0),
-        glb.createBoxMesh(0.22, 0.5, 0.22, -0.52, 0.6, 0),
-        glb.createBoxMesh(0.22, 0.5, 0.22, 0.52, 0.6, 0)
-      )
-      runicGeoms.push(
-        glb.createBoxMesh(0.3, 0.35, 0.3, -0.52, 1.0, 0),
-        glb.createBoxMesh(0.3, 0.35, 0.3, 0.52, 1.0, 0),
-        glb.createBoxMesh(0.5, 0.4, 0.1, 0, 0.75, 0.32)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.3, 0.3, 0.12, 0, 0.75, 0.34),
-        glb.createBoxMesh(0.32, 0.1, 0.06, 0, 1.22, 0.21)
-      )
-      break
-
-    case 3: // 03 - Aparición Astral (Ágil / Cristal)
-      obsidianGeoms.push(
-        glb.createBoxMesh(0.48, 0.55, 0.4, 0, 0.8, 0),
-        glb.createBoxMesh(0.3, 0.35, 0.3, 0, 1.25, 0),
-        glb.createBoxMesh(0.12, 0.55, 0.12, -0.36, 0.68, 0),
-        glb.createBoxMesh(0.12, 0.55, 0.12, 0.36, 0.68, 0)
-      )
-      runicGeoms.push(
-        glb.createBoxMesh(0.12, 0.35, 0.12, -0.38, 1.1, 0),
-        glb.createBoxMesh(0.12, 0.35, 0.12, 0.38, 1.1, 0),
-        glb.createBoxMesh(0.06, 0.35, 0.06, 0, 1.55, -0.05)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.16, 0.16, 0.1, 0, 0.8, 0.22),
-        glb.createBoxMesh(0.2, 0.06, 0.06, 0, 1.26, 0.16),
-        glb.createBoxMesh(0.08, 0.08, 0.08, -0.38, 1.3, 0),
-        glb.createBoxMesh(0.08, 0.08, 0.08, 0.38, 1.3, 0)
-      )
-      break
-
-    case 4: // 04 - Resonador de Fractura (Artillero / Cañón Arcano)
-      obsidianGeoms.push(
-        glb.createBoxMesh(0.7, 0.52, 0.5, 0, 0.75, 0),
-        glb.createBoxMesh(0.38, 0.3, 0.38, 0, 1.15, 0)
-      )
-      runicGeoms.push(
-        glb.createBoxMesh(0.18, 0.22, 0.65, -0.45, 0.65, 0.2), // Prisma cañón izq
-        glb.createBoxMesh(0.18, 0.22, 0.65, 0.45, 0.65, 0.2),  // Prisma cañón der
-        glb.createCylinderMesh(0.16, 0.08, 8, 0, 0.8, -0.28)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.2, 0.2, 0.1, 0, 0.75, 0.26),
-        glb.createBoxMesh(0.1, 0.1, 0.1, -0.45, 0.65, 0.55),
-        glb.createBoxMesh(0.1, 0.1, 0.1, 0.45, 0.65, 0.55)
-      )
-      break
-
-    case 5: // 05 - Señor del Éter Primigenio (Élite)
-      obsidianGeoms.push(
-        glb.createBoxMesh(0.75, 0.68, 0.58, 0, 0.8, 0),
-        glb.createBoxMesh(0.44, 0.38, 0.42, 0, 1.3, 0),
-        glb.createBoxMesh(0.2, 0.55, 0.2, -0.5, 0.65, 0),
-        glb.createBoxMesh(0.2, 0.55, 0.2, 0.5, 0.65, 0)
-      )
-      runicGeoms.push(
-        glb.createBoxMesh(0.22, 0.38, 0.22, -0.5, 1.1, 0),
-        glb.createBoxMesh(0.22, 0.38, 0.22, 0.5, 1.1, 0),
-        glb.createBoxMesh(0.08, 0.3, 0.08, -0.2, 1.6, -0.05),
-        glb.createBoxMesh(0.08, 0.3, 0.08, 0.2, 1.6, -0.05),
-        glb.createCylinderMesh(0.25, 0.08, 12, 0, 0.8, -0.32)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.28, 0.28, 0.14, 0, 0.8, 0.3),
-        glb.createBoxMesh(0.3, 0.1, 0.08, 0, 1.3, 0.22),
-        glb.createBoxMesh(0.1, 0.1, 0.1, -0.5, 1.32, 0),
-        glb.createBoxMesh(0.1, 0.1, 0.1, 0.5, 1.32, 0)
-      )
-      break
-  }
-
-  glb.addMeshNode('AetherObsidian', glb.combineGeometries(obsidianGeoms), matObsidian)
-  glb.addMeshNode('AetherRunic', glb.combineGeometries(runicGeoms), matRunic)
-  glb.addMeshNode('AetherGlow', glb.combineGeometries(glowGeoms), matGlow)
+  // --- Render final por material ---
+  glb.addMeshNode('Body', glb.combineGeometries(bodyGeoms), matBody)
+  glb.addMeshNode('Detail', glb.combineGeometries(detailGeoms), matDetail)
+  glb.addMeshNode('Glow', glb.combineGeometries(glowGeoms), matGlow)
 
   return glb.buildGlbBuffer()
 }
 
 // ============================================================================
-// CONFIGURACIÓN DE TIPOS Y MANEJO DE CLI
+// CONFIGURACIÓN Y MANEJO DE CLI
 // ============================================================================
 
-const GOLEM_TYPE_REGISTRY = {
-  steam: {
-    type: 'steam',
-    name: 'Vapor (Steam)',
-    generator: generateSteamGolem,
-    palette: 'Cobre, hierro fundido y fuego naranja emisivo (#FF7000)'
-  },
-  galvanic: {
-    type: 'galvanic',
-    name: 'Galvánico (Galvanic)',
-    generator: generateGalvanicGolem,
-    palette: 'Aleación azulada, bobinas de cobre y cian eléctrico (#00E5FF)'
-  },
-  mechanical: {
-    type: 'mechanical',
-    name: 'Mecánico (Mechanical)',
-    generator: generateMechanicalGolem,
-    palette: 'Hierro de chatarra, latón/bronce y ámbar dorado (#FFBF00)'
-  },
-  luminous: {
-    type: 'luminous',
-    name: 'Luminoso (Luminous)',
-    generator: generateLuminousGolem,
-    palette: 'Cromo pulido, reflectores dorados y luz solar amarilla (#FFFF33)'
-  },
-  aether: {
-    type: 'aether',
-    name: 'Éter (Aether)',
-    generator: generateAetherGolem,
-    palette: 'Obsidiana mística, grabados rúnicos y violeta amatista (#B833FF)'
-  }
+const AFFINITY_NAMES = {
+  steam: 'Vapor (Steam)',
+  galvanic: 'Galvánico (Galvanic)',
+  mechanical: 'Mecánico (Mechanical)',
+  luminous: 'Luminoso (Luminous)',
+  aether: 'Éter (Aether)'
 }
 
-/**
- * Muestra el manual de ayuda de la línea de comandos.
- */
 function showHelp() {
   console.log(`
 ================================================================================
-  GENERADOR DE MODELOS 3D GLB PARA GOLEMS (Decentraland SDK7 Mobile-First)
+  GENERADOR DE GOLEMS POR RECETAS (150 MODELOS DETERMINISTAS)
 ================================================================================
 
 USO:
   node scripts/generate_models.js [opciones]
-  node scripts/generate_models.js [tipo] [cantidad]
+  node scripts/generate_models.js [afinidad]
 
 OPCIONES:
-  -t, --type <tipo>         Tipo o afinidad a generar:
-                           [steam | galvanic | mechanical | luminous | aether | all]
-                           (Por defecto: 'all')
-  -c, --count <num>         Cantidad de variantes a generar por tipo (1 a 5).
-                           (Por defecto: 5)
-  -v, --variant <num>       Genera únicamente la variante específica (1 a 5).
-  -o, --output-dir <path>   Directorio base de salida para los modelos.
-                           (Por defecto: assets/models)
+  -t, --type <afinidad>     Afinidad a generar:
+                            [steam | galvanic | mechanical | luminous | aether | all]
+                            (Por defecto: 'all')
+  -r, --recipe <num>        Genera únicamente la receta específica (1 a 150).
+  -o, --output-dir <path>   Directorio base de salida.
+                            (Por defecto: assets/golems)
   -h, --help                Muestra este mensaje de ayuda.
 
 EJEMPLOS:
-  # Generar todas las 5 variantes de los 5 tipos (25 modelos en total):
+  # Generar los 150 golems (uno por receta):
   node scripts/generate_models.js
 
-  # Generar las 5 variantes únicamente del tipo Vapor:
+  # Generar solo los golems de afinidad Vapor:
   node scripts/generate_models.js --type steam
 
-  # Generar 3 variantes de tipo Galvánico:
-  node scripts/generate_models.js -t galvanic -c 3
-
-  # Generar solo la variante 5 (Suprema) de tipo Éter:
-  node scripts/generate_models.js --type aether --variant 5
-
-  # Sintaxis posicional rápida (tipo y cantidad):
-  node scripts/generate_models.js mechanical 4
+  # Generar solo la receta #001:
+  node scripts/generate_models.js --recipe 1
 ================================================================================
 `)
 }
 
-/**
- * Parsea los argumentos de la línea de comandos (flags y posicionales).
- */
 function parseCliArgs() {
   const args = process.argv.slice(2)
   const options = {
     type: 'all',
-    count: 5,
-    variant: null,
-    outputDir: path.join(__dirname, '..', 'assets', 'models'),
+    recipe: null,
+    outputDir: path.join(__dirname, '..', 'assets', 'golems'),
     help: false
   }
 
@@ -1128,7 +345,6 @@ function parseCliArgs() {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
-
     if (arg === '-h' || arg === '--help') {
       options.help = true
       return options
@@ -1136,14 +352,10 @@ function parseCliArgs() {
       options.type = (args[++i] || 'all').toLowerCase()
     } else if (arg.startsWith('--type=')) {
       options.type = arg.split('=')[1].toLowerCase()
-    } else if (arg === '-c' || arg === '--count') {
-      options.count = Math.min(5, Math.max(1, parseInt(args[++i], 10) || 5))
-    } else if (arg.startsWith('--count=')) {
-      options.count = Math.min(5, Math.max(1, parseInt(arg.split('=')[1], 10) || 5))
-    } else if (arg === '-v' || arg === '--variant') {
-      options.variant = Math.min(5, Math.max(1, parseInt(args[++i], 10) || 1))
-    } else if (arg.startsWith('--variant=')) {
-      options.variant = Math.min(5, Math.max(1, parseInt(arg.split('=')[1], 10) || 1))
+    } else if (arg === '-r' || arg === '--recipe' || arg === '-v' || arg === '--variant') {
+      options.recipe = parseInt(args[++i], 10)
+    } else if (arg.startsWith('--recipe=')) {
+      options.recipe = parseInt(arg.split('=')[1], 10)
     } else if (arg === '-o' || arg === '--output-dir') {
       options.outputDir = path.resolve(args[++i])
     } else if (arg.startsWith('--output-dir=')) {
@@ -1153,26 +365,16 @@ function parseCliArgs() {
     }
   }
 
-  // Parseo posicional si no se pasaron flags
   if (positional.length > 0) {
     const first = positional[0].toLowerCase()
-    if (GOLEM_TYPE_REGISTRY[first] || first === 'all') {
+    if (first === 'all' || AFFINITY_NAMES[first]) {
       options.type = first
-    }
-  }
-  if (positional.length > 1) {
-    const countNum = parseInt(positional[1], 10)
-    if (!isNaN(countNum)) {
-      options.count = Math.min(5, Math.max(1, countNum))
     }
   }
 
   return options
 }
 
-/**
- * Función principal de ejecución.
- */
 function main() {
   const options = parseCliArgs()
 
@@ -1181,67 +383,50 @@ function main() {
     process.exit(0)
   }
 
-  const typesToProcess =
-    options.type === 'all'
-      ? Object.keys(GOLEM_TYPE_REGISTRY)
-      : [options.type]
-
-  // Validar tipos
-  for (const t of typesToProcess) {
-    if (!GOLEM_TYPE_REGISTRY[t]) {
-      console.error(`❌ Error: Tipo desconocido '${t}'. Tipos válidos: steam, galvanic, mechanical, luminous, aether, all`)
-      process.exit(1)
-    }
-  }
+  const recipes = parseRecipes()
+  const byAffinity = getRecipesByAffinity(recipes)
 
   console.log('================================================================================')
-  console.log('🚀 GENERANDO MODELOS 3D GLB PROCEDURALES PARA GOLEMS')
+  console.log('🚀 GENERANDO GOLEMS A PARTIR DE LAS 150 RECETAS DETERMINISTAS')
   console.log(`📁 Directorio Base: ${options.outputDir}`)
-  console.log(`🏷️  Tipos: ${typesToProcess.join(', ')}`)
-  console.log(`🔢 Variantes: ${options.variant ? `Solo Variante ${options.variant}` : `1 a ${options.count}`}`)
+  console.log(`🏷️  Afinidad: ${options.type}`)
+  if (options.recipe) console.log(`🎯 Receta: #${String(options.recipe).padStart(3, '0')}`)
   console.log('================================================================================')
 
   let totalGenerated = 0
   let totalBytes = 0
+  const distribution = {}
 
-  for (const typeKey of typesToProcess) {
-    const typeInfo = GOLEM_TYPE_REGISTRY[typeKey]
-    const typeDir = path.join(options.outputDir, typeInfo.type)
+  for (const recipe of recipes) {
+    if (options.recipe && recipe.number !== options.recipe) continue
+    if (options.type !== 'all' && recipe.affinity !== options.type) continue
 
-    if (!fs.existsSync(typeDir)) {
-      fs.mkdirSync(typeDir, { recursive: true })
-    }
+    const affinityDir = path.join(options.outputDir, recipe.affinity)
+    if (!fs.existsSync(affinityDir)) fs.mkdirSync(affinityDir, { recursive: true })
 
-    console.log(`\n📌 Generando tipo: [${typeInfo.name.toUpperCase()}]`)
-    console.log(`🎨 Paleta: ${typeInfo.palette}`)
+    const fileName = `golem_${recipe.numberStr}.glb`
+    const filePath = path.join(affinityDir, fileName)
 
-    const variantsToGenerate = options.variant ? [options.variant] : Array.from({ length: options.count }, (_, i) => i + 1)
+    const glbBuffer = buildGolem(recipe)
+    fs.writeFileSync(filePath, glbBuffer)
+    totalGenerated++
+    totalBytes += glbBuffer.length
+    distribution[recipe.affinity] = (distribution[recipe.affinity] || 0) + 1
 
-    for (const v of variantsToGenerate) {
-      const glbBuffer = typeInfo.generator(v)
-      const numPad = String(v).padStart(2, '0')
-      const fileName = `golem_${typeInfo.type}_${numPad}.glb`
-      const filePath = path.join(typeDir, fileName)
-
-      fs.writeFileSync(filePath, glbBuffer)
-      totalGenerated++
-      totalBytes += glbBuffer.length
-
-      console.log(`   ✅ Variante ${numPad}: assets/models/${typeInfo.type}/${fileName} (${glbBuffer.length} bytes)`)
-
-      // Si es la variante 1, guardar también como nombre base canónico golem_<type>.glb para retrocompatibilidad
-      if (v === 1) {
-        const canonicalName = `golem_${typeInfo.type}.glb`
-        const canonicalPath = path.join(typeDir, canonicalName)
-        fs.writeFileSync(canonicalPath, glbBuffer)
-        console.log(`   🔗 Alias Canónico: assets/models/${typeInfo.type}/${canonicalName}`)
-      }
-    }
+    console.log(`   ✅ #${recipe.numberStr} [${recipe.affinity}] ${recipe.name} → ${fileName} (${glbBuffer.length} bytes)`)
   }
 
   console.log('\n================================================================================')
-  console.log(`🎉 GENERACIÓN COMPLETADA CON ÉXITO: ${totalGenerated} modelos creados (${(totalBytes / 1024).toFixed(1)} KB total).`)
-  console.log('================================================================================\n')
+  console.log(`🎉 GENERACIÓN COMPLETADA: ${totalGenerated} modelos creados (${(totalBytes / 1024).toFixed(1)} KB total).`)
+  console.log('📊 Distribución por afinidad:', JSON.stringify(distribution))
+  console.log('================================================================================')
+
+  // Resumen compacto para integrar en la escena (src/config/golems.ts)
+  console.log('\n📌 NÚMEROS DE RECETA POR AFINIDAD (para golems.ts):')
+  for (const k of Object.keys(AFFINITY_NAMES)) {
+    console.log(`   ${k}: [${(byAffinity[k] || []).join(', ')}]`)
+  }
+  console.log('')
 }
 
 main()

@@ -15,7 +15,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 3. [`generate_models.js`: Generador Procedural Binario de Golems](#3-generate_modelsjs-generador-procedural-binario-de-golems)
    - [3.1 Arquitectura glTF 2.0 Binaria Pura](#31-arquitectura-gltf-20-binaria-pura)
    - [3.2 Manual de Uso CLI](#32-manual-de-uso-cli)
-   - [3.3 Catálogo Maestro de los 25 Modelos de Golems](#33-catálogo-maestro-de-los-25-modelos-de-golems)
+   - [3.3 Catálogo de los 150 Modelos (por receta y afinidad)](#33-catálogo-de-los-150-modelos-por-receta-y-afinidad)
 4. [`generate_items.js`: Generador Procedural Binario de Ítems Coleccionables (46 Ítems)](#4-generate_itemsjs-generador-procedural-binario-de-ítems-coleccionables-46-ítems)
    - [4.1 Arquitectura, Paleta por Rareza y Política de Color (v3)](#41-arquitectura-paleta-por-rareza-y-política-de-color-v3)
    - [4.2 Kit de Primitivas y Recetas Reconocibles (v3)](#42-kit-de-primitivas-y-recetas-reconocibles-v3)
@@ -30,7 +30,12 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
    - [6.2 Paletas de Color y Gradientes por Rareza](#62-paletas-de-color-y-gradientes-por-rareza)
    - [6.3 Estructura de Salida en `showcase/`](#63-estructura-de-salida-en-showcase)
    - [6.4 Manual de Uso y Ejecución CLI](#64-manual-de-uso-y-ejecución-cli)
-7. [Integración en Decentraland SDK7 (`GltfContainer`)](#7-integración-en-decentraland-sdk7-gltfcontainer)
+7. [`generate_golem_pngs.js`: Generador de Renders PNG por Afinidad Elemental para Golems (150 Imágenes)](#7-generate_golem_pngsjs-generador-de-renders-png-por-afinidad-elemental-para-golems-150-imágenes)
+   - [7.1 Propósito y Arquitectura Técnica](#71-propósito-y-arquitectura-técnica)
+   - [7.2 Paletas de Color y Gradientes por Afinidad Elemental](#72-paletas-de-color-y-gradientes-por-afinidad-elemental)
+   - [7.3 Estructura de Salida en `GOLEMS/golems_imgs/`](#73-estructura-de-salida-en-golemsgolems_imgs)
+   - [7.4 Manual de Uso y Ejecución CLI](#74-manual-de-uso-y-ejecución-cli)
+8. [Integración en Decentraland SDK7 (`GltfContainer`)](#8-integración-en-decentraland-sdk7-gltfcontainer)
 
 ---
 
@@ -39,10 +44,11 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | Script | Propósito Principal | Salida en Disco |
 | :--- | :--- | :--- |
 | [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) | Descarga y organiza modelos `.glb` y texturas oficiales de DCL (Pack Steampunk) para la **Gran Arena de Torneo**. | `assets/asset-packs/<slug>/` |
-| [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera proceduralmente los 25 modelos binarios `.glb` PBR con canales emisivos para los **5 tipos de Golems**. | `assets/models/<tipo>/` |
+| [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera **150 modelos binarios `.glb`** (uno por cada receta determinista) ensamblados desde las formas de sus materiales y coloreados por afinidad elemental. | `assets/golems/<afinidad>/` |
 | [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) | Genera proceduralmente los 46 modelos binarios `.glb` PBR organizados por rareza para los **materiales coleccionables**. | `assets/items/<rareza>/` |
 | [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) | Genera las 46 fichas HTML estáticas bilingües (EN/ES) con visor 3D, navegación secuencial y botón de copiado de fotogramas a PNG. | `showcase/<rareza>/` y `showcase/index.html` |
 | [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 46 ítems 3D con fondo temático y resplandor según su rareza. | `showcase/<rareza>/<item_id>.png` |
+| [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 150 Golems 3D organizados por afinidad elemental. | `GOLEMS/golems_imgs/<afinidad>/<golem_id>.png` y `GOLEMS/golems_imgs/<golem_id>.png` |
 
 ---
 
@@ -108,7 +114,13 @@ node scripts/download_steampunk_assets.js
 
 ---
 
-## 3. `generate_models.js`: Generador Procedural Binario de Golems
+## 3. `generate_models.js`: Generador de los 150 Golems por Recetas Deterministas
+
+> 📚 **Documentación detallada de la librería subyacente**: la arquitectura interna
+> (constructor GLB, catálogo de formas de ítems, paleta de afinidades y parser de recetas)
+> está documentada en [`scripts/lib/README.md`](lib/README.md).
+
+El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) lee el catálogo oficial de **150 recetas deterministas** ([`GOLEMS/Golems-Recetas-150_eng.md`](../GOLEMS/Golems-Recetas-150_eng.md)), ensambla **un golem por receta** combinando las siluetas de los materiales que lo componen con la paleta de color de su afinidad elemental, y escribe modelos binarios autocontenidos sin dependencias externas:
 
 ### 3.1 Arquitectura glTF 2.0 Binaria Pura
 El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) construye modelos tridimensionales binarios autocontenidos sin dependencias externas:
@@ -127,67 +139,55 @@ El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/script
 ```bash
 # Sintaxis general
 node scripts/generate_models.js [opciones]
-node scripts/generate_models.js [tipo] [cantidad]
+node scripts/generate_models.js [afinidad]
 ```
 
 | Opción Larga | Opción Corta | Valores Posibles | Valor por Defecto | Descripción |
 | :--- | :--- | :--- | :--- | :--- |
-| `--type <tipo>` | `-t <tipo>` | `steam`, `galvanic`, `mechanical`, `luminous`, `aether`, `all` | `all` | Especifica el tipo o afinidad elemental. |
-| `--count <num>` | `-c <num>` | `1` a `5` | `5` | Número de variantes a generar por tipo. |
-| `--variant <num>`| `-v <num>` | `1` a `5` | *N/A* | Genera exclusivamente una variante específica. |
-| `--output-dir <ruta>`| `-o <ruta>` | Ruta válida en disco | `assets/models` | Directorio de salida. |
+| `--type <afinidad>` | `-t <afinidad>` | `steam`, `galvanic`, `mechanical`, `luminous`, `aether`, `all` | `all` | Especifica la afinidad elemental a generar. |
+| `--recipe <num>` | `-r <num>` | `1` a `150` | *N/A* | Genera únicamente la receta específica. |
+| `--output-dir <ruta>` | `-o <ruta>` | Ruta válida en disco | `assets/golems` | Directorio base de salida. |
 | `--help` | `-h` | *N/A* | *N/A* | Muestra el manual de ayuda interactivo. |
 
 #### Ejemplos de Ejecución
 ```bash
-# Generar los 25 modelos (5 tipos x 5 variantes)
+# Generar los 150 golems (uno por receta):
 node scripts/generate_models.js
 
-# Generar solo el tipo Vapor (5 variantes)
+# Generar solo los golems de afinidad Vapor (46 recetas):
 node scripts/generate_models.js --type steam
 
-# Generar variante 5 del tipo Éter
-node scripts/generate_models.js --type aether --variant 5
+# Generar solo la receta #001:
+node scripts/generate_models.js --recipe 1
 ```
 
-### 3.3 Catálogo Maestro de los 25 Modelos de Golems
+### 3.3 Catálogo de los 150 Modelos (por receta y afinidad)
 
 ```text
-assets/models/
-├── steam/        # Golems de Vapor (Calderas, chimeneas, fuego naranja #FF7000)
-├── galvanic/     # Golems Galvánicos (Bobinas de Tesla, arcos voltaicos cian #00E5FF)
-├── mechanical/   # Golems Mecánicos (Engranajes, blindaje de chatarra, ámbar #FFBF00)
-├── luminous/     # Golems Luminosos (Cúpulas de faro, prismas, luz solar #FFFF33)
-└── aether/       # Golems de Éter (Obsidiana, resonadores flotantes, violeta #B833FF)
+assets/golems/
+├── steam/        # 46 golems de Vapor (golem_003.glb, golem_005.glb, ... #FF7000)
+├── galvanic/     # 29 golems Galvánicos (golem_001.glb, golem_009.glb, ... #00E5FF)
+├── mechanical/   # 22 golems Mecánicos (golem_004.glb, golem_010.glb, ... #FFBF00)
+├── luminous/     # 21 golems Luminosos (golem_002.glb, golem_006.glb, ... #FFFF33)
+└── aether/       # 32 golems de Éter (golem_013.glb, golem_015.glb, ... #B833FF)
 ```
 
-| Tipo | Archivo | Rol / Arquetipo | Paleta PBR y Emisivo | Rasgos Distintivos 3D |
-| :--- | :--- | :--- | :--- | :--- |
-| **Vapor** | `golem_steam_01.glb` | Equilibrado Base | Cobre / Hierro (`#FF7000`) | Caldera central, chimenea superior de escape y visor incandescente. |
-| **Vapor** | `golem_steam_02.glb` | Tanque Blindado | Cobre reforzado (`#FF7000`) | Caldera ancha ensanchada, doble chimenea y hombreras gruesas. |
-| **Vapor** | `golem_steam_03.glb` | Vástago a Presión (Ágil) | Cobre pulido (`#FF7000`) | Chasis esbelto, chimenea alta y extremidades de pistón ligero. |
-| **Vapor** | `golem_steam_04.glb` | Mortero de Vapor (Artillero) | Cobre / Hierro (`#FF7000`) | Cañones de escape montados en brazos y doble escape trasero. |
-| **Vapor** | `golem_steam_05.glb` | Coloso de Fundición (Élite) | Cobre / Aleación (`#FF7000`) | Triple chimenea monumental, torso reforzado y caldera dual. |
-| **Galvánico** | `golem_galvanic_01.glb`| Chispazo Base | Acero azul / Cobre (`#00E5FF`) | Bobinas Tesla en hombros y reactor de arco voltaico central. |
-| **Galvánico** | `golem_galvanic_02.glb`| Acorazado Dínamo (Tanque)| Acero reforzado (`#00E5FF`) | Bobinas de gran calibre, aislador dorsal y placas pectorales. |
-| **Galvánico** | `golem_galvanic_03.glb`| Relámpago Veloz (Ágil) | Acero ligero (`#00E5FF`) | Doble antena de alta frecuencia y chasis estilizado. |
-| **Galvánico** | `golem_galvanic_04.glb`| Conductor de Rayos (Artillero)| Acero / Cobre (`#00E5FF`) | Cañones de bobina proyectores de descarga en ambos brazos. |
-| **Galvánico** | `golem_galvanic_05.glb`| Titán de Tesla (Élite) | Aleación galvánica (`#00E5FF`) | Cuádruple terminal de alta tensión y corona de descarga. |
-| **Mecánico** | `golem_mechanical_01.glb`| Acorazado Base | Chatarra / Latón (`#FFBF00`) | Hombreras de engranaje dentado, visor monóculo y placas remachadas. |
-| **Mecánico** | `golem_mechanical_02.glb`| Bastión de Chatarra (Tanque)| Placas de hierro (`#FFBF00`) | Escudo frontal ensanchado y hombreras masivas de blindaje. |
-| **Mecánico** | `golem_mechanical_03.glb`| Engranaje Relojero (Ágil) | Latón pulido (`#FFBF00`) | Engranajes de precisión expuestos en hombros y espalda. |
-| **Mecánico** | `golem_mechanical_04.glb`| Martillo Neumático (Artillero)| Hierro macizo (`#FFBF00`) | Puños de mazo neumático ensanchados para demolición. |
-| **Mecánico** | `golem_mechanical_05.glb`| Gran Autómata (Élite) | Latón / Chatarra (`#FFBF00`) | Rueda dentada monumental en espalda, monóculos múltiples y hombros dobles. |
-| **Luminoso** | `golem_luminous_01.glb`| Faro Solar Base | Cromo / Oro (`#FFFF33`) | Cúpula faro reflectante superior, núcleo solar y diodos en hombros. |
-| **Luminoso** | `golem_luminous_02.glb`| Reflector Acorazado (Tanque)| Cromo reforzado (`#FFFF33`) | Bloque reflector de prisma frontal y hombreras con bisel dorado. |
-| **Luminoso** | `golem_luminous_03.glb`| Centella Fotónica (Ágil) | Cromo ligero (`#FFFF33`) | Cúpula esbelta con prismas estilizados y acelerador de luz. |
-| **Luminoso** | `golem_luminous_04.glb`| Proyector de Plasma (Artillero)| Cromo / Oro (`#FFFF33`) | Cañones dobles de enfoque óptico láser en antebrazos. |
-| **Luminoso** | `golem_luminous_05.glb`| Corona de Helios (Élite) | Cromo pulido (`#FFFF33`) | Corona de tres puntas luminosas, faro monumental y diodos triples. |
-| **Éter** | `golem_aether_01.glb` | Autómata de Éter Base | Obsidiana / Amatista (`#B833FF`)| Cristal de maná central, resonadores en hombros y cuernos arcanos. |
-| **Éter** | `golem_aether_02.glb` | Monolito de Vacío (Tanque) | Obsidiana maciza (`#B833FF`)| Chasis de diamante ensanchado y monolitos de resonancia en hombros. |
-| **Éter** | `golem_aether_03.glb` | Aparición Astral (Ágil) | Obsidiana estilizada (`#B833FF`)| Silueta esbelta, antena de resonancia dorsal y núcleo cristalino. |
-| **Éter** | `golem_aether_04.glb` | Resonador de Fractura (Artillero)| Obsidiana / Runas (`#B833FF`)| Prismas cañón de energía dimensional en ambos brazos. |
-| **Éter** | `golem_aether_05.glb` | Señor Primigenio (Élite) | Obsidiana mística (`#B833FF`)| Corona de doble cuerno dimensional, anillo dorsal y núcleo triple. |
+Cada archivo `golem_<NNN>.glb` corresponde a la receta `#NNN` del catálogo oficial. La silueta
+del golem se ensambla a partir de las formas de los materiales listados en su receta (ollas
+como cascos, sartenes como pecheras, engranajes como hombreras, tuberías como piernas, etc.) y
+se colorea con el esquema de clases de su afinidad:
+
+| Afinidad | Carpeta | Color de clase | Ejemplos de recetas |
+| :--- | :--- | :--- | :--- |
+| ♨️ **Vapor** | `assets/golems/steam/` | Naranja fuego `#FF7000` | `golem_003.glb`, `golem_005.glb`, `golem_012.glb` |
+| ⚡ **Galvánico** | `assets/golems/galvanic/` | Cian eléctrico `#00E5FF` | `golem_001.glb`, `golem_009.glb`, `golem_041.glb` |
+| ⚙️ **Mecánico** | `assets/golems/mechanical/` | Ámbar dorado `#FFBF00` | `golem_004.glb`, `golem_010.glb`, `golem_044.glb` |
+| ☀️ **Luminoso** | `assets/golems/luminous/` | Luz solar `#FFFF33` | `golem_002.glb`, `golem_006.glb`, `golem_052.glb` |
+| 🔮 **Éter** | `assets/golems/aether/` | Violeta amatista `#B833FF` | `golem_013.glb`, `golem_015.glb`, `golem_091.glb` |
+
+> 📚 Para entender cómo se montan los slots (cabeza, núcleo, torso, hombros, brazos, piernas),
+> el mapeo de ítem → slot, el esquema de color y el parser de recetas, consulta
+> [`scripts/lib/README.md`](lib/README.md).
 
 ---
 
@@ -326,7 +326,63 @@ node scripts/generate_item_pngs.js
 
 ---
 
-## 7. Integración en Decentraland SDK7 (`GltfContainer`)
+## 7. `generate_golem_pngs.js`: Generador de Renders PNG por Afinidad Elemental para Golems (150 Imágenes)
+
+### 7.1 Propósito y Arquitectura Técnica
+El script [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) automatiza la captura y renderizado tridimensional en alta resolución (1024×1024 px) de los **150 modelos de Golems** alojados en `assets/golems/<afinidad>/*.glb`:
+
+1. **Servidor HTTP Local Estático**: Inicia un servidor HTTP local en el puerto `8990` para servir los modelos `.glb` sin problemas de CORS ni restricciones del protocolo `file://`.
+2. **Navegador Headless con Aceleración GPU**: Utiliza `puppeteer-core` conectado a Microsoft Edge o Chrome local con argumentos WebGL `--use-gl=angle` y `--enable-webgl`.
+3. **Model-Viewer WebGL**: Carga dinámicamente cada modelo mediante el componente `<model-viewer>` v3.4.0, aplicando iluminación PBR, ángulo de cámara cinemático (`camera-orbit="45deg 65deg 105%"`), sombras suaves (`shadow-intensity="1.6"`) y ajuste apretado de encuadre (`bounds="tight"`).
+
+### 7.2 Paletas de Color y Gradientes por Afinidad Elemental
+
+Cada una de las 5 afinidades elementales cuenta con un esquema de color personalizado en su fondo radial y anillo de resplandor (*glow ring*):
+
+| Afinidad | Gradiente Radial de Fondo (`bg`) | Resplandor (`glow`) | Color Acento |
+| :--- | :--- | :--- | :--- |
+| **Vapor (`steam`)** | `radial-gradient(circle at center, #5c2010 0%, #2b0e06 70%, #120502 100%)` | `rgba(255, 85, 34, 0.45)` | `#FF5522` |
+| **Galvánico (`galvanic`)** | `radial-gradient(circle at center, #103c5c 0%, #061c2b 70%, #020c12 100%)` | `rgba(0, 229, 255, 0.45)` | `#00E5FF` |
+| **Mecánico (`mechanical`)**| `radial-gradient(circle at center, #5c4710 0%, #2b2006 70%, #120e02 100%)` | `rgba(255, 170, 0, 0.45)` | `#FFAA00` |
+| **Luminoso (`luminous`)** | `radial-gradient(circle at center, #5c5810 0%, #2b2806 70%, #121102 100%)` | `rgba(255, 235, 59, 0.45)` | `#FFEE55` |
+| **Éter (`aether`)** | `radial-gradient(circle at center, #48105c 0%, #21062b 70%, #0e0212 100%)` | `rgba(187, 107, 255, 0.45)`| `#BB67FF` |
+
+### 7.3 Estructura de Salida en `GOLEMS/golems_imgs/`
+
+Las imágenes renderizadas se guardan simultáneamente en la raíz de `GOLEMS/golems_imgs/` para rápido acceso y vinculación en documentación markdown, así como en subcarpetas clasificadas por afinidad:
+
+```text
+GOLEMS/golems_imgs/
+├── golem_001.png ... golem_150.png   # Acceso directo por ID de golem (1024x1024)
+├── aether/                           # Subcarpeta Éter (golem_013.png, etc.)
+├── galvanic/                         # Subcarpeta Galvánico (golem_001.png, etc.)
+├── luminous/                         # Subcarpeta Luminoso (golem_002.png, etc.)
+├── mechanical/                       # Subcarpeta Mecánico (golem_004.png, etc.)
+└── steam/                            # Subcarpeta Vapor (golem_003.png, etc.)
+```
+
+### 7.4 Manual de Uso y Ejecución CLI
+
+```bash
+# Sintaxis general
+node scripts/generate_golem_pngs.js [opciones]
+
+# Generar las 150 imágenes PNG
+node scripts/generate_golem_pngs.js
+
+# Generar solo los golems de afinidad Vapor
+node scripts/generate_golem_pngs.js --affinity steam
+
+# Generar solo un golem específico (ej: Golem #015)
+node scripts/generate_golem_pngs.js --golem 015
+
+# Especificar un puerto HTTP personalizado
+node scripts/generate_golem_pngs.js --port 8995
+```
+
+---
+
+## 8. Integración en Decentraland SDK7 (`GltfContainer`)
 
 Cualquier modelo descargado o generado puede instanciarse directamente mediante el componente `GltfContainer`:
 
@@ -351,7 +407,7 @@ Transform.create(golem, {
   scale: Vector3.create(1.1, 1.1, 1.1)
 })
 GltfContainer.create(golem, {
-  src: 'assets/models/galvanic/golem_galvanic_03.glb'
+  src: 'assets/golems/galvanic/golem_001.glb'
 })
 
 // 3. Instanciar un Ítem Coleccionable Épico (Reactor de Éter)

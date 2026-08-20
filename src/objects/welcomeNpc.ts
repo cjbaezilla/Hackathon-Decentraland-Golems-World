@@ -175,7 +175,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
     scale: Vector3.create(0.65, 0.65, 0.65)
   })
   GltfContainer.create(companionGolem, {
-    src: 'assets/models/steam/golem_steam_03.glb'
+    src: 'assets/golems/steam/golem_003.glb'
   })
 
   // Rótulo del golem compañero

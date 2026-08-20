@@ -188,6 +188,19 @@ const GOLEM_AFFINITY_VARIANTS: Record<
 export const SQUAD_FOLLOW_DISTANCES = [1.8, 3.6, 5.4]
 
 /**
+ * Números de receta (001–150) agrupados por afinidad, generados desde el
+ * catálogo oficial `GOLEMS/Golems-Recetas-150_eng.md`. Cada número mapea a:
+ *   assets/golems/<afinidad>/golem_<NNN>.glb
+ */
+export const GOLEM_RECIPES_BY_AFFINITY: Record<GolemAffinity, number[]> = {
+  [GolemAffinity.STEAM]: [3, 5, 7, 12, 14, 21, 23, 24, 27, 28, 31, 32, 33, 39, 42, 43, 45, 46, 54, 55, 62, 63, 64, 75, 76, 79, 83, 85, 92, 93, 96, 98, 100, 101, 103, 105, 107, 109, 114, 117, 118, 119, 122, 130, 138, 144],
+  [GolemAffinity.GALVANIC]: [1, 9, 11, 18, 35, 38, 41, 47, 49, 50, 51, 56, 58, 59, 60, 61, 66, 67, 74, 80, 81, 86, 95, 99, 102, 106, 120, 124, 127],
+  [GolemAffinity.MECHANICAL]: [4, 10, 17, 25, 26, 36, 37, 44, 48, 69, 70, 72, 73, 78, 82, 87, 89, 90, 110, 111, 113, 123],
+  [GolemAffinity.LUMINOUS]: [2, 6, 8, 16, 19, 29, 30, 34, 40, 52, 53, 57, 65, 68, 71, 77, 84, 88, 97, 104, 112],
+  [GolemAffinity.AETHER]: [13, 15, 20, 22, 91, 94, 108, 115, 116, 121, 125, 126, 128, 129, 131, 132, 133, 134, 135, 136, 137, 139, 140, 141, 142, 143, 145, 146, 147, 148, 149, 150]
+}
+
+/**
  * Devuelve la afinidad contra la cual el atacante tiene ventaja elemental directa (x1.40).
  * Pentágono: Vapor > Mecánico > Galvánico > Luminoso > Éter > Vapor
  */
@@ -309,14 +322,15 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
     const variantData = GOLEM_AFFINITY_VARIANTS[affinity]
     const variantNumber = Math.floor(Math.random() * 5) + 1 // 1 a 5
     const variantIndex = variantNumber - 1
-    const variantPad = variantNumber.toString().padStart(2, '0')
-    const modelSrc = `assets/models/${variantData.folder}/golem_${variantData.folder}_${variantPad}.glb`
+    const recipesForAffinity = GOLEM_RECIPES_BY_AFFINITY[affinity]
+    const recipeNumber = recipesForAffinity[Math.floor(Math.random() * recipesForAffinity.length)]
+    const modelSrc = `assets/golems/${variantData.folder}/golem_${String(recipeNumber).padStart(3, '0')}.glb`
     const name = getLocalizedGolemName(affinity, variantIndex)
     const followDistance = SQUAD_FOLLOW_DISTANCES[index] || (index + 1) * 1.8
     const stats = generateRandomStats(affinity)
 
     return {
-      id: `golem_${variantData.folder}_${variantPad}_${Date.now()}_${index}`,
+      id: `golem_${variantData.folder}_${String(recipeNumber).padStart(3, '0')}_${Date.now()}_${index}`,
       name,
       affinity,
       modelSrc,
