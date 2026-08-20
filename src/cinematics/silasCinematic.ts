@@ -104,57 +104,57 @@ export function initSilasCinematicCamera(): Entity {
   return cinematicCamEntity
 }
 
+let initialPlayerPos: Vector3 | null = null
+
 /**
  * Programa el disparo de la cinemática inicial de Silas:
- * - Arranca INMEDIATAMENTE en el primer instante que el usuario interactúa (toca la pantalla o pulsa cualquier tecla/botón).
- * - Cuenta con un temporizador de seguridad de respaldo (fallback) si el usuario permanece inactivo.
- * - Limpia automáticamente el sistema ECS y los temporizadores al activarse.
+ * - NO se inicia automáticamente en ningún momento.
+ * - Requiere EXCLUSIVAMENTE que el usuario ejecute un comando de entrada (tap/clic/tecla) o mueva a su avatar.
  */
 export function scheduleSilasIntroCinematic() {
   if (getHasPlayedSilasIntro() || isRunning) return
 
   let resolved = false
-  let safetyTimerId: number | null = null
-
-  const isMobilePlatform = isMobile() || getPlatform() === 'mobile'
-  // Tiempo de respaldo amplio en móvil para evitar disparos prematuros durante la carga de assets
-  const SAFETY_TIMEOUT_MS = isMobilePlatform ? 20000 : 8000
 
   const cleanupDetection = () => {
     resolved = true
-    if (safetyTimerId !== null) {
-      timers.clearTimeout(safetyTimerId)
-      safetyTimerId = null
-    }
-    engine.removeSystem(playerInputDetectionSystem)
+    engine.removeSystem(playerInputAndMovementDetectionSystem)
   }
 
-  const triggerImmediately = (source: string) => {
-    if (resolved) return
+  const triggerOnInputOrMovement = (source: string) => {
+    if (resolved || getHasPlayedSilasIntro() || isRunning) return
     cleanupDetection()
-    console.log(`🎬 [Cinemática Silas] Disparo inmediato confirmado (${source}). Iniciando cinemática.`)
+    console.log(`🎬 [Cinemática Silas] Disparo verificado por ${source}. Iniciando cinemática.`)
     playSilasCinematic()
   }
 
-  // 1. Sistema ECS para detectar la primera interacción del usuario en tiempo real
-  const playerInputDetectionSystem = () => {
-    if (resolved) return
+  const playerInputAndMovementDetectionSystem = () => {
+    if (resolved || getHasPlayedSilasIntro() || isRunning) return
 
-    // Detectar cualquier interacción de entrada (tap, clic, WASD, salto, puntero, etc.)
-    const anyInput = inputSystem.getInputCommand(InputAction.IA_ANY, PointerEventType.PET_DOWN)
-    if (anyInput) {
-      triggerImmediately('Interacción del jugador')
+    // 1. Detectar interacción de entrada táctil o de teclado/puntero
+    const anyInputDown = inputSystem.getInputCommand(InputAction.IA_ANY, PointerEventType.PET_DOWN)
+    const anyInputUp = inputSystem.getInputCommand(InputAction.IA_ANY, PointerEventType.PET_UP)
+    if (anyInputDown || anyInputUp) {
+      triggerOnInputOrMovement('interacción táctil o de entrada del usuario')
+      return
+    }
+
+    // 2. Detectar desplazamiento o movimiento del avatar del jugador en el espacio 3D
+    if (Transform.has(engine.PlayerEntity)) {
+      const pPos = Transform.get(engine.PlayerEntity).position
+      if (!initialPlayerPos) {
+        initialPlayerPos = Vector3.clone(pPos)
+      } else {
+        const distSq = Vector3.distanceSquared(pPos, initialPlayerPos)
+        if (distSq > 0.08) {
+          triggerOnInputOrMovement('desplazamiento o movimiento del avatar')
+          return
+        }
+      }
     }
   }
 
-  engine.addSystem(playerInputDetectionSystem)
-
-  // 2. Temporizador de seguridad (fallback) si el usuario no interactúa
-  safetyTimerId = timers.setTimeout(() => {
-    if (!resolved && !getHasPlayedSilasIntro() && !isRunning) {
-      triggerImmediately(`Fallback por tiempo de espera (${SAFETY_TIMEOUT_MS}ms)`)
-    }
-  }, SAFETY_TIMEOUT_MS)
+  engine.addSystem(playerInputAndMovementDetectionSystem)
 }
 
 /**

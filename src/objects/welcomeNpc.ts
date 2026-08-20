@@ -19,6 +19,7 @@ import {
   getIsNpcDialogOpen,
   getIsCinematicActive
 } from '../state'
+import { registerEntityForLoading } from '../systems/sceneLoaderSystem'
 
 /**
  * ============================================================================
@@ -129,6 +130,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
   GltfContainer.create(smokerProp, {
     src: 'assets/asset-packs/smoker/Smoker.glb'
   })
+  registerEntityForLoading(smokerProp)
 
   // B. Cofre de herramientas y repuestos mecánicos rescatados
   const chestProp = engine.addEntity()
@@ -141,6 +143,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
   GltfContainer.create(chestProp, {
     src: 'assets/asset-packs/chest_gear/Chest Gear.glb'
   })
+  registerEntityForLoading(chestProp)
 
   // C. Mesa improvisada de barril
   const barrelTable = engine.addEntity()
@@ -153,6 +156,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
   GltfContainer.create(barrelTable, {
     src: 'assets/asset-packs/barrel/Barrel.glb'
   })
+  registerEntityForLoading(barrelTable)
 
   // D. Farol de aceite/gas sobre el barril
   const lampProp = engine.addEntity()
@@ -165,6 +169,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
   GltfContainer.create(lampProp, {
     src: 'assets/asset-packs/table_lamp/Table Lamp.glb'
   })
+  registerEntityForLoading(lampProp)
 
   // E. Mini-Golem Compañero Fiel («Pistón»)
   const companionGolem = engine.addEntity()
@@ -177,6 +182,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
   GltfContainer.create(companionGolem, {
     src: 'assets/models/steam/golem_003.glb'
   })
+  registerEntityForLoading(companionGolem)
 
   // Rótulo del golem compañero
   const golemLabel = engine.addEntity()

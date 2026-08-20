@@ -8,7 +8,7 @@ import { getLanguage } from '../i18n'
  * PANTALLA DE CARGA STEAMPUNK FULLSCREEN (REACT-ECS SDK7)
  * ============================================================================
  * Mantiene la pantalla bloqueada con estética visual steampunk y barra de
- * progreso dinámico mientras se descargan y renderizan los 100 NPCs y la
+ * progreso dinámico mientras se descargan e instancian los 100 NPCs y la
  * arquitectura 3D de 400m x 400m. Se desinstala automáticamente al 100%.
  */
 export const LoadingScreenWidget = () => {
@@ -39,13 +39,13 @@ export const LoadingScreenWidget = () => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          padding: { top: 32, bottom: 32, left: 48, right: 48 },
-          minWidth: 540,
+          padding: { top: 36, bottom: 36, left: 52, right: 52 },
+          minWidth: 560,
           borderWidth: 2,
-          borderColor: Color4.create(0.85, 0.65, 0.25, 0.8)
+          borderColor: Color4.create(0.85, 0.65, 0.25, 0.9)
         }}
         uiBackground={{
-          color: Color4.create(0.09, 0.11, 0.15, 0.95)
+          color: Color4.create(0.09, 0.11, 0.15, 0.96)
         }}
       >
         {/* Título Principal */}
@@ -55,7 +55,7 @@ export const LoadingScreenWidget = () => {
           }}
           uiText={{
             value: '⚙️ GOLEMS WORLD ⚙️',
-            fontSize: 32,
+            fontSize: 34,
             color: Color4.create(1.0, 0.82, 0.3, 1.0)
           }}
         />
@@ -70,15 +70,15 @@ export const LoadingScreenWidget = () => {
               ? 'Loading 400x400m Steampunk World & 100 NPCs...'
               : 'Cargando Mundo Steampunk de 400x400m y 100 NPCs...',
             fontSize: 16,
-            color: Color4.create(0.85, 0.88, 0.92, 0.9)
+            color: Color4.create(0.85, 0.88, 0.92, 0.95)
           }}
         />
 
         {/* Marco Exterior de la Barra de Progreso */}
         <UiEntity
           uiTransform={{
-            width: 440,
-            height: 28,
+            width: 460,
+            height: 30,
             padding: { top: 3, bottom: 3, left: 3, right: 3 },
             margin: { bottom: 16 },
             borderWidth: 1,
@@ -103,11 +103,11 @@ export const LoadingScreenWidget = () => {
         {/* Texto de Porcentaje de Progreso */}
         <UiEntity
           uiTransform={{
-            margin: { bottom: 8 }
+            margin: { bottom: 12 }
           }}
           uiText={{
             value: `${progress}%`,
-            fontSize: 22,
+            fontSize: 24,
             color: Color4.create(1.0, 0.9, 0.4, 1.0)
           }}
         />
@@ -116,10 +116,10 @@ export const LoadingScreenWidget = () => {
         <UiEntity
           uiText={{
             value: isEn
-              ? 'Optimizing 3D models, scrap materials & forge district...'
-              : 'Optimizando modelos 3D, chatarrales y distrito de la forja...',
+              ? 'Downloading 100 NPCs, wearables & compiling 3D districts...'
+              : 'Descargando 100 avatares de NPCs, accesorios y distritos 3D...',
             fontSize: 13,
-            color: Color4.create(0.65, 0.7, 0.75, 0.8)
+            color: Color4.create(0.65, 0.7, 0.75, 0.85)
           }}
         />
       </UiEntity>

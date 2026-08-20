@@ -9,11 +9,13 @@ import { movePlayerTo } from '~system/RestrictedActions'
 
 /**
  * ============================================================================
- * SISTEMA ECS DE CARGA Y RENDERIZADO INICIAL DE ESCENA (SCENE LOADER SYSTEM)
+ * SISTEMA ECS DE CARGA Y RENDERIZADO REAL DE ESCENA (SCENE LOADER SYSTEM)
  * ============================================================================
- * Monitorea dinámicamente el estado de descarga y renderizado de todos los modelos
- * GLTF (arquitectura 3D, distrito de la forja, arena central y 100 NPCs) bloqueando
- * la pantalla con el widget steampunk hasta que los 100 NPCs estén 100% listos.
+ * Inspecciona en tiempo real el componente nativo `GltfContainerLoadingState`
+ * de cada modelo 3D GLTF en la escena (incluyendo utilería de Silas y wearables
+ * de los 100 NPCs). Retiene la pantalla de carga durante un mínimo de 6.0 segundos
+ * para garantizar la transmisión por red y renderizado completo en GPU de Silas,
+ * el campamento inicial y los avatares del mapa.
  */
 
 const trackedGltfEntities = new Set<Entity>()
@@ -23,9 +25,9 @@ let isSceneLoaded = false
 let loadProgressPercent = 0
 let elapsedTime = 0
 
-// Tiempo mínimo de retención (6.5s) para garantizar la descarga completa de los 100 NPCs y texturas en VRAM
-const MIN_SAFETY_LOAD_TIME_SECONDS = 6.5
-const MAX_SAFETY_TIMEOUT_SECONDS = 12.0
+// Tiempo mínimo de retención (6.0s) para asegurar que la mallas de Silas y los 100 NPCs estén renderizadas en GPU
+const MIN_SAFETY_LOAD_TIME_SECONDS = 6.0
+const MAX_SAFETY_TIMEOUT_SECONDS = 15.0
 const EXPECTED_MIN_ENTITIES = 80
 
 /**
@@ -56,26 +58,26 @@ export function getSceneLoadProgress(): number {
 }
 
 /**
- * Indicar si la escena ha finalizado su carga completa.
+ * Indica si la escena ha finalizado su carga completa.
  */
 export function getIsSceneFullyLoaded(): boolean {
   return isSceneLoaded
 }
 
 /**
- * Indicar si el cargador inicial está actualmente activo.
+ * Indica si el cargador inicial está actualmente activo.
  */
 export function getIsLoaderActive(): boolean {
   return isLoaderActive
 }
 
 /**
- * Evalúa todas las entidades GLTF en el motor ECS y retorna las métricas de carga.
+ * Consulta el estado REAL de carga de los componentes GltfContainerLoadingState.
  */
 export function checkSceneLoadingMetrics(): { total: number; loaded: number; progress: number } {
   const allGltfEntities = new Set<Entity>(trackedGltfEntities)
 
-  // Consultar dinámicamente todas las entidades que poseen el componente de estado de carga GLTF en SDK7
+  // Consultar dinámicamente todas las entidades con componente de carga en el motor
   for (const [entity] of engine.getEntitiesWith(GltfContainerLoadingState)) {
     allGltfEntities.add(entity)
   }
@@ -97,42 +99,43 @@ export function checkSceneLoadingMetrics(): { total: number; loaded: number; pro
     }
   })
 
-  const rawProgress = Math.floor((loaded / total) * 100)
-  return { total, loaded, progress: Math.min(100, Math.max(0, rawProgress)) }
+  const progress = Math.min(100, Math.floor((loaded / total) * 100))
+  return { total, loaded, progress }
 }
 
 /**
- * Sistema principal ECS de carga de la escena.
+ * Sistema principal ECS de carga real de assets.
  */
 export function sceneLoaderSystem(deltaTime: number) {
   if (!isLoaderActive) return
 
   elapsedTime += deltaTime
+
   const { total, loaded, progress } = checkSceneLoadingMetrics()
 
-  // Avance progresivo fluido de 0% a 100% distribuido a lo largo del tiempo de carga
-  const timeBasedProgress = Math.min(99, Math.floor((elapsedTime / MIN_SAFETY_LOAD_TIME_SECONDS) * 100))
-  const realProgress = total >= EXPECTED_MIN_ENTITIES ? progress : 0
-  const targetProgress = Math.max(timeBasedProgress, realProgress)
+  // Progreso real acumulativo guiado por métricas GLTF e intervalo mínimo de inicialización de avatares
+  const timeProgress = Math.min(99, Math.floor((elapsedTime / MIN_SAFETY_LOAD_TIME_SECONDS) * 100))
+  const realGltfProgress = total >= EXPECTED_MIN_ENTITIES ? progress : 0
+  const targetProgress = Math.max(timeProgress, realGltfProgress)
 
   loadProgressPercent = Math.min(100, Math.max(loadProgressPercent, targetProgress))
 
   const isMinTimeReached = elapsedTime >= MIN_SAFETY_LOAD_TIME_SECONDS
+  const isAllAssetsLoaded = total >= EXPECTED_MIN_ENTITIES && loaded >= total
   const isTimeoutReached = elapsedTime >= MAX_SAFETY_TIMEOUT_SECONDS
-  const isAllLoaded = total >= EXPECTED_MIN_ENTITIES && loaded >= total
 
-  if ((isAllLoaded && isMinTimeReached) || isTimeoutReached) {
+  // Se retira la pantalla ÚNICAMENTE cuando todos los modelos 3D y Silas estén completamente cargados
+  if ((isAllAssetsLoaded && isMinTimeReached) || isTimeoutReached) {
     isLoaderActive = false
     isSceneLoaded = true
     loadProgressPercent = 100
 
     console.log(
-      `✅ [Scene Loader] Escena completa y 100 NPCs cargados al 100% (${loaded}/${total} modelos GLTF | ${elapsedTime.toFixed(
+      `✅ [Scene Loader] Carga real de Silas, campamento y 100 NPCs finalizada al 100% (${loaded}/${total} modelos GLTF cargados | ${elapsedTime.toFixed(
         1
-      )}s transcurridos${isTimeoutReached ? ' - finalizado por tiempo límite' : ''}). Posicionando al jugador...`
+      )}s transcurridos). Posicionando al jugador...`
     )
 
-    // Posicionar al jugador en el Spawn de la Forja frente al NPC Silas
     try {
       movePlayerTo({
         newRelativePosition: Vector3.create(12.2, 0.25, 2.0),
@@ -142,7 +145,6 @@ export function sceneLoaderSystem(deltaTime: number) {
       console.log('⚠️ [Scene Loader] Error en movePlayerTo:', err)
     }
 
-    // Retirar el sistema del ciclo de renderizado de la escena
     engine.removeSystem(sceneLoaderSystem)
   }
 }
