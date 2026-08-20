@@ -216,6 +216,19 @@ TouchScreenControls.createOrReplace(engine.RootEntity, {
 3. **Selector Táctil de Idioma Bilingüe (`LanguageToggle`)**:
    - Ubicado en la esquina superior derecha (`top: 24px, right: 32px`) con un área táctil amplia de $140 \times 46\text{ px}$ (`pointerFilter: 'block'`), permitiendo a los jugadores alternar entre Español e Inglés sin interferir con la jugabilidad táctil ([guia-soporte-bilingue-i18n.md](guia-soporte-bilingue-i18n.md)).
 
+### 4.4 Carga Garantizada de Escena y Posicionamiento Inicial (`sceneLoaderSystem` y `LoadingScreenWidget`)
+
+Para evitar que el cliente móvil instancie al avatar del jugador en medio de un mapa incompleto mientras se descargan e instancian asíncronamente las mallas 3D y los 100 NPCs, se implementó una **Pantalla de Carga y Reposicionamiento Garantizado**:
+
+1. **Monitoreo con `GltfContainerLoadingState` (`src/systems/sceneLoaderSystem.ts`)**:
+   - Monitorea el estado de carga (`LoadingState.FINISHED` o `LoadingState.FINISHED_WITH_ERROR`) de todas las mallas `.glb` registradas (estructuras y accesorios de los NPCs).
+   - Calcula el porcentaje de avance (0% al 100%) y gestiona un temporizador de seguridad de 10 segundos para conexiones con alta latencia.
+   - Una vez finalizada la carga, invoca `movePlayerTo({ newRelativePosition: Vector3.create(12.2, 0.25, 2.0), cameraTarget: Vector3.create(15.8, 1.0, 5.9) })` para posicionar al jugador de forma limpia frente a Silas en el punto de spawn de la Forja.
+
+2. **Overlay Visual de Carga Steampunk (`src/ui/loadingScreenComponent.tsx`)**:
+   - Renderiza un overlay opaco a pantalla completa (`pointerFilter: 'block'`) que cubre el proceso de renderizado del mapa.
+   - Muestra una barra de progreso dorada y descripciones bilingües de estado en tiempo real, retirándose y auto-desinstalándose automáticamente al completarse la verificación.
+
 ---
 
 ## 5. Paso a Paso: Cómo Probar el Multijugador y la Asignación Aleatoria en Local

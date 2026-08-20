@@ -7,6 +7,7 @@ import {
   AvatarAnchorPointType
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
+import { registerEntityForLoading } from '../systems/sceneLoaderSystem'
 
 /**
  * Definición de ítem o accesorio equipable 3D en SDK7.
@@ -224,6 +225,9 @@ export function equipCustomWearable(
   GltfContainer.create(modelEntity, {
     src: itemDef.modelSrc
   })
+
+  // Registrar el accesorio 3D GLB en el monitoreo de carga de la escena
+  registerEntityForLoading(modelEntity)
 
   return modelEntity
 }

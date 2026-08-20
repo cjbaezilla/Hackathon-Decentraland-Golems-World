@@ -34,6 +34,8 @@ import { createUserHideout } from './objects/userHideoutBuilder'
 import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinematics/silasCinematic'
 import { initTourFollowCamera, initMarketOrbitalCamera } from './cinematics/marketCinematic'
 import { silasTourSystem } from './systems/silasTourSystem'
+import { sceneLoaderSystem } from './systems/sceneLoaderSystem'
+
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -120,7 +122,8 @@ export function main() {
   // 11. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
   scheduleSilasIntroCinematic()
 
-  // 12. Registrar los sistemas de seguimiento, combate, animación, trampolín, NPCs y tour guiado
+  // 12. Registrar los sistemas de carga, seguimiento, combate, animación, trampolín, NPCs y tour guiado
+  engine.addSystem(sceneLoaderSystem)
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)

@@ -173,6 +173,7 @@ En Decentraland SDK7, el componente `AvatarAttach` requiere un identificador de 
 ```typescript
 import { engine, Entity, Transform, GltfContainer, AvatarAttach } from '@dcl/sdk/ecs'
 import { Quaternion } from '@dcl/sdk/math'
+import { registerEntityForLoading } from '../systems/sceneLoaderSystem'
 
 export function equipCustomWearable(avatarId: string, wearableId: string): Entity | undefined {
   const itemDef = CUSTOM_WEARABLES[wearableId]
@@ -198,9 +199,16 @@ export function equipCustomWearable(avatarId: string, wearableId: string): Entit
     src: itemDef.modelSrc
   })
 
+  // 3. Registrar la malla GLTF del accesorio en el sistema de carga inicial
+  registerEntityForLoading(modelEntity)
+
   return modelEntity
 }
 ```
+
+> [!NOTE]
+> **Monitoreo de Carga de Accesorios 3D**: Toda entidad con malla `.glb` creada mediante `equipCustomWearable` se registra en `sceneLoaderSystem` mediante `registerEntityForLoading(modelEntity)`. Esto permite que la pantalla de carga considere la descarga de los accesorios de los 100 NPCs antes de liberar la visión del jugador.
+
 
 ---
 

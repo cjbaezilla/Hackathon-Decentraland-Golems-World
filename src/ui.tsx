@@ -22,6 +22,8 @@ import {
   finishSilasGuidedTour
 } from './systems/silasTourSystem'
 import { MinimapWidget, BigMapModal } from './ui/minimapComponent'
+import { LoadingScreenWidget } from './ui/loadingScreenComponent'
+
 
 /**
  * ============================================================================
@@ -1003,6 +1005,9 @@ export const uiComponent = () => {
 
       {/* Modal de Mapa Grande Ampliado con Fondo Semitransparente */}
       <BigMapModal />
+
+      {/* Pantalla de Carga Steampunk (Fullscreen) */}
+      <LoadingScreenWidget />
     </UiEntity>
   )
 }
