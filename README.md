@@ -11,9 +11,9 @@
 
 **Golems** is a massive multiplayer experience built on **Decentraland SDK7**, set in a fascinating universe of scrap metal, steampunk technology, and residual magic. Players explore a vast 160,000 m² world, track down hidden mechanical parts using an innovative **Heat Radar**, forge unique combat automatons using a **deterministic hashing** system, lead automated expeditions, and fight in real time both in the open world and in a competitive **Ladder Tournament** (1v1 and 2v2).
 
-> 📚 **Official Game Design Document (GDD)**:
-> - 🇬🇧 **English**: [GOLEMS/GDD-Golems_eng.md](GOLEMS/GDD-Golems_eng.md) — Full design specification & mechanics
-> - 🇪🇸 **Español**: [GOLEMS/GDD-Golems.md](GOLEMS/GDD-Golems.md) — Especificación y diseño oficial de juego
+> 📚 **Official Game Design Document (GDD) & Recipe Catalog**:
+> - 🇬🇧 **English**: [GOLEMS/GDD-Golems_eng.md](GOLEMS/GDD-Golems_eng.md) (GDD) | 📜 [GOLEMS/Golems-Recipes-150_eng.md](GOLEMS/Golems-Recipes-150_eng.md) (150 Deterministic Recipe Catalog)
+> - 🇪🇸 **Español**: [GOLEMS/GDD-Golems.md](GOLEMS/GDD-Golems.md) (GDD) | 📜 [GOLEMS/Golems-Recetas-150.md](GOLEMS/Golems-Recetas-150.md) (Catálogo Maestro de 150 Recetas)
 
 ---
 
@@ -200,6 +200,10 @@ Then navigate to the showcase index or individual item pages in your web browser
    - **Visual Features**: Emissive color hue, proportional scale, and cosmetic details.
    - **Procedural Naming**: Prefix and suffix generated from predominant components (e.g., *"Titanic Steamchrome"*, *"Armored Galvanoid"*).
 5. **Determinism and Collectibility**: The exact same material combination yields **the exact same golem**, allowing players to discover, document, and share secret recipes with one another.
+
+> 📜 **Complete 150 Deterministic Recipe Catalog**:
+> - 🇬🇧 **English**: [GOLEMS/Golems-Recipes-150_eng.md](GOLEMS/Golems-Recipes-150_eng.md) — 150 Master Golem Recipe Catalog (Deterministic FNV-1a designs)
+> - 🇪🇸 **Español**: [GOLEMS/Golems-Recetas-150.md](GOLEMS/Golems-Recetas-150.md) — Catálogo Maestro de 150 Recetas de Golems (Especificación algorítmica)
 
 ---
 
@@ -417,6 +421,8 @@ Hackathon/
 ├── GOLEMS/                     # Official GDD, diagrams, schemas, and Golems cover
 │   ├── GDD-Golems.md           # Comprehensive game design document (Spanish)
 │   ├── GDD-Golems_eng.md       # Comprehensive game design document (English)
+│   ├── Golems-Recetas-150.md   # Master 150 deterministic golem recipe catalog (Spanish)
+│   ├── Golems-Recipes-150_eng.md # Master 150 deterministic golem recipe catalog (English)
 │   ├── golems_cover_eng.png    # Official experience cover (English version)
 │   └── *.png                   # Conceptual illustrations and infographics
 ├── guias/                      # Technical guides and master documentation
