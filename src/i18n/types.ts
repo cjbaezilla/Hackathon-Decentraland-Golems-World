@@ -48,6 +48,13 @@ export interface TranslationSchema {
     luminous: string
     aether: string
   }
+  rarities: {
+    common: string
+    uncommon: string
+    rare: string
+    epic: string
+    legendary: string
+  }
   golems: {
     steamNames: string[]
     galvanicNames: string[]

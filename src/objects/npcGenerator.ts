@@ -4,13 +4,24 @@ import {
   Transform,
   AvatarShape,
   TextShape,
-  Billboard
+  Billboard,
+  pointerEventsSystem,
+  InputAction
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
-import { NpcDefinition, NPC_CATALOG } from '../data/npcCatalog'
+import {
+  NpcDefinition,
+  NPC_CATALOG,
+  getLocalizedNpcName,
+  getLocalizedNpcTitle,
+  getLocalizedNpcPhrase,
+  getLocalizedNpcZone,
+  getLocalizedNpcRole
+} from '../data/npcCatalog'
 import { NPC_POSITIONS } from '../data/npcPositions'
 import { equipCustomWearable, CUSTOM_WEARABLES } from './npcWearables'
 import { NpcPatrolComponent } from '../systems/npcPatrolSystem'
+import { onLanguageChange, t } from '../i18n'
 
 /**
  * ============================================================================
@@ -19,12 +30,37 @@ import { NpcPatrolComponent } from '../systems/npcPatrolSystem'
  * Módulo reutilizable que instancia personajes no jugadores en SDK7 utilizando
  * el componente nativo `AvatarShape`, asignando sus wearables `base-avatars`,
  * paletas de colores de piel/pelo/ojos, rótulos 3D flotantes y accesorios .glb.
+ * Incluye compatibilidad i18n bilingüe para actualización dinámica de nombres.
  */
 
 /**
  * Mapa de rotuladores en memoria para gestión y actualización dinámica [npcEntity -> labelEntity].
  */
 const npcLabelMap = new Map<Entity, Entity>()
+
+/**
+ * Registro de datos de definición de cada NPC instanciado [npcEntity -> NpcDefinition].
+ */
+const spawnedNpcDataMap = new Map<Entity, NpcDefinition>()
+
+/**
+ * Actualiza los rótulos 3D de todos los NPCs instanciados según el idioma activo.
+ */
+export function updateAllNpcLabels() {
+  for (const [npcEntity, npcData] of spawnedNpcDataMap.entries()) {
+    const labelEntity = npcLabelMap.get(npcEntity)
+    if (labelEntity && TextShape.has(labelEntity)) {
+      const name = getLocalizedNpcName(npcData)
+      const title = getLocalizedNpcTitle(npcData)
+      TextShape.getMutable(labelEntity).text = `⚙️ ${name}\n[ ${title} ]`
+    }
+  }
+}
+
+// Suscripción al cambio de idioma global (es <-> en)
+onLanguageChange(() => {
+  updateAllNpcLabels()
+})
 
 /**
  * Instancia un personaje no jugador (NPC) a partir de su definición del catálogo.
@@ -70,8 +106,11 @@ export function createNpcAvatar(
     position: Vector3.create(0, 2.25, 0)
   })
 
+  const name = getLocalizedNpcName(npcData)
+  const title = getLocalizedNpcTitle(npcData)
+
   TextShape.create(labelEntity, {
-    text: `⚙️ ${npcData.name}\n[ ${npcData.title} ]`,
+    text: `⚙️ ${name}\n[ ${title} ]`,
     fontSize: 2.2,
     textColor: Color4.create(1.0, 0.85, 0.35, 1.0) // Ámbar / Dorado Steampunk
   })
@@ -79,6 +118,27 @@ export function createNpcAvatar(
   Billboard.create(labelEntity, {})
 
   npcLabelMap.set(npcEntity, labelEntity)
+  spawnedNpcDataMap.set(npcEntity, npcData)
+
+  // 4. Interacción táctil / puntero con diálogo/frase del NPC
+  pointerEventsSystem.onPointerDown(
+    {
+      entity: npcEntity,
+      opts: {
+        button: InputAction.IA_POINTER,
+        hoverText: `${getLocalizedNpcName(npcData)} (${getLocalizedNpcRole(npcData)})`,
+        maxDistance: 6
+      }
+    },
+    () => {
+      const currentName = getLocalizedNpcName(npcData)
+      const currentTitle = getLocalizedNpcTitle(npcData)
+      const currentZone = getLocalizedNpcZone(npcData)
+      const currentRole = getLocalizedNpcRole(npcData)
+      const currentPhrase = getLocalizedNpcPhrase(npcData)
+      console.log(`💬 [NPC] ${currentName} (${currentTitle} - ${currentRole} en ${currentZone}): "${currentPhrase}"`)
+    }
+  )
 
   return npcEntity
 }
@@ -92,7 +152,7 @@ export function getNpcLabelEntity(npcEntity: Entity): Entity | undefined {
 
 /**
  * Instancia 50 NPCs del catálogo (o la cantidad especificada por `limit`) distribuidos proporcionalmente por todo el mapa de 400m x 400m,
- * excluyendo estrictamente la Forja Inicial (0..140m, 0..140m) y el interior de la Gran Arena Central (r < 42m).
+ * excluyendo strictly la Forja Inicial (0..140m, 0..140m) y el interior de la Gran Arena Central (r < 42m).
  * Cada NPC se ubica en las coordenadas correspondientes a su distrito temático con orientaciones dinámicas.
  */
 export function spawnAllCatalogNpcs(limit: number = 50): Entity[] {
@@ -134,3 +194,4 @@ export function spawnAllCatalogNpcs(limit: number = 50): Entity[] {
 
   return spawnedEntities
 }
+

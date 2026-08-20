@@ -23,9 +23,13 @@ export interface NpcAvatarSpec {
 export interface NpcDefinition {
   id: string
   name: string
+  nameEn?: string
   title: string
+  titleEn?: string
   zone: string
+  zoneEn?: string
   role: string
+  roleEn?: string
   gender: 'male' | 'female'
   avatarSpec: NpcAvatarSpec
   phraseEs: string
@@ -44,9 +48,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-001',
     name: 'Vance el Forjador',
+    nameEn: 'Vance the Forger',
     title: 'Maestro de Calderas',
+    titleEn: 'Boiler Master',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Maestro Metalúrgico',
+    roleEn: 'Metallurgical Master',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -61,9 +69,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-002',
     name: 'Kaelen el Galvánico',
+    nameEn: 'Kaelen the Galvanic',
     title: 'Técnico Tesla',
+    titleEn: 'Tesla Technician',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Especialista en Alta Tensión',
+    roleEn: 'High Voltage Specialist',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -78,9 +90,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-003',
     name: 'Nora la Recolectora',
+    nameEn: 'Nora the Scavenger',
     title: 'Rastreadora de Piezas',
+    titleEn: 'Parts Tracker',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Recolectora de Repuestos',
+    roleEn: 'Spare Parts Scavenger',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -95,9 +111,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-004',
     name: 'Gideon el Guardián',
+    nameEn: 'Gideon the Guardian',
     title: 'Custodio de Bóveda',
+    titleEn: 'Vault Custodian',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Guardián de Yacimiento',
+    roleEn: 'Deposit Guardian',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -112,9 +132,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-005',
     name: 'Sora la Cazadora',
+    nameEn: 'Sora the Hunter',
     title: 'Mercenaria de Éter',
+    titleEn: 'Aether Mercenary',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Exploradora PK Mad Max',
+    roleEn: 'Mad Max PK Explorer',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -129,9 +153,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-006',
     name: 'Tobias el Comerciante',
+    nameEn: 'Tobias the Merchant',
     title: 'Mercader de Bronce',
+    titleEn: 'Bronze Merchant',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Vendedor de Chatarra',
+    roleEn: 'Scrap Vendor',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -146,9 +174,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-007',
     name: 'Lyra la Ingeniera',
+    nameEn: 'Lyra the Engineer',
     title: 'Mecánica de Precisión',
+    titleEn: 'Precision Mechanic',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Diseñadora de Autómatas',
+    roleEn: 'Automaton Designer',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -163,9 +195,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-008',
     name: 'Barton el Chatarrero',
+    nameEn: 'Barton the Scrapper',
     title: 'Desguazador de Tuberías',
+    titleEn: 'Pipe Scrapper',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Desmontador Metalúrgico',
+    roleEn: 'Metallurgical Dismantler',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -180,9 +216,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-009',
     name: 'Cora la Operadora',
+    nameEn: 'Cora the Operator',
     title: 'Transmisora de Ondas',
+    titleEn: 'Wave Transmitter',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Operadora de Baliza',
+    roleEn: 'Beacon Operator',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -197,9 +237,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-010',
     name: 'Darius el Gladiador',
+    nameEn: 'Darius the Gladiator',
     title: 'Campeón Veterano',
+    titleEn: 'Veteran Champion',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Gladiador Mad Max',
+    roleEn: 'Mad Max Gladiator',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -214,9 +258,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-011',
     name: 'Eliza la Alquimista',
+    nameEn: 'Eliza the Alchemist',
     title: 'Química de Baterías',
+    titleEn: 'Battery Chemist',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Sintetizadora Galvánica',
+    roleEn: 'Galvanic Synthesizer',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -231,9 +279,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-012',
     name: 'Finn el Aprendiz',
+    nameEn: 'Finn the Apprentice',
     title: 'Ayudante de Silas',
+    titleEn: "Silas's Helper",
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Aprendiz de Forjador',
+    roleEn: 'Blacksmith Apprentice',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -248,9 +300,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-013',
     name: 'Greta la Fogonera',
+    nameEn: 'Greta the Stoker',
     title: 'Operadora de Presión',
+    titleEn: 'Pressure Operator',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Técnica de Presión PK',
+    roleEn: 'Técnica de Presión PK',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -265,9 +321,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-014',
     name: 'Harlan el Minero',
+    nameEn: 'Harlan the Miner',
     title: 'Explotador de Vetas',
+    titleEn: 'Vein Excavator',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Extractor de Éter',
+    roleEn: 'Extractor de Éter',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -282,9 +342,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-015',
     name: 'Iris la Vigía',
+    nameEn: 'Iris the Watcher',
     title: 'Centinela de Altura',
+    titleEn: 'Centinela de Altura',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Vigía del Horizonte',
+    roleEn: 'Vigía del Horizonte',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -299,9 +363,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-016',
     name: 'Jarek el Mercenario',
+    nameEn: 'Jarek the Mercenary',
     title: 'Escolta Privado',
+    titleEn: 'Escolta Privado',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Protector en Zona PK',
+    roleEn: 'Protector en Zona PK',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -316,9 +384,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-017',
     name: 'Kira la Chatarrera',
+    nameEn: 'Kira la Chatarrera',
     title: 'Clasificadora de Pernos',
+    titleEn: 'Bolt Sorter',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Clasificadora de Hardware',
+    roleEn: 'Clasificadora de Hardware',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -333,9 +405,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-018',
     name: 'Leo el Informante',
+    nameEn: 'Leo el Informante',
     title: 'Corredor de Noticias',
+    titleEn: 'Corredor de Noticias',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Mensajero de Rumores',
+    roleEn: 'Mensajero de Rumores',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -350,9 +426,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-019',
     name: 'Mireia la Reparadora',
+    nameEn: 'Mireia la Reparadora',
     title: 'Mantenedora de Pistones',
+    titleEn: 'Mantenedora de Pistones',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Técnica de Mantenimiento',
+    roleEn: 'Técnica de Mantenimiento',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -367,9 +447,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-020',
     name: 'Nesta el Pionero',
+    nameEn: 'Nesta el Pionero',
     title: 'Geólogo de Maná',
+    titleEn: 'Mana Geologist',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Científico de Campo',
+    roleEn: 'Científico de Campo',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -384,9 +468,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-021',
     name: 'Orla la Piromante',
+    nameEn: 'Orla la Piromante',
     title: 'Técnica de Combustión',
+    titleEn: 'Combustion Tech',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Alquimista de Fuego',
+    roleEn: 'Alquimista de Fuego',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -401,9 +489,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-022',
     name: 'Phaedra la Cronista',
+    nameEn: 'Phaedra the Chronicler',
     title: 'Historiadora del Páramo',
+    titleEn: 'Historiadora del Páramo',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Registradora de Lore',
+    roleEn: 'Registradora de Lore',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -418,9 +510,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-023',
     name: 'Quentin el Electricista',
+    nameEn: 'Quentin el Electricista',
     title: 'Operador de Red',
+    titleEn: 'Operador de Red',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Técnico de Cableado',
+    roleEn: 'Técnico de Cableado',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -435,9 +531,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-024',
     name: 'Rhea la Gladiadora',
+    nameEn: 'Rhea la Gladiadora',
     title: 'Pretendiente al Título',
+    titleEn: 'Pretendiente al Título',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Retadora de Arena',
+    roleEn: 'Retadora de Arena',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -452,9 +552,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-025',
     name: 'Sam el Asistente',
+    nameEn: 'Sam el Asistente',
     title: 'Hermano Chatarrero',
+    titleEn: 'Hermano Chatarrero',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Logística de Puesto',
+    roleEn: 'Logística de Puesto',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -469,9 +573,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-026',
     name: 'Tess la Centinela',
+    nameEn: 'Tess la Centinela',
     title: 'Observadora de Frontera',
+    titleEn: 'Observadora de Frontera',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Vigía PK',
+    roleEn: 'Vigía PK',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -486,9 +594,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-027',
     name: 'Urien el Fundidor',
+    nameEn: 'Urien el Fundidor',
     title: 'Maestro Metalúrgico',
+    titleEn: 'Maestro Metalúrgico',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Operador de Hornos',
+    roleEn: 'Operador de Hornos',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -503,9 +615,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-028',
     name: 'Vespera la Mística',
+    nameEn: 'Vespera la Mística',
     title: 'Sabia del Éter',
+    titleEn: 'Sabia del Éter',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Sacerdotisa Mística',
+    roleEn: 'Sacerdotisa Mística',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -520,9 +636,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-029',
     name: 'Wade el Rastreador',
+    nameEn: 'Wade el Rastreador',
     title: 'Buscador de Piezas',
+    titleEn: 'Buscador de Piezas',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Explorador Urbano',
+    roleEn: 'Explorador Urbano',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -537,9 +657,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-030',
     name: 'Xander el Telegrafista',
+    nameEn: 'Xander el Telegrafista',
     title: 'Operador Cifrado',
+    titleEn: 'Operador Cifrado',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Comunicador Morse',
+    roleEn: 'Comunicador Morse',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -554,9 +678,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-031',
     name: 'Yara la Soldadora',
+    nameEn: 'Yara the Welder',
     title: 'Especialista en Arco',
+    titleEn: 'Especialista en Arco',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Unidora de Estructuras',
+    roleEn: 'Unidora de Estructuras',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -571,9 +699,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-032',
     name: 'Zane el Asaltante',
+    nameEn: 'Zane el Asaltante',
     title: 'Saqueador del Páramo',
+    titleEn: 'Saqueador del Páramo',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Bandido PK',
+    roleEn: 'Bandido PK',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -588,9 +720,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-033',
     name: 'Amara la Botánica',
+    nameEn: 'Amara la Botánica',
     title: 'Conservadora de Oasis',
+    titleEn: 'Oasis Curator',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Ecóloga Industrial',
+    roleEn: 'Ecóloga Industrial',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -605,9 +741,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-034',
     name: 'Bruno el Mecánico',
+    nameEn: 'Bruno the Mechanic',
     title: 'Ajustador de Bielas',
+    titleEn: 'Ajustador de Bielas',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Técnico de Engranajes',
+    roleEn: 'Técnico de Engranajes',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -622,9 +762,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-035',
     name: 'Celeste la Astronomía',
+    nameEn: 'Celeste la Astronomía',
     title: 'Calibradora Óptica',
+    titleEn: 'Optical Calibrator',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Observadora Estelar',
+    roleEn: 'Observadora Estelar',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -639,9 +783,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-036',
     name: 'Dominic el Fogonero',
+    nameEn: 'Dominic the Stoker',
     title: 'Custodio del Crisol',
+    titleEn: 'Custodio del Crisol',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Alimentador de Horno',
+    roleEn: 'Alimentador de Horno',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -656,9 +804,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-037',
     name: 'Evander el Vendedor',
+    nameEn: 'Evander the Vendor',
     title: 'Mercader de Tubos',
+    titleEn: 'Mercader de Tubos',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Comerciante Itinerante',
+    roleEn: 'Comerciante Itinerante',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -673,9 +825,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-038',
     name: 'Freya la Reclutadora',
+    nameEn: 'Freya la Reclutadora',
     title: 'Organizadora de Duetos',
+    titleEn: 'Organizadora de Duetos',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Inscriptora de Torneos',
+    roleEn: 'Inscriptora de Torneos',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -690,9 +846,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-039',
     name: 'Garrick el Minero',
+    nameEn: 'Garrick the Miner',
     title: 'Barrenador Neumático',
+    titleEn: 'Barrenador Neumático',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Operador de Taladro',
+    roleEn: 'Operador de Taladro',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -707,9 +867,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-040',
     name: 'Hesper la Electrónica',
+    nameEn: 'Hesper la Electrónica',
     title: 'Reparadora de Diodos',
+    titleEn: 'Reparadora de Diodos',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Técnica de Microcircuitos',
+    roleEn: 'Técnica de Microcircuitos',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -724,9 +888,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-041',
     name: 'Ignatius el Piromante',
+    nameEn: 'Ignatius el Piromante',
     title: 'Alquimista de Fuego',
+    titleEn: 'Alquimista de Fuego',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Refinador de Carbón',
+    roleEn: 'Refinador de Carbón',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -741,9 +909,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-042',
     name: 'Juno la Cazadora',
+    nameEn: 'Juno the Hunter',
     title: 'Rastreadora de Singularidades',
+    titleEn: 'Rastreadora de Singularidades',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Cazadora de Reliquias PK',
+    roleEn: 'Cazadora de Reliquias PK',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -758,9 +930,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-043',
     name: 'Kael el Chatarrero',
+    nameEn: 'Kael the Scrapper',
     title: 'Vendedor de Cadenas',
+    titleEn: 'Vendedor de Cadenas',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Recolector de Ferretería',
+    roleEn: 'Recolector de Ferretería',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -775,9 +951,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-044',
     name: 'Lora la Guía',
+    nameEn: 'Lora la Guía',
     title: 'Orientadora Comercial',
+    titleEn: 'Orientadora Comercial',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Guía de Quioscos',
+    roleEn: 'Guía de Quioscos',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -792,9 +972,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-045',
     name: 'Milo el Ensamblador',
+    nameEn: 'Milo el Ensamblador',
     title: 'Ajustador de Bastidores',
+    titleEn: 'Ajustador de Bastidores',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Ensamblador Chasis',
+    roleEn: 'Ensamblador Chasis',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -809,9 +993,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-046',
     name: 'Nix la Cazadora',
+    nameEn: 'Nix the Hunter',
     title: 'Tiradora del Páramo',
+    titleEn: 'Tiradora del Páramo',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Francotiradora PK',
+    roleEn: 'Francotiradora PK',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -826,9 +1014,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-047',
     name: 'Odin el Juez',
+    nameEn: 'Odin el Juez',
     title: 'Árbitro de Torneo',
+    titleEn: 'Árbitro de Torneo',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Certificador Elo',
+    roleEn: 'Certificador Elo',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -843,9 +1035,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-048',
     name: 'Piper la Mensajera',
+    nameEn: 'Piper the Messenger',
     title: 'Estafeta Vacio',
+    titleEn: 'Estafeta Vacio',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Repartidora Exprés',
+    roleEn: 'Repartidora Exprés',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -860,9 +1056,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-049',
     name: 'Quinn el Espectador',
+    nameEn: 'Quinn el Espectador',
     title: 'Aficionado Afanoso',
+    titleEn: 'Aficionado Afanoso',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Espectador Mad Max',
+    roleEn: 'Espectador Mad Max',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -877,9 +1077,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-050',
     name: 'Ronan el Comerciante',
+    nameEn: 'Ronan the Merchant',
     title: 'Mercader de Cristales',
+    titleEn: 'Mercader de Cristales',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Comerciante de Éter',
+    roleEn: 'Comerciante de Éter',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -894,9 +1098,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-051',
     name: 'Aldous el Fogonero',
+    nameEn: 'Aldous the Stoker',
     title: 'Fogonero Mayor',
+    titleEn: 'Chief Stoker',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Fogonero Mayor en Distrito de la Forja',
+    roleEn: 'Fogonero Mayor en Distrito de la Forja',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -911,9 +1119,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-052',
     name: 'Beatrix la Ingeniera',
+    nameEn: 'Beatrix the Engineer',
     title: 'Ingeniera de Precisión',
+    titleEn: 'Precision Engineer',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Ingeniera de Precisión en Subestación Eléctrica',
+    roleEn: 'Ingeniera de Precisión en Subestación Eléctrica',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -928,9 +1140,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-053',
     name: 'Cassian el Recolector',
+    nameEn: 'Cassian el Recolector',
     title: 'Recolector de Tuercas',
+    titleEn: 'Nut Collector',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Recolector de Tuercas en Los Chatarrales',
+    roleEn: 'Recolector de Tuercas en Los Chatarrales',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -945,9 +1161,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-054',
     name: 'Delphina la Custodia',
+    nameEn: 'Delphina la Custodia',
     title: 'Custodia de Cristal',
+    titleEn: 'Crystal Custodian',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Custodia de Cristal en Reserva de Minería',
+    roleEn: 'Custodia de Cristal en Reserva de Minería',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -962,9 +1182,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-055',
     name: 'Eldrin el Cazador',
+    nameEn: 'Eldrin the Hunter',
     title: 'Cazador de Éter',
+    titleEn: 'Aether Hunter',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Cazador de Éter en Desierto de Chatarra',
+    roleEn: 'Cazador de Éter en Desierto de Chatarra',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -979,9 +1203,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-056',
     name: 'Freya la Vendedora',
+    nameEn: 'Freya the Vendor',
     title: 'Vendedora de Latón',
+    titleEn: 'Brass Vendor',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Vendedora de Latón en Fábrica Abandonada',
+    roleEn: 'Vendedora de Latón en Fábrica Abandonada',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -996,9 +1224,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-057',
     name: 'Gideon el Operador',
+    nameEn: 'Gideon the Operator',
     title: 'Operador de Manómetros',
+    titleEn: 'Gauge Operator',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Operador de Manómetros en Torre de Radio',
+    roleEn: 'Operador de Manómetros en Torre de Radio',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1013,9 +1245,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-058',
     name: 'Hesper la Desguazadora',
+    nameEn: 'Hesper la Desguazadora',
     title: 'Desguazadora de Tuberías',
+    titleEn: 'Desguazadora de Tuberías',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Desguazadora de Tuberías en Calderas de Fundición',
+    roleEn: 'Desguazadora de Tuberías en Calderas de Fundición',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1030,9 +1266,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-059',
     name: 'Ignis el Transmisor',
+    nameEn: 'Ignis el Transmisor',
     title: 'Transmisor de Señal',
+    titleEn: 'Signal Transmitter',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Transmisor de Señal en Gran Arena Steampunk',
+    roleEn: 'Transmisor de Señal en Gran Arena Steampunk',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1047,9 +1287,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-060',
     name: 'Juno la Gladiadora',
+    nameEn: 'Juno la Gladiadora',
     title: 'Gladiadora de Éter',
+    titleEn: 'Gladiadora de Éter',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Gladiadora de Éter en Corredores y Vías Sur',
+    roleEn: 'Gladiadora de Éter en Corredores y Vías Sur',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1064,9 +1308,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-061',
     name: 'Kael el Alquimista',
+    nameEn: 'Kael the Alchemist',
     title: 'Alquimista de Plasma',
+    titleEn: 'Plasma Alchemist',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Alquimista de Plasma en Distrito de la Forja',
+    roleEn: 'Alquimista de Plasma en Distrito de la Forja',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1081,9 +1329,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-062',
     name: 'Lyra la Ayudante',
+    nameEn: 'Lyra la Ayudante',
     title: 'Ayudante de Forja',
+    titleEn: 'Ayudante de Forja',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Ayudante de Forja en Subestación Eléctrica',
+    roleEn: 'Ayudante de Forja en Subestación Eléctrica',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1098,9 +1350,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-063',
     name: 'Magnus el Técnico',
+    nameEn: 'Magnus the Technician',
     title: 'Técnico Tesla',
+    titleEn: 'Tesla Technician',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Técnico Tesla en Los Chatarrales',
+    roleEn: 'Técnico Tesla en Los Chatarrales',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1115,9 +1371,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-064',
     name: 'Nora la Explotadora',
+    nameEn: 'Nora la Explotadora',
     title: 'Explotadora de Vetas',
+    titleEn: 'Vein Excavator',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Explotadora de Vetas en Reserva de Minería',
+    roleEn: 'Explotadora de Vetas en Reserva de Minería',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1132,9 +1392,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-065',
     name: 'Orion el Vigía',
+    nameEn: 'Orion el Vigía',
     title: 'Vigía del Páramo',
+    titleEn: 'Wasteland Watcher',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Vigía del Páramo en Desierto de Chatarra',
+    roleEn: 'Vigía del Páramo en Desierto de Chatarra',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1149,9 +1413,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-066',
     name: 'Phaedra la Soldadora',
+    nameEn: 'Phaedra the Welder',
     title: 'Soldadora de Arco',
+    titleEn: 'Arc Welder',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Soldadora de Arco en Fábrica Abandonada',
+    roleEn: 'Soldadora de Arco en Fábrica Abandonada',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1166,9 +1434,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-067',
     name: 'Quillon el Clasificador',
+    nameEn: 'Quillon the Sorter',
     title: 'Clasificador de Chatarra',
+    titleEn: 'Scrap Sorter',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Clasificador de Chatarra en Torre de Radio',
+    roleEn: 'Scrap Sorter en Torre de Radio',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1183,9 +1455,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-068',
     name: 'Rhea la Estafeta',
+    nameEn: 'Rhea the Courier',
     title: 'Estafeta de Noticias',
+    titleEn: 'News Courier',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Estafeta de Noticias en Calderas de Fundición',
+    roleEn: 'Estafeta de Noticias en Calderas de Fundición',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1200,9 +1476,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-069',
     name: 'Silas el Mantenedor',
+    nameEn: 'Silas the Maintainer',
     title: 'Mantenedor de Pistones',
+    titleEn: 'Piston Maintainer',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Mantenedor de Pistones en Gran Arena Steampunk',
+    roleEn: 'Mantenedor de Pistones en Gran Arena Steampunk',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1217,9 +1497,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-070',
     name: 'Tess la Sabia',
+    nameEn: 'Tess the Sage',
     title: 'Sabia del Resonador',
+    titleEn: 'Resonator Sage',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Sabia del Resonador en Corredores y Vías Sur',
+    roleEn: 'Sabia del Resonador en Corredores y Vías Sur',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1234,9 +1518,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-071',
     name: 'Ulysses el Especialista',
+    nameEn: 'Ulysses el Especialista',
     title: 'Especialista en Vapor',
+    titleEn: 'Steam Specialist',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Especialista en Vapor en Distrito de la Forja',
+    roleEn: 'Especialista en Vapor en Distrito de la Forja',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1251,9 +1539,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-072',
     name: 'Vespera la Historiadora',
+    nameEn: 'Vespera the Historian',
     title: 'Historiadora de Chatarra',
+    titleEn: 'Scrap Historian',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Historiadora de Chatarra en Subestación Eléctrica',
+    roleEn: 'Historiadora de Chatarra en Subestación Eléctrica',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1268,9 +1560,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-073',
     name: 'Wolf el Reparador',
+    nameEn: 'Wolf the Repairman',
     title: 'Reparador de Cables',
+    titleEn: 'Cable Repairer',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Reparador de Cables en Los Chatarrales',
+    roleEn: 'Reparador de Cables en Los Chatarrales',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1285,9 +1581,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-074',
     name: 'Xena la Árbitra',
+    nameEn: 'Xena the Referee',
     title: 'Árbitra de Arena',
+    titleEn: 'Árbitra de Arena',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Árbitra de Arena en Reserva de Minería',
+    roleEn: 'Árbitra de Arena en Reserva de Minería',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1302,9 +1602,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-075',
     name: 'Ymir el Mercader',
+    nameEn: 'Ymir el Mercader',
     title: 'Mercader de Relaves',
+    titleEn: 'Tailings Merchant',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Mercader de Relaves en Desierto de Chatarra',
+    roleEn: 'Mercader de Relaves en Desierto de Chatarra',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1319,9 +1623,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-076',
     name: 'Zelda la Maestra',
+    nameEn: 'Zelda la Maestra',
     title: 'Maestra de Calderas',
+    titleEn: 'Maestra de Calderas',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Maestra de Calderas en Fábrica Abandonada',
+    roleEn: 'Maestra de Calderas en Fábrica Abandonada',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1336,9 +1644,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-077',
     name: 'Archie el Técnico',
+    nameEn: 'Archie the Technician',
     title: 'Técnico Galvánico',
+    titleEn: 'Galvanic Technician',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Técnico Galvánico en Torre de Radio',
+    roleEn: 'Técnico Galvánico en Torre de Radio',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1353,9 +1665,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-078',
     name: 'Bree la Rastreadora',
+    nameEn: 'Bree the Tracker',
     title: 'Rastreadora de Transistores',
+    titleEn: 'Transistor Tracker',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Rastreadora de Transistores en Calderas de Fundición',
+    roleEn: 'Rastreadora de Transistores en Calderas de Fundición',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1370,9 +1686,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-079',
     name: 'Corvus el Centinela',
+    nameEn: 'Corvus el Centinela',
     title: 'Centinela de Bóveda',
+    titleEn: 'Vault Sentinel',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Centinela de Bóveda en Gran Arena Steampunk',
+    roleEn: 'Centinela de Bóveda en Gran Arena Steampunk',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1387,9 +1707,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-080',
     name: 'Dahlia la Mercenaria',
+    nameEn: 'Dahlia la Mercenaria',
     title: 'Mercenaria de Éter',
+    titleEn: 'Aether Mercenary',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Mercenaria de Éter en Corredores y Vías Sur',
+    roleEn: 'Mercenaria de Éter en Corredores y Vías Sur',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1404,9 +1728,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-081',
     name: 'Aldous el Ajustador',
+    nameEn: 'Aldous the Adjuster',
     title: 'Ajustador de Presión',
+    titleEn: 'Pressure Adjuster',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Ajustador de Presión en Distrito de la Forja',
+    roleEn: 'Ajustador de Presión en Distrito de la Forja',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1421,9 +1749,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-082',
     name: 'Beatrix la Diseñadora',
+    nameEn: 'Beatrix the Designer',
     title: 'Diseñadora de Autómatas',
+    titleEn: 'Automaton Designer',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Diseñadora de Autómatas en Subestación Eléctrica',
+    roleEn: 'Automaton Designer en Subestación Eléctrica',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1438,9 +1770,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-083',
     name: 'Cassian el Desguazador',
+    nameEn: 'Cassian the Scrapper',
     title: 'Desguazador de Calderas',
+    titleEn: 'Boiler Scrapper',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Desguazador de Calderas en Los Chatarrales',
+    roleEn: 'Desguazador de Calderas en Los Chatarrales',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1455,9 +1791,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-084',
     name: 'Delphina la Calibradora',
+    nameEn: 'Delphina the Calibrator',
     title: 'Calibradora Óptica',
+    titleEn: 'Optical Calibrator',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Calibradora Óptica en Reserva de Minería',
+    roleEn: 'Calibradora Óptica en Reserva de Minería',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1472,9 +1812,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-085',
     name: 'Eldrin el Campeón',
+    nameEn: 'Eldrin el Campeón',
     title: 'Campeón de Arena',
+    titleEn: 'Arena Champion',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Campeón de Arena en Desierto de Chatarra',
+    roleEn: 'Campeón de Arena en Desierto de Chatarra',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1489,9 +1833,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-086',
     name: 'Freya la Química',
+    nameEn: 'Freya the Chemist',
     title: 'Química de Baterías',
+    titleEn: 'Battery Chemist',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Química de Baterías en Fábrica Abandonada',
+    roleEn: 'Química de Baterías en Fábrica Abandonada',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1506,9 +1854,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-087',
     name: 'Gideon el Aprendiz',
+    nameEn: 'Gideon the Apprentice',
     title: 'Aprendiz de Latón',
+    titleEn: 'Brass Apprentice',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Aprendiz de Latón en Torre de Radio',
+    roleEn: 'Aprendiz de Latón en Torre de Radio',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1523,9 +1875,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-088',
     name: 'Hesper la Operadora',
+    nameEn: 'Hesper the Operator',
     title: 'Operadora de Presión',
+    titleEn: 'Pressure Operator',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Operadora de Presión en Calderas de Fundición',
+    roleEn: 'Operadora de Presión en Calderas de Fundición',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1540,9 +1896,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-089',
     name: 'Ignis el Barrenador',
+    nameEn: 'Ignis the Driller',
     title: 'Barrenador de Vetas',
+    titleEn: 'Barrenador de Vetas',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Barrenador de Vetas en Gran Arena Steampunk',
+    roleEn: 'Barrenador de Vetas en Gran Arena Steampunk',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1557,9 +1917,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-090',
     name: 'Juno la Centinela',
+    nameEn: 'Juno la Centinela',
     title: 'Centinela de Frecuencias',
+    titleEn: 'Frequency Sentinel',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Centinela de Frecuencias en Corredores y Vías Sur',
+    roleEn: 'Centinela de Frecuencias en Corredores y Vías Sur',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1574,9 +1938,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-091',
     name: 'Kael el Escolta',
+    nameEn: 'Kael the Escort',
     title: 'Escolta Mecanizado',
+    titleEn: 'Mechanized Escort',
     zone: 'Distrito de la Forja',
+    zoneEn: 'Forge District',
     role: 'Escolta Mecanizado en Distrito de la Forja',
+    roleEn: 'Escolta Mecanizado en Distrito de la Forja',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1591,9 +1959,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-092',
     name: 'Lyra la Clasificadora',
+    nameEn: 'Lyra the Sorter',
     title: 'Clasificadora de Pernos',
+    titleEn: 'Bolt Sorter',
     zone: 'Subestación Eléctrica',
+    zoneEn: 'Electric Substation',
     role: 'Clasificadora de Pernos en Subestación Eléctrica',
+    roleEn: 'Clasificadora de Pernos en Subestación Eléctrica',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1608,9 +1980,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-093',
     name: 'Magnus el Corredor',
+    nameEn: 'Magnus the Runner',
     title: 'Corredor de Alijos',
+    titleEn: 'Cache Runner',
     zone: 'Los Chatarrales',
+    zoneEn: 'The Scrap Yards',
     role: 'Corredor de Alijos en Los Chatarrales',
+    roleEn: 'Corredor de Alijos en Los Chatarrales',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1625,9 +2001,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-094',
     name: 'Nora la Mecánica',
+    nameEn: 'Nora la Mecánica',
     title: 'Mecánica de Bastidores',
+    titleEn: 'Mecánica de Bastidores',
     zone: 'Reserva de Minería',
+    zoneEn: 'Mining Reserve',
     role: 'Mecánica de Bastidores en Reserva de Minería',
+    roleEn: 'Mecánica de Bastidores en Reserva de Minería',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1642,9 +2022,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-095',
     name: 'Orion el Geólogo',
+    nameEn: 'Orion the Geologist',
     title: 'Geólogo de Maná',
+    titleEn: 'Mana Geologist',
     zone: 'Desierto de Chatarra',
+    zoneEn: 'Scrap Desert',
     role: 'Geólogo de Maná en Desierto de Chatarra',
+    roleEn: 'Mana Geologist en Desierto de Chatarra',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1659,9 +2043,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-096',
     name: 'Phaedra la Técnica',
+    nameEn: 'Phaedra la Técnica',
     title: 'Técnica de Combustión',
+    titleEn: 'Combustion Tech',
     zone: 'Fábrica Abandonada',
+    zoneEn: 'Abandoned Factory',
     role: 'Técnica de Combustión en Fábrica Abandonada',
+    roleEn: 'Técnica de Combustión en Fábrica Abandonada',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1676,9 +2064,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-097',
     name: 'Quillon el Cronista',
+    nameEn: 'Quillon el Cronista',
     title: 'Cronista de Escoria',
+    titleEn: 'Slag Chronicler',
     zone: 'Torre de Radio',
+    zoneEn: 'Radio Tower',
     role: 'Cronista de Escoria en Torre de Radio',
+    roleEn: 'Cronista de Escoria en Torre de Radio',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1693,9 +2085,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-098',
     name: 'Rhea la Operadora',
+    nameEn: 'Rhea the Operator',
     title: 'Operadora de Red',
+    titleEn: 'Network Operator',
     zone: 'Calderas de Fundición',
+    zoneEn: 'Foundry Boilers',
     role: 'Operadora de Red en Calderas de Fundición',
+    roleEn: 'Operadora de Red en Calderas de Fundición',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1710,9 +2106,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-099',
     name: 'Silas el Gladiador',
+    nameEn: 'Silas the Gladiator',
     title: 'Gladiador Mecánico',
+    titleEn: 'Mechanical Gladiator',
     zone: 'Gran Arena Steampunk',
+    zoneEn: 'Grand Steampunk Arena',
     role: 'Gladiador Mecánico en Gran Arena Steampunk',
+    roleEn: 'Gladiador Mecánico en Gran Arena Steampunk',
     gender: 'male' as const,
     avatarSpec: {
       bodyShape: URN_MALE,
@@ -1727,9 +2127,13 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-100',
     name: 'Tess la Conservadora',
+    nameEn: 'Tess the Curator',
     title: 'Conservadora de Oasis',
+    titleEn: 'Oasis Curator',
     zone: 'Corredores y Vías Sur',
+    zoneEn: 'South Corridors & Paths',
     role: 'Conservadora de Oasis en Corredores y Vías Sur',
+    roleEn: 'Conservadora de Oasis en Corredores y Vías Sur',
     gender: 'female' as const,
     avatarSpec: {
       bodyShape: URN_FEMALE,
@@ -1742,3 +2146,52 @@ export const NPC_CATALOG: NpcDefinition[] = [
     phraseEn: 'I hold rare components salvaged directly from the northeast mines.'
   }
 ]
+
+
+/**
+ * ============================================================================
+ * FUNCIONES AUXILIARES DE LOCALIZACIÓN DE NPCS (NPC i18n HELPERS)
+ * ============================================================================
+ */
+
+import { getLanguage, Language } from '../i18n'
+
+export function getLocalizedNpcName(npcData: NpcDefinition, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+  if (currentLang === 'en' && npcData.nameEn) {
+    return npcData.nameEn
+  }
+  return npcData.name
+}
+
+export function getLocalizedNpcTitle(npcData: NpcDefinition, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+  if (currentLang === 'en' && npcData.titleEn) {
+    return npcData.titleEn
+  }
+  return npcData.title
+}
+
+export function getLocalizedNpcPhrase(npcData: NpcDefinition, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+  if (currentLang === 'en' && npcData.phraseEn) {
+    return npcData.phraseEn
+  }
+  return npcData.phraseEs
+}
+
+export function getLocalizedNpcZone(npcData: NpcDefinition, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+  if (currentLang === 'en' && npcData.zoneEn) {
+    return npcData.zoneEn
+  }
+  return npcData.zone
+}
+
+export function getLocalizedNpcRole(npcData: NpcDefinition, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+  if (currentLang === 'en' && npcData.roleEn) {
+    return npcData.roleEn
+  }
+  return npcData.role
+}

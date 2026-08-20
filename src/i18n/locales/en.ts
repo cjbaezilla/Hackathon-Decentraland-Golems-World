@@ -45,6 +45,13 @@ export const en: TranslationSchema = {
     luminous: 'Luminous',
     aether: 'Aether'
   },
+  rarities: {
+    common: 'Common',
+    uncommon: 'Uncommon',
+    rare: 'Rare',
+    epic: 'Epic',
+    legendary: 'Legendary'
+  },
   golems: {
     steamNames: [
       'Steam Boiler',

@@ -45,6 +45,13 @@ export const es: TranslationSchema = {
     luminous: 'Luminoso',
     aether: 'Éter'
   },
+  rarities: {
+    common: 'Común',
+    uncommon: 'Poco Común',
+    rare: 'Raro',
+    epic: 'Épico',
+    legendary: 'Legendario'
+  },
   golems: {
     steamNames: [
       'Calderón de Vapor',

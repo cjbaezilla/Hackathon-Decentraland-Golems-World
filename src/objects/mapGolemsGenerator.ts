@@ -9,22 +9,43 @@ import {
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
 import { generateRandomMapGolemsCatalog, MapGolemDefinition } from '../data/mapGolemsCatalog'
 import { getAffinityTextColor } from './golemFactory'
-import { getLocalizedAffinity } from '../i18n'
+import { getLocalizedAffinity, getLocalizedRarity, getLocalizedGolemName, onLanguageChange } from '../i18n'
 import { MapGolemPatrolComponent } from '../systems/mapGolemPatrolSystem'
 
 /**
  * ============================================================================
  * GENERADOR DE GOLEMS AMBIENTALES DEL MAPA (MAP GOLEMS GENERATOR)
  * ============================================================================
- * Instancia 100 golems aleatorios distribuidos proceduralmente en el mapa de 400m x 400m.
+ * Instancia golems aleatorios distribuidos proceduralmente en el mapa de 400m x 400m.
  * Muestra el modelo 3D GLTF (.glb), orientación Y aleatoria y etiqueta flotante
- * Billboard con el nombre, afinidad y rareza de cada golem (sin niveles ni estadísticas).
+ * Billboard con el nombre, afinidad y rareza traducidos dinámicamente según el idioma activo.
  */
 
 const spawnedMapGolemEntities: Entity[] = []
+const spawnedMapGolemDataMap = new Map<Entity, { golemDef: MapGolemDefinition; labelEntity: Entity }>()
 
 /**
- * Instancia los 150 golems aleatorios del mapa.
+ * Actualiza las etiquetas flotantes 3D de todos los golems ambientales del mapa al cambiar el idioma.
+ */
+export function updateAllMapGolemLabels() {
+  for (const { golemDef, labelEntity } of spawnedMapGolemDataMap.values()) {
+    if (labelEntity && TextShape.has(labelEntity)) {
+      const variantIdx = (golemDef.recipeNumber - 1) % 5
+      const name = getLocalizedGolemName(golemDef.affinity, variantIdx)
+      const affTag = getLocalizedAffinity(golemDef.affinity)
+      const rarityTag = getLocalizedRarity(golemDef.rarity)
+      TextShape.getMutable(labelEntity).text = `🤖 ${name}\n[${affTag}] • ${rarityTag}`
+    }
+  }
+}
+
+// Suscripción al cambio global de idioma
+onLanguageChange(() => {
+  updateAllMapGolemLabels()
+})
+
+/**
+ * Instancia los golems aleatorios del mapa.
  *
  * @param count Número total de golems a instanciar (por defecto 150).
  * @returns Lista de entidades instanciadas.
@@ -35,6 +56,7 @@ export function spawnMapGolems(count: number = 150): Entity[] {
     engine.removeEntity(entity)
   }
   spawnedMapGolemEntities.length = 0
+  spawnedMapGolemDataMap.clear()
 
   // 2. Generación procedural del catálogo dinámico de golems
   const catalog = generateRandomMapGolemsCatalog()
@@ -79,10 +101,13 @@ export function spawnMapGolems(count: number = 150): Entity[] {
       position: Vector3.create(0, heightOffset, 0)
     })
 
+    const variantIdx = (golemDef.recipeNumber - 1) % 5
+    const name = getLocalizedGolemName(golemDef.affinity, variantIdx)
     const affTag = getLocalizedAffinity(golemDef.affinity)
+    const rarityTag = getLocalizedRarity(golemDef.rarity)
 
     TextShape.create(labelEntity, {
-      text: `🤖 ${golemDef.name}\n[${affTag}] • ${golemDef.rarity}`,
+      text: `🤖 ${name}\n[${affTag}] • ${rarityTag}`,
       fontSize: 2.2,
       textColor: getAffinityTextColor(golemDef.affinity)
     })
@@ -90,6 +115,7 @@ export function spawnMapGolems(count: number = 150): Entity[] {
     Billboard.create(labelEntity, {})
 
     spawnedMapGolemEntities.push(golemEntity)
+    spawnedMapGolemDataMap.set(golemEntity, { golemDef, labelEntity })
   })
 
   console.log(
@@ -98,3 +124,4 @@ export function spawnMapGolems(count: number = 150): Entity[] {
 
   return spawnedMapGolemEntities
 }
+

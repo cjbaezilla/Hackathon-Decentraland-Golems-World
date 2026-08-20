@@ -139,6 +139,35 @@ export function getLocalizedAffinity(affinity: string, lang?: Language): string 
 }
 
 /**
+ * Obtiene la etiqueta traducida de rareza de un elemento/golem.
+ */
+export function getLocalizedRarity(rarity: string, lang?: Language): string {
+  const dict = getTranslations(lang)
+  switch (rarity.toLowerCase()) {
+    case 'común':
+    case 'comun':
+    case 'common':
+      return dict.rarities.common
+    case 'poco común':
+    case 'poco comun':
+    case 'uncommon':
+      return dict.rarities.uncommon
+    case 'raro':
+    case 'rare':
+      return dict.rarities.rare
+    case 'épico':
+    case 'epico':
+    case 'epic':
+      return dict.rarities.epic
+    case 'legendario':
+    case 'legendary':
+      return dict.rarities.legendary
+    default:
+      return rarity
+  }
+}
+
+/**
  * Obtiene el nombre traducido de un arquetipo de golem según su afinidad y variante (0 a 4).
  */
 export function getLocalizedGolemName(affinity: string, variantIndex: number, lang?: Language): string {

@@ -8,7 +8,7 @@ import {
   removeEntityWithChildren
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
-import { GolemConfig, GolemAffinity, generateRandomStats } from '../config/golems'
+import { GolemConfig, GolemAffinity, generateRandomStats, getGolemDisplayName } from '../config/golems'
 import { GolemFollowerComponent, GolemSquadMemberDto } from '../components/follower'
 import {
   GolemCombatComponent,
@@ -185,9 +185,12 @@ export function createFollowerGolem(
 
   const ownerTag = formatShortAddress(ownerAddress)
   const hpBar = getHealthBarAscii(currentHp, maxHp)
+  const affTag = getLocalizedAffinity(config.affinity)
+  const levelTag = t('common.levelShort')
+  const name = getGolemDisplayName(config)
 
   TextShape.create(labelEntity, {
-    text: `${config.name}${ownerTag} [${config.affinity}]\nNv.${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
+    text: `${name}${ownerTag} [${affTag}]\n${levelTag}${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
     fontSize: 2.1,
     textColor: getAffinityTextColor(config.affinity)
   })
