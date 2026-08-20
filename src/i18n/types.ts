@@ -113,5 +113,22 @@ export interface TranslationSchema {
     skipButton: string
     hintPrompt: string
   }
+  map: {
+    title: string
+    subtitle: string
+    enlarge: string
+    minimize: string
+    close: string
+    north: string
+    south: string
+    east: string
+    west: string
+    legendTitle: string
+    safeZone: string
+    pkZone: string
+    arenaZone: string
+    playerTooltip: string
+  }
 }
+
 

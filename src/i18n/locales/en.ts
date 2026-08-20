@@ -139,6 +139,23 @@ export const en: TranslationSchema = {
     subtitle: 'Your veteran mentor in the Forge District and Wastelands',
     skipButton: 'Skip ⏭️',
     hintPrompt: '💡 Tap on Silas to begin your crafting adventure!'
+  },
+  map: {
+    title: 'WORLD MAP',
+    subtitle: '25x25 Parcels Grid (400m × 400m)',
+    enlarge: 'Enlarge Map ⛶',
+    minimize: 'Minimize Map 🗕',
+    close: 'Close ✖',
+    north: 'N',
+    south: 'S',
+    east: 'E',
+    west: 'W',
+    legendTitle: 'Zoning & Hazard Levels',
+    safeZone: 'Safe Zone (No PK)',
+    pkZone: 'Hazard Zone (Free PK)',
+    arenaZone: 'Tournament Grand Arena',
+    playerTooltip: 'Your Position'
   }
 }
+
 

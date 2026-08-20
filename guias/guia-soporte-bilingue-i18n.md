@@ -173,11 +173,30 @@ Cuando se desarrolle una nueva característica (ej. inventario de piezas, árbol
    const count = t('inventory.slotCount', { used: 3, max: 20 })
    ```
 
+### 5.1 Texturas e Imágenes de UI Bilingües (Patrón de Cartografía)
+Cuando una textura 2D contiene rotulación o tipografía horneada (como el mapa del mundo), se implementa un selector dinámico basado en `getLanguage()`:
+
+```typescript
+import { getLanguage } from '../i18n'
+
+export function getMinimapTextureSrc(): string {
+  return getLanguage() === 'en' ? 'assets/images/minimap_en.jpg' : 'assets/images/minimap.jpg'
+}
+
+// En el componente React-ECS:
+<UiEntity
+  uiBackground={{
+    texture: { src: getMinimapTextureSrc() },
+    textureMode: 'stretch'
+  }}
+/>
+```
+
 ---
 
 ## 🔒 6. Buenas Prácticas y Reglas para Desarrolladores y Agentes
 
 - 🚫 **Nunca hardcodear strings en inglés ni en español** en `pointerEventsSystem`, `TextShape`, `addCombatLog` o componentes UI.
 - ✅ **Utilizar siempre claves semánticas y jerárquicas** (`modulo.submodulo.clave`).
-- ✅ **Garantizar paridad estricta**: Si se añade una clave a `es.ts`, debe añadirse simultáneamente a `en.ts` y al tipo `TranslationSchema`.
+- ✅ **Garantizar paridad estritca**: Si se añade una clave a `es.ts`, debe añadirse simultáneamente a `en.ts` y al tipo `TranslationSchema`.
 - ✅ **Formatos de números y fechas**: Mantener formatos limpios y comprensibles internacionalmente.

@@ -17,6 +17,7 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 | **07** | **Multijugador P2P y Optimización Mobile-First** | Arquitectura de red P2P (`MessageBus`), gestión de controles táctiles (`TouchScreenControls`), hitboxes amplias y restricciones del cliente móvil. | [📖 Leer Guía](guia-multijugador-mobile.md) |
 | **08** | **Soporte Bilingüe e Internacionalización (i18n)** | Motor dinámico `src/i18n`, selector de idioma táctil en HUD, diccionarios canónicos tipados (ES/EN) y suscripciones reactivas en tiempo real. | [📖 Leer Guía](guia-soporte-bilingue-i18n.md) |
 | **09** | **Sistema de Cámaras, Cinemáticas y Presentación** | Cámara orbital SDK7 con `VirtualCamera`, `lookAtEntity`, bloqueo de avatar con `InputModifier`, botón de salto Mobile-First y presentación de Silas. | [📖 Leer Guía](guia-cinematicas-y-camaras.md) |
+| **10** | **Sistema de Minimapa, Cartografía 2D y Orientación** | Proyección matemática 2D del Grid 25x25 (400m × 400m), cono de visión 360° (Sight Cone), texturas bilingües HD y modal panorámico Mobile-First en 2 columnas. | [📖 Leer Guía](guia-sistema-minimapa-y-cartografia.md) |
 
 ---
 
@@ -48,3 +49,7 @@ Manual del subsistema de internacionalización (`src/i18n`). Establece la regla 
 
 ### 9. [guia-cinematicas-y-camaras.md](guia-cinematicas-y-camaras.md)
 Manual técnico del sistema de cinemáticas y cámaras virtuales. Detalla la orquestación de `VirtualCamera` y `MainCamera`, fórmulas de la trayectoria orbital, bloqueo seguro de avatar con `InputModifier`, superposición UI con botón táctil de salto y repetición desde el diálogo con Silas.
+
+### 10. [guia-sistema-minimapa-y-cartografia.md](guia-sistema-minimapa-y-cartografia.md)
+Manual completo del sistema de minimapa HUD y modal panorámico de mapa grande. Detalla las ecuaciones de proyección métrica a porcentaje en el Grid 25x25 (400m × 400m), cálculo del vector director y cono de visión 360° (*Sight Cone*), diseño apaisado en 2 columnas optimizado para la resolución virtual móvil `1600x720` e intercambio dinámico de texturas bilingües (`minimap.jpg` / `minimap_en.jpg`).
+

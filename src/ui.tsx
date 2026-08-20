@@ -13,6 +13,7 @@ import {
 } from './state'
 import { updateWelcomeNpcLanguage } from './objects/welcomeNpc'
 import { playSilasCinematic, stopSilasCinematic } from './cinematics/silasCinematic'
+import { MinimapWidget, BigMapModal } from './ui/minimapComponent'
 
 /**
  * ============================================================================
@@ -615,11 +616,17 @@ export const uiComponent = () => {
       {/* Barra Superior con Indicador de Tilemap y Selector de Idioma */}
       <TopHeaderBar />
 
+      {/* Widget de Minimapa Compacto (Esquina Superior Derecha, bajo TopHeaderBar) */}
+      <MinimapWidget />
+
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />
 
       {/* Superposición Cinemática de Presentación de Silas */}
       <CinematicOverlay />
+
+      {/* Modal de Mapa Grande Ampliado con Fondo Semitransparente */}
+      <BigMapModal />
     </UiEntity>
   )
 }

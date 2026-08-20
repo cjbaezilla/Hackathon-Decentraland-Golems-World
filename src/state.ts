@@ -29,6 +29,7 @@ export interface SceneState {
   npcDialogStep: NpcDialogStep
   isCinematicActive: boolean
   hasPlayedSilasIntro: boolean
+  isBigMapOpen: boolean
 }
 
 export const sceneState: SceneState = {
@@ -41,7 +42,29 @@ export const sceneState: SceneState = {
   isNpcDialogOpen: false,
   npcDialogStep: 'intro',
   isCinematicActive: false,
-  hasPlayedSilasIntro: false
+  hasPlayedSilasIntro: false,
+  isBigMapOpen: false
+}
+
+/**
+ * Consulta si la ventana modal del mapa grande está abierta.
+ */
+export function getIsBigMapOpen(): boolean {
+  return sceneState.isBigMapOpen
+}
+
+/**
+ * Establece el estado de apertura del mapa grande.
+ */
+export function setIsBigMapOpen(open: boolean) {
+  sceneState.isBigMapOpen = open
+}
+
+/**
+ * Alterna el estado de apertura del mapa grande (abrir/cerrar).
+ */
+export function toggleBigMap() {
+  sceneState.isBigMapOpen = !sceneState.isBigMapOpen
 }
 
 /**
@@ -57,6 +80,7 @@ export function getIsCinematicActive(): boolean {
 export function setIsCinematicActive(active: boolean) {
   sceneState.isCinematicActive = active
 }
+
 
 /**
  * Consulta si ya se reprodujo la cinemática inicial de Silas en la sesión.

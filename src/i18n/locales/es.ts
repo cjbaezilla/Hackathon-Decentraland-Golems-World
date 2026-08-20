@@ -139,6 +139,23 @@ export const es: TranslationSchema = {
     subtitle: 'Tu guía y mentor en el Distrito de la Forja y los Páramos',
     skipButton: 'Saltar ⏭️',
     hintPrompt: '💡 ¡Toca a Silas para iniciar tu aventura de forja!'
+  },
+  map: {
+    title: 'MAPA DEL MUNDO',
+    subtitle: 'Cuadrícula 25x25 (400m × 400m)',
+    enlarge: 'Ampliar Mapa ⛶',
+    minimize: 'Minimizar Mapa 🗕',
+    close: 'Cerrar ✖',
+    north: 'N',
+    south: 'S',
+    east: 'E',
+    west: 'O',
+    legendTitle: 'Zonificación y Riesgo',
+    safeZone: 'Zona Segura (Sin PK)',
+    pkZone: 'Zona de Peligro (PK Libre)',
+    arenaZone: 'Gran Arena de Torneo',
+    playerTooltip: 'Tu Posición'
   }
 }
+
 

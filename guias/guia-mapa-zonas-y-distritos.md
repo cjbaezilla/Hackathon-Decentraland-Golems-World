@@ -24,6 +24,7 @@ Esta guía técnica y documental detalla exhaustivamente la arquitectura espacia
 6. [Tabla de Coordenadas, Superficies y Niveles de Riesgo](#6-tabla-de-coordenadas-superficies-y-niveles-de-riesgo)
 7. [Catálogo Completo de Modelos 3D y Assets Utilizados](#7-catálogo-completo-de-modelos-3d-y-assets-utilizados)
 8. [Patrones de Construcción y Principios Mobile-First](#8-patrones-de-construcción-y-principios-mobile-first)
+9. [Sistema de Minimapa, Cartografía 2D y Orientación](#9-sistema-de-minimapa-cartografía-2d-y-orientación)
 
 ---
 
@@ -334,3 +335,14 @@ Todos los modelos 3D son archivos binarios glTF 2.0 (`.glb`) autocontenidos en `
    - Todas las arterias y caminos principales tienen entre $8\text{m}$ y $12\text{m}$ de ancho para permitir el libre tránsito simultáneo de avatares con sus formaciones de 3 golems acompañantes sin colisiones ni atascos de cámara.
 4. **Colisionadores Físicos Transparentes y Eficientes**:
    - Únicamente las estructuras sólidas visibles (muros, vallas, bastiones, tanques) poseen colisión física; el suelo y las áreas abiertas están completamente despejadas de mallas de colisión invisibles que puedan trabar el movimiento táctil.
+
+---
+
+## 9. Sistema de Minimapa, Cartografía 2D y Orientación
+
+Para navegar por esta matriz espacial de 400m × 400m, la escena incorpora un sistema de navegación 2D en tiempo real sincronizado matemáticamente con las cotas métricas del mundo:
+
+- **Minimapa HUD (`MinimapWidget`)**: Ubicado en `{ top: 80, right: 28 }`, muestra la textura bilingüe de parcelas (`minimap.jpg` / `minimap_en.jpg`), el *Glowing Dot* del avatar y el *Sight Cone* de rotación de cámara a 360°.
+- **Modal de Mapa Completo (`BigMapModal`)**: Tarjeta panorámica en 2 columnas ($880\text{px} \times 480\text{px}$) con fondo semitransparente (`rgba(5, 8, 15, 0.86)`), diseñada específicamente para encajar en la resolución virtual de teléfonos móviles (`1600x720`).
+- **Mapeo de Zonas y Distritos**: Refleja con precisión las 4 esquinas simétricas, los anillos intermedios y la Gran Arena Central, con leyenda de peligros en tiempo real.
+- **Documentación Completa**: Consulta todos los algoritmos de proyección y código fuente en la [Guía Maestra: Sistema de Minimapa y Cartografía 2D](guia-sistema-minimapa-y-cartografia.md).
