@@ -120,54 +120,54 @@ To ensure optimal performance on mobile devices, buried materials do not require
 
 There are **46 types of materials**, categorized into 5 rarity tiers. Epic and Legendary materials are capped at **only one active instance at a time** across the entire map:
 
-| # | Material | Rarity | Spawn Weight | Respawn Time | Zone | Attribute & Affinity Contribution |
-| :-: | :--- | :--- | :-: | :-: | :--- | :--- |
-| 1 | **Copper Wire** (`alambre_cobre`) | Common | 3.7% | 1 to 3 min | Junklands | +Speed (2) |
-| 2 | **Screws & Bolts** (`tornillos_pernos`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (2) |
-| 3 | **Worn Gears** (`engranajes_desgastados`) | Common | 3.7% | 1 to 3 min | Junklands | +Speed (1), +Defense (1) |
-| 4 | **Copper Pipes** (`tubos_cobre`) | Common | 3.7% | 1 to 3 min | Junklands | +Vitality (10) |
-| 5 | **Frying Pans** (`sartenes`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (3) |
-| 6 | **Cooking Pots** (`ollas_cocinar`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (2), +Vitality (5) |
-| 7 | **Brass Plates** (`placas_laton`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (3) |
-| 8 | **Rusty Nails** (`clavos_oxidados`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (1) |
-| 9 | **Tin Cans** (`latas_conserva`) | Common | 3.4% | 1 to 3 min | Junklands | +Vitality (8) |
-| 10 | **Iron Chains** (`cadenas_hierro`) | Common | 3.4% | 1 to 3 min | Junklands | +Defense (2) |
-| 11 | **Giant Nuts** (`tuercas_gigantes`) | Common | 3.4% | 1 to 3 min | Junklands | +Defense (2) |
-| 12 | **Manhole Covers** (`tapas_alcantarilla`) | Common | 3.4% | 1 to 3 min | Junklands | +Defense (3) |
-| 13 | **Frayed Cables** (`cables_deshilachados`) | Common | 3.4% | 1 to 3 min | Junklands | +Speed (2) |
-| 14 | **Coal Residue** (`residuos_carbon`) | Common | 3.4% | 1 to 3 min | Junklands | +Vitality (6) & Steam Affinity |
-| 15 | **Transistors** (`transistores`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Attack (3) |
-| 16 | **Filament Bulbs** (`bombillas_filamento`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Vitality (12) & Luminous Affinity |
-| 17 | **Clock Springs** (`resortes_reloj`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Speed (4) |
-| 18 | **Pressure Gauges** (`manometros`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Vitality (15) |
-| 19 | **Steam Valves** (`valvulas_vapor`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Attack (2) & Steam Affinity |
-| 20 | **Old TV Lenses** (`lentes_tv_viejo`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Speed (3) |
-| 21 | **Blown Fuses** (`fusibles_fundidos`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Attack (2) & Galvanic Affinity |
-| 22 | **Broken Pocket Watches** (`relojes_bolsillo`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Speed (3) |
-| 23 | **Magnetic Compasses** (`brujulas_magneticas`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Speed (3) & Mechanical Affinity |
-| 24 | **Vacuum Tubes** (`tubos_vacio`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Attack (3) & Luminous Affinity |
-| 25 | **Switch Levers** (`palancas_interruptor`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Defense (2) |
-| 26 | **Steam Engine** (`motor_vapor`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Attack (5) & Steam Affinity |
-| 27 | **Tesla Coils** (`bobinas_tesla`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Attack (6) & Galvanic Affinity |
-| 28 | **Radio Antennas** (`antenas_radio`) | Rare | 1.5% | 10 to 15 min | Radio Tower | +Speed (6) |
-| 29 | **LED Diodes** (`diodos_led`) | Rare | 1.5% | 10 to 15 min | Radio Tower | +Attack (4) & Luminous Affinity |
-| 30 | **Alchemical Batteries** (`baterias_alquimicas`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Vitality (25) & Galvanic Affinity |
-| 31 | **Perfect Bronze Gears** (`engranajes_bronce`) | Rare | 1.5% | 10 to 15 min | Mining Reserve | +Defense (6) & Mechanical Affinity |
-| 32 | **Galvanic Dynamo** (`dinamo_galvanica`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Attack (5) & Galvanic Affinity |
-| 33 | **Resonating Quartz Crystal** (`cristal_fuerza`) | Rare | 1.5% | 10 to 15 min | Radio Tower | +Speed (5) & Luminous Affinity |
-| 34 | **Precision Gyroscope** (`giroscopio_precision`) | Rare | 1.5% | 10 to 15 min | Mining Reserve | +Defense (5) & Mechanical Affinity |
-| 35 | **High-Pressure Condenser** (`condensador_presion`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Vitality (20) & Steam Affinity |
-| 36 | **Condensed Mana Core** (`nucleo_mana`) | Epic | 0.8% | 20 to 30 min | Mining Reserve | +Attack (8) & Aether Affinity |
-| 37 | **Automaton Brain** (`cerebro_automata`) | Epic | 0.8% | 20 to 30 min | Mining Reserve | +Attack (8) & Mechanical Affinity |
-| 38 | **Aether Reactor** (`reactor_eter`) | Epic | 0.8% | 20 to 30 min | Smelting Boilers (PK) | +Attack (9) & Aether Affinity |
-| 39 | **Boiler Heart** (`corazon_caldera`) | Epic | 0.8% | 20 to 30 min | Smelting Boilers (PK) | +Defense (8) & Steam Affinity |
-| 40 | **Supercharged Plasma Battery** (`bateria_plasma`) | Epic | 0.8% | 20 to 30 min | Electrical Substation | +Attack (8) & Galvanic Affinity |
-| 41 | **Solar Optical Array** (`matriz_optica_solar`) | Epic | 0.8% | 20 to 30 min | Radio Tower | +Speed (7) & Luminous Affinity |
-| 42 | **Forged Titanium Piston** (`embolo_titanio`) | Epic | 0.8% | 20 to 30 min | Smelting Boilers (PK) | +Defense (7) & Steam Affinity |
-| 43 | **Mechanical Dragon Eye** (`ojo_dragon`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Attack (14) & Aether Affinity |
-| 44 | **Primordial Golem Heart** (`corazon_primigenio`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +All Stats |
-| 45 | **Aetheric Singularity** (`singularidad_eterica`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Attack (12), +Speed (6) & Aether Affinity |
-| 46 | **Celestial Gear Reliquary** (`relicario_astral`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Defense (10), +Vitality (30) & Aether Affinity |
+| # | Icon | Material | Rarity | Spawn Weight | Respawn Time | Zone | Attribute & Affinity Contribution |
+| :-: | :-: | :--- | :--- | :-: | :-: | :--- | :--- |
+| 1 | <img src="showcase/common/alambre_cobre.png" width="40" alt="alambre_cobre" /> | **Copper Wire** (`alambre_cobre`) | Common | 3.7% | 1 to 3 min | Junklands | +Speed (2) |
+| 2 | <img src="showcase/common/tornillos_pernos.png" width="40" alt="tornillos_pernos" /> | **Screws & Bolts** (`tornillos_pernos`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (2) |
+| 3 | <img src="showcase/common/engranajes_desgastados.png" width="40" alt="engranajes_desgastados" /> | **Worn Gears** (`engranajes_desgastados`) | Common | 3.7% | 1 to 3 min | Junklands | +Speed (1), +Defense (1) |
+| 4 | <img src="showcase/common/tubos_cobre.png" width="40" alt="tubos_cobre" /> | **Copper Pipes** (`tubos_cobre`) | Common | 3.7% | 1 to 3 min | Junklands | +Vitality (10) |
+| 5 | <img src="showcase/common/sartenes.png" width="40" alt="sartenes" /> | **Frying Pans** (`sartenes`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (3) |
+| 6 | <img src="showcase/common/ollas_cocinar.png" width="40" alt="ollas_cocinar" /> | **Cooking Pots** (`ollas_cocinar`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (2), +Vitality (5) |
+| 7 | <img src="showcase/common/placas_laton.png" width="40" alt="placas_laton" /> | **Brass Plates** (`placas_laton`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (3) |
+| 8 | <img src="showcase/common/clavos_oxidados.png" width="40" alt="clavos_oxidados" /> | **Rusty Nails** (`clavos_oxidados`) | Common | 3.7% | 1 to 3 min | Junklands | +Defense (1) |
+| 9 | <img src="showcase/common/latas_conserva.png" width="40" alt="latas_conserva" /> | **Tin Cans** (`latas_conserva`) | Common | 3.4% | 1 to 3 min | Junklands | +Vitality (8) |
+| 10 | <img src="showcase/common/cadenas_hierro.png" width="40" alt="cadenas_hierro" /> | **Iron Chains** (`cadenas_hierro`) | Common | 3.4% | 1 to 3 min | Junklands | +Defense (2) |
+| 11 | <img src="showcase/common/tuercas_gigantes.png" width="40" alt="tuercas_gigantes" /> | **Giant Nuts** (`tuercas_gigantes`) | Common | 3.4% | 1 to 3 min | Junklands | +Defense (2) |
+| 12 | <img src="showcase/common/tapas_alcantarilla.png" width="40" alt="tapas_alcantarilla" /> | **Manhole Covers** (`tapas_alcantarilla`) | Common | 3.4% | 1 to 3 min | Junklands | +Defense (3) |
+| 13 | <img src="showcase/common/cables_deshilachados.png" width="40" alt="cables_deshilachados" /> | **Frayed Cables** (`cables_deshilachados`) | Common | 3.4% | 1 to 3 min | Junklands | +Speed (2) |
+| 14 | <img src="showcase/common/residuos_carbon.png" width="40" alt="residuos_carbon" /> | **Coal Residue** (`residuos_carbon`) | Common | 3.4% | 1 to 3 min | Junklands | +Vitality (6) & Steam Affinity |
+| 15 | <img src="showcase/uncommon/transistores.png" width="40" alt="transistores" /> | **Transistors** (`transistores`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Attack (3) |
+| 16 | <img src="showcase/uncommon/bombillas_filamento.png" width="40" alt="bombillas_filamento" /> | **Filament Bulbs** (`bombillas_filamento`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Vitality (12) & Luminous Affinity |
+| 17 | <img src="showcase/uncommon/resortes_reloj.png" width="40" alt="resortes_reloj" /> | **Clock Springs** (`resortes_reloj`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Speed (4) |
+| 18 | <img src="showcase/uncommon/manometros.png" width="40" alt="manometros" /> | **Pressure Gauges** (`manometros`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Vitality (15) |
+| 19 | <img src="showcase/uncommon/valvulas_vapor.png" width="40" alt="valvulas_vapor" /> | **Steam Valves** (`valvulas_vapor`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Attack (2) & Steam Affinity |
+| 20 | <img src="showcase/uncommon/lentes_tv_viejo.png" width="40" alt="lentes_tv_viejo" /> | **Old TV Lenses** (`lentes_tv_viejo`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Speed (3) |
+| 21 | <img src="showcase/uncommon/fusibles_fundidos.png" width="40" alt="fusibles_fundidos" /> | **Blown Fuses** (`fusibles_fundidos`) | Uncommon | 2.6% | 4 to 7 min | Abandoned Factory | +Attack (2) & Galvanic Affinity |
+| 22 | <img src="showcase/uncommon/relojes_bolsillo.png" width="40" alt="relojes_bolsillo" /> | **Broken Pocket Watches** (`relojes_bolsillo`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Speed (3) |
+| 23 | <img src="showcase/uncommon/brujulas_magneticas.png" width="40" alt="brujulas_magneticas" /> | **Magnetic Compasses** (`brujulas_magneticas`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Speed (3) & Mechanical Affinity |
+| 24 | <img src="showcase/uncommon/tubos_vacio.png" width="40" alt="tubos_vacio" /> | **Vacuum Tubes** (`tubos_vacio`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Attack (3) & Luminous Affinity |
+| 25 | <img src="showcase/uncommon/palancas_interruptor.png" width="40" alt="palancas_interruptor" /> | **Switch Levers** (`palancas_interruptor`) | Uncommon | 2.45% | 4 to 7 min | Abandoned Factory | +Defense (2) |
+| 26 | <img src="showcase/rare/motor_vapor.png" width="40" alt="motor_vapor" /> | **Steam Engine** (`motor_vapor`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Attack (5) & Steam Affinity |
+| 27 | <img src="showcase/rare/bobinas_tesla.png" width="40" alt="bobinas_tesla" /> | **Tesla Coils** (`bobinas_tesla`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Attack (6) & Galvanic Affinity |
+| 28 | <img src="showcase/rare/antenas_radio.png" width="40" alt="antenas_radio" /> | **Radio Antennas** (`antenas_radio`) | Rare | 1.5% | 10 to 15 min | Radio Tower | +Speed (6) |
+| 29 | <img src="showcase/rare/diodos_led.png" width="40" alt="diodos_led" /> | **LED Diodes** (`diodos_led`) | Rare | 1.5% | 10 to 15 min | Radio Tower | +Attack (4) & Luminous Affinity |
+| 30 | <img src="showcase/rare/baterias_alquimicas.png" width="40" alt="baterias_alquimicas" /> | **Alchemical Batteries** (`baterias_alquimicas`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Vitality (25) & Galvanic Affinity |
+| 31 | <img src="showcase/rare/engranajes_bronce.png" width="40" alt="engranajes_bronce" /> | **Perfect Bronze Gears** (`engranajes_bronce`) | Rare | 1.5% | 10 to 15 min | Mining Reserve | +Defense (6) & Mechanical Affinity |
+| 32 | <img src="showcase/rare/dinamo_galvanica.png" width="40" alt="dinamo_galvanica" /> | **Galvanic Dynamo** (`dinamo_galvanica`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Attack (5) & Galvanic Affinity |
+| 33 | <img src="showcase/rare/cristal_fuerza.png" width="40" alt="cristal_fuerza" /> | **Resonating Quartz Crystal** (`cristal_fuerza`) | Rare | 1.5% | 10 to 15 min | Radio Tower | +Speed (5) & Luminous Affinity |
+| 34 | <img src="showcase/rare/giroscopio_precision.png" width="40" alt="giroscopio_precision" /> | **Precision Gyroscope** (`giroscopio_precision`) | Rare | 1.5% | 10 to 15 min | Mining Reserve | +Defense (5) & Mechanical Affinity |
+| 35 | <img src="showcase/rare/condensador_presion.png" width="40" alt="condensador_presion" /> | **High-Pressure Condenser** (`condensador_presion`) | Rare | 1.5% | 10 to 15 min | Electrical Substation | +Vitality (20) & Steam Affinity |
+| 36 | <img src="showcase/epic/nucleo_mana.png" width="40" alt="nucleo_mana" /> | **Condensed Mana Core** (`nucleo_mana`) | Epic | 0.8% | 20 to 30 min | Mining Reserve | +Attack (8) & Aether Affinity |
+| 37 | <img src="showcase/epic/cerebro_automata.png" width="40" alt="cerebro_automata" /> | **Automaton Brain** (`cerebro_automata`) | Epic | 0.8% | 20 to 30 min | Mining Reserve | +Attack (8) & Mechanical Affinity |
+| 38 | <img src="showcase/epic/reactor_eter.png" width="40" alt="reactor_eter" /> | **Aether Reactor** (`reactor_eter`) | Epic | 0.8% | 20 to 30 min | Smelting Boilers (PK) | +Attack (9) & Aether Affinity |
+| 39 | <img src="showcase/epic/corazon_caldera.png" width="40" alt="corazon_caldera" /> | **Boiler Heart** (`corazon_caldera`) | Epic | 0.8% | 20 to 30 min | Smelting Boilers (PK) | +Defense (8) & Steam Affinity |
+| 40 | <img src="showcase/epic/bateria_plasma.png" width="40" alt="bateria_plasma" /> | **Supercharged Plasma Battery** (`bateria_plasma`) | Epic | 0.8% | 20 to 30 min | Electrical Substation | +Attack (8) & Galvanic Affinity |
+| 41 | <img src="showcase/epic/matriz_optica_solar.png" width="40" alt="matriz_optica_solar" /> | **Solar Optical Array** (`matriz_optica_solar`) | Epic | 0.8% | 20 to 30 min | Radio Tower | +Speed (7) & Luminous Affinity |
+| 42 | <img src="showcase/epic/embolo_titanio.png" width="40" alt="embolo_titanio" /> | **Forged Titanium Piston** (`embolo_titanio`) | Epic | 0.8% | 20 to 30 min | Smelting Boilers (PK) | +Defense (7) & Steam Affinity |
+| 43 | <img src="showcase/legendary/ojo_dragon.png" width="40" alt="ojo_dragon" /> | **Mechanical Dragon Eye** (`ojo_dragon`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Attack (14) & Aether Affinity |
+| 44 | <img src="showcase/legendary/corazon_primigenio.png" width="40" alt="corazon_primigenio" /> | **Primordial Golem Heart** (`corazon_primigenio`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +All Stats |
+| 45 | <img src="showcase/legendary/singularidad_eterica.png" width="40" alt="singularidad_eterica" /> | **Aetheric Singularity** (`singularidad_eterica`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Attack (12), +Speed (6) & Aether Affinity |
+| 46 | <img src="showcase/legendary/relicario_astral.png" width="40" alt="relicario_astral" /> | **Celestial Gear Reliquary** (`relicario_astral`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Defense (10), +Vitality (30) & Aether Affinity |
 
 ---
 

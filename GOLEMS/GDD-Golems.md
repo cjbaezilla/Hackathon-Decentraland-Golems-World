@@ -78,54 +78,54 @@ El HUD incluye un widget de **Minimapa 2D** en la interfaz React-ECS que proyect
 
 El catálogo completo se compone de **cuarenta y seis (46) tipos de materiales coleccionables**, distribuidos en 5 niveles de rareza, todos diseñados como piezas de chatarra, mecatrónica y utensilios de un mundo post-industrial. Los porcentajes de aparición están calibrados para sumar exactamente el **100%**:
 
-| Material | Rareza | Peso | Reaparición | Zona | Aporte principal |
-|---|---|---|---|---|---|
-| Alambre de cobre | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Velocidad +2 |
-| Tornillos y pernos | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +2 |
-| Engranajes desgastados | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Velocidad +1, Defensa +1 |
-| Tubos de cobre | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Vitalidad +10 |
-| Sartenes | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +3 |
-| Ollas de cocinar | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +2, Vitalidad +5 |
-| Placas de latón | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +3 |
-| Clavos oxidados | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +1 |
-| Latas de conserva | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Vitalidad +8 |
-| Cadenas de hierro | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Defensa +2 |
-| Tuercas gigantes | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Defensa +2 |
-| Tapas de alcantarilla | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Defensa +3 |
-| Cables deshilachados | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Velocidad +2 |
-| Residuos de carbón | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Vitalidad +6, Afinidad Vapor |
-| Transistores | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Ataque +3 |
-| Bombillas de filamento | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Vitalidad +12, Afinidad Luminosa |
-| Resortes de reloj | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +4 |
-| Manómetros | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Vitalidad +15 |
-| Válvulas de vapor | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Ataque +2, Afinidad Vapor |
-| Lentes de televisor viejo | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +3 |
-| Fusibles fundidos | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Ataque +2, Afinidad Galvánica |
-| Relojes de bolsillo rotos | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +3 |
-| Brújulas magnéticas | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +3, Afinidad Mecánica |
-| Tubos de vacío | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Ataque +3, Afinidad Luminosa |
-| Palancas de interruptor | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Defensa +2 |
-| Motor de vapor | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Ataque +5, Afinidad Vapor |
-| Bobinas de Tesla | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Ataque +6, Afinidad Galvánica |
-| Antenas de radio | Raro | 1.5% | 10 a 15 minutos | Torre de Radio | Velocidad +6 |
-| Diodos LED | Raro | 1.5% | 10 a 15 minutos | Torre de Radio | Ataque +4, Afinidad Luminosa |
-| Baterías alquímicas | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Vitalidad +25, Afinidad Galvánica |
-| Engranajes de bronce perfectos | Raro | 1.5% | 10 a 15 minutos | Reserva de Minería | Defensa +6, Afinidad Mecánica |
-| Dínamo galvánica | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Ataque +5, Afinidad Galvánica |
-| Cristal de cuarzo resonante | Raro | 1.5% | 10 a 15 minutos | Torre de Radio | Velocidad +5, Afinidad Luminosa |
-| Giróscopo de precisión | Raro | 1.5% | 10 a 15 minutos | Reserva de Minería | Defensa +5, Afinidad Mecánica |
-| Condensador de alta presión | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Vitalidad +20, Afinidad Vapor |
-| Núcleo de maná condensado | Épico | 0.8% | 20 a 30 minutos | Reserva de Minería | Ataque +8, Afinidad Éter |
-| Cerebro de autómata | Épico | 0.8% | 20 a 30 minutos | Reserva de Minería | Ataque +8, Afinidad Mecánica |
-| Reactor de éter | Épico | 0.8% | 20 a 30 minutos | Calderas de la Fundición (PK) | Ataque +9, Afinidad Éter |
-| Corazón de caldera | Épico | 0.8% | 20 a 30 minutos | Calderas de la Fundición (PK) | Defensa +8, Afinidad Vapor |
-| Batería de plasma supercargada | Épico | 0.8% | 20 a 30 minutos | Subestación Eléctrica | Ataque +8, Afinidad Galvánica |
-| Matriz óptica solar | Épico | 0.8% | 20 a 30 minutos | Torre de Radio | Velocidad +7, Afinidad Luminosa |
-| Émbolo de titanio forjado | Épico | 0.8% | 20 a 30 minutos | Calderas de la Fundición (PK) | Defensa +7, Afinidad Vapor |
-| Ojo de dragón mecánico | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Ataque +14, Afinidad Éter |
-| Corazón de golem primigenio | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Todas las estadísticas |
-| Singularidad etérica | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Ataque +12, Velocidad +6, Afinidad Éter |
-| Relicario de engranajes astrales | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Defensa +10, Vitalidad +30, Afinidad Éter |
+| Icono | Material | Rareza | Peso | Reaparición | Zona | Aporte principal |
+| :-: | :--- | :--- | :--- | :--- | :--- | :--- |
+| <img src="../showcase/common/alambre_cobre.png" width="40" alt="Alambre de cobre" /> | Alambre de cobre | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Velocidad +2 |
+| <img src="../showcase/common/tornillos_pernos.png" width="40" alt="Tornillos y pernos" /> | Tornillos y pernos | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +2 |
+| <img src="../showcase/common/engranajes_desgastados.png" width="40" alt="Engranajes desgastados" /> | Engranajes desgastados | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Velocidad +1, Defensa +1 |
+| <img src="../showcase/common/tubos_cobre.png" width="40" alt="Tubos de cobre" /> | Tubos de cobre | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Vitalidad +10 |
+| <img src="../showcase/common/sartenes.png" width="40" alt="Sartenes" /> | Sartenes | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +3 |
+| <img src="../showcase/common/ollas_cocinar.png" width="40" alt="Ollas de cocinar" /> | Ollas de cocinar | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +2, Vitalidad +5 |
+| <img src="../showcase/common/placas_laton.png" width="40" alt="Placas de latón" /> | Placas de latón | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +3 |
+| <img src="../showcase/common/clavos_oxidados.png" width="40" alt="Clavos oxidados" /> | Clavos oxidados | Común | 3.7% | 1 a 3 minutos | Los Chatarrales | Defensa +1 |
+| <img src="../showcase/common/latas_conserva.png" width="40" alt="Latas de conserva" /> | Latas de conserva | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Vitalidad +8 |
+| <img src="../showcase/common/cadenas_hierro.png" width="40" alt="Cadenas de hierro" /> | Cadenas de hierro | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Defensa +2 |
+| <img src="../showcase/common/tuercas_gigantes.png" width="40" alt="Tuercas gigantes" /> | Tuercas gigantes | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Defensa +2 |
+| <img src="../showcase/common/tapas_alcantarilla.png" width="40" alt="Tapas de alcantarilla" /> | Tapas de alcantarilla | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Defensa +3 |
+| <img src="../showcase/common/cables_deshilachados.png" width="40" alt="Cables deshilachados" /> | Cables deshilachados | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Velocidad +2 |
+| <img src="../showcase/common/residuos_carbon.png" width="40" alt="Residuos de carbón" /> | Residuos de carbón | Común | 3.4% | 1 a 3 minutos | Los Chatarrales | Vitalidad +6, Afinidad Vapor |
+| <img src="../showcase/uncommon/transistores.png" width="40" alt="Transistores" /> | Transistores | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Ataque +3 |
+| <img src="../showcase/uncommon/bombillas_filamento.png" width="40" alt="Bombillas de filamento" /> | Bombillas de filamento | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Vitalidad +12, Afinidad Luminosa |
+| <img src="../showcase/uncommon/resortes_reloj.png" width="40" alt="Resortes de reloj" /> | Resortes de reloj | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +4 |
+| <img src="../showcase/uncommon/manometros.png" width="40" alt="Manómetros" /> | Manómetros | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Vitalidad +15 |
+| <img src="../showcase/uncommon/valvulas_vapor.png" width="40" alt="Válvulas de vapor" /> | Válvulas de vapor | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Ataque +2, Afinidad Vapor |
+| <img src="../showcase/uncommon/lentes_tv_viejo.png" width="40" alt="Lentes de televisor viejo" /> | Lentes de televisor viejo | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +3 |
+| <img src="../showcase/uncommon/fusibles_fundidos.png" width="40" alt="Fusibles fundidos" /> | Fusibles fundidos | Poco común | 2.6% | 4 a 7 minutos | Fábrica Abandonada | Ataque +2, Afinidad Galvánica |
+| <img src="../showcase/uncommon/relojes_bolsillo.png" width="40" alt="Relojes de bolsillo rotos" /> | Relojes de bolsillo rotos | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +3 |
+| <img src="../showcase/uncommon/brujulas_magneticas.png" width="40" alt="Brújulas magnéticas" /> | Brújulas magnéticas | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Velocidad +3, Afinidad Mecánica |
+| <img src="../showcase/uncommon/tubos_vacio.png" width="40" alt="Tubos de vacío" /> | Tubos de vacío | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Ataque +3, Afinidad Luminosa |
+| <img src="../showcase/uncommon/palancas_interruptor.png" width="40" alt="Palancas de interruptor" /> | Palancas de interruptor | Poco común | 2.45% | 4 a 7 minutos | Fábrica Abandonada | Defensa +2 |
+| <img src="../showcase/rare/motor_vapor.png" width="40" alt="Motor de vapor" /> | Motor de vapor | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Ataque +5, Afinidad Vapor |
+| <img src="../showcase/rare/bobinas_tesla.png" width="40" alt="Bobinas de Tesla" /> | Bobinas de Tesla | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Ataque +6, Afinidad Galvánica |
+| <img src="../showcase/rare/antenas_radio.png" width="40" alt="Antenas de radio" /> | Antenas de radio | Raro | 1.5% | 10 a 15 minutos | Torre de Radio | Velocidad +6 |
+| <img src="../showcase/rare/diodos_led.png" width="40" alt="Diodos LED" /> | Diodos LED | Raro | 1.5% | 10 a 15 minutos | Torre de Radio | Ataque +4, Afinidad Luminosa |
+| <img src="../showcase/rare/baterias_alquimicas.png" width="40" alt="Baterías alquímicas" /> | Baterías alquímicas | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Vitalidad +25, Afinidad Galvánica |
+| <img src="../showcase/rare/engranajes_bronce.png" width="40" alt="Engranajes de bronce perfectos" /> | Engranajes de bronce perfectos | Raro | 1.5% | 10 a 15 minutos | Reserva de Minería | Defensa +6, Afinidad Mecánica |
+| <img src="../showcase/rare/dinamo_galvanica.png" width="40" alt="Dínamo galvánica" /> | Dínamo galvánica | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Ataque +5, Afinidad Galvánica |
+| <img src="../showcase/rare/cristal_fuerza.png" width="40" alt="Cristal de cuarzo resonante" /> | Cristal de cuarzo resonante | Raro | 1.5% | 10 a 15 minutos | Torre de Radio | Velocidad +5, Afinidad Luminosa |
+| <img src="../showcase/rare/giroscopio_precision.png" width="40" alt="Giróscopo de precisión" /> | Giróscopo de precisión | Raro | 1.5% | 10 a 15 minutos | Reserva de Minería | Defensa +5, Afinidad Mecánica |
+| <img src="../showcase/rare/condensador_presion.png" width="40" alt="Condensador de alta presión" /> | Condensador de alta presión | Raro | 1.5% | 10 a 15 minutos | Subestación Eléctrica | Vitalidad +20, Afinidad Vapor |
+| <img src="../showcase/epic/nucleo_mana.png" width="40" alt="Núcleo de maná condensado" /> | Núcleo de maná condensado | Épico | 0.8% | 20 a 30 minutos | Reserva de Minería | Ataque +8, Afinidad Éter |
+| <img src="../showcase/epic/cerebro_automata.png" width="40" alt="Cerebro de autómata" /> | Cerebro de autómata | Épico | 0.8% | 20 a 30 minutos | Reserva de Minería | Ataque +8, Afinidad Mecánica |
+| <img src="../showcase/epic/reactor_eter.png" width="40" alt="Reactor de éter" /> | Reactor de éter | Épico | 0.8% | 20 a 30 minutos | Calderas de la Fundición (PK) | Ataque +9, Afinidad Éter |
+| <img src="../showcase/epic/corazon_caldera.png" width="40" alt="Corazón de caldera" /> | Corazón de caldera | Épico | 0.8% | 20 a 30 minutos | Calderas de la Fundición (PK) | Defensa +8, Afinidad Vapor |
+| <img src="../showcase/epic/bateria_plasma.png" width="40" alt="Batería de plasma supercargada" /> | Batería de plasma supercargada | Épico | 0.8% | 20 a 30 minutos | Subestación Eléctrica | Ataque +8, Afinidad Galvánica |
+| <img src="../showcase/epic/matriz_optica_solar.png" width="40" alt="Matriz óptica solar" /> | Matriz óptica solar | Épico | 0.8% | 20 a 30 minutos | Torre de Radio | Velocidad +7, Afinidad Luminosa |
+| <img src="../showcase/epic/embolo_titanio.png" width="40" alt="Émbolo de titanio forjado" /> | Émbolo de titanio forjado | Épico | 0.8% | 20 a 30 minutos | Calderas de la Fundición (PK) | Defensa +7, Afinidad Vapor |
+| <img src="../showcase/legendary/ojo_dragon.png" width="40" alt="Ojo de dragón mecánico" /> | Ojo de dragón mecánico | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Ataque +14, Afinidad Éter |
+| <img src="../showcase/legendary/corazon_primigenio.png" width="40" alt="Corazón de golem primigenio" /> | Corazón de golem primigenio | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Todas las estadísticas |
+| <img src="../showcase/legendary/singularidad_eterica.png" width="40" alt="Singularidad etérica" /> | Singularidad etérica | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Ataque +12, Velocidad +6, Afinidad Éter |
+| <img src="../showcase/legendary/relicario_astral.png" width="40" alt="Relicario de engranajes astrales" /> | Relicario de engranajes astrales | Legendario | 0.35% | 45 a 60 minutos | Desierto de Chatarra (PK) | Defensa +10, Vitalidad +30, Afinidad Éter |
 
 Los materiales épicos y legendarios respetan un límite de **una sola instancia activa a la vez** en todo el mapa.
 

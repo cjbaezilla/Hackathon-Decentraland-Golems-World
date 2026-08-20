@@ -17,14 +17,20 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
    - [3.2 Manual de Uso CLI](#32-manual-de-uso-cli)
    - [3.3 Catálogo Maestro de los 25 Modelos de Golems](#33-catálogo-maestro-de-los-25-modelos-de-golems)
 4. [`generate_items.js`: Generador Procedural Binario de Ítems Coleccionables (46 Ítems)](#4-generate_itemsjs-generador-procedural-binario-de-ítems-coleccionables-46-ítems)
-   - [4.1 Arquitectura y Paleta por Rareza](#41-arquitectura-y-paleta-por-rareza)
-   - [4.2 Manual de Uso y Ejecución](#42-manual-de-uso-y-ejecución)
-   - [4.3 Catálogo Maestro de los 46 Ítems](#43-catálogo-maestro-de-los-46-ítems)
+   - [4.1 Arquitectura, Paleta por Rareza y Política de Color (v3)](#41-arquitectura-paleta-por-rareza-y-política-de-color-v3)
+   - [4.2 Kit de Primitivas y Recetas Reconocibles (v3)](#42-kit-de-primitivas-y-recetas-reconocibles-v3)
+   - [4.3 Manual de Uso y Ejecución](#43-manual-de-uso-y-ejecución)
+   - [4.4 Catálogo Maestro de los 46 Ítems](#44-catálogo-maestro-de-los-46-ítems)
 5. [`generate_item_htmls.js`: Generador de Fichas HTML Estáticas Bilingües y Showcase (46 Fichas)](#5-generate_item_htmlsjs-generador-de-fichas-html-estáticas-bilingües-y-showcase-46-fichas)
    - [5.1 Propósito y Características Principales](#51-propósito-y-características-principales)
    - [5.2 Estructura en `showcase/` e i18n](#52-estructura-en-showcase-e-i18n)
    - [5.3 Manual de Uso y Servidor Local PHP](#53-manual-de-uso-y-servidor-local-php)
-6. [Integración en Decentraland SDK7 (`GltfContainer`)](#6-integración-en-decentraland-sdk7-gltfcontainer)
+6. [`generate_item_pngs.js`: Generador de Renders PNG por Rareza para Ítems (46 Imágenes)](#6-generate_item_pngsjs-generador-de-renders-png-por-rareza-para-ítems-46-imágenes)
+   - [6.1 Propósito y Arquitectura Técnica](#61-propósito-y-arquitectura-técnica)
+   - [6.2 Paletas de Color y Gradientes por Rareza](#62-paletas-de-color-y-gradientes-por-rareza)
+   - [6.3 Estructura de Salida en `showcase/`](#63-estructura-de-salida-en-showcase)
+   - [6.4 Manual de Uso y Ejecución CLI](#64-manual-de-uso-y-ejecución-cli)
+7. [Integración en Decentraland SDK7 (`GltfContainer`)](#7-integración-en-decentraland-sdk7-gltfcontainer)
 
 ---
 
@@ -36,6 +42,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera proceduralmente los 25 modelos binarios `.glb` PBR con canales emisivos para los **5 tipos de Golems**. | `assets/models/<tipo>/` |
 | [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) | Genera proceduralmente los 46 modelos binarios `.glb` PBR organizados por rareza para los **materiales coleccionables**. | `assets/items/<rareza>/` |
 | [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) | Genera las 46 fichas HTML estáticas bilingües (EN/ES) con visor 3D, navegación secuencial y botón de copiado de fotogramas a PNG. | `showcase/<rareza>/` y `showcase/index.html` |
+| [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 46 ítems 3D con fondo temático y resplandor según su rareza. | `showcase/<rareza>/<item_id>.png` |
 
 ---
 
@@ -186,26 +193,45 @@ assets/models/
 
 ## 4. `generate_items.js`: Generador Procedural Binario de Ítems Coleccionables (46 Ítems)
 
-### 4.1 Arquitectura y Paleta por Rareza
+### 4.1 Arquitectura, Paleta por Rareza y Política de Color (v3)
 El script [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) construye los 46 modelos binarios `.glb` autocompresos para los materiales coleccionables del juego descritos en el GDD.
 
-Aplica propiedades PBR y matices emisivos diferenciados según el nivel de rareza:
+**Fuente única de color**: los valores de clase provienen de `src/config/items.ts` → `RARITY_COLOR_MAP` (constante `RARITY_CLASS_COLORS` en el script). Cada modelo usa **3 materiales PBR**:
 
-- 🟩 **Común** (`assets/items/common/` - 14 ítems): Base metálica/latón mate (`#A0A0A0`).
-- 🟩 **Poco Común** (`assets/items/uncommon/` - 11 ítems): Resplandor Verde Neón incandescente (`#00FF44`).
-- 🟦 **Raro** (`assets/items/rare/` - 10 ítems): Destellos Azul Galvánico / Eléctrico (`#00D4FF`).
-- 🟪 **Épico** (`assets/items/epic/` - 7 ítems): Brillo Violeta Éter resplandeciente (`#C038FF`).
-- 🟧 **Legendario** (`assets/items/legendary/` - 4 ítems): Aura Dorado Incandescente (`#FFAA00`).
+| Material | Descripción |
+| :--- | :--- |
+| `matBody` | Cuerpo dominante con el **color exacto de su clase** (metallic 0.8, roughness 0.42, sin emisivo). |
+| `matDetail` | Detalle estructural con el **mismo tono oscurecido ×0.45** (metallic 0.9, roughness 0.55). |
+| `matGlow` | Acento emisivo del color de clase (metallic 0.15, roughness 0.25). |
 
-### 4.2 Manual de Uso y Ejecución
+**Política de emisivo (glow)** — solo las rarezas altas emiten luz para optimizar el rendimiento móvil y acentuar la progresión:
+
+- 🟩 **Común** (`assets/items/common/` - 14 ítems): Gris Metálico `#A0A0A0` — **sin glow**.
+- 🟩 **Poco Común** (`assets/items/uncommon/` - 11 ítems): Verde Neón `#00FF44` — **sin glow**.
+- 🟦 **Raro** (`assets/items/rare/` - 10 ítems): Azul Galvánico `#00D4FF` — **glow**.
+- 🟪 **Épico** (`assets/items/epic/` - 7 ítems): Violeta Éter `#C038FF` — **glow**.
+- 🟧 **Legendario** (`assets/items/legendary/` - 4 ítems): Dorado Incandescente `#FFAA00` — **glow**.
+
+### 4.2 Kit de Primitivas y Recetas Reconocibles (v3)
+
+La revisión v3 sustituyó el antiguo kit de 3 primitivas (caja, cilindro sin tapas, octaedro) por un conjunto más rico **sin incrementar el presupuesto de polígonos** (cada ítem queda entre ~40 y ~1500 triángulos):
+
+- **Cilindro/tronco de cono con tapas y normales suavizadas** (corrige los antiguos tubos abiertos que dejaban ver a través).
+- **Cono**, **esfera UV low-poly**, **toro** (anillo/eslabón, con eje configurable `x`/`y`/`z`) y **octaedro**.
+- **Extrusión de polígono 2D** (base de engranajes, tuercas hexagonales y placas).
+- **Engranaje dentado real** (`createGearMesh`) y **prisma hexagonal** (`createHexPrismMesh`).
+
+Cada ítem tiene una **silueta única y reconocible** (sartén con mango, tapa de alcantarilla con nervaduras en X, cadena de eslabones toroidales, manómetro con aguja, bobina Tesla con toroide, giroscopio de 3 anillos, cristal bipiramidal, etc.), eliminando las familias de modelos repetidos de la versión anterior.
+
+### 4.3 Manual de Uso y Ejecución
 
 ```bash
 node scripts/generate_items.js
 ```
 
-El script genera automáticamente las 5 subcarpetas por rareza en `assets/items/` y guarda los 46 modelos en disco.
+El script genera automáticamente las 5 subcarpetas por rareza en `assets/items/` y guarda los 46 modelos en disco. Todos los `.glb` resultantes cumplen glTF 2.0 binario estricto (cabecera `0x46546C67`, chunks JSON/BIN alineados a 4 bytes) y son autocontenidos sin dependencias externas.
 
-### 4.3 Catálogo Maestro de los 46 Ítems
+### 4.4 Catálogo Maestro de los 46 Ítems
 
 ```text
 assets/items/
@@ -257,7 +283,50 @@ Acceso en el navegador:
 
 ---
 
-## 6. Integración en Decentraland SDK7 (`GltfContainer`)
+## 6. `generate_item_pngs.js`: Generador de Renders PNG por Rareza para Ítems (46 Imágenes)
+
+### 6.1 Propósito y Arquitectura Técnica
+El script [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) automatiza la generación de imágenes en formato **PNG a alta resolución (1024×1024 píxeles efectivos)** para los 46 materiales coleccionables del juego (`assets/items/<rareza>/*.glb`).
+
+Características y flujo técnico:
+- 📡 **Servidor HTTP Local Efímero**: Inicia de forma autónoma un servidor local en el puerto `8989` para servir los archivos `.glb` de forma transparente.
+- 🌐 **Puppeteer + Aceleración WebGL**: Lanza Microsoft Edge / Chromium en modo *headless* con soporte WebGL nativo activado.
+- 📷 **Renderizado 3D Preciso**: Utiliza el componente `<model-viewer>` con encuadre automático ajustado (`bounds="tight"`), sombras de contacto suaves (`shadow-intensity="1.6"`) e iluminación adaptativa.
+- 🎨 **Ambiente por Rareza**: Aplica un fondo con gradiente radial y un anillo de resplandor neón derivado del color característico de la rareza del ítem.
+
+### 6.2 Paletas de Color y Gradientes por Rareza
+
+| Rareza | Tono Base de Fondo (Gradiente Radial) | Resplandor Neón (Glow) | Hex de Acento |
+| :--- | :--- | :--- | :--- |
+| **Común (`common`)** | Pizarra metálica industrial (`#2e3440` ➔ `#0f1115`) | Gris acero (`rgba(160,160,160,0.35)`) | `#A0A0A0` |
+| **Poco Común (`uncommon`)** | Verde esmeralda oscuro (`#1b3a27` ➔ `#07120c`) | Verde neón (`rgba(0,255,68,0.4)`) | `#00FF44` |
+| **Raro (`rare`)** | Azul zafiro profundo (`#13344b` ➔ `#050e15`) | Cian eléctrico (`rgba(0,212,255,0.4)`) | `#00D4FF` |
+| **Épico (`epic`)** | Púrpura amatista nocturno (`#351c4e` ➔ `#0e0716`) | Violeta místico (`rgba(192,56,255,0.4)`) | `#C038FF` |
+| **Legendario (`legendary`)** | Bronce y oro imperial (`#4a3515` ➔ `#140d04`) | Dorado radiante (`rgba(255,170,0,0.5)`) | `#FFAA00` |
+
+### 6.3 Estructura de Salida en `showcase/`
+
+Las imágenes PNG se almacenan de forma organizada en las subcarpetas por rareza dentro de `showcase/`:
+
+```text
+showcase/
+├── common/       # 14 imágenes (alambre_cobre.png, cadenas_hierro.png, etc.)
+├── uncommon/     # 11 imágenes (transistores.png, valvulas_vapor.png, etc.)
+├── rare/         # 10 imágenes (motor_vapor.png, bobinas_tesla.png, etc.)
+├── epic/         #  7 imágenes (nucleo_mana.png, reactor_eter.png, etc.)
+└── legendary/    #  4 imágenes (corazon_primigenio.png, ojo_dragon.png, etc.)
+```
+
+### 6.4 Manual de Uso y Ejecución CLI
+
+```bash
+# Generar o actualizar las 46 imágenes PNG en showcase/
+node scripts/generate_item_pngs.js
+```
+
+---
+
+## 7. Integración en Decentraland SDK7 (`GltfContainer`)
 
 Cualquier modelo descargado o generado puede instanciarse directamente mediante el componente `GltfContainer`:
 

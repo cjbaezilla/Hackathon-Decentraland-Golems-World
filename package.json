@@ -11,7 +11,8 @@
   },
   "devDependencies": {
     "@dcl/js-runtime": "7.26.0",
-    "@dcl/sdk": "latest"
+    "@dcl/sdk": "latest",
+    "puppeteer-core": "^25.8.0"
   },
   "engines": {
     "node": ">=16.0.0",

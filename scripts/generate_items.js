@@ -15,18 +15,59 @@ const path = require('path')
  *   - assets/items/epic/       (7 ítems)
  *   - assets/items/legendary/  (4 ítems)
  *
- * Aplica colores PBR y canales emisivos característicos por rareza:
- *   - Común: Gris Metálico / Latón Industrial (#A0A0A0)
- *   - Poco Común: Verde Neón (#00FF44)
- *   - Raro: Azul Galvánico / Eléctrico (#00D4FF)
- *   - Épico: Violeta Éter (#C038FF)
- *   - Legendario: Dorado Incandescente (#FFAA00)
+ * FUENTE ÚNICA DE COLOR: los valores de clase provienen de
+ * `src/config/items.ts` -> `RARITY_COLOR_MAP`:
+ *   - Común:      #A0A0A0 (Gris Metálico)
+ *   - Poco Común: #00FF44 (Verde Neón)
+ *   - Raro:       #00D4FF (Azul Galvánico)
+ *   - Épico:      #C038FF (Violeta Éter)
+ *   - Legendario: #FFAA00 (Dorado Incandescente)
+ *
+ * POLÍTICA DE COLOR:
+ *   - El cuerpo dominante usa el color EXACTO de su clase (metálico).
+ *   - Un segundo material de detalle usa el mismo tono oscurecido.
+ *   - El brillo emisivo (glow) solo se activa en RARO / ÉPICO / LEGENDARIO.
+ * ============================================================================
  */
+
+// ---------------------------------------------------------------------------
+// Utilidades de color (fuente única sincronizada con src/config/items.ts)
+// ---------------------------------------------------------------------------
+
+const RARITY_CLASS_COLORS = {
+  common: '#A0A0A0',
+  uncommon: '#00FF44',
+  rare: '#00D4FF',
+  epic: '#C038FF',
+  legendary: '#FFAA00'
+}
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '')
+  return [
+    parseInt(h.slice(0, 2), 16) / 255,
+    parseInt(h.slice(2, 4), 16) / 255,
+    parseInt(h.slice(4, 6), 16) / 255
+  ]
+}
+
+// Raro+ emiten luz; común y poco común no (optimización móvil + contraste).
+const RARITY_HAS_GLOW = {
+  common: false,
+  uncommon: false,
+  rare: true,
+  epic: true,
+  legendary: true
+}
+
+// ---------------------------------------------------------------------------
+// Constructor GLB (glTF 2.0 binario puro)
+// ---------------------------------------------------------------------------
 
 class GlbBuilder {
   constructor() {
     this.json = {
-      asset: { version: '2.0', generator: 'GolemsItemsProceduralGlbGenerator_v2' },
+      asset: { version: '2.0', generator: 'GolemsItemsProceduralGlbGenerator_v3' },
       scenes: [{ nodes: [0] }],
       scene: 0,
       nodes: [{ name: 'Root', children: [] }],
@@ -76,11 +117,20 @@ class GlbBuilder {
         roughnessFactor: roughness,
         metallicFactor: metallic
       },
-      emissiveFactor: emissive
+      emissiveFactor: emissive,
+      doubleSided: true
     })
     return matIndex
   }
 
+  // ==== Bases ortonormales por eje ========================================
+  static axisBasis(axis) {
+    if (axis === 'x') return { a: [0, 1, 0], b: [0, 0, 1], c: [1, 0, 0] }
+    if (axis === 'z') return { a: [1, 0, 0], b: [0, 1, 0], c: [0, 0, 1] }
+    return { a: [1, 0, 0], b: [0, 0, 1], c: [0, 1, 0] } // 'y'
+  }
+
+  // ==== Caja ==============================================================
   createBoxMesh(width, height, depth, offsetX = 0, offsetY = 0, offsetZ = 0) {
     const hw = width / 2
     const hh = height / 2
@@ -96,7 +146,7 @@ class GlbBuilder {
       { norm: [0, 1, 0], v: [[-hw, hh, hd], [hw, hh, hd], [hw, hh, -hd], [-hw, hh, -hd]] },
       { norm: [0, -1, 0], v: [[-hw, -hh, -hd], [hw, -hh, -hd], [hw, -hh, hd], [-hw, -hh, hd]] },
       { norm: [1, 0, 0], v: [[hw, -hh, hd], [hw, -hh, -hd], [hw, hh, -hd], [hw, hh, hd]] },
-      { norm: [-1, 0, 0], v: [[-hw, -hh, -hd], [-hw, -hh, hd], [-hw, hh, hd], [-hw, -hh, -hd]] }
+      { norm: [-1, 0, 0], v: [[-hw, -hh, -hd], [-hw, -hh, hd], [-hw, hh, hd], [-hw, hh, -hd]] }
     ]
 
     let vOffset = 0
@@ -112,24 +162,49 @@ class GlbBuilder {
     return { positions, normals, indices }
   }
 
-  createCylinderMesh(radius, height, segments = 12, offsetX = 0, offsetY = 0, offsetZ = 0) {
+  // ==== Cilindro / Tronco de cono (con tapas y normales suavizadas) ========
+  createCylinderMesh(rTop, rBottom, height, segments = 12, offsetX = 0, offsetY = 0, offsetZ = 0, axis = 'y', capTop = true, capBottom = true) {
+    const { a, b, c } = GlbBuilder.axisBasis(axis)
+    const ox = [offsetX, offsetY, offsetZ]
     const hh = height / 2
+    const slope = (rBottom - rTop) / height
+    const invLen = 1 / Math.sqrt(1 + slope * slope)
+    const nnAxial = slope * invLen
+    const nnRadial = invLen
+
     const positions = []
     const normals = []
     const indices = []
 
+    // Pared lateral (anillo superior + inferior, normales radiales suavizadas)
     for (let i = 0; i <= segments; i++) {
       const angle = (i / segments) * Math.PI * 2
-      const x = Math.cos(angle) * radius
-      const z = Math.sin(angle) * radius
-      const nx = Math.cos(angle)
-      const nz = Math.sin(angle)
+      const ca = Math.cos(angle)
+      const sa = Math.sin(angle)
 
-      positions.push(x + offsetX, hh + offsetY, z + offsetZ)
-      normals.push(nx, 0, nz)
+      // vértice superior
+      positions.push(
+        ox[0] + a[0] * rTop * ca + b[0] * rTop * sa + c[0] * hh,
+        ox[1] + a[1] * rTop * ca + b[1] * rTop * sa + c[1] * hh,
+        ox[2] + a[2] * rTop * ca + b[2] * rTop * sa + c[2] * hh
+      )
+      normals.push(
+        a[0] * ca * nnRadial + b[0] * sa * nnRadial + c[0] * nnAxial,
+        a[1] * ca * nnRadial + b[1] * sa * nnRadial + c[1] * nnAxial,
+        a[2] * ca * nnRadial + b[2] * sa * nnRadial + c[2] * nnAxial
+      )
 
-      positions.push(x + offsetX, -hh + offsetY, z + offsetZ)
-      normals.push(nx, 0, nz)
+      // vértice inferior
+      positions.push(
+        ox[0] + a[0] * rBottom * ca + b[0] * rBottom * sa - c[0] * hh,
+        ox[1] + a[1] * rBottom * ca + b[1] * rBottom * sa - c[1] * hh,
+        ox[2] + a[2] * rBottom * ca + b[2] * rBottom * sa - c[2] * hh
+      )
+      normals.push(
+        a[0] * ca * nnRadial + b[0] * sa * nnRadial + c[0] * nnAxial,
+        a[1] * ca * nnRadial + b[1] * sa * nnRadial + c[1] * nnAxial,
+        a[2] * ca * nnRadial + b[2] * sa * nnRadial + c[2] * nnAxial
+      )
     }
 
     for (let i = 0; i < segments; i++) {
@@ -137,25 +212,244 @@ class GlbBuilder {
       const i2 = i * 2 + 1
       const i3 = (i + 1) * 2
       const i4 = (i + 1) * 2 + 1
-
       indices.push(i1, i3, i2)
       indices.push(i2, i3, i4)
+    }
+
+    // Tapas (abanicos triangulares con centro)
+    if (capTop) {
+      const center = positions.length / 3
+      positions.push(ox[0] + c[0] * hh, ox[1] + c[1] * hh, ox[2] + c[2] * hh)
+      normals.push(c[0], c[1], c[2])
+      const ringStart = positions.length / 3
+      for (let i = 0; i <= segments; i++) {
+        const angle = (i / segments) * Math.PI * 2
+        const ca = Math.cos(angle)
+        const sa = Math.sin(angle)
+        positions.push(
+          ox[0] + a[0] * rTop * ca + b[0] * rTop * sa + c[0] * hh,
+          ox[1] + a[1] * rTop * ca + b[1] * rTop * sa + c[1] * hh,
+          ox[2] + a[2] * rTop * ca + b[2] * rTop * sa + c[2] * hh
+        )
+        normals.push(c[0], c[1], c[2])
+      }
+      for (let i = 0; i < segments; i++) {
+        indices.push(center, ringStart + i + 1, ringStart + i)
+      }
+    }
+
+    if (capBottom) {
+      const center = positions.length / 3
+      positions.push(ox[0] - c[0] * hh, ox[1] - c[1] * hh, ox[2] - c[2] * hh)
+      normals.push(-c[0], -c[1], -c[2])
+      const ringStart = positions.length / 3
+      for (let i = 0; i <= segments; i++) {
+        const angle = (i / segments) * Math.PI * 2
+        const ca = Math.cos(angle)
+        const sa = Math.sin(angle)
+        positions.push(
+          ox[0] + a[0] * rBottom * ca + b[0] * rBottom * sa - c[0] * hh,
+          ox[1] + a[1] * rBottom * ca + b[1] * rBottom * sa - c[1] * hh,
+          ox[2] + a[2] * rBottom * ca + b[2] * rBottom * sa - c[2] * hh
+        )
+        normals.push(-c[0], -c[1], -c[2])
+      }
+      for (let i = 0; i < segments; i++) {
+        indices.push(center, ringStart + i, ringStart + i + 1)
+      }
     }
 
     return { positions, normals, indices }
   }
 
+  createConeMesh(radius, height, segments = 12, offsetX = 0, offsetY = 0, offsetZ = 0, axis = 'y') {
+    return this.createCylinderMesh(0, radius, height, segments, offsetX, offsetY, offsetZ, axis, false, true)
+  }
+
+  // ==== Esfera UV (low-poly, normales suavizadas) ==========================
+  createSphereMesh(radius, segLat = 8, segLon = 12, offsetX = 0, offsetY = 0, offsetZ = 0) {
+    const positions = []
+    const normals = []
+    const indices = []
+
+    for (let y = 0; y <= segLat; y++) {
+      const phi = (y / segLat) * Math.PI
+      const sinPhi = Math.sin(phi)
+      const cosPhi = Math.cos(phi)
+      for (let x = 0; x <= segLon; x++) {
+        const theta = (x / segLon) * Math.PI * 2
+        const nx = sinPhi * Math.cos(theta)
+        const ny = cosPhi
+        const nz = sinPhi * Math.sin(theta)
+        positions.push(offsetX + nx * radius, offsetY + ny * radius, offsetZ + nz * radius)
+        normals.push(nx, ny, nz)
+      }
+    }
+
+    for (let y = 0; y < segLat; y++) {
+      for (let x = 0; x < segLon; x++) {
+        const i1 = y * (segLon + 1) + x
+        const i2 = i1 + segLon + 1
+        indices.push(i1, i2, i1 + 1)
+        indices.push(i1 + 1, i2, i2 + 1)
+      }
+    }
+
+    return { positions, normals, indices }
+  }
+
+  // ==== Toro (anillo/eslabón/bobina), eje configurable =====================
+  createTorusMesh(majorRadius, minorRadius, segRing = 16, segTube = 10, offsetX = 0, offsetY = 0, offsetZ = 0, axis = 'y') {
+    const { a, b, c } = GlbBuilder.axisBasis(axis)
+    const ox = [offsetX, offsetY, offsetZ]
+    const positions = []
+    const normals = []
+    const indices = []
+
+    for (let i = 0; i <= segRing; i++) {
+      const u = (i / segRing) * Math.PI * 2
+      const cu = Math.cos(u)
+      const su = Math.sin(u)
+      // dirección radial del anillo
+      const dir = [a[0] * cu + b[0] * su, a[1] * cu + b[1] * su, a[2] * cu + b[2] * su]
+      const center = [ox[0] + dir[0] * majorRadius, ox[1] + dir[1] * majorRadius, ox[2] + dir[2] * majorRadius]
+
+      for (let j = 0; j <= segTube; j++) {
+        const v = (j / segTube) * Math.PI * 2
+        const cv = Math.cos(v)
+        const sv = Math.sin(v)
+        const nx = dir[0] * cv + c[0] * sv
+        const ny = dir[1] * cv + c[1] * sv
+        const nz = dir[2] * cv + c[2] * sv
+        positions.push(center[0] + nx * minorRadius, center[1] + ny * minorRadius, center[2] + nz * minorRadius)
+        normals.push(nx, ny, nz)
+      }
+    }
+
+    for (let i = 0; i < segRing; i++) {
+      for (let j = 0; j < segTube; j++) {
+        const i1 = i * (segTube + 1) + j
+        const i2 = i1 + segTube + 1
+        indices.push(i1, i2, i1 + 1)
+        indices.push(i1 + 1, i2, i2 + 1)
+      }
+    }
+
+    return { positions, normals, indices }
+  }
+
+  // ==== Extrusión de polígono 2D (prismas: engranajes, tuercas, placas) =====
+  extrudePolygon(profile, height, offsetX = 0, offsetY = 0, offsetZ = 0, axis = 'y') {
+    const { a, b, c } = GlbBuilder.axisBasis(axis)
+    const ox = [offsetX, offsetY, offsetZ]
+    const hh = height / 2
+    const n = profile.length
+
+    const positions = []
+    const normals = []
+    const indices = []
+
+    const p3 = (p, sign) => [
+      ox[0] + a[0] * p[0] + b[0] * p[1] + c[0] * sign * hh,
+      ox[1] + a[1] * p[0] + b[1] * p[1] + c[1] * sign * hh,
+      ox[2] + a[2] * p[0] + b[2] * p[1] + c[2] * sign * hh
+    ]
+
+    // Caras laterales (normales planas por arista)
+    for (let i = 0; i < n; i++) {
+      const p1 = profile[i]
+      const p2 = profile[(i + 1) % n]
+      const du = p2[0] - p1[0]
+      const dv = p2[1] - p1[1]
+      const len = Math.sqrt(du * du + dv * dv) || 1
+      const nu = dv / len
+      const nv = -du / len
+      // normal 3D = a*nu + b*nv
+      const nx = a[0] * nu + b[0] * nv
+      const ny = a[1] * nu + b[1] * nv
+      const nz = a[2] * nu + b[2] * nv
+
+      const t1 = p3(p1, 1)
+      const t2 = p3(p2, 1)
+      const b2 = p3(p2, -1)
+      const b1 = p3(p1, -1)
+      const base = positions.length / 3
+      positions.push(...t1, ...t2, ...b2, ...b1)
+      for (let k = 0; k < 4; k++) normals.push(nx, ny, nz)
+      indices.push(base, base + 1, base + 2, base, base + 2, base + 3)
+    }
+
+    // Tapa superior e inferior (abanico)
+    let cx = 0
+    let cy = 0
+    for (const p of profile) {
+      cx += p[0]
+      cy += p[1]
+    }
+    cx /= n
+    cy /= n
+
+    for (const sign of [1, -1]) {
+      const center = positions.length / 3
+      const cc = p3([cx, cy], sign)
+      positions.push(...cc)
+      normals.push(c[0] * sign, c[1] * sign, c[2] * sign)
+      const ringStart = positions.length / 3
+      for (let i = 0; i < n; i++) {
+        const rp = p3(profile[i], sign)
+        positions.push(...rp)
+        normals.push(c[0] * sign, c[1] * sign, c[2] * sign)
+      }
+      for (let i = 0; i < n; i++) {
+        const idx1 = ringStart + i
+        const idx2 = ringStart + ((i + 1) % n)
+        if (sign === 1) indices.push(center, idx2, idx1)
+        else indices.push(center, idx1, idx2)
+      }
+    }
+
+    return { positions, normals, indices }
+  }
+
+  // ==== Engranaje (disco dentado real) =====================================
+  createGearMesh(outerRadius, rootRadius, height, teeth, offsetX = 0, offsetY = 0, offsetZ = 0, axis = 'z') {
+    const profile = []
+    const toothHalf = (Math.PI / teeth) * 0.4
+    for (let t = 0; t < teeth; t++) {
+      const center = (t / teeth) * Math.PI * 2
+      const a0 = center - toothHalf
+      const a1 = center + toothHalf
+      profile.push(
+        [rootRadius * Math.cos(a0), rootRadius * Math.sin(a0)],
+        [outerRadius * Math.cos(a0), outerRadius * Math.sin(a0)],
+        [outerRadius * Math.cos(a1), outerRadius * Math.sin(a1)],
+        [rootRadius * Math.cos(a1), rootRadius * Math.sin(a1)]
+      )
+    }
+    return this.extrudePolygon(profile, height, offsetX, offsetY, offsetZ, axis)
+  }
+
+  // ==== Prisma hexagonal ===================================================
+  createHexPrismMesh(outerRadius, height, offsetX = 0, offsetY = 0, offsetZ = 0, axis = 'y') {
+    const profile = []
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2 + Math.PI / 6
+      profile.push([outerRadius * Math.cos(angle), outerRadius * Math.sin(angle)])
+    }
+    return this.extrudePolygon(profile, height, offsetX, offsetY, offsetZ, axis)
+  }
+
+  // ==== Octaedro (para cristales pequeños / acentos) =======================
   createOctahedronMesh(size, offsetX = 0, offsetY = 0, offsetZ = 0) {
     const hs = size / 2
     const positions = [
-      0 + offsetX, hs + offsetY, 0 + offsetZ,     // 0 Top
-      -hs + offsetX, 0 + offsetY, 0 + offsetZ,    // 1 Left
-      0 + offsetX, 0 + offsetY, hs + offsetZ,     // 2 Front
-      hs + offsetX, 0 + offsetY, 0 + offsetZ,     // 3 Right
-      0 + offsetX, 0 + offsetY, -hs + offsetZ,    // 4 Back
-      0 + offsetX, -hs + offsetY, 0 + offsetZ     // 5 Bottom
+      0 + offsetX, hs + offsetY, 0 + offsetZ,
+      -hs + offsetX, 0 + offsetY, 0 + offsetZ,
+      0 + offsetX, 0 + offsetY, hs + offsetZ,
+      hs + offsetX, 0 + offsetY, 0 + offsetZ,
+      0 + offsetX, 0 + offsetY, -hs + offsetZ,
+      0 + offsetX, -hs + offsetY, 0 + offsetZ
     ]
-
     const normals = [
       0, 1, 0,
       -1, 0, 0,
@@ -164,15 +458,14 @@ class GlbBuilder {
       0, 0, -1,
       0, -1, 0
     ]
-
     const indices = [
-      0, 1, 2,  0, 2, 3,  0, 3, 4,  0, 4, 1,
-      5, 2, 1,  5, 3, 2,  5, 4, 3,  5, 1, 4
+      0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1,
+      5, 2, 1, 5, 3, 2, 5, 4, 3, 5, 1, 4
     ]
-
     return { positions, normals, indices }
   }
 
+  // ==== Combinar geometrías ================================================
   combineGeometries(geomList) {
     const positions = []
     const normals = []
@@ -180,7 +473,7 @@ class GlbBuilder {
     let vertexCount = 0
 
     for (const g of geomList) {
-      if (!g || !g.positions) continue
+      if (!g || !g.positions || g.positions.length === 0) continue
       positions.push(...g.positions)
       normals.push(...g.normals)
       for (const idx of g.indices) {
@@ -319,609 +612,642 @@ class GlbBuilder {
 }
 
 // ============================================================================
-// PALETA DE COLORES Y PROPIEDADES PBR POR RAREZA
-// ============================================================================
-
-const RARITY_COLORS = {
-  common: {
-    base: [0.65, 0.65, 0.70, 1.0],
-    accent: [0.72, 0.45, 0.20, 1.0],
-    emissive: [0.15, 0.15, 0.15],
-    roughness: 0.6,
-    metallic: 0.7
-  },
-  uncommon: {
-    base: [0.25, 0.35, 0.28, 1.0],
-    accent: [0.0, 0.9, 0.3, 1.0],
-    emissive: [0.0, 1.0, 0.27],
-    roughness: 0.3,
-    metallic: 0.5
-  },
-  rare: {
-    base: [0.2, 0.3, 0.45, 1.0],
-    accent: [0.0, 0.75, 1.0, 1.0],
-    emissive: [0.0, 0.83, 1.0],
-    roughness: 0.2,
-    metallic: 0.8
-  },
-  epic: {
-    base: [0.35, 0.2, 0.45, 1.0],
-    accent: [0.75, 0.25, 1.0, 1.0],
-    emissive: [0.75, 0.22, 1.0],
-    roughness: 0.15,
-    metallic: 0.6
-  },
-  legendary: {
-    base: [0.55, 0.4, 0.15, 1.0],
-    accent: [1.0, 0.75, 0.0, 1.0],
-    emissive: [1.0, 0.67, 0.0],
-    roughness: 0.1,
-    metallic: 0.9
-  }
-}
-
-// ============================================================================
-// GENERADORES ESPECÍFICOS DE LOS 46 MODELOS DE ÍTEMS
+// GENERADOR PRINCIPAL DE ÍTEMS (recetas reconocibles y únicas)
 // ============================================================================
 
 function createItemGlb(itemId, rarity) {
   const glb = new GlbBuilder()
-  const rColor = RARITY_COLORS[rarity] || RARITY_COLORS.common
+  const classRgb = hexToRgb(RARITY_CLASS_COLORS[rarity])
+  const detailRgb = classRgb.map((ch) => ch * 0.45)
+  const hasGlow = !!RARITY_HAS_GLOW[rarity]
 
-  const matBase = glb.addMaterial({
-    name: `${itemId}_BaseMat`,
-    baseColor: rColor.base,
-    roughness: rColor.roughness,
-    metallic: rColor.metallic
-  })
-
-  const matAccent = glb.addMaterial({
-    name: `${itemId}_AccentMat`,
-    baseColor: rColor.accent,
-    roughness: 0.3,
+  const matBody = glb.addMaterial({
+    name: `${itemId}_Body`,
+    baseColor: [...classRgb, 1.0],
+    roughness: 0.42,
     metallic: 0.8
   })
 
+  const matDetail = glb.addMaterial({
+    name: `${itemId}_Detail`,
+    baseColor: [...detailRgb, 1.0],
+    roughness: 0.55,
+    metallic: 0.9
+  })
+
   const matGlow = glb.addMaterial({
-    name: `${itemId}_EmissiveMat`,
-    baseColor: rColor.accent,
-    roughness: 0.1,
-    metallic: 0.0,
-    emissive: rColor.emissive
+    name: `${itemId}_Glow`,
+    baseColor: [...classRgb, 1.0],
+    roughness: 0.25,
+    metallic: 0.15,
+    emissive: hasGlow ? [...classRgb] : [0, 0, 0]
   })
 
   const baseGeoms = []
-  const accentGeoms = []
+  const detailGeoms = []
   const glowGeoms = []
 
   switch (itemId) {
-    // ------------------------------------------------------------------------
-    // COMUNES (14 Ítems)
-    // ------------------------------------------------------------------------
-    case 'alambre_cobre':
+    // ========================================================================
+    // COMUNES (14) — Gris #A0A0A0, sin glow
+    // ========================================================================
+    case 'alambre_cobre': {
+      // Carrete de alambre: 2 discos + núcleo + bobina enrollada
       baseGeoms.push(
-        glb.createCylinderMesh(0.18, 0.08, 12, 0, 0.1, 0),
-        glb.createCylinderMesh(0.14, 0.12, 12, 0, 0.1, 0)
+        glb.createCylinderMesh(0.14, 0.14, 0.02, 16, 0, 0.02, 0),
+        glb.createCylinderMesh(0.14, 0.14, 0.02, 16, 0, 0.2, 0),
+        glb.createCylinderMesh(0.05, 0.05, 0.16, 12, 0, 0.11, 0)
       )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.02, 0.3, 8, 0.1, 0.2, 0.1),
-        glb.createCylinderMesh(0.02, 0.25, 8, -0.1, 0.2, -0.1)
+      detailGeoms.push(
+        glb.createTorusMesh(0.09, 0.012, 20, 8, 0, 0.11, 0, 'y'),
+        glb.createCylinderMesh(0.008, 0.008, 0.1, 6, 0.1, 0.16, 0)
       )
-      glowGeoms.push(glb.createBoxMesh(0.04, 0.04, 0.04, 0, 0.22, 0))
       break
+    }
 
-    case 'tornillos_pernos':
-      baseGeoms.push(
-        glb.createCylinderMesh(0.08, 0.05, 6, -0.06, 0.05, 0),
-        glb.createCylinderMesh(0.08, 0.05, 6, 0.06, 0.05, 0.04),
-        glb.createCylinderMesh(0.08, 0.05, 6, 0, 0.05, -0.06)
-      )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.03, 0.25, 8, -0.06, 0.15, 0),
-        glb.createCylinderMesh(0.03, 0.25, 8, 0.06, 0.15, 0.04),
-        glb.createCylinderMesh(0.03, 0.25, 8, 0, 0.15, -0.06)
-      )
-      glowGeoms.push(glb.createBoxMesh(0.03, 0.03, 0.03, 0, 0.26, 0))
-      break
-
-    case 'engranajes_desgastados':
-      baseGeoms.push(glb.createCylinderMesh(0.25, 0.06, 12, 0, 0.1, 0))
-      for (let i = 0; i < 8; i++) {
-        if (i % 3 === 0) continue
-        const angle = (i / 8) * Math.PI * 2
-        accentGeoms.push(glb.createBoxMesh(0.06, 0.06, 0.06, Math.cos(angle) * 0.26, 0.1, Math.sin(angle) * 0.26))
-      }
-      glowGeoms.push(glb.createCylinderMesh(0.08, 0.07, 8, 0, 0.1, 0))
-      break
-
-    case 'tubos_cobre':
-      baseGeoms.push(
-        glb.createCylinderMesh(0.05, 0.45, 10, -0.08, 0.22, 0),
-        glb.createCylinderMesh(0.05, 0.45, 10, 0.08, 0.22, 0)
-      )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.07, 0.04, 10, -0.08, 0.35, 0),
-        glb.createCylinderMesh(0.07, 0.04, 10, 0.08, 0.35, 0),
-        glb.createBoxMesh(0.22, 0.04, 0.08, 0, 0.22, 0)
-      )
-      glowGeoms.push(glb.createBoxMesh(0.06, 0.06, 0.06, 0, 0.22, 0))
-      break
-
-    case 'sartenes':
-      baseGeoms.push(glb.createCylinderMesh(0.22, 0.06, 14, 0, 0.05, 0))
-      accentGeoms.push(glb.createBoxMesh(0.06, 0.03, 0.3, 0, 0.07, 0.25))
-      glowGeoms.push(glb.createCylinderMesh(0.18, 0.02, 10, 0, 0.06, 0))
-      break
-
-    case 'ollas_cocinar':
-      baseGeoms.push(glb.createCylinderMesh(0.2, 0.22, 12, 0, 0.12, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.22, 0.03, 12, 0, 0.2, 0),
-        glb.createBoxMesh(0.08, 0.04, 0.04, -0.22, 0.15, 0),
-        glb.createBoxMesh(0.08, 0.04, 0.04, 0.22, 0.15, 0)
-      )
-      glowGeoms.push(glb.createCylinderMesh(0.19, 0.02, 10, 0, 0.22, 0))
-      break
-
-    case 'placas_laton':
-      baseGeoms.push(
-        glb.createBoxMesh(0.3, 0.04, 0.3, 0, 0.05, 0),
-        glb.createBoxMesh(0.26, 0.04, 0.26, 0, 0.08, 0)
-      )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.02, 0.06, 6, -0.12, 0.07, -0.12),
-        glb.createCylinderMesh(0.02, 0.06, 6, 0.12, 0.07, -0.12),
-        glb.createCylinderMesh(0.02, 0.06, 6, -0.12, 0.07, 0.12),
-        glb.createCylinderMesh(0.02, 0.06, 6, 0.12, 0.07, 0.12)
-      )
-      glowGeoms.push(glb.createBoxMesh(0.08, 0.02, 0.08, 0, 0.1, 0))
-      break
-
-    case 'clavos_oxidados':
-      for (let i = 0; i < 5; i++) {
-        const offset = (i - 2) * 0.05
-        baseGeoms.push(glb.createCylinderMesh(0.015, 0.2, 6, offset, 0.1, 0))
-        accentGeoms.push(glb.createCylinderMesh(0.035, 0.02, 6, offset, 0.19, 0))
-      }
-      glowGeoms.push(glb.createBoxMesh(0.04, 0.04, 0.04, 0, 0.22, 0))
-      break
-
-    case 'latas_conserva':
-      baseGeoms.push(
-        glb.createCylinderMesh(0.1, 0.18, 10, -0.06, 0.09, 0),
-        glb.createCylinderMesh(0.09, 0.16, 10, 0.06, 0.08, 0.04)
-      )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.105, 0.02, 10, -0.06, 0.17, 0),
-        glb.createCylinderMesh(0.095, 0.02, 10, 0.06, 0.15, 0.04)
-      )
-      glowGeoms.push(glb.createOctahedronMesh(0.05, 0, 0.2, 0))
-      break
-
-    case 'cadenas_hierro':
-      for (let i = 0; i < 4; i++) {
-        const y = i * 0.08 + 0.05
-        baseGeoms.push(glb.createCylinderMesh(0.06, 0.07, 8, 0, y, 0))
-        accentGeoms.push(glb.createCylinderMesh(0.04, 0.08, 8, 0, y, 0))
-      }
-      glowGeoms.push(glb.createBoxMesh(0.05, 0.05, 0.05, 0, 0.32, 0))
-      break
-
-    case 'tuercas_gigantes':
-      baseGeoms.push(
-        glb.createCylinderMesh(0.18, 0.08, 6, 0, 0.05, 0),
-        glb.createCylinderMesh(0.14, 0.1, 6, 0, 0.13, 0)
-      )
-      accentGeoms.push(glb.createCylinderMesh(0.1, 0.12, 12, 0, 0.09, 0))
-      glowGeoms.push(glb.createOctahedronMesh(0.07, 0, 0.2, 0))
-      break
-
-    case 'tapas_alcantarilla':
-      baseGeoms.push(glb.createCylinderMesh(0.3, 0.04, 16, 0, 0.03, 0))
-      accentGeoms.push(
-        glb.createBoxMesh(0.55, 0.02, 0.04, 0, 0.05, 0),
-        glb.createBoxMesh(0.04, 0.02, 0.55, 0, 0.05, 0)
-      )
-      glowGeoms.push(glb.createOctahedronMesh(0.08, 0, 0.07, 0))
-      break
-
-    case 'cables_deshilachados':
-      baseGeoms.push(glb.createCylinderMesh(0.04, 0.4, 8, 0, 0.2, 0))
-      for (let i = 0; i < 3; i++) {
-        const angle = (i / 3) * Math.PI * 2
-        accentGeoms.push(glb.createCylinderMesh(0.015, 0.15, 6, Math.cos(angle) * 0.04, 0.38, Math.sin(angle) * 0.04))
-      }
-      glowGeoms.push(glb.createBoxMesh(0.05, 0.05, 0.05, 0, 0.44, 0))
-      break
-
-    case 'residuos_carbon':
-      baseGeoms.push(
-        glb.createOctahedronMesh(0.18, -0.06, 0.08, 0),
-        glb.createOctahedronMesh(0.14, 0.06, 0.07, 0.04),
-        glb.createOctahedronMesh(0.12, 0, 0.12, -0.05)
-      )
-      accentGeoms.push(glb.createBoxMesh(0.05, 0.05, 0.05, 0, 0.15, 0))
-      glowGeoms.push(glb.createOctahedronMesh(0.06, 0, 0.18, 0))
-      break
-
-    // ------------------------------------------------------------------------
-    // POCO COMUNES (11 Ítems - Verde)
-    // ------------------------------------------------------------------------
-    case 'transistores':
-      baseGeoms.push(glb.createBoxMesh(0.28, 0.06, 0.18, 0, 0.05, 0))
-      for (let i = -2; i <= 2; i++) {
-        accentGeoms.push(
-          glb.createCylinderMesh(0.03, 0.16, 8, i * 0.05, 0.14, 0),
-          glb.createCylinderMesh(0.01, 0.08, 6, i * 0.05, 0.01, 0.1)
+    case 'tornillos_pernos': {
+      // 3 pernos hexagonales con vástago roscado
+      const offsets = [[-0.06, 0], [0.06, 0.03], [0, -0.05]]
+      for (const [dx, dz] of offsets) {
+        baseGeoms.push(
+          glb.createCylinderMesh(0.018, 0.018, 0.16, 8, dx, 0.08, dz),
+          glb.createHexPrismMesh(0.032, 0.03, dx, 0.18, dz, 'y')
+        )
+        detailGeoms.push(
+          glb.createCylinderMesh(0.021, 0.021, 0.012, 8, dx, 0.14, dz),
+          glb.createCylinderMesh(0.021, 0.021, 0.012, 8, dx, 0.115, dz)
         )
       }
-      glowGeoms.push(glb.createBoxMesh(0.24, 0.04, 0.06, 0, 0.07, 0))
       break
+    }
 
-    case 'bombillas_filamento':
-      baseGeoms.push(glb.createCylinderMesh(0.08, 0.1, 10, 0, 0.06, 0))
-      accentGeoms.push(glb.createCylinderMesh(0.14, 0.18, 12, 0, 0.2, 0))
-      glowGeoms.push(
-        glb.createCylinderMesh(0.02, 0.1, 6, 0, 0.2, 0),
-        glb.createOctahedronMesh(0.06, 0, 0.2, 0)
+    case 'engranajes_desgastados': {
+      // Engranaje dentado + segundo engranaje menor + diente roto
+      baseGeoms.push(glb.createGearMesh(0.2, 0.16, 0.05, 8, 0, 0.05, 0, 'z'))
+      detailGeoms.push(
+        glb.createGearMesh(0.12, 0.095, 0.05, 6, 0.16, 0.05, 0.02, 'z'),
+        glb.createBoxMesh(0.06, 0.05, 0.05, 0.2, 0.05, 0)
       )
       break
+    }
 
-    case 'resortes_reloj':
-      baseGeoms.push(glb.createCylinderMesh(0.2, 0.04, 12, 0, 0.05, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.15, 0.05, 12, 0, 0.09, 0),
-        glb.createCylinderMesh(0.1, 0.06, 12, 0, 0.13, 0)
-      )
-      glowGeoms.push(glb.createOctahedronMesh(0.08, 0, 0.16, 0))
-      break
-
-    case 'manometros':
+    case 'tubos_cobre': {
+      // Dos tuberías verticales + codo conector horizontal
       baseGeoms.push(
-        glb.createCylinderMesh(0.2, 0.08, 12, 0, 0.15, 0),
-        glb.createCylinderMesh(0.04, 0.12, 8, 0, 0.06, 0)
+        glb.createCylinderMesh(0.03, 0.03, 0.3, 10, -0.07, 0.15, 0),
+        glb.createCylinderMesh(0.03, 0.03, 0.3, 10, 0.07, 0.15, 0)
       )
-      accentGeoms.push(glb.createCylinderMesh(0.22, 0.02, 12, 0, 0.18, 0))
-      glowGeoms.push(
-        glb.createCylinderMesh(0.16, 0.01, 10, 0, 0.19, 0),
-        glb.createBoxMesh(0.14, 0.02, 0.02, 0.04, 0.2, 0)
+      detailGeoms.push(
+        glb.createCylinderMesh(0.035, 0.035, 0.16, 10, 0, 0.12, 0, 'x'),
+        glb.createCylinderMesh(0.04, 0.04, 0.02, 10, 0, 0.12, 0)
       )
       break
+    }
 
-    case 'valvulas_vapor':
+    case 'sartenes': {
+      // Sartén: cuerpo + mango + borde
+      baseGeoms.push(glb.createCylinderMesh(0.15, 0.13, 0.05, 16, 0, 0.03, 0))
+      detailGeoms.push(
+        glb.createBoxMesh(0.03, 0.03, 0.22, 0.16, 0.04, 0),
+        glb.createTorusMesh(0.15, 0.008, 20, 8, 0, 0.06, 0, 'y')
+      )
+      break
+    }
+
+    case 'ollas_cocinar': {
+      // Olla: cuerpo + borde + tapa + asas
+      baseGeoms.push(glb.createCylinderMesh(0.13, 0.12, 0.18, 16, 0, 0.09, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.14, 0.14, 0.02, 16, 0, 0.19, 0),
+        glb.createTorusMesh(0.05, 0.011, 14, 8, -0.14, 0.11, 0, 'x'),
+        glb.createTorusMesh(0.05, 0.011, 14, 8, 0.14, 0.11, 0, 'x'),
+        glb.createCylinderMesh(0.04, 0.04, 0.02, 10, 0, 0.21, 0)
+      )
+      break
+    }
+
+    case 'placas_laton': {
+      // Dos placas apiladas + remaches de esquina
       baseGeoms.push(
-        glb.createCylinderMesh(0.06, 0.35, 10, 0, 0.18, 0),
-        glb.createCylinderMesh(0.06, 0.2, 10, 0, 0.18, 0)
+        glb.createBoxMesh(0.3, 0.03, 0.22, 0, 0.02, 0),
+        glb.createBoxMesh(0.27, 0.03, 0.19, 0, 0.05, 0)
       )
-      accentGeoms.push(glb.createCylinderMesh(0.18, 0.04, 10, 0, 0.36, 0))
-      glowGeoms.push(glb.createCylinderMesh(0.08, 0.05, 8, 0, 0.18, 0))
-      break
-
-    case 'lentes_tv_viejo':
-      baseGeoms.push(glb.createBoxMesh(0.3, 0.22, 0.06, 0, 0.15, 0))
-      accentGeoms.push(glb.createCylinderMesh(0.12, 0.08, 12, 0, 0.15, 0))
-      glowGeoms.push(glb.createCylinderMesh(0.1, 0.09, 12, 0, 0.15, 0.01))
-      break
-
-    case 'fusibles_fundidos':
-      baseGeoms.push(glb.createCylinderMesh(0.06, 0.25, 10, 0, 0.14, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.07, 0.04, 10, 0, 0.26, 0),
-        glb.createCylinderMesh(0.07, 0.04, 10, 0, 0.02, 0)
+      detailGeoms.push(
+        glb.createCylinderMesh(0.014, 0.014, 0.02, 8, -0.11, 0.07, -0.07),
+        glb.createCylinderMesh(0.014, 0.014, 0.02, 8, 0.11, 0.07, -0.07),
+        glb.createCylinderMesh(0.014, 0.014, 0.02, 8, -0.11, 0.07, 0.07),
+        glb.createCylinderMesh(0.014, 0.014, 0.02, 8, 0.11, 0.07, 0.07)
       )
-      glowGeoms.push(glb.createOctahedronMesh(0.08, 0, 0.14, 0))
       break
+    }
 
-    case 'relojes_bolsillo':
-      baseGeoms.push(glb.createCylinderMesh(0.16, 0.04, 12, 0, 0.05, 0))
-      accentGeoms.push(glb.createCylinderMesh(0.03, 0.04, 8, 0, 0.05, 0.18))
+    case 'clavos_oxidados': {
+      // 5 clavos con punta cónica y cabeza
+      for (let i = 0; i < 5; i++) {
+        const dx = (i - 2) * 0.045
+        const dz = (i % 2 === 0 ? 1 : -1) * 0.015
+        baseGeoms.push(glb.createCylinderMesh(0.013, 0.013, 0.14, 8, dx, 0.08, dz))
+        detailGeoms.push(
+          glb.createConeMesh(0.013, 0.05, 8, dx, 0.175, dz),
+          glb.createCylinderMesh(0.022, 0.022, 0.012, 8, dx, 0.155, dz)
+        )
+      }
+      break
+    }
+
+    case 'latas_conserva': {
+      // Dos latas con tapa y reborde
+      baseGeoms.push(
+        glb.createCylinderMesh(0.06, 0.06, 0.16, 12, -0.06, 0.08, 0),
+        glb.createCylinderMesh(0.055, 0.055, 0.14, 12, 0.06, 0.07, 0.03)
+      )
+      detailGeoms.push(
+        glb.createCylinderMesh(0.062, 0.062, 0.015, 12, -0.06, 0.15, 0),
+        glb.createCylinderMesh(0.057, 0.057, 0.015, 12, 0.06, 0.13, 0.03)
+      )
+      break
+    }
+
+    case 'cadenas_hierro': {
+      // Cadena de 3 eslabones entrelazados (orientaciones alternadas)
+      baseGeoms.push(glb.createTorusMesh(0.05, 0.013, 14, 8, 0, 0.04, 0, 'y'))
+      detailGeoms.push(
+        glb.createTorusMesh(0.05, 0.013, 14, 8, 0, 0.11, 0, 'x'),
+        glb.createTorusMesh(0.05, 0.013, 14, 8, 0, 0.18, 0, 'y')
+      )
+      break
+    }
+
+    case 'tuercas_gigantes': {
+      // Tuerca hexagonal con agujero central
+      baseGeoms.push(glb.createHexPrismMesh(0.12, 0.08, 0, 0.04, 0, 'y'))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.05, 0.05, 0.09, 12, 0, 0.04, 0),
+        glb.createHexPrismMesh(0.13, 0.015, 0, 0.09, 0, 'y')
+      )
+      break
+    }
+
+    case 'tapas_alcantarilla': {
+      // Tapa de alcantarilla: disco + nervaduras en cruz + reborde
+      baseGeoms.push(glb.createCylinderMesh(0.2, 0.2, 0.03, 20, 0, 0.02, 0))
+      detailGeoms.push(
+        glb.createBoxMesh(0.36, 0.02, 0.03, 0, 0.045, 0),
+        glb.createBoxMesh(0.03, 0.02, 0.36, 0, 0.045, 0),
+        glb.createTorusMesh(0.2, 0.01, 20, 8, 0, 0.02, 0, 'y')
+      )
+      break
+    }
+
+    case 'cables_deshilachados': {
+      // Haz de cables con hilos sueltos en abanico
+      baseGeoms.push(
+        glb.createCylinderMesh(0.02, 0.02, 0.28, 8, 0, 0.16, 0),
+        glb.createCylinderMesh(0.016, 0.016, 0.26, 8, -0.02, 0.16, 0.02),
+        glb.createCylinderMesh(0.016, 0.016, 0.24, 8, 0.02, 0.16, -0.02)
+      )
+      detailGeoms.push(
+        glb.createCylinderMesh(0.007, 0.007, 0.1, 6, -0.05, 0.32, 0.03),
+        glb.createCylinderMesh(0.007, 0.007, 0.1, 6, 0.05, 0.32, -0.03),
+        glb.createTorusMesh(0.035, 0.008, 12, 8, 0, 0.02, 0, 'y')
+      )
+      break
+    }
+
+    case 'residuos_carbon': {
+      // Racimo de trozos de carbón (grumos facetados)
+      baseGeoms.push(
+        glb.createOctahedronMesh(0.18, -0.06, 0.08, 0),
+        glb.createOctahedronMesh(0.14, 0.06, 0.08, 0.04),
+        glb.createOctahedronMesh(0.12, 0, 0.12, -0.05),
+        glb.createOctahedronMesh(0.1, 0.09, 0.05, -0.03)
+      )
+      detailGeoms.push(glb.createOctahedronMesh(0.08, -0.02, 0.03, 0.06))
+      break
+    }
+
+    // ========================================================================
+    // POCO COMUNES (11) — Verde #00FF44, sin glow
+    // ========================================================================
+    case 'transistores': {
+      // Transistor: cuerpo plano + 3 patas
+      baseGeoms.push(glb.createBoxMesh(0.1, 0.06, 0.08, 0, 0.1, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.006, 0.006, 0.1, 6, -0.02, 0.05, 0),
+        glb.createCylinderMesh(0.006, 0.006, 0.1, 6, 0, 0.05, 0),
+        glb.createCylinderMesh(0.006, 0.006, 0.1, 6, 0.02, 0.05, 0)
+      )
+      break
+    }
+
+    case 'bombillas_filamento': {
+      // Bombilla: casquillo roscado + vidrio esférico + filamento
+      baseGeoms.push(glb.createCylinderMesh(0.03, 0.03, 0.08, 12, 0, 0.04, 0))
+      detailGeoms.push(
+        glb.createSphereMesh(0.085, 10, 14, 0, 0.13, 0),
+        glb.createCylinderMesh(0.008, 0.008, 0.05, 6, 0, 0.15, 0)
+      )
+      break
+    }
+
+    case 'resortes_reloj': {
+      // Resorte de reloj: espiral plana (anillos concéntricos)
+      baseGeoms.push(
+        glb.createTorusMesh(0.1, 0.012, 22, 8, 0, 0.015, 0, 'y'),
+        glb.createTorusMesh(0.068, 0.012, 18, 8, 0, 0.015, 0, 'y'),
+        glb.createTorusMesh(0.038, 0.012, 14, 8, 0, 0.015, 0, 'y')
+      )
+      detailGeoms.push(glb.createBoxMesh(0.02, 0.012, 0.12, 0.1, 0.015, 0.05))
+      break
+    }
+
+    case 'manometros': {
+      // Manómetro: dial + bisel + aguja + tubo
+      baseGeoms.push(
+        glb.createCylinderMesh(0.09, 0.09, 0.04, 16, 0, 0.06, 0, 'z'),
+        glb.createCylinderMesh(0.014, 0.014, 0.1, 8, 0, 0.01, -0.08, 'y')
+      )
+      detailGeoms.push(
+        glb.createTorusMesh(0.09, 0.008, 16, 8, 0, 0.06, 0, 'z'),
+        glb.createBoxMesh(0.012, 0.07, 0.012, 0, 0.06, 0.005),
+        glb.createCylinderMesh(0.012, 0.012, 0.02, 8, 0, 0.06, 0.04, 'z')
+      )
+      break
+    }
+
+    case 'valvulas_vapor': {
+      // Válvula: cuerpo + volante con radios
+      baseGeoms.push(glb.createCylinderMesh(0.05, 0.06, 0.16, 12, 0, 0.08, 0))
+      detailGeoms.push(
+        glb.createTorusMesh(0.09, 0.011, 16, 8, 0, 0.18, 0, 'y'),
+        glb.createBoxMesh(0.17, 0.015, 0.015, 0, 0.18, 0),
+        glb.createBoxMesh(0.015, 0.015, 0.17, 0, 0.18, 0),
+        glb.createCylinderMesh(0.02, 0.02, 0.04, 8, 0, 0.2, 0)
+      )
+      break
+    }
+
+    case 'lentes_tv_viejo': {
+      // Lente convexa: disco grueso + cúpula + marco
+      baseGeoms.push(glb.createCylinderMesh(0.09, 0.09, 0.05, 16, 0, 0.05, 0, 'z'))
+      detailGeoms.push(
+        glb.createSphereMesh(0.09, 6, 12, 0, 0.05, -0.04),
+        glb.createTorusMesh(0.09, 0.008, 16, 8, 0, 0.05, 0, 'z')
+      )
+      break
+    }
+
+    case 'fusibles_fundidos': {
+      // Fusible: tubo de vidrio + casquillos + filamento roto
+      baseGeoms.push(glb.createCylinderMesh(0.02, 0.02, 0.16, 10, 0, 0.08, 0, 'x'))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.024, 0.024, 0.03, 10, -0.09, 0.08, 0, 'x'),
+        glb.createCylinderMesh(0.024, 0.024, 0.03, 10, 0.09, 0.08, 0, 'x'),
+        glb.createBoxMesh(0.14, 0.004, 0.004, 0, 0.08, 0)
+      )
+      break
+    }
+
+    case 'relojes_bolsillo': {
+      // Reloj de bolsillo: caja + corona + anilla
+      baseGeoms.push(glb.createCylinderMesh(0.08, 0.08, 0.03, 16, 0, 0.04, 0, 'z'))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.015, 0.015, 0.025, 8, 0, 0.065, 0, 'y'),
+        glb.createTorusMesh(0.02, 0.005, 12, 8, 0, 0.09, 0, 'z')
+      )
+      break
+    }
+
+    case 'brujulas_magneticas': {
+      // Brújula: base + aguja romboidal + pivote
+      baseGeoms.push(glb.createCylinderMesh(0.09, 0.09, 0.03, 16, 0, 0.03, 0))
+      detailGeoms.push(
+        glb.createBoxMesh(0.12, 0.008, 0.02, 0, 0.05, 0),
+        glb.createBoxMesh(0.02, 0.008, 0.12, 0, 0.05, 0),
+        glb.createCylinderMesh(0.01, 0.01, 0.02, 8, 0, 0.06, 0)
+      )
+      break
+    }
+
+    case 'tubos_vacio': {
+      // Tubo de vacío: vidrio + ánodo interno + patillas
+      baseGeoms.push(glb.createCylinderMesh(0.045, 0.045, 0.18, 12, 0, 0.09, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.02, 0.02, 0.08, 8, 0, 0.1, 0),
+        glb.createCylinderMesh(0.007, 0.007, 0.06, 6, -0.02, 0.005, 0),
+        glb.createCylinderMesh(0.007, 0.007, 0.06, 6, 0, 0.005, 0),
+        glb.createCylinderMesh(0.007, 0.007, 0.06, 6, 0.02, 0.005, 0)
+      )
+      break
+    }
+
+    case 'palancas_interruptor': {
+      // Palanca: base + vástago inclinado + pomo esférico
+      baseGeoms.push(glb.createBoxMesh(0.12, 0.04, 0.09, 0, 0.02, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.012, 0.012, 0.16, 8, 0.03, 0.09, 0),
+        glb.createSphereMesh(0.025, 8, 10, 0.05, 0.17, 0)
+      )
+      break
+    }
+
+    // ========================================================================
+    // RAROS (10) — Azul #00D4FF, glow
+    // ========================================================================
+    case 'motor_vapor': {
+      // Motor de vapor: bloque + volante + pistones + chimenea
+      baseGeoms.push(glb.createBoxMesh(0.2, 0.14, 0.16, 0, 0.09, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.09, 0.09, 0.04, 16, 0, 0.07, 0.11, 'z'),
+        glb.createCylinderMesh(0.03, 0.03, 0.14, 8, -0.08, 0.12, -0.06),
+        glb.createCylinderMesh(0.03, 0.03, 0.14, 8, 0.08, 0.12, -0.06),
+        glb.createCylinderMesh(0.04, 0.04, 0.12, 10, 0, 0.16, 0)
+      )
+      glowGeoms.push(glb.createBoxMesh(0.08, 0.08, 0.04, 0, 0.09, 0.09))
+      break
+    }
+
+    case 'bobinas_tesla': {
+      // Bobina de Tesla: toroide superior + fuste + anillos + base
+      baseGeoms.push(
+        glb.createCylinderMesh(0.035, 0.045, 0.24, 12, 0, 0.12, 0),
+        glb.createCylinderMesh(0.07, 0.07, 0.02, 14, 0, 0.01, 0)
+      )
+      detailGeoms.push(
+        glb.createTorusMesh(0.035, 0.007, 12, 8, 0, 0.06, 0, 'y'),
+        glb.createTorusMesh(0.04, 0.007, 12, 8, 0, 0.12, 0, 'y'),
+        glb.createTorusMesh(0.045, 0.007, 12, 8, 0, 0.18, 0, 'y')
+      )
       glowGeoms.push(
-        glb.createCylinderMesh(0.13, 0.01, 10, 0, 0.07, 0),
-        glb.createBoxMesh(0.1, 0.01, 0.01, 0.02, 0.08, 0)
+        glb.createTorusMesh(0.06, 0.012, 16, 8, 0, 0.24, 0, 'y'),
+        glb.createSphereMesh(0.03, 8, 10, 0, 0.26, 0)
       )
       break
+    }
 
-    case 'brujulas_magneticas':
-      baseGeoms.push(glb.createCylinderMesh(0.18, 0.05, 12, 0, 0.05, 0))
-      accentGeoms.push(glb.createCylinderMesh(0.2, 0.02, 12, 0, 0.07, 0))
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.1, 0, 0.08, 0),
-        glb.createBoxMesh(0.14, 0.01, 0.02, 0, 0.08, 0)
-      )
-      break
-
-    case 'tubos_vacio':
-      baseGeoms.push(glb.createCylinderMesh(0.08, 0.06, 10, 0, 0.04, 0))
-      accentGeoms.push(glb.createCylinderMesh(0.07, 0.25, 10, 0, 0.18, 0))
-      glowGeoms.push(
-        glb.createCylinderMesh(0.03, 0.18, 8, 0, 0.18, 0),
-        glb.createOctahedronMesh(0.06, 0, 0.32, 0)
-      )
-      break
-
-    case 'palancas_interruptor':
-      baseGeoms.push(glb.createBoxMesh(0.2, 0.08, 0.14, 0, 0.04, 0))
-      accentGeoms.push(glb.createCylinderMesh(0.02, 0.24, 8, 0.04, 0.18, 0))
-      glowGeoms.push(glb.createOctahedronMesh(0.07, 0.04, 0.3, 0))
-      break
-
-    // ------------------------------------------------------------------------
-    // RAROS (10 Ítems - Azul Galvánico)
-    // ------------------------------------------------------------------------
-    case 'motor_vapor':
-      baseGeoms.push(glb.createBoxMesh(0.32, 0.2, 0.24, 0, 0.12, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.1, 0.25, 10, -0.08, 0.22, 0),
-        glb.createCylinderMesh(0.06, 0.2, 8, 0.08, 0.22, 0)
+    case 'antenas_radio': {
+      // Antena: base + 2 mástiles + disco parabólico
+      baseGeoms.push(glb.createBoxMesh(0.14, 0.03, 0.1, 0, 0.02, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.008, 0.008, 0.4, 8, -0.03, 0.22, 0),
+        glb.createCylinderMesh(0.008, 0.008, 0.34, 8, 0.03, 0.19, 0),
+        glb.createCylinderMesh(0.09, 0.07, 0.03, 16, -0.03, 0.42, 0, 'y')
       )
       glowGeoms.push(
-        glb.createBoxMesh(0.12, 0.12, 0.26, 0, 0.12, 0),
-        glb.createOctahedronMesh(0.08, -0.08, 0.32, 0)
+        glb.createSphereMesh(0.018, 8, 10, -0.03, 0.42, 0),
+        glb.createSphereMesh(0.018, 8, 10, 0.03, 0.36, 0)
       )
       break
+    }
 
-    case 'bobinas_tesla':
-      baseGeoms.push(glb.createCylinderMesh(0.16, 0.1, 10, 0, 0.06, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.06, 0.35, 8, 0, 0.22, 0),
-        glb.createCylinderMesh(0.14, 0.06, 10, 0, 0.38, 0)
+    case 'diodos_led': {
+      // Diodo LED: cúpula luminosa + collar + 2 patas
+      baseGeoms.push(glb.createCylinderMesh(0.05, 0.05, 0.03, 12, 0, 0.04, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.006, 0.006, 0.07, 6, -0.015, 0.005, 0),
+        glb.createCylinderMesh(0.006, 0.006, 0.07, 6, 0.015, 0.005, 0)
+      )
+      glowGeoms.push(glb.createSphereMesh(0.045, 8, 12, 0, 0.08, 0))
+      break
+    }
+
+    case 'baterias_alquimicas': {
+      // Batería alquímica: celda + tapas + terminal + ventana
+      baseGeoms.push(glb.createCylinderMesh(0.07, 0.07, 0.24, 12, 0, 0.12, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.075, 0.075, 0.03, 12, 0, 0.23, 0),
+        glb.createCylinderMesh(0.075, 0.075, 0.03, 12, 0, 0.01, 0),
+        glb.createSphereMesh(0.022, 8, 10, 0, 0.27, 0)
+      )
+      glowGeoms.push(glb.createTorusMesh(0.075, 0.012, 14, 8, 0, 0.12, 0, 'y'))
+      break
+    }
+
+    case 'engranajes_bronce': {
+      // Dos engranajes de bronce engranando
+      baseGeoms.push(glb.createGearMesh(0.18, 0.14, 0.05, 9, 0, 0.05, 0, 'z'))
+      detailGeoms.push(glb.createGearMesh(0.12, 0.09, 0.05, 6, 0.16, 0.05, 0.04, 'z'))
+      glowGeoms.push(glb.createCylinderMesh(0.02, 0.02, 0.06, 8, 0, 0.05, 0, 'z'))
+      break
+    }
+
+    case 'dinamo_galvanica': {
+      // Dínamo: cuerpo + bobinado + eje + polea
+      baseGeoms.push(glb.createCylinderMesh(0.08, 0.08, 0.18, 12, 0, 0.09, 0, 'x'))
+      detailGeoms.push(
+        glb.createTorusMesh(0.08, 0.014, 14, 8, -0.04, 0.09, 0, 'x'),
+        glb.createTorusMesh(0.08, 0.014, 14, 8, 0.04, 0.09, 0, 'x'),
+        glb.createCylinderMesh(0.02, 0.02, 0.12, 8, 0.12, 0.09, 0, 'x')
+      )
+      glowGeoms.push(glb.createCylinderMesh(0.085, 0.085, 0.02, 12, -0.1, 0.09, 0, 'x'))
+      break
+    }
+
+    case 'cristal_fuerza': {
+      // Cristal de cuarzo resonante: bipirámide luminosa + fragmentos + base
+      baseGeoms.push(glb.createCylinderMesh(0.08, 0.08, 0.02, 12, 0, 0.01, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0, 0.03, 0.09, 8, -0.09, 0.08, 0.02),
+        glb.createCylinderMesh(0, 0.025, 0.07, 8, 0.09, 0.07, -0.02)
       )
       glowGeoms.push(
-        glb.createOctahedronMesh(0.12, 0, 0.42, 0),
-        glb.createCylinderMesh(0.16, 0.02, 10, 0, 0.25, 0)
+        glb.createCylinderMesh(0, 0.07, 0.14, 10, 0, 0.12, 0),
+        glb.createCylinderMesh(0.07, 0, 0.08, 10, 0, 0.04, 0)
       )
       break
+    }
 
-    case 'antenas_radio':
-      baseGeoms.push(glb.createBoxMesh(0.2, 0.08, 0.16, 0, 0.05, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.02, 0.45, 6, -0.05, 0.28, 0),
-        glb.createCylinderMesh(0.02, 0.45, 6, 0.05, 0.28, 0)
+    case 'giroscopio_precision': {
+      // Giróscopo: 3 anillos perpendiculares + rotor central
+      baseGeoms.push(
+        glb.createTorusMesh(0.11, 0.012, 16, 8, 0, 0.1, 0, 'y'),
+        glb.createTorusMesh(0.09, 0.012, 16, 8, 0, 0.1, 0, 'x'),
+        glb.createTorusMesh(0.07, 0.012, 16, 8, 0, 0.1, 0, 'z')
+      )
+      glowGeoms.push(glb.createSphereMesh(0.04, 8, 10, 0, 0.1, 0))
+      break
+    }
+
+    case 'condensador_presion': {
+      // Condensador horizontal: cápsula + tapas abombadas + tubos
+      baseGeoms.push(glb.createCylinderMesh(0.09, 0.09, 0.2, 12, 0, 0.1, 0, 'x'))
+      detailGeoms.push(
+        glb.createSphereMesh(0.09, 8, 12, -0.1, 0.1, 0),
+        glb.createSphereMesh(0.09, 8, 12, 0.1, 0.1, 0),
+        glb.createCylinderMesh(0.02, 0.02, 0.1, 8, 0, 0.16, 0)
+      )
+      glowGeoms.push(glb.createCylinderMesh(0.03, 0.03, 0.04, 8, 0, 0.22, 0))
+      break
+    }
+
+    // ========================================================================
+    // ÉPICOS (7) — Violeta #C038FF, glow
+    // ========================================================================
+    case 'nucleo_mana': {
+      // Núcleo de maná: orbe luminoso + anillo orbital + soporte
+      baseGeoms.push(glb.createCylinderMesh(0.09, 0.1, 0.03, 14, 0, 0.02, 0))
+      detailGeoms.push(glb.createTorusMesh(0.13, 0.008, 20, 8, 0, 0.16, 0, 'x'))
+      glowGeoms.push(
+        glb.createSphereMesh(0.1, 10, 14, 0, 0.16, 0),
+        glb.createTorusMesh(0.13, 0.006, 20, 8, 0, 0.16, 0, 'y')
+      )
+      break
+    }
+
+    case 'cerebro_automata': {
+      // Cerebro de autómata: masa lobular + cables
+      baseGeoms.push(
+        glb.createSphereMesh(0.08, 8, 10, -0.05, 0.12, 0),
+        glb.createSphereMesh(0.08, 8, 10, 0.05, 0.12, 0),
+        glb.createSphereMesh(0.06, 8, 10, 0, 0.16, 0)
+      )
+      detailGeoms.push(
+        glb.createCylinderMesh(0.012, 0.012, 0.1, 6, -0.1, 0.08, 0),
+        glb.createCylinderMesh(0.012, 0.012, 0.1, 6, 0.1, 0.08, 0),
+        glb.createCylinderMesh(0.012, 0.012, 0.08, 6, 0, 0.04, 0)
       )
       glowGeoms.push(
-        glb.createOctahedronMesh(0.08, -0.05, 0.5, 0),
-        glb.createOctahedronMesh(0.08, 0.05, 0.5, 0)
+        glb.createTorusMesh(0.12, 0.006, 18, 8, 0, 0.14, 0, 'y'),
+        glb.createSphereMesh(0.022, 8, 10, 0, 0.12, 0.085)
       )
       break
+    }
 
-    case 'diodos_led':
-      baseGeoms.push(glb.createBoxMesh(0.26, 0.04, 0.18, 0, 0.04, 0))
-      for (let x = -0.08; x <= 0.08; x += 0.08) {
-        for (let z = -0.04; z <= 0.04; z += 0.08) {
-          accentGeoms.push(glb.createCylinderMesh(0.03, 0.08, 8, x, 0.08, z))
-          glowGeoms.push(glb.createOctahedronMesh(0.05, x, 0.14, z))
+    case 'reactor_eter': {
+      // Reactor de éter: cámara vertical + núcleo luminoso superior + anillos
+      baseGeoms.push(glb.createCylinderMesh(0.09, 0.09, 0.16, 14, 0, 0.08, 0))
+      detailGeoms.push(
+        glb.createTorusMesh(0.09, 0.012, 14, 8, 0, 0.03, 0, 'y'),
+        glb.createTorusMesh(0.09, 0.012, 14, 8, 0, 0.13, 0, 'y')
+      )
+      glowGeoms.push(glb.createSphereMesh(0.07, 8, 12, 0, 0.18, 0))
+      break
+    }
+
+    case 'corazon_caldera': {
+      // Corazón de caldera: cámara esférica + 2 conductos
+      baseGeoms.push(glb.createSphereMesh(0.1, 10, 14, 0, 0.14, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.04, 0.05, 0.14, 10, 0, 0.24, 0),
+        glb.createCylinderMesh(0.035, 0.035, 0.12, 10, -0.08, 0.06, 0, 'x'),
+        glb.createCylinderMesh(0.035, 0.035, 0.12, 10, 0.08, 0.06, 0, 'x')
+      )
+      glowGeoms.push(glb.createTorusMesh(0.12, 0.01, 16, 8, 0, 0.14, 0, 'y'))
+      break
+    }
+
+    case 'bateria_plasma': {
+      // Batería de plasma: celda + núcleo + electrodos
+      baseGeoms.push(glb.createCylinderMesh(0.09, 0.09, 0.22, 14, 0, 0.12, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.1, 0.1, 0.03, 14, 0, 0.22, 0),
+        glb.createCylinderMesh(0.1, 0.1, 0.03, 14, 0, 0.02, 0),
+        glb.createCylinderMesh(0.015, 0.015, 0.06, 8, -0.04, 0.26, 0)
+      )
+      glowGeoms.push(
+        glb.createTorusMesh(0.1, 0.012, 14, 8, 0, 0.12, 0, 'y'),
+        glb.createSphereMesh(0.03, 8, 10, 0, 0.27, 0)
+      )
+      break
+    }
+
+    case 'matriz_optica_solar': {
+      // Matriz óptica: panel + malla de lentes
+      baseGeoms.push(glb.createBoxMesh(0.28, 0.24, 0.05, 0, 0.12, 0))
+      for (let x = -0.09; x <= 0.09; x += 0.09) {
+        for (let y = -0.07; y <= 0.07; y += 0.07) {
+          detailGeoms.push(glb.createCylinderMesh(0.035, 0.035, 0.02, 12, x, y + 0.12, 0.03, 'z'))
         }
       }
-      break
-
-    case 'baterias_alquimicas':
-      baseGeoms.push(glb.createCylinderMesh(0.14, 0.32, 10, 0, 0.18, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.16, 0.04, 10, 0, 0.34, 0),
-        glb.createCylinderMesh(0.16, 0.04, 10, 0, 0.02, 0)
-      )
       glowGeoms.push(
-        glb.createCylinderMesh(0.11, 0.26, 8, 0, 0.18, 0),
-        glb.createOctahedronMesh(0.08, 0, 0.38, 0)
+        glb.createSphereMesh(0.02, 8, 10, -0.09, 0.12, 0.05),
+        glb.createSphereMesh(0.02, 8, 10, 0.09, 0.12, 0.05),
+        glb.createSphereMesh(0.02, 8, 10, 0, 0.19, 0.05)
       )
       break
+    }
 
-    case 'engranajes_bronce':
+    case 'embolo_titanio': {
+      // Émbolo: pistón + biela + cabeza
       baseGeoms.push(
-        glb.createCylinderMesh(0.26, 0.05, 14, 0, 0.08, 0),
-        glb.createCylinderMesh(0.16, 0.06, 12, 0, 0.14, 0)
+        glb.createCylinderMesh(0.07, 0.07, 0.14, 12, 0, 0.12, 0),
+        glb.createCylinderMesh(0.03, 0.03, 0.16, 8, 0, 0.26, 0)
       )
-      for (let i = 0; i < 10; i++) {
-        const angle = (i / 10) * Math.PI * 2
-        accentGeoms.push(glb.createBoxMesh(0.05, 0.05, 0.05, Math.cos(angle) * 0.27, 0.08, Math.sin(angle) * 0.27))
-      }
-      glowGeoms.push(glb.createOctahedronMesh(0.1, 0, 0.15, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.075, 0.075, 0.02, 12, 0, 0.05, 0),
+        glb.createCylinderMesh(0.05, 0.05, 0.03, 12, 0, 0.34, 0)
+      )
+      glowGeoms.push(glb.createCylinderMesh(0.04, 0.04, 0.02, 10, 0, 0.2, 0))
       break
+    }
 
-    case 'dinamo_galvanica':
-      baseGeoms.push(glb.createCylinderMesh(0.18, 0.26, 12, 0, 0.15, 0))
-      accentGeoms.push(
-        glb.createBoxMesh(0.4, 0.1, 0.1, 0, 0.15, 0),
-        glb.createCylinderMesh(0.2, 0.04, 12, 0, 0.28, 0)
+    // ========================================================================
+    // LEGENDARIOS (4) — Dorado #FFAA00, glow
+    // ========================================================================
+    case 'ojo_dragon': {
+      // Ojo de dragón: esfera + anillo + hendidura vertical
+      baseGeoms.push(glb.createSphereMesh(0.1, 10, 14, 0, 0.12, 0))
+      detailGeoms.push(
+        glb.createTorusMesh(0.12, 0.012, 18, 8, 0, 0.12, 0, 'x'),
+        glb.createTorusMesh(0.12, 0.012, 18, 8, 0, 0.12, 0, 'y')
+      )
+      glowGeoms.push(glb.createBoxMesh(0.03, 0.1, 0.05, 0, 0.12, 0.12))
+      break
+    }
+
+    case 'corazon_primigenio': {
+      // Corazón primigenio: esfera + aortas + anillos orbitales
+      baseGeoms.push(glb.createSphereMesh(0.12, 10, 14, 0, 0.14, 0))
+      detailGeoms.push(
+        glb.createCylinderMesh(0.035, 0.035, 0.14, 8, 0, 0.26, 0),
+        glb.createCylinderMesh(0.03, 0.03, 0.12, 8, -0.09, 0.2, 0, 'x'),
+        glb.createCylinderMesh(0.03, 0.03, 0.12, 8, 0.09, 0.2, 0, 'x')
       )
       glowGeoms.push(
-        glb.createOctahedronMesh(0.12, 0, 0.32, 0),
-        glb.createCylinderMesh(0.12, 0.18, 10, 0, 0.15, 0)
+        glb.createTorusMesh(0.15, 0.006, 20, 8, 0, 0.14, 0, 'y'),
+        glb.createTorusMesh(0.15, 0.006, 20, 8, 0, 0.14, 0, 'x')
       )
       break
+    }
 
-    case 'cristal_fuerza':
-      baseGeoms.push(glb.createCylinderMesh(0.16, 0.08, 8, 0, 0.05, 0))
-      accentGeoms.push(glb.createOctahedronMesh(0.16, 0, 0.2, 0))
+    case 'singularidad_eterica': {
+      // Singularidad: núcleo luminoso + anillos orbitales triaxiales + soporte
+      baseGeoms.push(glb.createCylinderMesh(0.08, 0.08, 0.02, 12, 0, 0.01, 0))
+      detailGeoms.push(glb.createTorusMesh(0.11, 0.008, 16, 8, 0, 0.14, 0, 'y'))
       glowGeoms.push(
-        glb.createOctahedronMesh(0.22, 0, 0.22, 0),
-        glb.createOctahedronMesh(0.08, 0, 0.38, 0)
+        glb.createSphereMesh(0.1, 10, 14, 0, 0.14, 0),
+        glb.createTorusMesh(0.14, 0.006, 20, 8, 0, 0.14, 0, 'x'),
+        glb.createTorusMesh(0.14, 0.006, 20, 8, 0, 0.14, 0, 'y'),
+        glb.createTorusMesh(0.14, 0.006, 20, 8, 0, 0.14, 0, 'z')
       )
       break
+    }
 
-    case 'giroscopio_precision':
-      baseGeoms.push(glb.createCylinderMesh(0.25, 0.02, 14, 0, 0.15, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.2, 0.02, 12, 0, 0.15, 0),
-        glb.createCylinderMesh(0.14, 0.02, 10, 0, 0.15, 0)
-      )
-      glowGeoms.push(glb.createOctahedronMesh(0.12, 0, 0.15, 0))
-      break
-
-    case 'condensador_presion':
-      baseGeoms.push(glb.createCylinderMesh(0.18, 0.35, 12, 0, 0.18, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.2, 0.04, 12, 0, 0.34, 0),
-        glb.createCylinderMesh(0.2, 0.04, 12, 0, 0.02, 0)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.14, 0.26, 10, 0, 0.18, 0),
-        glb.createOctahedronMesh(0.1, 0, 0.38, 0)
-      )
-      break
-
-    // ------------------------------------------------------------------------
-    // ÉPICOS (7 Ítems - Violeta Éter)
-    // ------------------------------------------------------------------------
-    case 'nucleo_mana':
+    case 'relicario_astral': {
+      // Relicario: cofre + engranaje decorativo + cierre
       baseGeoms.push(
-        glb.createOctahedronMesh(0.14, 0, 0.25, 0),
-        glb.createCylinderMesh(0.22, 0.03, 12, 0, 0.05, 0)
+        glb.createBoxMesh(0.24, 0.16, 0.18, 0, 0.08, 0),
+        glb.createBoxMesh(0.26, 0.06, 0.2, 0, 0.16, 0)
       )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.28, 0.02, 12, 0, 0.25, 0),
-        glb.createCylinderMesh(0.24, 0.02, 12, 0, 0.18, 0)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.22, 0, 0.25, 0),
-        glb.createOctahedronMesh(0.08, 0, 0.42, 0)
-      )
-      break
-
-    case 'cerebro_automata':
-      baseGeoms.push(glb.createBoxMesh(0.26, 0.18, 0.22, 0, 0.14, 0))
-      accentGeoms.push(
-        glb.createBoxMesh(0.28, 0.04, 0.24, 0, 0.05, 0),
-        glb.createCylinderMesh(0.04, 0.24, 8, -0.08, 0.14, 0.12),
-        glb.createCylinderMesh(0.04, 0.24, 8, 0.08, 0.14, 0.12)
+      detailGeoms.push(
+        glb.createGearMesh(0.08, 0.06, 0.03, 8, 0, 0.05, 0.11, 'z'),
+        glb.createCylinderMesh(0.015, 0.015, 0.04, 8, 0, 0.1, 0.1, 'z')
       )
       glowGeoms.push(
-        glb.createOctahedronMesh(0.12, -0.07, 0.14, 0),
-        glb.createOctahedronMesh(0.12, 0.07, 0.14, 0),
-        glb.createOctahedronMesh(0.08, 0, 0.26, 0)
+        glb.createSphereMesh(0.03, 8, 10, 0, 0.05, 0.11),
+        glb.createCylinderMesh(0.02, 0.02, 0.06, 8, 0, 0.12, 0.1, 'z')
       )
       break
-
-    case 'reactor_eter':
-      baseGeoms.push(glb.createCylinderMesh(0.18, 0.36, 12, 0, 0.2, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.22, 0.05, 12, 0, 0.36, 0),
-        glb.createCylinderMesh(0.22, 0.05, 12, 0, 0.04, 0),
-        glb.createBoxMesh(0.04, 0.36, 0.22, 0, 0.2, 0)
-      )
-      glowGeoms.push(
-        glb.createCylinderMesh(0.14, 0.28, 10, 0, 0.2, 0),
-        glb.createOctahedronMesh(0.12, 0, 0.42, 0)
-      )
-      break
-
-    case 'corazon_caldera':
-      baseGeoms.push(glb.createCylinderMesh(0.22, 0.26, 12, 0, 0.16, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.06, 0.2, 8, -0.12, 0.28, 0),
-        glb.createCylinderMesh(0.06, 0.2, 8, 0.12, 0.28, 0)
-      )
-      glowGeoms.push(
-        glb.createBoxMesh(0.16, 0.16, 0.24, 0, 0.16, 0),
-        glb.createOctahedronMesh(0.14, 0, 0.32, 0)
-      )
-      break
-
-    case 'bateria_plasma':
-      baseGeoms.push(glb.createCylinderMesh(0.2, 0.34, 12, 0, 0.2, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.24, 0.06, 12, 0, 0.36, 0),
-        glb.createCylinderMesh(0.24, 0.06, 12, 0, 0.04, 0)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.18, 0, 0.2, 0),
-        glb.createOctahedronMesh(0.1, 0, 0.44, 0)
-      )
-      break
-
-    case 'matriz_optica_solar':
-      baseGeoms.push(glb.createBoxMesh(0.3, 0.3, 0.08, 0, 0.2, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.14, 0.1, 12, 0, 0.2, 0.04),
-        glb.createCylinderMesh(0.08, 0.12, 10, 0, 0.2, 0.06)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.14, 0, 0.2, 0.08),
-        glb.createOctahedronMesh(0.08, 0, 0.38, 0)
-      )
-      break
-
-    case 'embolo_titanio':
-      baseGeoms.push(
-        glb.createCylinderMesh(0.22, 0.18, 12, 0, 0.12, 0),
-        glb.createCylinderMesh(0.1, 0.3, 10, 0, 0.25, 0)
-      )
-      accentGeoms.push(glb.createCylinderMesh(0.24, 0.04, 12, 0, 0.18, 0))
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.14, 0, 0.42, 0),
-        glb.createBoxMesh(0.12, 0.12, 0.12, 0, 0.12, 0)
-      )
-      break
-
-    // ------------------------------------------------------------------------
-    // LEGENDARIOS (4 Ítems - Dorado Incandescente)
-    // ------------------------------------------------------------------------
-    case 'ojo_dragon':
-      baseGeoms.push(glb.createCylinderMesh(0.22, 0.12, 12, 0, 0.16, 0))
-      accentGeoms.push(
-        glb.createOctahedronMesh(0.28, 0, 0.16, 0),
-        glb.createBoxMesh(0.36, 0.04, 0.06, 0, 0.16, 0),
-        glb.createBoxMesh(0.06, 0.04, 0.36, 0, 0.16, 0)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.18, 0, 0.16, 0),
-        glb.createBoxMesh(0.04, 0.18, 0.18, 0, 0.16, 0.02)
-      )
-      break
-
-    case 'corazon_primigenio':
-      baseGeoms.push(
-        glb.createOctahedronMesh(0.2, 0, 0.24, 0),
-        glb.createCylinderMesh(0.3, 0.03, 14, 0, 0.1, 0)
-      )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.36, 0.03, 14, 0, 0.24, 0),
-        glb.createCylinderMesh(0.26, 0.03, 12, 0, 0.38, 0)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.28, 0, 0.24, 0),
-        glb.createOctahedronMesh(0.12, 0, 0.44, 0),
-        glb.createOctahedronMesh(0.12, 0, 0.04, 0)
-      )
-      break
-
-    case 'singularidad_eterica':
-      baseGeoms.push(
-        glb.createOctahedronMesh(0.22, 0, 0.25, 0),
-        glb.createCylinderMesh(0.32, 0.02, 16, 0, 0.25, 0)
-      )
-      accentGeoms.push(
-        glb.createCylinderMesh(0.38, 0.02, 16, 0, 0.18, 0),
-        glb.createCylinderMesh(0.28, 0.02, 14, 0, 0.32, 0)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.3, 0, 0.25, 0),
-        glb.createOctahedronMesh(0.14, 0, 0.46, 0),
-        glb.createOctahedronMesh(0.14, 0, 0.04, 0)
-      )
-      break
-
-    case 'relicario_astral':
-      baseGeoms.push(glb.createBoxMesh(0.32, 0.32, 0.32, 0, 0.2, 0))
-      accentGeoms.push(
-        glb.createCylinderMesh(0.34, 0.04, 14, 0, 0.2, 0),
-        glb.createCylinderMesh(0.24, 0.34, 12, 0, 0.2, 0)
-      )
-      glowGeoms.push(
-        glb.createOctahedronMesh(0.26, 0, 0.2, 0),
-        glb.createOctahedronMesh(0.12, 0, 0.44, 0)
-      )
-      break
+    }
 
     default:
       baseGeoms.push(glb.createBoxMesh(0.2, 0.2, 0.2, 0, 0.1, 0))
-      glowGeoms.push(glb.createOctahedronMesh(0.1, 0, 0.2, 0))
+      detailGeoms.push(glb.createOctahedronMesh(0.12, 0, 0.22, 0))
       break
   }
 
-  // Ensamblar la geometría en nodos del GLB
-  glb.addMeshNode('Base', glb.combineGeometries(baseGeoms), matBase)
-  glb.addMeshNode('Accent', glb.combineGeometries(accentGeoms), matAccent)
+  glb.addMeshNode('Body', glb.combineGeometries(baseGeoms), matBody)
+  glb.addMeshNode('Detail', glb.combineGeometries(detailGeoms), matDetail)
   glb.addMeshNode('Glow', glb.combineGeometries(glowGeoms), matGlow)
 
   return glb.buildGlbBuffer()
@@ -1009,17 +1335,18 @@ function main() {
   }
 
   let generatedCount = 0
+  let totalBytes = 0
   for (const item of ITEMS_CATALOG) {
     const filePath = path.join(baseOutputDir, item.rarity, `${item.id}.glb`)
     const glbBuffer = createItemGlb(item.id, item.rarity)
     fs.writeFileSync(filePath, glbBuffer)
+    totalBytes += glbBuffer.length
 
-    const stats = fs.statSync(filePath)
-    console.log(`  ✅ [${item.rarity.toUpperCase()}] ${item.id}.glb -> ${filePath} (${(stats.size / 1024).toFixed(2)} KB)`)
+    console.log(`  ✅ [${item.rarity.toUpperCase()}] ${item.id}.glb (${(glbBuffer.length / 1024).toFixed(2)} KB)`)
     generatedCount++
   }
 
-  console.log(`\n🎉 Generación completada con éxito. Se crearon ${generatedCount} modelos .glb de ítems coleccionables en 'assets/items/'.`)
+  console.log(`\n🎉 Generación completada con éxito. ${generatedCount} modelos .glb (${(totalBytes / 1024).toFixed(1)} KB total) en 'assets/items/'.`)
 }
 
 main()
