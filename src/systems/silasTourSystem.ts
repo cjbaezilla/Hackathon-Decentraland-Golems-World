@@ -16,7 +16,8 @@ import {
   setSilasPositionAndRotation,
   getSilasPosition,
   triggerSilasWaveEmote,
-  setSilasEmote
+  setSilasEmote,
+  clearSilasEmote
 } from '../objects/welcomeNpc'
 import {
   activateTourFollowCamera,
@@ -224,7 +225,8 @@ export function startSilasGuidedTour() {
     setSilasTourSubtitle(t(firstWp.speechKey as any))
   }
 
-  setSilasEmote('raiseHand')
+  // Limpiar cualquier emote para garantizar locomoción de caminata 100% limpia y fluida
+  clearSilasEmote()
   console.log('🧭 [Silas Tour] Tour guiado iniciado exitosamente. Silas en marcha hacia Waypoint 1.')
 }
 
@@ -244,6 +246,9 @@ export function advanceSilasTourToNextWaypoint() {
   setSilasTourCurrentWaypoint(nextIndex)
   isPausedForStopDialog = false
   closeNpcDialog()
+
+  // Limpiar cualquier emote para que la caminata reanude sin interrupciones
+  clearSilasEmote()
 
   const nextWp = SILAS_TOUR_WAYPOINTS[nextIndex]
   setSilasTourSubtitle(t(nextWp.speechKey as any))
@@ -309,7 +314,7 @@ export function silasTourSystem(dt: number) {
     // Manejar acciones de parada
     if (wp.stopAction && wp.stopAction !== 'none') {
       isPausedForStopDialog = true
-      triggerSilasWaveEmote()
+      clearSilasEmote()
 
       // Teletransportar al usuario automáticamente frente a Silas al detenerse en la parada
       teleportPlayerInFrontOfSilas(wp.stopAction)

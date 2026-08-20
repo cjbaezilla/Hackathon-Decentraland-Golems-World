@@ -269,15 +269,26 @@ export function setSilasPositionAndRotation(pos: Vector3, rot: Quaternion) {
 }
 
 /**
- * Establece la animación o emote activo de Silas.
+ * Establece la animación o emote activo de Silas (bloqueado durante el tour guiado).
  */
 export function setSilasEmote(emoteId: string) {
+  if (getIsSilasTourActive()) return
   if (silasNpcEntity && AvatarShape.has(silasNpcEntity)) {
     const avatar = AvatarShape.getMutable(silasNpcEntity)
     if (avatar.expressionTriggerId !== emoteId) {
       avatar.expressionTriggerId = emoteId
       avatar.expressionTriggerTimestamp = (avatar.expressionTriggerTimestamp ?? 0) + 1
     }
+  }
+}
+
+/**
+ * Limpia cualquier emote o expresión activa en Silas para permitir la locomoción natural (caminata pura) sin interrupciones.
+ */
+export function clearSilasEmote() {
+  if (silasNpcEntity && AvatarShape.has(silasNpcEntity)) {
+    const avatar = AvatarShape.getMutable(silasNpcEntity)
+    avatar.expressionTriggerId = undefined
   }
 }
 
@@ -291,7 +302,7 @@ export function triggerSilasWaveEmote() {
 /**
  * Sistema ECS para dotar de vida a Silas:
  * 1. Detección proactiva de proximidad (<= 4.5m) para disparar el diálogo inicial a nuevos jugadores.
- * 2. Emotes periódicos de saludo cuando el jugador está en las inmediaciones.
+ * 2. Emotes periódicos de saludo cuando el jugador está en las inmediaciones del campamento en reposo.
  */
 export function welcomeNpcAnimationSystem(dt: number) {
   if (!silasNpcEntity || !AvatarShape.has(silasNpcEntity)) return
@@ -318,9 +329,16 @@ export function welcomeNpcAnimationSystem(dt: number) {
     console.log('🧭 [Silas Proximity] Diálogo proactivo de bienvenida iniciado por cercanía del jugador.')
   }
 
+  // Si el tour guiado está activo, el diálogo está abierto o hay una cinemática en curso,
+  // no reproducir emotes periódicos que interfieran con la locomoción natural o la escena
+  if (getIsSilasTourActive() || getIsNpcDialogOpen() || getIsCinematicActive()) {
+    emoteTimer = 0
+    return
+  }
+
   emoteTimer += dt
 
-  // Cada 9 segundos, si el jugador está a corta distancia, reproduce un saludo
+  // Cada 9 segundos, si el jugador está a corta distancia en el campamento, reproduce un saludo
   if (emoteTimer >= 9) {
     emoteTimer = 0
 
