@@ -1,6 +1,6 @@
-![Golems Cover](GOLEMS/golems_cover.png)
+![Golems Cover](GOLEMS/golems_cover_eng.png)
 
-# Golems: Experiencia Multijugador en Decentraland
+# Golems: Multiplayer Experience in Decentraland
 
 [![Decentraland SDK7](https://img.shields.io/badge/Decentraland-SDK7-ff2d55.svg)](https://docs.decentraland.org)
 [![Decentraland World](https://img.shields.io/badge/World-golems.dcl.eth-6366f1.svg)](https://decentraland.org)
@@ -9,419 +9,423 @@
 [![Grid Size](https://img.shields.io/badge/Grid-25x25%20(400m%20x%20400m)-f59e0b.svg)](https://docs.decentraland.org)
 [![Backend](https://img.shields.io/badge/Backend-PHP%20%26%20MySQL%20(SignedFetch)-3b82f6.svg)](https://docs.decentraland.org)
 
-**Golems** es una experiencia multijugador masiva desarrollada sobre **Decentraland SDK7** ambientada en un fascinante universo de chatarra, tecnología steampunk y magia residual. Los jugadores exploran un extenso mundo de 160.000 m², rastrean piezas mecánicas ocultas mediante un innovador **Radar de Calor**, forjan autómatas de combate únicos mediante un sistema de **hash determinista**, dirigen expediciones automatizadas y combaten en tiempo real tanto en el entorno abierto como en un **Torneo Escalera** competitivo (1v1 y 2v2).
+**Golems** is a massive multiplayer experience built on **Decentraland SDK7**, set in a fascinating universe of scrap metal, steampunk technology, and residual magic. Players explore a vast 160,000 m² world, track down hidden mechanical parts using an innovative **Heat Radar**, forge unique combat automatons using a **deterministic hashing** system, lead automated expeditions, and fight in real time both in the open world and in a competitive **Ladder Tournament** (1v1 and 2v2).
+
+> 📚 **Official Game Design Document (GDD)**:
+> - 🇬🇧 **English**: [GOLEMS/GDD-Golems_eng.md](GOLEMS/GDD-Golems_eng.md) — Full design specification & mechanics
+> - 🇪🇸 **Español**: [GOLEMS/GDD-Golems.md](GOLEMS/GDD-Golems.md) — Especificación y diseño oficial de juego
 
 ---
 
-## 📑 Tabla de Contenidos
+## 📑 Table of Contents
 
-1. [De qué trata el juego](#-de-qu%C3%A9-trata-el-juego)
-2. [El Bucle Principal de Juego](#-el-bucle-principal-de-juego)
-3. [El Mundo y Mapa (Grid 25x25 - 400m × 400m)](#-el-mundo-y-mapa-grid-25x25---400m--400m)
-4. [El Radar de Calor y la Recolección](#-el-radar-de-calor-y-la-recolecci%C3%B3n)
-5. [Catálogo Completo de Materiales](#-cat%C3%A1logo-completo-de-materiales)
-6. [La Forja y Unicidad de los Golems (Hash Determinista)](#-la-forja-y-unicidad-de-los-golems-hash-determinista)
-7. [Estadísticas, Afinidades y Combate en Tiempo Real](#-estad%C3%ADsticas-afinidades-y-combate-en-tiempo-real)
-8. [Golems Acompañantes y Misiones de Reserva](#-golems-acompa%C3%B1antes-y-misiones-de-reserva)
-9. [NPCs Hostiles y Guardianes de Zona](#-npcs-hostiles-y-guardianes-de-zona)
-10. [Progresión y Sistema de Niveles](#-progresi%C3%B3n-y-sistema-de-niveles)
-11. [Torneo Escalera Competitivo (1v1 y 2v2)](#-torneo-escalera-competitivo-1v1-y-2v2)
-12. [Gran Arena Circular de Torneo Steampunk (Colosal 72m - Cell Games Ring)](#-gran-arena-circular-de-torneo-steampunk-colosal-72m---cell-games-ring)
-13. [Arquitectura Técnica y Persistencia](#-arquitectura-t%C3%A9cnica-y-persistencia)
-14. [Diseño Mobile-First y Restricciones de Rendimiento](#-dise%C3%B1o-mobile-first-y-restricciones-de-rendimiento)
-15. [Instalación, Desarrollo y Despliegue](#-instalaci%C3%B3n-desarrollo-y-despliegue)
-16. [Estructura del Proyecto](#-estructura-del-proyecto)
-
----
-
-## ⚙️ De qué trata el juego
-
-En el mundo de **Golems**, la civilización ha dejado atrás toneladas de maquinaria en desuso: transistores, calderas, manómetros, ollas, antenas de radio y baterías alquímicas impregnadas de energía residual. 
-
-![De qué trata Golems](GOLEMS/golems_de_que_trata.png)
-
-Los exploradores se adentran en este paisaje para:
-- **Recolectar Chatarra**: Localizar 25 tipos de piezas mediante proximidad térmica con el Radar de Calor.
-- **Forjar Criaturas Mecánicas**: Combinar de 5 a 12 componentes en el Distrito de la Forja para generar golems con apariencias, nombres y atributos únicos derivados algorítmicamente.
-- **Comandar hasta 3 Golems Activos**: Criaturas que siguen al jugador en formación y defienden a su creador en tiempo real.
-- **Automatizar Expediciones**: Asignar a los golems en reserva misiones de recolección fuera de línea que generan botín constante.
-- **Competir en la Escalera**: Desafiar a otros jugadores en duelos 1v1 y 2v2 sincronizados por red.
+1. [What the Game Is About](#-what-the-game-is-about)
+2. [The Core Game Loop](#-the-core-game-loop)
+3. [The World and Map (Grid 25x25 - 400m × 400m)](#-the-world-and-map-grid-25x25---400m--400m)
+4. [The Heat Radar and Scavenging](#-the-heat-radar-and-scavenging)
+5. [Complete Materials Catalog](#-complete-materials-catalog)
+6. [The Forge and Golem Uniqueness (Deterministic Hash)](#-the-forge-and-golem-uniqueness-deterministic-hash)
+7. [Stats, Affinities, and Real-Time Combat](#-stats-affinities-and-real-time-combat)
+8. [Companion Golems and Real-Time Multiplayer Following](#-companion-golems-and-real-time-multiplayer-following)
+9. [Hostile NPCs and Zone Guardians](#-hostile-npcs-and-zone-guardians)
+10. [Progression and Level System](#-progression-and-level-system)
+11. [Competitive Ladder Tournament (1v1 and 2v2)](#-competitive-ladder-tournament-1v1-and-2v2)
+12. [Colossal 72m Steampunk Tournament Arena (Cell Games Ring)](#-colossal-72m-steampunk-tournament-arena-cell-games-ring)
+13. [Technical Architecture and Persistence](#-technical-architecture-and-persistence)
+14. [Mobile-First Design and Performance Constraints](#-mobile-first-design-and-performance-constraints)
+15. [Installation, Development, and Deployment](#-installation-development-and-deployment)
+16. [Project Structure](#-project-structure)
 
 ---
 
-## 🔄 El Bucle Principal de Juego
+## ⚙️ What the Game Is About
 
-El flujo de juego está diseñado como un ciclo continuo y orgánico que recompensa tanto al jugador casual como al estratega competitivo:
+In the world of **Golems**, civilization has left behind tons of disused machinery: transistors, boilers, pressure gauges, cooking pots, radio antennas, and alchemical batteries imbued with residual energy. 
+
+![What Golems is about](GOLEMS/golems_de_que_trata_eng.png)
+
+Explorers venture into this landscape to:
+- **Scavenge Scrap**: Locate 25 types of parts via thermal proximity using the Heat Radar.
+- **Forge Mechanical Creatures**: Combine 5 to 12 components in the Forge District to generate golems with unique appearances, names, and algorithmically derived attributes.
+- **Command up to 3 Active Golems**: Creatures follow the player in formation and defend their creator in real time.
+- **Automate Expeditions**: Assign reserve golems to offline scavenging missions that generate continuous loot.
+- **Compete in the Ladder**: Challenge other players in network-synchronized 1v1 and 2v2 duels.
+
+---
+
+## 🔄 The Core Game Loop
+
+The gameplay loop is designed as a continuous, organic cycle rewarding both casual players and competitive strategists:
 
 ```mermaid
 graph TD
-    A["Distrito de la Forja (Spawn & Base)"] -->|"Equipar Radar de Calor"| B["Exploración del Mapa (25x25)"]
-    B -->|"Detección Euclidiana & Toque"| C["Recolección de Chatarra (25 Materiales)"]
-    C -->|"Retorno a la Forja"| D["Forja de Golems (Hash 5-12 Piezas)"]
-    D -->|"Asignar Escuadrón (Máx. 3)"| E["Combate RT vs NPCs y Jugadores"]
-    D -->|"Asignar Golems en Reserva"| F["Misiones de Recolección Automatizadas"]
-    E -->|"Victoria & Experiencia"| G["Subida de Nivel (Jugador & Golems)"]
-    F -->|"Reclamar Botín Remoto"| C
-    G -->|"Escalar Ranking"| H["Torneo Escalera (1v1 / 2v2)"]
-    H -->|"Prestigio & Recursos"| A
+    A["Forge District (Spawn & Base)"] -->|"Equip Heat Radar"| B["Map Exploration (25x25)"]
+    B -->|"Euclidean Detection & Touch"| C["Scrap Collection (25 Materials)"]
+    C -->|"Return to Forge"| D["Golem Forging (Hash 5-12 Parts)"]
+    D -->|"Assign Squad (Max 3)"| E["RT Combat vs NPCs and Players"]
+    D -->|"Assign Reserve Golems"| F["Automated Scavenging Missions"]
+    E -->|"Victory & Experience"| G["Level Up (Player & Golems)"]
+    F -->|"Claim Remote Loot"| C
+    G -->|"Climb Ranking"| H["Ladder Tournament (1v1 / 2v2)"]
+    H -->|"Prestige & Resources"| A
 ```
 
-![Bucle de Juego](GOLEMS/golems_bucle_juego.png)
+![Game Loop](GOLEMS/golems_bucle_juego_eng.png)
 
 ---
 
-## 🗺️ El Mundo y Mapa (Grid 25x25 - 400m × 400m)
+## 🗺️ The World and Map (Grid 25x25 - 400m × 400m)
 
-La experiencia se ubica en el Decentraland World `golems.dcl.eth`, compuesto por una cuadrícula de **25x25 parcelas** (desde `0,0` hasta `24,24`), abarcando un área de **400 metros de ancho por 400 metros de profundidad** (160.000 m² de superficie útil con terreno natural `landscapeTerrain: true`).
+The experience takes place in the Decentraland World `golems.dcl.eth`, made of a **25x25 parcel grid** (from `0,0` to `24,24`), covering an area of **400 meters wide by 400 meters deep** (160,000 m² of usable surface with natural terrain `landscapeTerrain: true`).
 
-![Mapa de Zonas](GOLEMS/golems_map.png)
+![Zone Map](GOLEMS/golems_map_eng.png)
 
-> 📘 **Documentación Detallada del Mapa**: Para conocer todas las cotas métricas, arquitectura de archivos, hitos y diagramas ASCII detallados, consulta la [Guía Maestra: Mapa, Distritos, Zonas y Coordenadas](guias/guia-mapa-zonas-y-distritos.md).
+> 📘 **Detailed Map Documentation**: To learn about all metric elevations, file architecture, landmarks, and detailed ASCII diagrams, check the [Master Guide: Map, Districts, Zones, and Coordinates](guias/guia-mapa-zonas-y-distritos.md).
 
-### Distribución Espacial de Zonas y las 4 Esquinas Simétricas (140m × 140m c/u)
+### Spatial Distribution of Zones and the 4 Symmetrical Corners (140m × 140m each)
 
-| Zona | Ubicación (Coords Metros) | Dimensión | Nivel de Riesgo | Materiales Principales | Descripción |
+| Zone | Location (Coords Metros) | Dimension | Risk Level | Main Materials | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Spawn `(16, 6)`, **Silas** en `(15.8, 5.9)`, Plaza Mayor `(70, 70)`, 10 Trading Posts, Wreckage Lab `[1,2]`, Trampolín y **Escondite/Bóveda del Jugador** en `(Z: 17.7m, X: 3.8m-8.0m)`. |
-| **Desierto de Chatarra** | Esquina Noroeste `(0,260)` a `(140,400)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Legendarios (`ojo_dragon`, `corazon_primigenio`) | Páramo desolado de máxima dificultad, Cráter del Autómata Primigenio `(70, 330)`, Nido del Dragón y portal `(130, 270)`. |
-| **Reserva de Minería** | Esquina Noreste `(260,260)` a `(400,400)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) | Cantera protegida de éter `(340, 340)`, taller de relojería, pozo profundo, refugio de exploradores y portal `(270, 270)`. |
-| **Calderas de la Fundición** | Esquina Sureste `(260,0)` a `(400,140)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Épicos (`corazon_caldera`, `reactor_eter`) | Complejo volcánico y térmico, Gran Horno Central `(330, 70)`, Reactor de Éter y portal `(270, 130)`. |
-| **Corredor y Gran Vía Sur**| Sector Sur `(140,0)` a `(260,140)` | ~16.800 m² | 🟢 Zona Segura (Tránsito) | Conexión e infraestructura | Puesto de Control Parcela 13,1 `(212, 24)`, Gran Cruce `(200, 70)` y Estación de Vapor `(170, 40)`. |
-| **Los Chatarrales** | Sector Oeste `(0,140)` a `(140,260)` | ~16.800 m² | 🟢 Dificultad Baja | Comunes (Alambre, Tornillos, Ollas) | Campamento de Chatarreros `(70, 200)`, Depósito de Latón `(40, 170)` y calzada $X=70$. |
-| **Fábrica Abandonada** | Anillo Medio `(140,140)` a `(260,260)` | ~20.000 m² | 🟡 Dificultad Media | Poco Comunes (Transistores, Manómetros) | Estructuras industriales derruidas con materiales de estadísticas avanzadas. |
-| **Subestación Eléctrica** | Sector Norte `(140,280)` a `(260,400)` | ~14.400 m² | 🟠 Dificultad Alta | Raros (Bobinas Tesla, Baterías, Motores) | Complejo de alta tensión con componentes de afinidad galvánica y vapor. |
-| **Torre de Radio** | Sector Este `(280,140)` a `(400,260)` | ~14.400 m² | 🟠 Dificultad Alta | Raros (Antenas de radio, Diodos LED) | Antiguas antenas de telecomunicación con materiales de afinidad luminosa. |
-| **Gran Arena de Torneo** | Centro `(164,164)` a `(236,236)` | ~4.071 m² (Ø 72m) | 🏆 Competitivo | Torneo Escalera 1v1 y 2v2 | Colosal plataforma circular de torneo steampunk en `(200, 200)`. |
+| **Forge District** | Southwest Corner `(0,0)` to `(140,140)` | 140m × 140m (19,600 m²) | 🟢 Safe Zone (No PK) | None (Workshop/Forge) | Spawn `(16, 6)`, **Silas** at `(15.8, 5.9)`, Main Plaza `(70, 70)`, 10 Trading Posts, Wreckage Lab `[1,2]`, Trampoline, and **Player Hideout/Vault** at `(Z: 17.7m, X: 3.8m-8.0m)`. |
+| **Scrap Desert** | Northwest Corner `(0,260)` to `(140,400)` | 140m × 140m (19,600 m²) | 🔴 Open PK Zone | Legendaries (`ojo_dragon`, `corazon_primigenio`) | Desolate, maximum difficulty wasteland, Primordial Automaton Crater `(70, 330)`, Dragon's Nest, and portal `(130, 270)`. |
+| **Mining Reserve** | Northeast Corner `(260,260)` to `(400,400)` | 140m × 140m (19,600 m²) | 🟢 Safe Zone (No PK) | Epics (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) | Protected aether quarry `(340, 340)`, watchmaking workshop, deep pit, explorers' shelter, and portal `(270, 270)`. |
+| **Smelting Boilers** | Southeast Corner `(260,0)` to `(400,140)` | 140m × 140m (19,600 m²) | 🔴 Open PK Zone | Epics (`corazon_caldera`, `reactor_eter`) | Volcanic and thermal complex, Central Furnace `(330, 70)`, Aether Reactor, and portal `(270, 130)`. |
+| **Corridor and South Highway**| South Sector `(140,0)` to `(260,140)` | ~16,800 m² | 🟢 Safe Zone (Transit) | Connection & infrastructure | Checkpoint Parcel 13,1 `(212, 24)`, Grand Junction `(200, 70)`, and Steam Station `(170, 40)`. |
+| **The Junklands** | West Sector `(0,140)` to `(140,260)` | ~16,800 m² | 🟢 Low Difficulty | Commons (Wire, Screws, Pots) | Scavenger Camp `(70, 200)`, Brass Depot `(40, 170)`, and roadway $X=70$. |
+| **Abandoned Factory** | Middle Ring `(140,140)` to `(260,260)` | ~20,000 m² | 🟡 Medium Difficulty | Uncommons (Transistors, Gauges) | Ruined industrial structures containing materials with advanced stats. |
+| **Electrical Substation** | North Sector `(140,280)` to `(260,400)` | ~14,400 m² | 🟠 High Difficulty | Rares (Tesla Coils, Batteries, Engines) | High-voltage complex featuring galvanic and steam affinity components. |
+| **Radio Tower** | East Sector `(280,140)` to `(400,260)` | ~14,400 m² | 🟠 High Difficulty | Rares (Radio antennas, LED Diodes) | Old telecommunication towers with luminous affinity materials. |
+| **Grand Tournament Arena** | Center `(164,164)` to `(236,236)` | ~4,071 m² (Ø 72m) | 🏆 Competitive | 1v1 & 2v2 Ladder Tournament | Colossal circular steampunk tournament platform at `(200, 200)`. |
 
-![Detalle del Mapa y Anillos](GOLEMS/golems_map2.png)
-
----
-
-## 📡 El Radar de Calor y la Recolección
-
-Para ofrecer la máxima fluidez en dispositivos móviles, los materiales enterrados no requieren sistemas de puntería o *raycasting* complejos. En su lugar, el **Radar de Calor** (construido con React-ECS) procesa la distancia euclidiana entre el avatar y los recursos activos:
-
-![Radar de Calor](GOLEMS/golems_radar.png)
-
-- **Comportamiento del Radar**:
-  - **Lejos (> 30m)**: Sensor inactivo con tonalidades frías y pulso apagado.
-  - **Distancia Media (15m - 30m)**: Pulso rítmico suave en tonos amarillos.
-  - **Cercanía (< 15m)**: Pulso acelerado en tonos rojos/naranjas brillantes.
-  - **Proximidad Inmediata (< 4m)**: La pieza de chatarra emerge visualmente del suelo con un efecto de partículas emisivas.
-- **Recolección Táctil**: Al emerger, la pieza dispone de un colisionador de puntero amplio (*hitbox* táctil optimizada para pantallas táctiles) que se recolecta con un simple toque.
+![Map Details and Rings](GOLEMS/golems_map2_eng.png)
 
 ---
 
-## 🔩 Catálogo Completo de Materiales
+## 📡 The Heat Radar and Scavenging
 
-Existen **25 tipos de materiales**, clasificados en 5 niveles de rareza. Los materiales épicos y legendarios tienen un límite de **una sola instancia activa simultánea** en todo el mapa:
+To ensure optimal performance on mobile devices, buried materials do not require complex aiming or *raycasting* systems. Instead, the **Heat Radar** (built with React-ECS) computes the Euclidean distance between the avatar and active resources:
 
-| # | Material | Rareza | Peso Spawn | Tiempo Respawn | Zona | Aporte a Estadísticas y Afinidad |
+![Heat Radar](GOLEMS/golems_radar_eng.png)
+
+- **Radar Behavior**:
+  - **Far (> 30m)**: Sensor inactive with cool blue tones and an off pulse.
+  - **Medium Distance (15m - 30m)**: Gentle rhythmic pulse in yellow tones.
+  - **Close (< 15m)**: Accelerated pulse in bright red/orange tones.
+  - **Immediate Proximity (< 4m)**: The scrap part visually emerges from the ground with an emissive particle effect.
+- **Touch Scavenging**: Upon emerging, the part features a wide pointer collider (a touch *hitbox* optimized for touchscreens) collected with a single tap.
+
+---
+
+## 🔩 Complete Materials Catalog
+
+There are **25 types of materials**, categorized into 5 rarity tiers. Epic and Legendary materials are capped at **only one active instance at a time** across the entire map:
+
+| # | Material | Rarity | Spawn Weight | Respawn Time | Zone | Attribute & Affinity Contribution |
 | :-: | :--- | :--- | :-: | :-: | :--- | :--- |
-| 1 | **Alambre de cobre** | Común | 9% | 1 a 3 min | Chatarrales | +Velocidad |
-| 2 | **Tornillos y pernos** | Común | 9% | 1 a 3 min | Chatarrales | +Defensa |
-| 3 | **Engranajes desgastados** | Común | 8% | 1 a 3 min | Chatarrales | +Velocidad |
-| 4 | **Tubos de cobre** | Común | 8% | 1 a 3 min | Chatarrales | +Vitalidad |
-| 5 | **Sartenes** | Común | 7% | 1 a 3 min | Chatarrales | +Defensa |
-| 6 | **Ollas de cocinar** | Común | 7% | 1 a 3 min | Chatarrales | +Defensa |
-| 7 | **Placas de latón** | Común | 6% | 1 a 3 min | Chatarrales | +Defensa |
-| 8 | **Transistores** | Poco común | 6% | 4 a 7 min | Fábrica abandonada | +Ataque |
-| 9 | **Bombillas de filamento** | Poco común | 6% | 4 a 7 min | Fábrica abandonada | +Vitalidad & Afinidad Luminosa |
-| 10 | **Resortes de reloj** | Poco común | 5% | 4 a 7 min | Fábrica abandonada | +Velocidad |
-| 11 | **Manómetros** | Poco común | 5% | 4 a 7 min | Fábrica abandonada | +Vitalidad |
-| 12 | **Válvulas de vapor** | Poco común | 5% | 4 a 7 min | Fábrica abandonada | +Afinidad de Vapor |
-| 13 | **Lentes de televisor viejo** | Poco común | 4% | 4 a 7 min | Fábrica abandonada | +Velocidad |
-| 14 | **Motor de vapor** | Raro | 4% | 10 a 15 min | Subestación Eléctrica | +Ataque & Afinidad de Vapor |
-| 15 | **Bobinas de Tesla** | Raro | 3% | 10 a 15 min | Subestación Eléctrica | +Ataque & Afinidad Galvánica |
-| 16 | **Antenas de radio** | Raro | 3% | 10 a 15 min | Torre de Radio | +Velocidad |
-| 17 | **Diodos LED** | Raro | 3% | 10 a 15 min | Torre de Radio | +Afinidad Luminosa |
-| 18 | **Baterías alquímicas** | Raro | 3% | 10 a 15 min | Subestación Eléctrica | +Vitalidad & Afinidad Galvánica |
-| 19 | **Engranajes de bronce perfectos**| Raro | 2% | 10 a 15 min | Reserva de Minería | +Defensa & Afinidad Mecánica |
-| 20 | **Núcleo de maná condensado** | Épico | 2% | 20 a 30 min | Reserva de Minería | +Afinidad de Éter |
-| 21 | **Cerebro de autómata** | Épico | 2% | 20 a 30 min | Reserva de Minería | +Ataque & Afinidad Mecánica |
-| 22 | **Reactor de éter** | Épico | 2% | 20 a 30 min | Calderas de la Fundición (PK) | +Ataque & Afinidad de Éter |
-| 23 | **Corazón de caldera** | Épico | 1% | 20 a 30 min | Calderas de la Fundición (PK) | +Defensa & Afinidad de Vapor |
-| 24 | **Ojo de dragón mecánico** | Legendario | 0.5% | 45 a 60 min | Desierto de Chatarra (PK) | +Ataque & Afinidad de Éter |
-| 25 | **Corazón de golem primigenio** | Legendario | 0.5% | 45 a 60 min | Desierto de Chatarra (PK) | +Todas las Estadísticas |
+| 1 | **Copper Wire** (`alambre_cobre`) | Common | 9% | 1 to 3 min | Junklands | +Speed |
+| 2 | **Screws and Bolts** (`tornillos_pernos`) | Common | 9% | 1 to 3 min | Junklands | +Defense |
+| 3 | **Worn Gears** (`engranajes_desgastados`) | Common | 8% | 1 to 3 min | Junklands | +Speed |
+| 4 | **Copper Pipes** (`tubos_cobre`) | Common | 8% | 1 to 3 min | Junklands | +Vitality |
+| 5 | **Frying Pans** (`sartenes`) | Common | 7% | 1 to 3 min | Junklands | +Defense |
+| 6 | **Cooking Pots** (`ollas_cocinar`) | Common | 7% | 1 to 3 min | Junklands | +Defense |
+| 7 | **Brass Plates** (`placas_laton`) | Common | 6% | 1 to 3 min | Junklands | +Defense |
+| 8 | **Transistors** (`transistores`) | Uncommon | 6% | 4 to 7 min | Abandoned Factory | +Attack |
+| 9 | **Filament Bulbs** (`bombillas_filamento`) | Uncommon | 6% | 4 to 7 min | Abandoned Factory | +Vitality & Luminous Affinity |
+| 10 | **Clock Springs** (`resortes_reloj`) | Uncommon | 5% | 4 to 7 min | Abandoned Factory | +Speed |
+| 11 | **Pressure Gauges** (`manometros`) | Uncommon | 5% | 4 to 7 min | Abandoned Factory | +Vitality |
+| 12 | **Steam Valves** (`valvulas_vapor`) | Uncommon | 5% | 4 to 7 min | Abandoned Factory | +Steam Affinity |
+| 13 | **Old TV Lenses** (`lentes_tv_viejo`) | Uncommon | 4% | 4 to 7 min | Abandoned Factory | +Speed |
+| 14 | **Steam Engine** (`motor_vapor`) | Rare | 4% | 10 to 15 min | Electrical Substation | +Attack & Steam Affinity |
+| 15 | **Tesla Coils** (`bobinas_tesla`) | Rare | 3% | 10 to 15 min | Electrical Substation | +Attack & Galvanic Affinity |
+| 16 | **Radio Antennas** (`antenas_radio`) | Rare | 3% | 10 to 15 min | Radio Tower | +Speed |
+| 17 | **LED Diodes** (`diodos_led`) | Rare | 3% | 10 to 15 min | Radio Tower | +Luminous Affinity |
+| 18 | **Alchemical Batteries** (`baterias_alquimicas`) | Rare | 3% | 10 to 15 min | Electrical Substation | +Vitality & Galvanic Affinity |
+| 19 | **Perfect Bronze Gears** (`engranajes_bronce`) | Rare | 2% | 10 to 15 min | Mining Reserve | +Defense & Mechanical Affinity |
+| 20 | **Condensed Mana Core** (`nucleo_mana`) | Epic | 2% | 20 to 30 min | Mining Reserve | +Aether Affinity |
+| 21 | **Automaton Brain** (`cerebro_automata`) | Epic | 2% | 20 to 30 min | Mining Reserve | +Attack & Mechanical Affinity |
+| 22 | **Aether Reactor** (`reactor_eter`) | Epic | 2% | 20 to 30 min | Smelting Boilers (PK) | +Attack & Aether Affinity |
+| 23 | **Boiler Heart** (`corazon_caldera`) | Epic | 1% | 20 to 30 min | Smelting Boilers (PK) | +Defense & Steam Affinity |
+| 24 | **Mechanical Dragon Eye** (`ojo_dragon`) | Legendary | 0.5% | 45 to 60 min | Scrap Desert (PK) | +Attack & Aether Affinity |
+| 25 | **Primordial Golem Heart** (`corazon_primigenio`) | Legendary | 0.5% | 45 to 60 min | Scrap Desert (PK) | +All Stats |
 
 ---
 
-## 🔨 La Forja y Unicidad de los Golems (Hash Determinista)
+## 🔨 The Forge and Golem Uniqueness (Deterministic Hash)
 
-![La Forja](GOLEMS/golems_forja.png)
+![The Forge](GOLEMS/golems_forja_eng.png)
 
-1. **Composición de Recetas**: El jugador selecciona entre **5 y 12 piezas** de su inventario. Se pueden apilar materiales idénticos o balancear piezas variadas.
-2. **Serialización Canónica**: La receta se ordena alfabéticamente por identificador de material y cantidad (ej. `antena:2|bobina:1|cobre:3|engranaje:2|sarten:1`).
-3. **Hash Determinista**: Se calcula un hash numérico de 32 bits (FNV-1a / SHA truncado).
-4. **Derivación de Atributos y Rasgos**:
-   - **Estadísticas Base**: Suma ponderada de los materiales constituyentes.
-   - **Variación de Perfil**: El hash aplica ajustes porcentuales controlados.
-   - **Rasgos Visuales**: Tono de emisión, escala proporcional y detalles cosméticos.
-   - **Nomenclatura Procedural**: Prefijo y sufijo generados a partir de los componentes predominantes (ej. *«Vaporocrom Titánico»*, *«Galvanoide Blindado»*).
-5. **Determinismo y Coleccionismo**: La misma combinación de materiales produce **exactamente el mismo golem**, lo que permite descubrir, documentar y compartir recetas secretas entre jugadores.
+1. **Recipe Composition**: The player selects between **5 and 12 parts** from their inventory. Identical materials can be stacked or varied parts balanced.
+2. **Canonical Serialization**: The recipe is sorted alphabetically by material identifier and quantity (e.g., `antena:2|bobina:1|cobre:3|engranaje:2|sarten:1`).
+3. **Deterministic Hash**: A 32-bit numerical hash is calculated (FNV-1a / truncated SHA).
+4. **Derivation of Attributes and Features**:
+   - **Base Stats**: Weighted sum of constituent materials.
+   - **Profile Variation**: The hash applies controlled percentage adjustments.
+   - **Visual Features**: Emissive color hue, proportional scale, and cosmetic details.
+   - **Procedural Naming**: Prefix and suffix generated from predominant components (e.g., *"Titanic Steamchrome"*, *"Armored Galvanoid"*).
+5. **Determinism and Collectibility**: The exact same material combination yields **the exact same golem**, allowing players to discover, document, and share secret recipes with one another.
 
 ---
 
-## ⚔️ Estadísticas, Afinidades y Combate en Tiempo Real (FFA en la Gran Arena)
+## ⚔️ Stats, Affinities, and Real-Time Combat (FFA in the Grand Arena)
 
-![Estadísticas y Combate](GOLEMS/golems_stats.png)
+![Stats and Combat](GOLEMS/golems_stats_eng.png)
 
-Cada golem posee 5 estadísticas fundamentales generadas proceduralmente o por forja:
-- **Ataque (ATK)**: Daño base emitido por golpe ($20-38$).
-- **Defensa (DEF)**: Reducción directa del daño recibido ($10-22$).
-- **Vitalidad (HP)**: Puntos totales de salud del autómata ($100-160$).
-- **Velocidad (SPD)**: Frecuencia de ataque ($T_{\text{cooldown}} = 2.2\text{s} / (1 + \text{SPD}\times 0.04)$) y velocidad de traslación.
-- **Afinidad Elemental (AFF)**: Naturaleza energética del golem (`STEAM`, `MECHANICAL`, `GALVANIC`, `LUMINOUS`, `AETHER`).
+Each golem has 5 core stats generated procedurally or via forging:
+- **Attack (ATK)**: Base damage delivered per hit ($20-38$).
+- **Defense (DEF)**: Direct reduction of incoming damage ($10-22$).
+- **Vitality (HP)**: Total health points of the automaton ($100-160$).
+- **Speed (SPD)**: Attack frequency ($T_{\text{cooldown}} = 2.2\text{s} / (1 + \text{SPD}\times 0.04)$) and movement speed.
+- **Elemental Affinity (AFF)**: Energy type of the golem (`STEAM`, `MECHANICAL`, `GALVANIC`, `LUMINOUS`, `AETHER`).
 
-### El Pentágono de Afinidades Elementales
+### The Elemental Affinity Pentagon
 
-El sistema de combate incorpora un pentágono cíclico de ventajas y desventajas energéticas:
+The combat system features a cyclical pentagon of energy advantages and disadvantages:
 
 ```mermaid
 graph LR
-    VAPOR["💨 Vapor"] -->|"Oxida e inhabilita (x1.40)"| MECANICO["⚙️ Mecánico"]
-    MECANICO -->|"Aísla y desvía (x1.40)"| GALVANICO["⚡ Galvánico"]
-    GALVANICO -->|"Sobrecarga filamentos (x1.40)"| LUMINOSO["💡 Luminoso"]
-    LUMINOSO -->|"Dispersa y refracta (x1.40)"| ETER["🔮 Éter"]
-    ETER -->|"Condensa la presión (x1.40)"| VAPOR
+    STEAM["💨 Steam"] -->|"Rusts and disables (x1.40)"| MECHANICAL["⚙️ Mechanical"]
+    MECHANICAL -->|"Insulates and deflects (x1.40)"| GALVANIC["⚡ Galvanic"]
+    GALVANIC -->|"Overloads filaments (x1.40)"| LUMINOUS["💡 Luminous"]
+    LUMINOUS -->|"Disperses and refracts (x1.40)"| AETHER["🔮 Aether"]
+    AETHER -->|"Condenses pressure (x1.40)"| STEAM
 ```
 
-- **Ventaja de Afinidad**: Multiplicador de daño `×1.40` al golpear al tipo débil con texto dorado `⚡ CRÍTICO`.
-- **Desventaja de Afinidad**: Reducción de daño a `×0.75` al golpear al tipo fuerte.
-- **Ecuación de Daño por Tick**: $\text{Daño} = \max\left(2, \text{round}\big((\text{ATK} - \text{DEF} \times 0.5) \times \text{Multiplicador}\big)\right)$.
-- **Arquitectura de Equipos Canónicos (`GOLEM_TEAMS`)**: Inmunidad total a fuego amigo (`TEAM_PLAYER` vs `TEAM_REMOTE_*`).
-- **Separación Física Boids & Anillo de Combate**: Repulsión horizontal (`1.6m`) y parada a distancia (`1.8m`) para evitar encimamiento entre modelos 3D.
-- **Sincronización P2P por MessageBus**: Difusión instantánea de ataques (`golem_combat_attack`) y derrotas (`golem_combat_defeat`).
-- **Progresión y Recompensas**: $+60$ a $+120$ EXP por baja; subir de nivel restaura salud e incrementa ATK, DEF y HP.
-- 📖 *Guía técnica maestra:* [Guía del Sistema de Combate y Batallas FFA](guias/guia-sistema-combate-y-batallas.md).
+- **Affinity Advantage**: `×1.40` damage multiplier when striking the weak type with golden text `⚡ CRITICAL`.
+- **Affinity Disadvantage**: Damage reduction to `×0.75` when striking the strong type.
+- **Damage per Tick Equation**: $\text{Damage} = \max\left(2, \text{round}\big((\text{ATK} - \text{DEF} \times 0.5) \times \text{Multiplier}\big)\right)$.
+- **Canonical Team Architecture (`GOLEM_TEAMS`)**: Complete friendly fire immunity (`TEAM_PLAYER` vs `TEAM_REMOTE_*`).
+- **Boids Physical Separation & Combat Ring**: Horizontal repulsion (`1.6m`) and distance stopping (`1.8m`) to prevent 3D models from overlapping.
+- **P2P Synchronization via MessageBus**: Instant broadcast of attacks (`golem_combat_attack`) and defeats (`golem_combat_defeat`).
+- **Progression and Rewards**: $+60$ to $+120$ EXP per kill; leveling up restores health and increases ATK, DEF, and HP.
+- 📖 *Master technical guide:* [FFA Combat System and Battles Guide](guias/guia-sistema-combate-y-batallas.md).
 
 ---
 
-## 🤖 Golems Acompañantes y Acompañamiento Multijugador en Tiempo Real
+## 🤖 Companion Golems and Real-Time Multiplayer Following
 
-![Límite de Golems y Misiones](GOLEMS/golems_limite_y_misiones.png)
+![Golem Limit and Missions](GOLEMS/golems_limite_y_misiones_eng.png)
 
-- **Escuadrón Activo en Fila (Máximo 3)**: El jugador puede llevar consigo hasta 3 golems simultáneos.
-- **Asignación Aleatoria de 3 Tipos Diferentes (Por Sesión / Sin Persistencia)**: Cada jugador que ingresa o reingresa a la escena recibe automáticamente un conjunto aleatorio de **3 golems de tipos completamente distintos** (seleccionados al azar y sin duplicados entre las 5 afinidades elementales: Vapor, Galvánico, Mecánico, Luminoso y Éter). Al recargar o reincorporarse a la escena, se genera un conjunto nuevo y único en memoria volátil.
-- **Visualización Multijugador P2P en Tiempo Real (Multi-Trail System)**: Todos los jugadores presentes en la escena pueden ver en tiempo real los 3 golems acompañantes de cada usuario. El sistema utiliza una arquitectura distribuida que procesa trayectorias independientes para el avatar local (`engine.PlayerEntity`) y para todos los avatares remotos (`PlayerIdentityData` + `Transform`), ejecutando interpolación suave (*LERP/SLERP*) a 60 FPS con slots escalonados a $1.8\text{m}$, $3.6\text{m}$ y $5.4\text{m}$ sin saturar el bus CRDT.
-- **Handshake P2P y Etiquetas de Identificación**: Mediante eventos ligeros en `MessageBus` (`golem_squad_announce` y `golem_squad_request`), cada cliente difunde y almacena la composición del escuadrón de los demás avatares, mostrando etiquetas flotantes `Billboard` con el nombre, afinidad, nivel, barra de vida ASCII `[████████░░]` y la dirección abreviada de la cartera del dueño.
-  - 📖 *Guías técnicas maestras:*
-    - ⚔️ [Guía del Sistema de Combate y Batallas FFA](guias/guia-sistema-combate-y-batallas.md)
-    - 🏟️ [Guía de la Gran Arena Circular de Torneo Steampunk (72m)](guias/guia-arena-torneo-steampunk.md)
-    - 🏭 [Guía de la Fábrica de Golems y Jerarquías](guias/guia-fabrica-de-golems-y-mecanicas.md)
-    - 🤖 [Guía del Sistema de Seguimiento en Fila](guias/guia-sistema-seguimiento-y-mecanicas.md)
-    - 🌐 [Guía de Red Multijugador y Mobile-First](guias/guia-multijugador-mobile.md)
-- **Catálogo de 25 Modelos 3D (.glb) en 5 Carpetas Temáticas**: Incluye modelos binarios glTF 2.0 optimizados para móvil con materiales PBR y canales emisivos puros sin luces dinámicas:
-  - ♨️ **Vapor (`assets/models/steam/`)**: Cobre, calderas, chimeneas y fuego naranja (`golem_steam_01.glb` a `05.glb`).
-  - ⚡ **Galvánico (`assets/models/galvanic/`)**: Chasis angular, bobinas de Tesla y cian eléctrico (`golem_galvanic_01.glb` a `05.glb`).
-  - ⚙️ **Mecánico (`assets/models/mechanical/`)**: Blindaje de chatarra, engranajes y ámbar (`golem_mechanical_01.glb` a `05.glb`).
-  - ☀️ **Luminoso (`assets/models/luminous/`)**: Cromo plateado, faros prismáticos y luz solar (`golem_luminous_01.glb` a `05.glb`).
-  - 🔮 **Éter (`assets/models/aether/`)**: Obsidiana mística, resonadores flotantes y amatista (`golem_aether_01.glb` a `05.glb`).
-- **Golems en Reserva (Expediciones)**: Los golems que no viajan con el avatar pueden enviarse a misiones automáticas seleccionando:
-  - **Zona de Destino**: Determina la tabla de botín y rareza de piezas.
-  - **Duración**: Desde 15 minutos hasta 12 horas.
-  - **Eficiencia**: Calculada en base a la velocidad y afinidad del golem asignado.
-  - **Persistencia Asíncrona**: El progreso de la misión se computa en el servidor PHP/MySQL, permitiendo que sigan operando mientras el jugador no está conectado.
-
----
-
-## 🛡️ NPCs Hostiles y Guardianes de Zona
-
-El mundo cuenta con patrullas de NPCs mecánicos y guardianes que custodian las zonas más valiosas:
-
-- **Comportamiento por Waypoints**: Rutas de patrulla optimizadas sin sobrecargar la CPU de dispositivos móviles.
-- **Radio de Agresión**: Al aproximarse un jugador, el NPC activa el modo de combate contra los golems del usuario.
-- **Guardianes Élite**: En el *Desierto de Chatarra* y las *Calderas de la Fundición*, los golems de los NPCs tienen estadísticas avanzadas para proteger las piezas épicas y legendarias.
-- **Recompensas**: Derrotar NPCs otorga experiencia para el jugador y los golems, además de una probabilidad de dropeo de materiales directos.
+- **Active Squad in Line (Maximum 3)**: The player can carry up to 3 golems simultaneously.
+- **Random Assignment of 3 Different Types (Per Session / Non-Persistent)**: Every player who enters or re-enters the scene automatically receives a random set of **3 golems of completely distinct types** (selected at random with no duplicates among the 5 elemental affinities: Steam, Galvanic, Mechanical, Luminous, and Aether). Upon reloading or rejoining the scene, a new unique set is generated in volatile memory.
+- **Real-Time P2P Multiplayer Visualization (Multi-Trail System)**: All players present in the scene can see each user's 3 companion golems in real time. The system uses a distributed architecture processing independent trajectories for the local avatar (`engine.PlayerEntity`) and for all remote avatars (`PlayerIdentityData` + `Transform`), performing smooth interpolation (*LERP/SLERP*) at 60 FPS with staggered slots at $1.8\text{m}$, $3.6\text{m}$, and $5.4\text{m}$ without saturating the CRDT bus.
+- **P2P Handshake and Identification Tags**: Via lightweight `MessageBus` events (`golem_squad_announce` and `golem_squad_request`), each client broadcasts and stores the squad composition of other avatars, displaying floating `Billboard` tags with the owner's name, affinity, level, ASCII health bar `[████████░░]`, and abbreviated wallet address.
+  - 📖 *Master technical guides:*
+    - ⚔️ [FFA Combat System and Battles Guide](guias/guia-sistema-combate-y-batallas.md)
+    - 🏟️ [Steampunk Tournament Grand Circular Arena Guide (72m)](guias/guia-arena-torneo-steampunk.md)
+    - 🏭 [Golem Factory and Hierarchies Guide](guias/guia-fabrica-de-golems-y-mecanicas.md)
+    - 🤖 [Single-File Following System Guide](guias/guia-sistema-seguimiento-y-mecanicas.md)
+    - 🌐 [Multiplayer Network and Mobile-First Guide](guias/guia-multijugador-mobile.md)
+- **Catalog of 25 3D Models (.glb) in 5 Themed Folders**: Includes mobile-optimized glTF 2.0 binary models with PBR materials and pure emissive channels without dynamic lights:
+  - ♨️ **Steam (`assets/models/steam/`)**: Copper, boilers, chimneys, and orange fire (`golem_steam_01.glb` to `05.glb`).
+  - ⚡ **Galvanic (`assets/models/galvanic/`)**: Angular chassis, Tesla coils, and electric cyan (`golem_galvanic_01.glb` to `05.glb`).
+  - ⚙️ **Mechanical (`assets/models/mechanical/`)**: Scrap armor, gears, and amber (`golem_mechanical_01.glb` to `05.glb`).
+  - ☀️ **Luminous (`assets/models/luminous/`)**: Silver chrome, prismatic headlights, and sunlight (`golem_luminous_01.glb` to `05.glb`).
+  - 🔮 **Aether (`assets/models/aether/`)**: Mystical obsidian, floating resonators, and amethyst (`golem_aether_01.glb` to `05.glb`).
+- **Reserve Golems (Expeditions)**: Golems not travelling with the avatar can be sent on automated missions by selecting:
+  - **Destination Zone**: Determines the loot table and part rarity.
+  - **Duration**: From 15 minutes to 12 hours.
+  - **Efficiency**: Calculated based on the assigned golem's speed and affinity.
+  - **Asynchronous Persistence**: Mission progress is computed on the PHP/MySQL server, enabling them to operate while the player is offline.
 
 ---
 
-## 📈 Progresión y Sistema de Niveles
+## 🛡️ Hostile NPCs and Zone Guardians
 
-- **Nivel del Jugador**: Se incrementa al recolectar, forjar, ganar batallas y completar expediciones. Desbloquea más espacios para misiones simultáneas, mayor capacidad de almacén y aumento del rango del radar.
-- **Nivel de los Golems**: Ganado en combate y misiones. Aumenta las estadísticas de forma proporcional a su perfil de forja.
-- **Techo de Nivel según Rareza**: Un golem forjado con materiales épicos o legendarios posee un límite de nivel superior al de un golem hecho de chatarra común.
+The world features mechanical NPC patrols and guardians guarding the most valuable areas:
 
----
-
-## 🏆 Torneo Escalera Competitivo (1v1 y 2v2)
-
-![Torneo Escalera](GOLEMS/golems_torneo.png)
-
-El Distrito de la Forja alberga el podio y panel interactivo de la **Escalera Competitiva**:
-
-- **Formato 1v1**: 3 golems vs 3 golems (resolución en tiempo real por comparación de estadísticas y afinidades).
-- **Formato 2v2**: 2 jugadores por equipo con 3 golems cada uno (12 golems simultáneos en arena de combate).
-- **Clasificación Elo**: El matchmaking empareja a combatientes con puntuaciones similares y registra los resultados en la base de datos MySQL mediante firmas criptográficas.
-- **Sin Dependencia de Reflejos de Disparo**: Al resolverse por estadísticas y afinidades, el torneo garantiza igualdad absoluta de condiciones entre jugadores de móviles y de escritorio.
+- **Waypoint Behavior**: Optimized patrol routes without overloading mobile device CPUs.
+- **Aggression Radius**: When a player approaches, the NPC enters combat mode against the user's golems.
+- **Elite Guardians**: In the *Scrap Desert* and *Smelting Boilers*, NPC golems have advanced stats to protect epic and legendary parts.
+- **Rewards**: Defeating NPCs awards experience to the player and golems, along with a chance for direct material drops.
 
 ---
 
-## 🏟️ Gran Arena Circular de Torneo Steampunk (Colosal 72m - Cell Games Ring)
+## 📈 Progression and Level System
 
-Ubicada en el centro geométrico del mundo (`X: 200m, Z: 200m`), esta colosal estructura de **72 metros de diámetro** ($R = 36\text{m}$) está inspirada en la arquitectura del cuadrilátero del Torneo de Cell (*Dragon Ball Z*) reinterpretada bajo una estética post-industrial de vapor y engranajes:
-
-- **Plataforma Elevada Radial (72m)**: Más de 250 losas de madera reforzada y metal elevado $+0.6\text{m}$ sobre el terreno, con 56 segmentos continuos de bordillos de adoquín.
-- **Cuatro Columnas Monumentales de 12 Metros**: En las 4 esquinas diagonales (NW, NE, SE, SW), integradas por calderas base ampliadas (1.8x), fustes triples de engranajes verticales (`Gear Shaft.glb`), doble anillo giratorio contragiro (`Gear 10 Teeth` y `Gear 8 Teeth`), farolas dobles y chimeneas superiores humeantes (`Smoker.glb`).
-- **Gran Sigilo Planetario Central**: Un engranaje central colosal (`Gear Big.glb` escala 4.8x / ~12m diámetro) girando a $+0.20\text{ rad/s}$ sincronizado con 8 engranajes satélites en formación orbital y un altar relicario con espada (`Arthur Sword.glb`).
-- **16 Balizas Perimetrales y Rampas Ceremoniales**: Pedestales de barril con números Steampunk (`00` a `08`) y 4 grandes rampas cardinales de acceso (Norte, Sur, Este, Oeste) con doble barandilla de seguridad (`Tree Fence.glb`).
-- **Guía Técnica Detallada**: Consulta [`guias/guia-arena-torneo-steampunk.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-arena-torneo-steampunk.md).
+- **Player Level**: Increased by scavenging, forging, winning battles, and completing expeditions. Unlocks more simultaneous mission slots, larger vault capacity, and extended radar range.
+- **Golem Level**: Earned in combat and missions. Proportionally increases stats based on their forge profile.
+- **Level Cap by Rarity**: A golem forged with epic or legendary materials has a higher level ceiling than one made of common scrap.
 
 ---
 
-## 🏗️ Arquitectura Técnica y Persistencia
+## 🏆 Competitive Ladder Tournament (1v1 and 2v2)
 
-El proyecto implementa una arquitectura híbrida optimizada para el entorno descentralizado y de alto rendimiento:
+![Ladder Tournament](GOLEMS/golems_torneo_eng.png)
+
+The Forge District houses the podium and interactive panel for the **Competitive Ladder**:
+
+- **1v1 Format**: 3 golems vs 3 golems (resolved in real time by comparing stats and affinities).
+- **2v2 Format**: 2 players per team with 3 golems each (12 simultaneous golems in the combat arena).
+- **Elo Rating**: Matchmaking pairs combatants with similar scores and logs results to the MySQL database via cryptographic signatures.
+- **No Reliance on Reflexes/Shooting**: By resolving via stats and affinities, the tournament guarantees absolute equal footing between mobile and desktop players.
+
+---
+
+## 🏟️ Colossal 72m Steampunk Tournament Arena (Cell Games Ring)
+
+Located at the geometric center of the world (`X: 200m, Z: 200m`), this colossal **72-meter diameter** ($R = 36\text{m}$) structure is inspired by the ring architecture from Cell's Tournament (*Dragon Ball Z*) reinterpreted with a post-industrial steam-and-gear aesthetic:
+
+- **Radial Elevated Platform (72m)**: Over 250 reinforced wooden planks and metal elevated $+0.6\text{m}$ above the terrain, with 56 continuous cobble curb segments.
+- **Four 12-Meter Monumental Pillars**: At the 4 diagonal corners (NW, NE, SE, SW), built with enlarged base boilers (1.8x), triple vertical gear shafts (`Gear Shaft.glb`), double counter-rotating gear rings (`Gear 10 Teeth` and `Gear 8 Teeth`), double streetlights, and smoking top chimneys (`Smoker.glb`).
+- **Grand Central Planetary Sigil**: A colossal central gear (`Gear Big.glb` scale 4.8x / ~12m diameter) rotating at $+0.20\text{ rad/s}$ synchronized with 8 satellite gears in orbital formation and a reliquary altar with sword (`Arthur Sword.glb`).
+- **16 Perimeter Beacons and Ceremonial Ramps**: Barrel pedestals with Steampunk numbers (`00` to `08`) and 4 large cardinal access ramps (North, South, East, West) with double safety guardrails (`Tree Fence.glb`).
+- **Detailed Technical Guide**: See [`guias/guia-arena-torneo-steampunk.md`](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-arena-torneo-steampunk.md).
+
+---
+
+## 🏗️ Technical Architecture and Persistence
+
+The project implements a hybrid architecture optimized for decentralized and high-performance environments:
 
 ```mermaid
 graph TD
-    subgraph Cliente_Decentraland["Cliente Decentraland (Mobile / Desktop)"]
+    subgraph Decentraland_Client["Decentraland Client (Mobile / Desktop)"]
         ECS["SDK7 ECS Engine (TypeScript)"]
-        UI["React-ECS UI (Radar, HUD, Inventario)"]
+        UI["React-ECS UI (Radar, HUD, Inventory)"]
         Multi["P2P Comms (MessageBus Handshake & Multi-Trail)"]
     end
 
-    subgraph Backend_Persistente["Backend Persistente"]
-        API["API REST (PHP 8.x)"]
-        AUTH["Verificación de Firmas Web3 (signedFetch)"]
-        DB[(Base de Datos MySQL)]
+    subgraph Persistent_Backend["Persistent Backend"]
+        API["REST API (PHP 8.x)"]
+        AUTH["Web3 Signature Verification (signedFetch)"]
+        DB[(MySQL Database)]
     end
 
-    ECS <-->|"Interacción Local & Audio"| UI
-    ECS <-->|"Sincronización P2P en Vivo"| Multi
-    ECS -->|"Peticiones Firmadas (signedFetch)"| API
+    ECS <-->|"Local Interaction & Audio"| UI
+    ECS <-->|"Live P2P Sync"| Multi
+    ECS -->|"Signed Requests (signedFetch)"| API
     API --> AUTH
-    AUTH -->|"Lectura / Escritura"| DB
+    AUTH -->|"Read / Write"| DB
 ```
 
-- **Runtime de Escena**: Decentraland SDK7 (`@dcl/sdk/ecs`, `@dcl/sdk/react-ecs`, `@dcl/sdk/math`).
-- **Multijugador P2P Autónomo**: Difusión ligera de escuadrones con `MessageBus` y simulación local distribuida sin dependencia de servidores externos para el movimiento en vivo.
-- **Persistencia de Datos**: Peticiones firmadas con `signedFetch` hacia la API PHP para operaciones críticas (inventario, recetas de golems, expediciones y ranking).
-
-
----
-
-## 📱 Diseño Mobile-First y Restricciones de Rendimiento
-
-Para asegurar 60 FPS estables y compatibilidad total con la aplicación móvil de Decentraland (Godot Explorer), la escena cumple estrictamente las directrices oficiales:
-
-- 🚫 **Sin Luces Dinámicas**: Se utilizan materiales con textura horneada y emisivos unlit para efectos de radar y energía.
-- 🚫 **Sin Raycasting Avanzado de Puntero**: Reemplazado por detección de distancia euclidiana del radar.
-- 🚫 **Sin Nine-Slice Complejo**: Fondos de interfaz planos o con texturas de dimensiones fijas.
-- 🚫 **Sin Análisis de Frecuencia de Audio (FFT)**: Audio espacial ligero con componentes `AudioSource`.
-- 🚫 **Sin Dependencia de Teclado Físico / Ratón**: Controles 100% táctiles con hitboxes de gran tamaño y respeto a las zonas seguras (evitando colisión con los joysticks virtuales de la pantalla).
+- **Scene Runtime**: Decentraland SDK7 (`@dcl/sdk/ecs`, `@dcl/sdk/react-ecs`, `@dcl/sdk/math`).
+- **Autonomous P2P Multiplayer**: Lightweight squad broadcast via `MessageBus` and distributed local simulation without relying on external servers for live movement.
+- **Data Persistence**: Signed requests via `signedFetch` to the PHP API for critical operations (inventory, golem recipes, expeditions, and ranking).
 
 ---
 
-## 🚀 Instalación, Desarrollo y Despliegue
+## 📱 Mobile-First Design and Performance Constraints
 
-### Requisitos Previos
-- **Node.js**: Versión `>= 18.0.0`
-- **NPM**: Versión `>= 8.0.0`
-- **Decentraland CLI**: Instalado automáticamente con el SDK
+To guarantee a stable 60 FPS and complete compatibility with the Decentraland mobile app (Godot Explorer), the scene strictly complies with official guidelines:
 
-### Pasos de Instalación
+- 🚫 **No Dynamic Lights**: Materials with baked textures and unlit emissives are used for radar and energy effects.
+- 🚫 **No Advanced Pointer Raycasting**: Replaced by Euclidean distance detection from the radar.
+- 🚫 **No Complex Nine-Slice**: Flat UI backgrounds or textures with fixed dimensions.
+- 🚫 **No Audio Frequency Analysis (FFT)**: Lightweight spatial audio using `AudioSource` components.
+- 🚫 **No Physical Keyboard / Mouse Dependency**: 100% touch controls with oversized hitboxes respecting safe zones (avoiding collision with virtual on-screen joysticks).
+
+---
+
+## 🚀 Installation, Development, and Deployment
+
+### Prerequisites
+- **Node.js**: Version `>= 18.0.0`
+- **NPM**: Version `>= 8.0.0`
+- **Decentraland CLI**: Installed automatically with the SDK
+
+### Installation Steps
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clone the repository
 git clone https://github.com/cjbaezilla/Hackathon-Decentraland-Scene.git
 cd Hackathon-Decentraland-Scene
 
-# 2. Instalar dependencias
+# 2. Install dependencies
 npm install
 
-# 3. Iniciar el entorno de desarrollo local con recarga en caliente
+# 3. Start local development environment with hot reload
 npm start
 ```
 
-### Comandos Disponibles
+### Available Commands
 
-| Comando | Descripción |
+| Command | Description |
 | :--- | :--- |
-| `npm start` | Inicia el servidor de prueba local con interfaz web y depuración. |
-| `npm run build` | Compila el código TypeScript a JavaScript en `bin/index.js`. |
-| `npm run deploy` | Despliega la escena en el Decentraland World asignado (`golems.dcl.eth`). |
-| `npm run upgrade-sdk` | Actualiza `@dcl/sdk` a la versión más reciente disponible. |
-| `node scripts/download_steampunk_assets.js` | Descarga y organiza automáticamente los modelos 3D y texturas oficiales del paquete Steampunk de Decentraland. |
-| `node scripts/generate_models.js` | Genera proceduralmente los 25 modelos 3D GLB (glTF 2.0) organizados por tipo (`--help` para ver opciones CLI). |
+| `npm start` | Starts local test server with web interface and debugging. |
+| `npm run build` | Compiles TypeScript code to JavaScript in `bin/index.js`. |
+| `npm run deploy` | Deploys scene to assigned Decentraland World (`golems.dcl.eth`). |
+| `npm run upgrade-sdk` | Upgrades `@dcl/sdk` to latest available version. |
+| `node scripts/download_steampunk_assets.js` | Automatically downloads and organizes official Decentraland Steampunk package 3D models and textures. |
+| `node scripts/generate_models.js` | Procedurally generates 25 GLB 3D models (glTF 2.0) organized by type (`--help` to see CLI options). |
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```text
 Hackathon/
-├── assets/                     # Modelos 3D (.glb), texturas, sonidos e iconos
-│   ├── asset-packs/            # Modelos oficiales de Decentraland (Steampunk pack y arena)
-│   └── models/                 # Modelos 3D GLB organizados por afinidad (25 modelos en total)
-│       ├── steam/              # Golems de Vapor (golem_steam_01.glb a 05.glb)
-│       ├── galvanic/           # Golems Galvánicos (golem_galvanic_01.glb a 05.glb)
-│       ├── mechanical/         # Golems Mecánicos (golem_mechanical_01.glb a 05.glb)
-│       ├── luminous/           # Golems Luminosos (golem_luminous_01.glb a 05.glb)
-│       └── aether/             # Golems de Éter (golem_aether_01.glb a 05.glb)
-├── GOLEMS/                     # GDD oficial, diagramas, esquemas y portada de Golems
-│   ├── GDD-Golems.md           # Documento de diseño de juego integral
-│   ├── golems_cover.png        # Portada oficial de la experiencia
-│   └── *.png                   # Ilustraciones e infografías conceptuales
-├── guias/                      # Guías técnicas y documentación maestra de la experiencia
-│   ├── README.md               # Índice Maestro y Directorio de Todas las Guías Técnicas
-│   ├── guia-npc-bienvenida-silas.md           # Guía Maestra del NPC Silas el Sobreviviente y Campamento
-│   ├── guia-mapa-zonas-y-distritos.md         # Guía Maestra del Mapa 25x25, 9 Zonas, Trampolines y Puestos
-│   ├── guia-arena-torneo-steampunk.md         # Guía de la Gran Arena Circular de Torneo Steampunk (72m)
-│   ├── guia-fabrica-de-golems-y-mecanicas.md   # Guía del Wreckage Lab y Forja de Golems
-│   ├── guia-sistema-combate-y-batallas.md     # Guía del Sistema de Combate en Tiempo Real y FFA
-│   ├── guia-sistema-seguimiento-y-mecanicas.md # Guía del sistema de seguimiento Multi-Trail FIFO LERP
-│   ├── guia-multijugador-mobile.md             # Guía de red P2P MessageBus y Mobile-First
-│   └── guia-soporte-bilingue-i18n.md          # Guía del Sistema Bilingüe e Internacionalización (ES / EN)
-├── docs/                       # Documentación oficial de Decentraland y SDK Skills
-│   ├── dcl-docs-main/          # Documentación oficial de Decentraland SDK7
-│   └── sdk-skills-main/        # Catálogo maestro de habilidades y patrones
-├── scripts/                    # Scripts de generación de assets y utilidades
-│   ├── download_steampunk_assets.js # Descargador automatizado de modelos GLB oficiales de Decentraland
-│   ├── generate_models.js      # Generador binario procedural de modelos .glb glTF 2.0 (CLI paramétrico)
-│   └── README.md               # Manual de uso detallado del generador CLI y catálogo de modelos
-├── src/                        # Código fuente TypeScript SDK7
-│   ├── index.ts                # Inicializador principal y orquestador de sistemas
-│   ├── state.ts                # Estado global reactivo de la escena (EXP, kills, logs, diálogo NPC)
-│   ├── ui.tsx                  # Interfaz de usuario con React-ECS (HUD, Selector de Idioma, Modal Silas)
-│   ├── multiplayer.ts          # Infraestructura P2P (MessageBus handshake, ataques y derrotas)
-│   ├── i18n/                   # Motor de internacionalización y diccionarios bilingües
-│   │   ├── types.ts            # Esquemas de tipos y TranslationSchema
-│   │   ├── index.ts            # Motor t(), toggleLanguage() y suscripciones reactivas
-│   │   └── locales/            # Diccionarios canónicos tipados (es.ts y en.ts)
-│   ├── config/                 # Configuraciones maestras y constantes
-│   │   ├── arenaConfig.ts      # Configuración espacial, dimensiones y modelos de la Arena Steampunk
-│   │   ├── userHideoutConfig.ts# Configuración del Escondite y Bóveda del Jugador (3 cofres cerrados)
-│   │   ├── forgeDistrictConfig.ts # Configuración y trazado vial del Distrito de la Forja
-│   │   └── golems.ts           # Configuración de golems, afinidades, pentágono y generador RPG
-│   ├── components/             # Componentes ECS personalizados (Schemas)
-│   │   ├── arena.ts            # ArenaRotatorComponent (Rotación determinista continua)
-│   │   ├── combat.ts           # GolemCombatComponent, FloatingDamageComponent y GOLEM_TEAMS
-│   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
-│   ├── objects/                # Patrón Factory de GameObjects
-│   │   ├── welcomeNpc.ts       # Fábrica del NPC de Bienvenida Silas, campamento y animación reactiva
-│   │   ├── userHideoutBuilder.ts# Fábrica constructora del Escondite y Bóveda del Jugador
-│   │   ├── arenaBuilder.ts     # Constructor procedimental de la Gran Arena de Torneo Steampunk
-│   │   ├── wreckageLabBuilder.ts# Constructor del Laboratorio de Desguace (Wreckage Lab)
-│   │   ├── tradingPostsBuilder.ts# Constructor de los 10 puestos de comercio steampunk
-│   │   ├── golemFactory.ts     # Fábrica de entidades, billboards, salud ASCII y números flotantes
-│   │   └── trampoline.ts       # Trampolín propulsor steampunk de vapor
-│   └── systems/                # Sistemas ECS
-│       ├── arenaAnimationSystem.ts # Sistema de animación continua de engranajes y coronas de la arena
-│       ├── followerSystem.ts   # Sistema de seguimiento Multi-Trail FIFO LERP/SLERP y salto a arena
-│       ├── golemCombatSystem.ts# Sistema ECS de Combate FFA, IA táctica, anillo y repulsión Boids
-│       └── trampolineSystem.ts # Sistema de detección y salto del trampolín
-├── scene.json                  # Metadatos del World (25x25 parcelas, spawn, rating)
-├── package.json                # Dependencias y scripts de construcción
-├── tsconfig.json               # Configuración del compilador TypeScript
-├── AGENTS.md                   # Instrucciones maestras y contexto para IA
-└── README.md                   # Documentación principal del repositorio
+├── assets/                     # 3D models (.glb), textures, sounds, and icons
+│   ├── asset-packs/            # Official Decentraland models (Steampunk pack & arena)
+│   └── models/                 # GLB 3D models organized by affinity (25 models in total)
+│       ├── steam/              # Steam Golems (golem_steam_01.glb to 05.glb)
+│       ├── galvanic/           # Galvanic Golems (golem_galvanic_01.glb to 05.glb)
+│       ├── mechanical/         # Mechanical Golems (golem_mechanical_01.glb to 05.glb)
+│       ├── luminous/           # Luminous Golems (golem_luminous_01.glb to 05.glb)
+│       └── aether/             # Aether Golems (golem_aether_01.glb to 05.glb)
+├── GOLEMS/                     # Official GDD, diagrams, schemas, and Golems cover
+│   ├── GDD-Golems.md           # Comprehensive game design document (Spanish)
+│   ├── GDD-Golems_eng.md       # Comprehensive game design document (English)
+│   ├── golems_cover_eng.png    # Official experience cover (English version)
+│   └── *.png                   # Conceptual illustrations and infographics
+├── guias/                      # Technical guides and master documentation
+│   ├── README.md               # Master Index and Directory of All Technical Guides
+│   ├── guia-npc-bienvenida-silas.md           # Welcome NPC Silas the Survivor & Camp Master Guide
+│   ├── guia-mapa-zonas-y-distritos.md         # 25x25 Map, 9 Zones, Trampolines & Posts Master Guide
+│   ├── guia-arena-torneo-steampunk.md         # Steampunk Tournament Grand Circular Arena (72m) Guide
+│   ├── guia-fabrica-de-golems-y-mecanicas.md   # Wreckage Lab and Golem Forge Guide
+│   ├── guia-sistema-combate-y-batallas.md     # Real-Time FFA Combat System Guide
+│   ├── guia-sistema-seguimiento-y-mecanicas.md # Multi-Trail FIFO LERP Following System Guide
+│   ├── guia-multijugador-mobile.md             # MessageBus P2P Network and Mobile-First Guide
+│   └── guia-soporte-bilingue-i18n.md          # Dual-Language System & i18n Guide (ES / EN)
+├── docs/                       # Official Decentraland documentation and SDK Skills
+│   ├── dcl-docs-main/          # Official Decentraland SDK7 documentation
+│   └── sdk-skills-main/        # Master catalog of skills and patterns
+├── scripts/                    # Asset generation scripts and utilities
+│   ├── download_steampunk_assets.js # Automated downloader for official Decentraland GLB models
+│   ├── generate_models.js      # Procedural binary generator for .glb glTF 2.0 models (parametric CLI)
+│   └── README.md               # Detailed CLI generator manual and model catalog
+├── src/                        # SDK7 TypeScript source code
+│   ├── index.ts                # Main initializer and systems orchestrator
+│   ├── state.ts                # Scene reactive global state (EXP, kills, logs, NPC dialogue)
+│   ├── ui.tsx                  # React-ECS user interface (HUD, Language Selector, Silas Modal)
+│   ├── multiplayer.ts          # P2P infrastructure (MessageBus handshake, attacks & defeats)
+│   ├── i18n/                   # Internationalization engine and bilingual dictionaries
+│   │   ├── types.ts            # Type schemas and TranslationSchema
+│   │   ├── index.ts            # Engine t(), toggleLanguage() and reactive subscriptions
+│   │   └── locales/            # Canonical typed dictionaries (es.ts and en.ts)
+│   ├── config/                 # Master configurations and constants
+│   │   ├── arenaConfig.ts      # Spatial configuration, dimensions & models for Steampunk Arena
+│   │   ├── userHideoutConfig.ts# Player Hideout and Vault configuration (3 locked chests)
+│   │   ├── forgeDistrictConfig.ts # Forge District configuration and road layout
+│   │   └── golems.ts           # Golems configuration, affinities, pentagon & RPG generator
+│   ├── components/             # Custom ECS components (Schemas)
+│   │   ├── arena.ts            # ArenaRotatorComponent (Continuous deterministic rotation)
+│   │   ├── combat.ts           # GolemCombatComponent, FloatingDamageComponent & GOLEM_TEAMS
+│   │   └── follower.ts         # GolemFollowerComponent (with ownerAddress & squad DTOs)
+│   ├── objects/                # GameObjects Factory Pattern
+│   │   ├── welcomeNpc.ts       # Welcome NPC Silas factory, camp & reactive animation
+│   │   ├── userHideoutBuilder.ts# Player Hideout & Vault builder factory
+│   │   ├── arenaBuilder.ts     # Steampunk Tournament Grand Arena procedural builder
+│   │   ├── wreckageLabBuilder.ts# Wreckage Lab builder
+│   │   ├── tradingPostsBuilder.ts# Steampunk trading posts builder (10 posts)
+│   │   ├── golemFactory.ts     # Entities factory, billboards, ASCII health & floating numbers
+│   │   └── trampoline.ts       # Steampunk steam booster trampoline
+│   └── systems/                # ECS Systems
+│       ├── arenaAnimationSystem.ts # Arena gears and crowns continuous animation system
+│       ├── followerSystem.ts   # Multi-Trail FIFO LERP/SLERP following system & arena leap
+│       ├── golemCombatSystem.ts# FFA Combat ECS system, tactical AI, ring & Boids repulsion
+│       └── trampolineSystem.ts # Trampoline detection and jump system
+├── scene.json                  # World metadata (25x25 parcels, spawn, rating)
+├── package.json                # Dependencies and build scripts
+├── tsconfig.json               # TypeScript compiler configuration
+├── AGENTS.md                   # AI master instructions and context
+└── README.md                   # Main repository documentation
 ```
 
 ---
 
-## 👥 Créditos y Contacto
+## 👥 Credits and Contact
 
-- **Creador y Desarrollador**: Carlos Baeza (`baeza.eth`)
-- **Contacto**: `hola@cbaeza.com`
-- **Mundo Desplegado**: `golems.dcl.eth`
+- **Creator and Developer**: Carlos Baeza (`baeza.eth`)
+- **Contact**: `hola@cbaeza.com`
+- **Deployed World**: `golems.dcl.eth`

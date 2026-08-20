@@ -8,52 +8,75 @@ Golems es una experiencia multijugador para Decentraland donde cada visitante en
 
 El corazón del juego es el golem. Cada golem nace de una receta concreta y, gracias a un sistema de hash determinista, ninguna combinación produce exactamente el mismo resultado dos veces por accidente, aunque sí se puede reproducir a voluntad si memorizas la receta. Un jugador puede forjar y llevar consigo hasta tres golems que lo siguen por el mundo. Los que no viajan contigo no se quedan de brazos cruzados: los envías a misiones de recolección automatizadas que siguen trabajando mientras tú haces otra cosa.
 
-Alrededor de esa idea central orbitan el combate en tiempo real basado en estadísticas, los personajes no jugadores que patrullan la escena con sus propios golems hostiles, la progresión por niveles y un torneo competitivo estilo escalera que se juega tanto en formato uno contra uno como en formato dos contra dos.
+Alrededor de esa idea central orbitan el combate en tiempo real basado en estadísticas, los personajes no jugadores que patrullan la escena con sus propios golems hostiles, la progresión por niveles y un torneo competitivo estilo escalera que se juega tanto en formato uno contra uno como en formato dos contra dos en una colosal arena de torneo de 72 metros.
 
-La intención es que una persona recién llegada entienda qué hacer en los primeros dos minutos, y que quien lleva semanas jugando siga encontrando razones para volver, ya sea por una pieza legendaria que no aparece, por un golem que quiere forjar con una receta secreta o por un rival que le está ganando en la tabla.
+La intención es que una persona recién llegada entienda qué hacer en los primeros dos minutos gracias al acompañamiento del NPC tutorial **Silas el Sobreviviente**, y que quien lleva semanas jugando siga encontrando razones para volver, ya sea por una pieza legendaria que no aparece, por un golem que quiere forjar con una receta secreta o por un rival que le está ganando en la tabla.
 
 ![de_que_trata](golems_de_que_trata.png)
 
 ## 2. El bucle principal de juego
 
-El recorrido típico de una sesión se puede resumir en un flujo circular que se retroalimenta. Primero el jugador aparece en el Distrito de la Forja, que funciona como punto de partida y zona segura en una de las esquinas del mapa. Ahí recibe el radar de calor y una breve explicación de cómo funciona. En segundo lugar sale a explorar, y el radar lo guía hacia piezas enterradas, escondidas entre los restos de maquinaria. Tercero, cuando tiene suficientes materiales, vuelve a la forja y los combina para crear un golem. Cuarto, ese golem lo acompaña a combatir contra los NPC hostiles o a enfrentarse a otros jugadores. Quinto, los golems que no lo siguen se envían a misiones de recolección que generan más materiales. Ese último paso cierra el círculo y devuelve al jugador al primer punto con más recursos de los que tenía.
+El recorrido típico de una sesión se puede resumir en un flujo circular que se retroalimenta:
 
-Lo importante de este bucle es que no tiene un final obligatorio ni una meta única. Cada jugador decide si se especializa en coleccionar piezas raras, en forjar golems con combinaciones poco comunes, en subir de nivel combatiendo o en trepar en la escalera competitiva. Las cuatro actividades se alimentan entre sí, así que una persona que solo quiere recolectar igualmente termina con materiales que puede vender o usar, y alguien que solo quiere pelear necesita recolectar para forjar mejores golems.
+1. **Distrito de la Forja (Spawn & Base)**: El jugador aparece en la parcela `[0,0]` `(15.8m, 5.9m)`, interactúa opcionalmente con Silas el Sobreviviente, consulta su Escondite y Bóveda personal `(Z: 17.7m, X: 3.8m-8.0m)` y recibe el Radar de Calor.
+2. **Exploración del Mapa (25x25 / 400m × 400m)**: Sale a explorar guiado por las pulsaciones térmicas del radar y el Minimapa 2D superpuesto en el HUD.
+3. **Recolección de Chatarra**: Al acercarse a menos de 4m, la pieza emerge visualmente del suelo y se recolecta mediante un toque táctil.
+4. **Forja Determinista**: En el Wreckage Lab de la Forja, combina de 5 a 12 componentes para generar golems con atributos y nombres derivados algorítmicamente.
+5. **Acompañamiento y Combate**: Asigna hasta 3 golems activos que lo siguen en formación Multi-Trail FIFO LERP y luchan en tiempo real contra NPCs o jugadores en la Gran Arena de 72m.
+6. **Misiones de Reserva Automatizadas**: Asigna a los golems en reserva misiones de recolección fuera de línea que generan botín persistente.
+
+Cada jugador decide si se especializa en coleccionar piezas raras, en forjar golems con combinaciones poco comunes, en subir de nivel combatiendo o en trepar en la escalera competitiva.
 
 ![bucle_juego](golems_bucle_juego.png)
 
-## 3. El mundo y el mapa
+## 3. El mundo y el mapa (Grid 25x25 - 400m × 400m)
 
-La experiencia se despliega en un Decentraland World de veinticinco por veinticinco parcelas, lo que equivale a un terreno de cuatrocientos por cuatrocientos metros. Son ciento sesenta mil metros cuadrados de superficie útil, y el terreno usa la configuración de paisaje natural propia de los Worlds, con colinas suaves y desniveles que dan variedad sin complicar la navegación en móvil.
+La experiencia se despliega en un Decentraland World de veinticinco por veinticinco parcelas (desde `0,0` hasta `24,24`), lo que equivale a un terreno de cuatrocientos por cuatrocientos metros. Son ciento sesenta mil metros cuadrados de superficie útil, y el terreno usa la configuración de paisaje natural propia de los Worlds (`landscapeTerrain: true`), con colinas suaves y desniveles que dan variedad sin complicar la navegación en móvil.
 
-Dentro de ese espacio se distribuyen varias zonas temáticas que ordenan la rareza de los materiales. El Distrito de la Forja se ubica en la esquina suroeste del mapa, la misma donde el terreno empieza a contar desde las coordenadas cero, y funciona como punto de aparición, lugar de forja y refugio seguro donde no hay combate entre jugadores. Desde esa esquina, la dificultad del mundo crece de forma progresiva a medida que uno se aleja, como si el terreno se ordenara en anillos concéntricos alrededor del punto de partida. La regla es fácil de leer para cualquiera: cuanto más lejos de la forja, más valioso el material y más peligroso el camino.
+### 3.1 Distribución Espacial de Zonas y las 4 Esquinas Simétricas (140m × 140m c/u)
 
-El primer anillo, pegado a la esquina de partida, reúne los chatarrales, planos y despejados, donde abundan los materiales comunes. El segundo anillo, a media distancia, alberga la fábrica abandonada con sus piezas poco comunes como transistores y manómetros. El tercer anillo, ya lejano, concentra la subestación eléctrica al norte con bobinas de Tesla y baterías alquímicas, y la torre de radio al este con antenas y diodos LED, ambas con materiales raros.
+| Zona | Ubicación (Coords Metros) | Dimensión | Nivel de Riesgo | Materiales Principales | Descripción |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Spawn `(16, 6)`, **Silas** en `(15.8, 5.9)`, Plaza Mayor `(70, 70)`, 10 Trading Posts, Wreckage Lab `[1,2]`, Trampolín de Vapor y **Escondite/Bóveda del Jugador** en `(Z: 17.7m, X: 3.8m-8.0m)`. |
+| **Desierto de Chatarra** | Esquina Noroeste `(0,260)` a `(140,400)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Legendarios (`ojo_dragon`, `corazon_primigenio`) | Páramo desolado de máxima dificultad, Cráter del Autómata Primigenio `(70, 330)`, Nido del Dragón y portal `(130, 270)`. |
+| **Reserva de Minería** | Esquina Noreste `(260,260)` to `(400,400)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) | Cantera protegida de éter `(340, 340)`, taller de relojería, pozo profundo, refugio de exploradores y portal `(270, 270)`. |
+| **Calderas de la Fundición** | Esquina Sureste `(260,0)` a `(400,140)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Épicos (`corazon_caldera`, `reactor_eter`) | Complejo volcánico y térmico, Gran Horno Central `(330, 70)`, Reactor de Éter y portal `(270, 130)`. |
+| **Corredor y Gran Vía Sur**| Sector Sur `(140,0)` a `(260,140)` | ~16.800 m² | 🟢 Zona Segura (Tránsito) | Conexión e infraestructura | Puesto de Control Parcela 13,1 `(212, 24)`, Gran Cruce `(200, 70)` y Estación de Vapor `(170, 40)`. |
+| **Los Chatarrales** | Sector Oeste `(0,140)` a `(140,260)` | ~16.800 m² | 🟢 Dificultad Baja | Comunes (Alambre, Tornillos, Ollas) | Campamento de Chatarreros `(70, 200)`, Depósito de Latón `(40, 170)` y calzada $X=70$. |
+| **Fábrica Abandonada** | Anillo Medio `(140,140)` a `(260,260)` | ~20.000 m² | 🟡 Dificultad Media | Poco Comunes (Transistores, Manómetros) | Estructuras industriales derruidas con materiales de estadísticas avanzadas. |
+| **Subestación Eléctrica** | Sector Norte `(140,280)` a `(260,400)` | ~14.400 m² | 🟠 Dificultad Alta | Raros (Bobinas Tesla, Baterías, Motores) | Complejo de alta tensión con componentes de afinidad galvánica y vapor. |
+| **Torre de Radio** | Sector Este `(280,140)` a `(400,260)` | ~14.400 m² | 🟠 Dificultad Alta | Raros (Antenas de radio, Diodos LED) | Antiguas antenas de telecomunicación con materiales de afinidad luminosa. |
+| **Gran Arena de Torneo** | Centro `(164,164)` a `(236,236)` | ~4.071 m² (Ø 72m) | 🏆 Competitivo | Torneo Escalera 1v1 y 2v2 | Colosal plataforma circular de torneo steampunk en `(200, 200)`. |
 
-Las tres esquinas restantes son el destino de quienes ya dominan el bucle básico, y cada una cumple un papel distinto. El desierto de chatarra, en la esquina noroeste, y las calderas de la fundición, en la esquina sureste, son zonas de combate libre entre jugadores, donde el PK está permitido. Ahí aparecen los materiales que no se consiguen en ningún otro lado, el corazón de caldera y el reactor de éter en la fundición, el ojo de dragón mecánico y el corazón de golem primigenio en el desierto. Esas dos esquinas están custodiadas por personajes no jugadores con golems poderosos, de nivel muy superior al de las zonas intermedias, así que entrar ahí sin preparación se castiga con la derrota. La esquina noreste, en cambio, se reserva como zona segura de minería, una reserva donde los materiales raros y algunos épicos, como el núcleo de maná condensado y el cerebro de autómata, se pueden recolectar sin exponerse al ataque de otros jugadores ni de los guardias.
+### 3.2 Hitos e Infraestructura Destacada del Distrito de la Forja
 
-Esa separación por zonas cumple tres funciones a la vez. La primera es guiar el flujo de jugadores para que no todos se amontonen en el mismo punto. La segunda es crear una curva de dificultad natural, en la que un jugador nuevo puede quedarse tranquilo cerca de la forja mientras aprende. La tercera es ofrecer decisiones con riesgo real: el material más valioso exige entrar a una zona donde otro jugador puede atacarte, y quien prefiera evitar ese riesgo tiene en la reserva segura una alternativa honesta, con recompensas un poco menores pero sin miedo a morir.
+- **Campamento de Silas el Sobreviviente `(15.8m, 0.25m, 5.9m)`**: Punto de acogida en la parcela `[0,0]`. Silas ofrece un diálogo tutorial dinámico (React-ECS) y un **Tour Guiado a pie** de 11 waypoints con cinemáticas de cámara orbital (`silasTourSystem.ts`) para mostrar el refugio, la fábrica y los mercados.
+- **Escondite y Bóveda del Jugador (User's Hideout & Vault) `(Z: 17.7m, X: 3.8m-8.0m)`**: Taller improvisado de supervivencia que incluye una plataforma escenográfica con **3 cofres cerrados** de alta resistencia que representan la custodia del tesoro e inventario del jugador.
+- **Trampolín de Vapor Propulsor `(X: 5.2m, Z: 5.6m)`**: Dispositivo mecatrónico impulsado por vapor que eleva verticalmente al avatar al pisar su plataforma, permitiendo cruzar rápidamente los desniveles hacia la plaza principal.
+- **10 Puestos de Mercado Steampunk y Wreckage Lab**: Infraestructura de comercio y la nave central de forja `[1,2]` equipada con yunque térmico y reactor de plasma.
 
 ![map](golems_map.png)
 ![map2](golems_map2.png)
 
-## 4. El radar de calor y la recolección
+## 4. El radar de calor, el minimapa 2D y la recolección
 
-Los materiales no están visibles a simple vista. Están enterrados o camuflados, y solo se revelan cuando el jugador se acerca lo suficiente usando el radar de calor que aparece en la interfaz. Esta decisión tiene una razón práctica directa con la plataforma: en el cliente móvil no se puede depender del raycasting avanzado, así que en lugar de apuntar con la cámara, el jugador camina y el radar hace el trabajo de interpretar la cercanía.
+Los materiales no están visibles a simple vista. Están enterrados o camuflados, y se revelan cuando el jugador se acerca lo suficiente utilizando el **Radar de Calor** y el **Minimapa 2D en tiempo real**.
 
-El radar se dibuja como un elemento de interfaz con React ECS, y muestra una señal que se intensifica en brillo, color y pulso a medida que la distancia al material más cercano se reduce. Lejos de cualquier pieza, el radar está apagado o en tonos fríos y apenas se mueve. A distancias medias empieza a latir con un ritmo perceptible. Cuando el jugador está a pocos metros, el radar se enciende en tonos cálidos y el pulso es rápido, hasta que la pieza emerge del suelo o del escondite y queda lista para recogerse con un toque.
+### 4.1 El Radar de Calor (React-ECS)
+- **Lejos (> 30m)**: Sensor inactivo con tonalidades frías y pulso apagado.
+- **Distancia Media (15m - 30m)**: Pulso rítmico suave en tonos amarillos.
+- **Cercanía (< 15m)**: Pulso acelerado en tonos rojos/naranjas brillantes.
+- **Proximidad Inmediata (< 4m)**: La pieza emerge visualmente del suelo ($Y = -0.5\text{m} \rightarrow Y = 0.3\text{m}$) con efecto de partículas emisivas.
+- **Recolección Táctil**: Hitbox amplia ($\ge 1.2\text{m}$) recolectable con un toque en pantalla móvil.
 
-El radar funciona por distancia euclidiana entre la posición del avatar y la lista de materiales activos en ese momento. No necesita rayos, ni apuntar, ni precisión fina, lo que lo hace cómodo de usar con una sola mano en el teléfono. La recolección se resuelve con un toque sobre la pieza una vez revelada, usando una hitbox amplia que cumple con el mínimo recomendado para pantallas táctiles.
-
-Cada material tiene una vida útil desde que aparece hasta que desaparece si nadie lo recoge, y un tiempo de reaparición distinto según su rareza. Los materiales raros y épicos no aparecen todos al mismo tiempo, sino que respetan un límite de instancias simultáneas por zona, lo que mantiene la sensación de búsqueda sin saturar el mapa ni el rendimiento.
+### 4.2 Sistema de Minimapa 2D y Cartografía
+El HUD incluye un widget de **Minimapa 2D** en la interfaz React-ECS que proyecta la posición del avatar en tiempo real dentro del mapa de 25x25 parcelas (400m × 400m). Permite conmutar a vista desplegada a pantalla completa mediante toque táctil, mostrando íconos de recursos detectados, zonas de riesgo y la ubicación de la Gran Arena Central.
 
 ![radar](golems_radar.png)
 
 ## 5. Los materiales
 
-El catálogo completo tiene veinticinco tipos de material, todos pensados como piezas de chatarra, maquinaria o utensilios que uno podría encontrar en un taller abandonado. No hay minerales en el sentido clásico, porque la identidad del juego está en reutilizar cosas cotidianas que, combinadas con magia residual, se convierten en algo extraordinario.
-
-Cada material tiene una rareza, un peso de aparición que define qué tan probable es que surja al momento de generar un recurso, un tiempo de reaparición, una zona donde vive y un aporte a las estadísticas del golem que lo usa. Las estadísticas del golem son cinco: ataque, defensa, vitalidad, velocidad y afinidad. La afinidad es la naturaleza energética de la pieza, y define ventajas y desventajas en combate.
+El catálogo completo tiene veinticinco tipos de material, todos pensados como piezas de chatarra, maquinaria o utensilios que uno podría encontrar en un taller abandonado.
 
 | Material | Rareza | Peso | Reaparición | Zona | Aporte principal |
 |---|---|---|---|---|---|
@@ -83,110 +106,119 @@ Cada material tiene una rareza, un peso de aparición que define qué tan probab
 | Ojo de dragón mecánico | Legendario | 0.5% | 45 a 60 minutos | Desierto de Chatarra (PK) | Ataque y afinidad de éter |
 | Corazón de golem primigenio | Legendario | 0.5% | 45 a 60 minutos | Desierto de Chatarra (PK) | Todas las estadísticas |
 
-La tabla anterior suma veinticinco materiales, aunque he dejado el ojo de dragón mecánico y el corazón de golem primigenio como dos piezas legendarias separadas para que el desierto de chatarra tenga más de un objetivo de máxima rareza. Los porcentajes son pesos relativos, no probabilidades estrictas, y se pueden ajustar durante el balance sin tocar la lógica central.
+Los materiales épicos y legendarios respetan un límite de **una sola instancia activa a la vez** en todo el mapa.
 
-Los materiales épicos y legendarios respetan un límite de una sola instancia activa a la vez en todo el mapa. Esto significa que si el reactor de éter ya está enterrado esperando a ser encontrado, no aparecerá otro hasta que el primero sea recogido o expire. Esa regla genera tensión, porque encontrar una pieza épica es un momento que no se repite de inmediato, y crea una especie de carrera silenciosa entre jugadores que buscan lo mismo.
+## 6. La forja y la unicidad de cada golem (Hash Determinista)
 
-Cada material aporta además un matiz visual al golem. Las ollas y sartenes dan un aspecto de blindaje improvisado, las bobinas de Tesla añaden destellos eléctricos, los diodos LED iluminan el cuerpo en colores fríos, y el corazón de caldera tiñe el interior de un brillo anaranjado. Ese matiz visual es consecuencia directa de la receta, así que dos golems con estadísticas parecidas pueden verse completamente distintos.
-
-## 6. La forja y la unicidad de cada golem
-
-Forjar un golem consiste en elegir una combinación de materiales desde el inventario y confirmarla en la forja. La cantidad mínima de una receta es de cinco materiales y la cantidad máxima es de doce, la libertad es total: puedes repetir un mismo material varias veces o buscar una mezcla equilibrada.
-
-La unicidad se resuelve con un hash determinista. La receta se serializa en un texto canónico que incluye el identificador de cada material y su cantidad, en un orden fijo. Ese texto pasa por una función de hash del estilo FNV-1a o un SHA truncado, y el número resultante se usa como semilla para derivar tres cosas: un factor de perfil que ajusta ligeramente las estadísticas base, un conjunto de rasgos visuales como el tono dominante y el tamaño relativo, y un nombre generado a partir de una tabla de prefijos y sufijos asociados a los materiales dominantes.
-
-La palabra determinista es clave. La misma receta produce siempre el mismo golem, con las mismas estadísticas y el mismo nombre. Esto convierte la forja en algo reproducible y coleccionable, porque un jugador que descubre una receta buena puede compartirla con otros y ambos obtendrán resultados equivalentes. Al mismo tiempo, el espacio de combinaciones es tan grande que la probabilidad de tropezarse dos veces con la misma receta sin querer es prácticamente nula, lo que da la sensación de que cada golem es único.
-
-Las estadísticas base se calculan sumando los aportes de cada material, y el factor de perfil del hash aplica una variación acotada que respeta el peso de la receta sin romperla. Un golem forjado con muchas sartenes y ollas saldrá naturalmente defensivo, y el hash solo matizará cuánto de defensa frente a cuánta vitalidad, manteniendo la identidad que el jugador buscó al elegir la receta.
+1. **Selección**: Entre 5 y 12 materiales del inventario.
+2. **Serialización Canónica**: Cadena ordenada alfabéticamente (ej. `antena:2|bobina:1|cobre:3`).
+3. **Hash FNV-1a (32-bit)**:
+   ```typescript
+   function calcularHashReceta(recetaCanonica: string): number {
+     let hash = 0x811c9dc5
+     for (let i = 0; i < recetaCanonica.length; i++) {
+       hash ^= recetaCanonica.charCodeAt(i)
+       hash = Math.imul(hash, 0x01000193)
+     }
+     return hash >>> 0
+   }
+   ```
+4. **Derivación Determinista**:
+   - **Stats Base**: Suma ponderada de materiales.
+   - **Variación de Perfil**: Ajuste pseudoaleatorio acotado ($\pm 5\%$).
+   - **Tinte y Escala**: Matiz emisivo PBR y tamaño ($0.9\text{m}$ a $1.3\text{m}$).
+   - **Nombre Procedural**: Generado por tabla de prefijos/sufijos (ej. *«Vaporocrom Titánico»*).
 
 ![forja](golems_forja.png)
 
 ## 7. Las estadísticas y el combate en tiempo real
 
-Cada golem tiene cinco estadísticas: ataque, que mide el daño por golpe; defensa, que reduce el daño recibido; vitalidad, que define los puntos de vida; velocidad, que determina la frecuencia de ataque y la probabilidad de esquivar; y afinidad, que es la naturaleza energética del conjunto.
+Cada golem posee 5 estadísticas fundamentales:
+- **Ataque (ATK)**: Daño base por impacto ($20-38$).
+- **Defensa (DEF)**: Reducción directa de daño recibido ($10-22$).
+- **Vitalidad (HP)**: Puntos totales de salud ($100-160$).
+- **Velocidad (SPD)**: Frecuencia de ataque ($T_{\text{cooldown}} = 2.2\text{s} / (1 + \text{SPD}\times 0.04)$) y traslación.
+- **Afinidad Elemental (AFF)**: `STEAM`, `MECHANICAL`, `GALVANIC`, `LUMINOUS`, `AETHER`.
 
-El combate se resuelve en tiempo real por comparación de estadísticas, sin turnos. Cuando dos golems están a distancia de combate, el sistema avanza un ciclo de resolución cada fracción de segundo, usando el delta de tiempo del motor. En cada ciclo, el atacante calcula un daño restando la defensa del rival a su ataque, con un mínimo garantizado para que ningún combate se estanque, y ese daño se descuenta de la vitalidad. La velocidad marca cada cuánto tiempo puede golpear cada golem y añade una probabilidad de esquivar el golpe entrante.
+### El Pentágono de Afinidades Elementales
+- `Vapor` vence a `Mecánico` ($\times 1.40$) | Desventaja ante `Éter` ($\times 0.75$)
+- `Mecánico` vence a `Galvánico` ($\times 1.40$) | Desventaja ante `Vapor` ($\times 0.75$)
+- `Galvánico` vence a `Luminoso` ($\times 1.40$) | Desventaja ante `Mecánico` ($\times 0.75$)
+- `Luminoso` vence a `Éter` ($\times 1.40$) | Desventaja ante `Galvánico` ($\times 0.75$)
+- `Éter` vence a `Vapor` ($\times 1.40$) | Desventaja ante `Luminoso` ($\times 0.75$)
 
-La afinidad introduce un sistema de ventajas de tipo piedra, papel o tijera con cinco fuerzas propias de este ecosistema de chatarra: el vapor, lo mecánico, lo galvánico, lo luminoso y el éter. El vapor vence a lo mecánico porque la presión y la humedad oxidan y atascan los engranajes. Lo mecánico vence a lo galvánico porque la estructura física y el aislamiento de los engranajes absorben y desvían la corriente. Lo galvánico vence a lo luminoso porque una descarga quema el filamento y apaga el brillo. Lo luminoso vence al éter porque la luz concentrada dispersa y refracta esa energía difusa. El éter vence al vapor porque esa energía sutil condensa y suspende la presión del vapor. Cuando un golem con ventaja golpea, el daño se multiplica por un factor favorable, y cuando está en desventaja, el daño se reduce. Esto premia la variedad de recetas y evita que una sola combinación domine la tabla.
-
-El combate contra otros jugadores usa el mismo sistema, con la salvedad de que las posiciones se sincronizan por red y el resultado de cada enfrentamiento se reporta a la API para actualizar la clasificación.
+Ecuación de daño: $\text{Daño} = \max\left(2, \text{round}\big((\text{ATK} - \text{DEF} \times 0.5) \times \text{Multiplicador}\big)\right)$.
 
 ![stats](golems_stats.png)
 
-## 8. Límite de golems y comportamiento de seguimiento
+## 8. Límite de golems, seguimiento Multi-Trail y etiquetas P2P
 
-Cada jugador puede tener un máximo de tres golems activos que lo siguen por la escena. El seguimiento se resuelve con una distancia de mantenimiento: cada golem persigue la posición del avatar cuando se aleja más de un umbral, se detiene cuando está lo suficientemente cerca y reposiciona suavemente para no amontonarse con los demás. El movimiento usa interpolación, sin física agresiva, para que el conjunto se vea natural y no exija demasiado al dispositivo móvil.
-
-El jugador puede elegir cuál de sus golems viaja con él y cuál se queda disponible para misiones. Los que no lo siguen no desaparecen del mundo, quedan asociados al inventario del jugador en estado de reserva, listos para recibir una orden de misión o para ser convocados de nuevo.
-
-## 9. Misiones de recolección automatizadas
-
-Los golems que no siguen activamente al jugador pueden enviarse a misiones de recolección. El jugador elige un golem, elige una zona y elige una duración, que va desde unos pocos minutos hasta varias horas. El golem parte, y el sistema calcula al término de la misión un botín basado en la rareza de la zona, la duración y una estadística de eficiencia derivada de la velocidad y la afinidad del golem.
-
-La persistencia de estas misiones se apoya en la API de PHP y MySQL, de modo que el progreso no se pierde si el jugador se desconecta. Cuando el tiempo se cumple, el jugador puede reclamar el botín desde la interfaz, y el golem vuelve a estar disponible. Existe un factor de riesgo acotado: una misión puede volver con menos material del esperado, y en casos raros con una pieza mejor de lo previsto, lo que mantiene el interés sin castigar de forma severa.
-
-El número de misiones simultáneas está limitado para que el sistema de recolección automatizado no sustituya por completo a la exploración manual. La idea es que las misiones complementen el bucle principal, no que lo reemplacen, porque recorrer el mapa con el radar es la experiencia que hace especial al juego.
+- **Escuadrón Activo (Máximo 3)**: El jugador lleva hasta 3 golems simultáneos en formación.
+- **Asignación Aleatoria por Sesión**: Al ingresar a la escena, el usuario recibe 3 golems aleatorios de afinidades distintas en memoria volátil.
+- **Algoritmo Multi-Trail (FIFO LERP/SLERP)**: Procesa trayectorias a 60 FPS desfasando posiciones a $1.8\text{m}$, $3.6\text{m}$ y $5.4\text{m}$ en fila india detrás del avatar local y remotos.
+- **Etiquetas Floats `Billboard` & ASCII Health**: Cada golem muestra en tiempo real una etiqueta superior con su nombre, afinidad, barra de salud ASCII `[████████░░]` y dirección de billetera del dueño.
+- **Handshake P2P (`MessageBus`)**: Los clientes anuncian y solicitan la composición de escuadrones mediante `golem_squad_announce` y `golem_squad_request`.
 
 ![limite_y_misiones](golems_limite_y_misiones.png)
 
-## 10. Los personajes no jugadores y sus golems
+## 9. Misiones de recolección automatizadas
 
-Distribuidos por el mapa hay personajes no jugadores que patrullan rutas definidas por puntos de camino. Cada uno tiene un golem propio, o en algunos casos un pequeño grupo, con un nivel acorde a la zona donde vive. Estos NPC no buscan entablar conversación, sino que defienden su territorio. Cuando un jugador entra en su radio de agresión, el NPC y su golem inician un combate en tiempo real contra el golem o golems del jugador. Los guardias más duros se concentran en las zonas de combate libre de las esquinas noroeste y sureste, donde custodian los materiales exclusivos con golems de nivel claramente superior al de los NPC de las zonas intermedias.
+Los golems en reserva pueden enviarse a expediciones fuera de línea desde la interfaz:
+- **Destino y Duración**: Desde 15 minutos hasta 12 horas.
+- **Eficiencia**: Calculada en base a la velocidad y afinidad del golem.
+- **Persistencia Asíncrona**: Computada en la API PHP/MySQL para continuar operando con el jugador desconectado.
 
-La resolución del combate contra NPC usa exactamente el mismo sistema de estadísticas descrito antes, lo que garantiza coherencia entre el combate contra la inteligencia artificial y el combate entre jugadores. Al vencer a un NPC, el jugador recibe puntos de experiencia y una probabilidad de obtener materiales, con una chance mayor para los NPC de zonas de rareza alta.
+## 10. Silas el Sobreviviente y los personajes no jugadores (NPCs)
 
-Los NPC se mueven con un comportamiento sencillo de patrulla, sin navegación compleja, para no cargar el rendimiento del cliente móvil. Se apoyan en el kit de NPC del SDK o en la forma de avatar, según convenga al resultado visual y a la simplicidad del sistema de movimiento.
+- **Silas el Sobreviviente**: Mentor tutorial pacifista en el punto de aparición `(15.8m, 5.9m)`.
+- **NPCs Hostiles y Guardianes de Zona**: Patrullas mecánicas con rutas de waypoints y radio de agresión que defienden las zonas PK (*Desierto Chatarra* y *Calderas*), custodiando los materiales épicos y legendarios con golems de alto nivel.
 
 ## 11. Progresión y niveles
 
-Tanto el jugador como los golems ganan experiencia y suben de nivel. El jugador gana experiencia al recolectar materiales, forjar golems, completar misiones y vencer en combate. Subir de nivel al jugador desbloquea ventajas de conveniencia, como más ranuras de misión simultánea, la posibilidad de mantener más golems en reserva o un ligero aumento de la distancia del radar.
+- **Nivel del Jugador**: Desbloquea más ranuras de expedición, capacidad de bóveda en el escondite y mayor alcance del radar.
+- **Nivel de Golems**: Incrementa ATK, DEF y HP proporcionalmente a su perfil de forja. El techo de nivel depende de la rareza de los componentes utilizados.
 
-Los golems ganan experiencia al participar en combates y en misiones. Al subir de nivel, un golem aumenta sus estadísticas de forma proporcional a su perfil de forja, de modo que un golem defensivo seguirá siendo defensivo al crecer, solo que más. El límite de nivel de los golems está ligado a la rareza de los materiales con que fueron forjados, lo que da a las piezas legendarias un valor de largo plazo: un golem forjado con un corazón primigenio puede alcanzar un techo más alto que uno hecho solo con chatarra común.
-
-La curva de experiencia es deliberadamente suave al principio y se empina después, para que el progreso inicial se sienta rápido y motivador, mientras que los niveles altos requieren dedicación y recompensan la constancia.
-
-## 12. El torneo escalera, uno contra uno y dos contra dos
-
-El torneo es el componente competitivo del juego. Funciona como una escalera con puntuación de habilidad, similar a un sistema de Elo, donde cada jugador tiene una calificación que sube o baja según los resultados de sus enfrentamientos.
-
-En el formato uno contra uno, cada jugador entra al combate con sus tres golems activos, y la batalla se resuelve en tiempo real por estadísticas hasta que todos los golems de un bando quedan fuera de combate. En el formato dos contra dos, los dos jugadores de cada equipo entran con sus golems, lo que suma seis golems por bando y doce en total, y la victoria se define por la caída de todos los golems del equipo contrario.
-
-El emparejamiento se hace a través de la API, que busca rivales con calificaciones cercanas para que cada partida sea pareja. El resultado de cada combate se reporta a la API una vez terminado, y la clasificación se actualiza. La tabla se puede consultar desde el Distrito de la Forja, y sirve tanto para presumir posición como para descubrir a los rivales más fuertes de la temporada.
-
-El torneo no exige jugar con la cámara apuntando con precisión ni depende de reflejos de disparo, porque se resuelve por estadísticas. Eso lo hace cómodo en móvil y pone el peso de la estrategia en la composición de la receta, la afinidad energética y la gestión de los niveles, más que en la destreza manual.
+## 12. El torneo escalera y la Gran Arena Circular Steampunk (Colosal 72m - Cell Ring)
 
 ![torneo](golems_torneo.png)
 
+### 12.1 Formatos Competitivos (1v1 y 2v2)
+- **1v1**: 3 golems vs 3 golems en tiempo real por estadísticas.
+- **2v2**: 2 jugadores por bando (12 golems simultáneos en arena).
+- **Matchmaking Elo**: Clasificación registrada en MySQL mediante peticiones firmadas `signedFetch`.
+
+### 12.2 Especificación de la Gran Arena Circular de Torneo Steampunk (Ø 72m)
+Ubicada en el centro geométrico del mundo `(X: 200m, Z: 200m)`:
+- **Plataforma Elevada Radial (72m / $R=36\text{m}$)**: Elevada $+0.6\text{m}$ sobre el terreno con 250+ losas reforzadas y bordillos de adoquín.
+- **4 Columnas Monumentales de 12 Metros**: En las 4 esquinas diagonales (NW, NE, SE, SW), integradas por calderas base ampliadas (1.8x), fustes triples de engranajes verticales (`Gear Shaft.glb`), doble anillo giratorio contragiro, farolas dobles y chimeneas superiores humeantes (`Smoker.glb`).
+- **Gran Sigilo Planetario Central**: Un engranaje central colosal (`Gear Big.glb` escala 4.8x / ~12m Ø) girando a $+0.20\text{ rad/s}$ sincronizado con 8 engranajes satélites en formación orbital y un altar relicario con espada (`Arthur Sword.glb`).
+- **16 Balizas Perimetrales y Rampas Ceremoniales**: Pedestales de barril con números Steampunk (`00` a `08`) y 4 grandes rampas cardinales de acceso (Norte, Sur, Este, Oeste) con doble barandilla de seguridad (`Tree Fence.glb`).
+
 ## 13. Arquitectura del servidor y persistencia
 
-La persistencia de jugadores, golems, inventario, misiones y clasificación se apoya en una API escrita en PHP que interactúa con una base de datos MySQL. El juego en vivo, es decir, lo que ocurre dentro de la escena en un momento dado, se resuelve con el multijugador sin servidor propio del SDK, usando la sincronización de entidades y el bus de mensajes. La API entra en juego para todo lo que debe sobrevivir entre sesiones: guardar un golem recién forjado, registrar el avance de una misión, consultar la clasificación o reportar el resultado de un combate.
+Architecture híbrida:
+- **Runtime**: Decentraland SDK7 (`@dcl/sdk/ecs`, `@dcl/sdk/react-ecs`, `@dcl/sdk/math`).
+- **Multijugador P2P**: `MessageBus` para difusión efímera de ataques, derrotas y escuadrones.
+- **Backend Persistente**: API REST PHP 8.x + Base de Datos MySQL con solicitudes autenticadas por firmas Web3 (`signedFetch`).
 
-La comunicación entre la escena y la API se hace con peticiones firmadas. El SDK permite enviar una solicitud con la cadena de autenticación del usuario, y el lado PHP puede verificar esa firma para confirmar que la petición proviene de la dirección de billetera que dice ser. Con eso se evita que un tercero escriba datos a nombre de otro jugador, sin necesidad de manejar contraseñas.
+## 14. Arquitectura de código en el SDK y Motor Bilingüe i18n
 
-Las tablas principales de la base de datos son: una de jugadores, con su dirección y su nivel; una de golems, con la receta, las estadísticas y el nivel de cada uno; una de inventario, con las cantidades de material por jugador; una de misiones, con el golem asignado, la zona, la duración y el momento de finalización; una de partidas, con los participantes y el resultado; y una de clasificación, con la calificación actual de cada jugador.
+### 14.1 Estructura Modular
+El código está organizado en carpetas dedicadas dentro de `src/`: `components/`, `config/`, `objects/`, `systems/` e `i18n/`.
 
-Los endpoints de la API se agrupan en: registro y consulta de jugador, guardado de golem, listado de golems, inventario, inicio y reclamación de misiones, búsqueda de rival para el torneo, reporte de resultado y consulta de la clasificación. Cada endpoint devuelve respuestas en formato JSON y valida la firma antes de modificar cualquier dato.
-
-## 14. Arquitectura de código en el SDK
-
-El código de la escena se organiza en módulos dentro de la carpeta de fuentes, siguiendo el patrón de objetos de juego del SDK. El archivo principal se mantiene limpio y solo se encarga de inicializar la interfaz, los controles táctiles, el suelo base y de instanciar los sistemas. Cada responsabilidad vive en su propio archivo.
-
-El módulo de materiales gestiona la generación de recursos, los tiempos de reaparición, la vida útil y los límites de instancias simultáneas por rareza. El módulo de radar calcula la distancia del jugador al material más cercano y alimenta el estado que la interfaz usa para dibujar la señal. El módulo de forja resuelve el hash determinista y produce las estadísticas y rasgos del golem. El módulo de golem se encarga de crear la entidad, el seguimiento del avatar y el estado en combate. El módulo de misiones administra el envío y la reclamación de recolección automatizada. El módulo de NPC patrulla las rutas y dispara el radio de agresión. El módulo de combate contiene la resolución por estadísticas en tiempo real. El módulo de progresión aplica la experiencia y los niveles. El módulo de escalera coordina el emparejamiento y el reporte de resultados. El módulo de backend centraliza las llamadas firmadas a la API de PHP.
-
-La interfaz se construye con React ECS y separa los elementos en componentes reutilizables, con el radar como pieza central y paneles para el inventario, la forja, las misiones y la clasificación.
+### 14.2 Motor de Internacionalización Bilingüe (`src/i18n`)
+- **Diccionarios Canónicos Tipados**: `src/i18n/locales/es.ts` y `en.ts` bajo `TranslationSchema`.
+- **Selector en HUD**: Botón táctil `🌐 ES | EN` en la esquina superior derecha del HUD React-ECS que alterna dinámicamente el idioma en tiempo real sin recargar la escena.
+- **Suscripción Reactiva**: Actualiza instantáneamente modales de diálogo de Silas, textos de HUD, menús de forja y registros de combate.
 
 ## 15. Multijugador en vivo
+Sincronización P2P distribuida con separación estricta entre datos efímeros de red (ataques, posiciones) y datos persistentes en base de datos MySQL (inventario, recetas, ranking).
 
-Dentro de la escena, el estado compartido que debe verse en tiempo real se maneja con las herramientas de multijugador del SDK. Las entidades que representan golems visibles se sincronizan para que todos los presentes vean lo mismo. Los eventos efímeros, como el inicio de un combate o el resultado de un golpe, viajan por el bus de mensajes.
-
-El diseño separa con claridad lo que es efímero de lo que es persistente. Un combate en vivo es efímero y usa el bus de mensajes. Un golem recién forjado es persistente y se guarda en la API. Esa separación evita saturar el bus con información que no necesita viajar entre todos los clientes y mantiene la red liviana, algo importante en dispositivos móviles con conexiones variables.
-
-## 16. Restricciones para el cliente móvil
-
-Toda la experiencia se diseña pensando primero en pantallas táctiles, y eso impone una serie de restricciones que se respetan en cada módulo. No se usan luces dinámicas, así que los efectos de emisión del radar, de los diodos LED y de los golems se logran con materiales emisivos o sin iluminación, que sí están soportados. No se depende del raycasting avanzado ni de la dirección del puntero, porque el radar reemplaza esa necesidad. Los fondos de interfaz evitan el estirado de nueve porciones y usan texturas planas o dimensiones fijas. No se usan componentes de análisis de audio ni eventos de audio avanzados. Los videos, si llegan a existir, usan solo flujos directos compatibles, sin enlaces a plataformas que las tiendas de aplicaciones restringen.
-
-Los controles son exclusivamente táctiles, sin depender del estado del ratón ni de atajos de teclado. Las hitboxes de los botones y de las piezas recolectables superan el tamaño mínimo recomendado para tocar con comodidad. La interfaz respeta las zonas seguras del dispositivo, evitando el área donde viven el joystick virtual y los botones nativos. El rendimiento se cuida limitando la cantidad de entidades activas, agrupando la geometría cuando es posible y manteniendo el número de piezas simultáneas dentro de un presupuesto razonable.
+## 16. Restricciones para el cliente móvil (Mobile-First)
+- 🚫 Sin luces dinámicas (materiales horneados / unlit emisivos).
+- 🚫 Sin raycasting de puntero complejo (reemplazado por radar de distancia euclidiana).
+- 🚫 Sin 9-slice complejo ni análisis FFT de audio.
+- 🚫 Sin dependencia de teclado físico / ratón (controles 100% táctiles con hitboxes amplias $\ge 1.2\text{m}$ respetando zonas seguras de pantalla).
 
 ## 17. Cierre y camino a seguir
-
-El documento define un sistema coherente y construible dentro de las capacidades del SDK y del cliente móvil. El siguiente paso natural es validar el set de materiales y los números de balance con una primera versión jugable, usando la recolección y la forja como núcleo inicial, para después sumar el combate, las misiones y por último la escalera. Cada pieza se puede probar de forma independiente, y el orden propuesto permite llegar a una experiencia completa sin bloquear el avance por una sola funcionalidad pendiente.
+El ecosistema especificado proporciona un marco de desarrollo probado y completamente integrado en Decentraland SDK7, optimizado para ofrecer una experiencia fluida a 60 FPS tanto en dispositivos móviles como en clientes de escritorio.
