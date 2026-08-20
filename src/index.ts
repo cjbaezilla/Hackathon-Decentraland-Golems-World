@@ -35,6 +35,7 @@ import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinemat
 import { initTourFollowCamera, initMarketOrbitalCamera } from './cinematics/marketCinematic'
 import { silasTourSystem } from './systems/silasTourSystem'
 import { sceneLoaderSystem } from './systems/sceneLoaderSystem'
+import { npcPatrolSystem } from './systems/npcPatrolSystem'
 
 import {
   setupSquadSyncListeners,
@@ -130,6 +131,7 @@ export function main() {
   engine.addSystem(trampolineSystem)
   engine.addSystem(welcomeNpcAnimationSystem)
   engine.addSystem(silasTourSystem)
+  engine.addSystem(npcPatrolSystem)
 
   console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente, cinemática de presentación y sistema de tour guiado activo.')
 }

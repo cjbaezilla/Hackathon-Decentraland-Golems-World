@@ -10,6 +10,7 @@ import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
 import { NpcDefinition, NPC_CATALOG } from '../data/npcCatalog'
 import { NPC_POSITIONS } from '../data/npcPositions'
 import { equipCustomWearable, CUSTOM_WEARABLES } from './npcWearables'
+import { NpcPatrolComponent } from '../systems/npcPatrolSystem'
 
 /**
  * ============================================================================
@@ -104,6 +105,20 @@ export function spawnAllCatalogNpcs(): Entity[] {
     const spawnPos = Vector3.create(posData.x, posData.y, posData.z)
 
     const entity = createNpcAvatar(npcData, spawnPos, posData.rot)
+
+    // Componente de patrulla y movimiento orgánico en radio de 2.5m - 3.5m
+    NpcPatrolComponent.create(entity, {
+      anchorX: posData.x,
+      anchorY: posData.y,
+      anchorZ: posData.z,
+      targetX: posData.x,
+      targetY: posData.y,
+      targetZ: posData.z,
+      state: 'IDLE',
+      idleTimer: Math.random() * 5.0, // Desfase aleatorio inicial de reposo
+      moveSpeed: 1.1 + Math.random() * 0.3, // Velocidad de caminata suave (1.1 - 1.4 m/s)
+      patrolRadius: 2.5 + Math.random() * 1.0 // Radio de patrulla (2.5m - 3.5m)
+    })
 
     // Equipar accesorio 3D GLB temático en el cuerpo del NPC usando AvatarAttach por su ID
     const wearableId = customWearableKeys[index % customWearableKeys.length]
