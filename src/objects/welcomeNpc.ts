@@ -11,7 +11,14 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
 import { t } from '../i18n'
-import { openNpcDialog } from '../state'
+import {
+  openNpcDialog,
+  getHasTriggeredProximityIntro,
+  setHasTriggeredProximityIntro,
+  getIsSilasTourActive,
+  getIsNpcDialogOpen,
+  getIsCinematicActive
+} from '../state'
 
 /**
  * ============================================================================
@@ -43,7 +50,7 @@ let currentEmoteIndex: number = 0
  * @param pos Coordenadas base en el mundo (por defecto X: 15.8m, Y: 0.25m, Z: 5.9m).
  */
 export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9)): WelcomeNpcEntities {
-  // 1. Nodo contenedor raíz del campamento
+  // 1. Nodo contenedor raíz del campamento base fijo
   const root = engine.addEntity()
   Transform.create(root, {
     position: pos,
@@ -51,11 +58,10 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
     scale: Vector3.One()
   })
 
-  // 2. AvatarShape de Silas el Sobreviviente
+  // 2. AvatarShape de Silas el Sobreviviente (Posición en coordenadas de mundo independientes)
   const silasAvatar = engine.addEntity()
   Transform.create(silasAvatar, {
-    parent: root,
-    position: Vector3.create(0, 0, 0),
+    position: Vector3.create(pos.x, pos.y, pos.z),
     rotation: Quaternion.fromEulerDegrees(0, 180, 0),
     scale: Vector3.One()
   })
@@ -93,7 +99,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
       }
     },
     () => {
-      openNpcDialog('intro')
+      openNpcDialog('firstTimeCheck')
     }
   )
 
@@ -197,7 +203,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
       }
     },
     () => {
-      openNpcDialog('intro')
+      openNpcDialog('firstTimeCheck')
     }
   )
 
@@ -232,22 +238,85 @@ export function getSilasAvatarEntity(): Entity | null {
 }
 
 /**
- * Dispara inmediatamente el emote de saludo de Silas (usado en cinemáticas).
+ * Obtiene la posición actual en el mundo del avatar de Silas.
  */
-export function triggerSilasWaveEmote() {
-  if (silasNpcEntity && AvatarShape.has(silasNpcEntity)) {
-    const avatar = AvatarShape.getMutable(silasNpcEntity)
-    avatar.expressionTriggerId = 'wave'
-    avatar.expressionTriggerTimestamp = (avatar.expressionTriggerTimestamp ?? 0) + 1
+export function getSilasPosition(): Vector3 {
+  if (silasNpcEntity && Transform.has(silasNpcEntity)) {
+    return Transform.get(silasNpcEntity).position
+  }
+  return Vector3.create(15.8, 0.25, 5.9)
+}
+
+/**
+ * Obtiene la rotación actual del avatar de Silas.
+ */
+export function getSilasRotation(): Quaternion {
+  if (silasNpcEntity && Transform.has(silasNpcEntity)) {
+    return Transform.get(silasNpcEntity).rotation
+  }
+  return Quaternion.fromEulerDegrees(0, 180, 0)
+}
+
+/**
+ * Actualiza la posición y orientación de Silas en el mundo (usado por el sistema de tour).
+ */
+export function setSilasPositionAndRotation(pos: Vector3, rot: Quaternion) {
+  if (silasNpcEntity && Transform.has(silasNpcEntity)) {
+    const transform = Transform.getMutable(silasNpcEntity)
+    transform.position = pos
+    transform.rotation = rot
   }
 }
 
 /**
+ * Establece la animación o emote activo de Silas.
+ */
+export function setSilasEmote(emoteId: string) {
+  if (silasNpcEntity && AvatarShape.has(silasNpcEntity)) {
+    const avatar = AvatarShape.getMutable(silasNpcEntity)
+    if (avatar.expressionTriggerId !== emoteId) {
+      avatar.expressionTriggerId = emoteId
+      avatar.expressionTriggerTimestamp = (avatar.expressionTriggerTimestamp ?? 0) + 1
+    }
+  }
+}
+
+/**
+ * Dispara inmediatamente el emote de saludo de Silas (usado en cinemáticas y llegadas).
+ */
+export function triggerSilasWaveEmote() {
+  setSilasEmote('wave')
+}
+
+/**
  * Sistema ECS para dotar de vida a Silas:
- * - Emotes periódicos (saludo con la mano cuando el jugador está en las inmediaciones).
+ * 1. Detección proactiva de proximidad (<= 4.5m) para disparar el diálogo inicial a nuevos jugadores.
+ * 2. Emotes periódicos de saludo cuando el jugador está en las inmediaciones.
  */
 export function welcomeNpcAnimationSystem(dt: number) {
   if (!silasNpcEntity || !AvatarShape.has(silasNpcEntity)) return
+  if (!Transform.has(engine.PlayerEntity)) return
+
+  const pPos = Transform.get(engine.PlayerEntity).position
+  const silasPos = Transform.has(silasNpcEntity) ? Transform.get(silasNpcEntity).position : Vector3.create(15.8, 0.25, 5.9)
+
+  const dx = pPos.x - silasPos.x
+  const dz = pPos.z - silasPos.z
+  const distSq = dx * dx + dz * dz
+
+  // Detección proactiva: Si el jugador se acerca a <= 4.5m por primera vez y no hay diálogo/cinemática activa
+  if (
+    !getHasTriggeredProximityIntro() &&
+    !getIsSilasTourActive() &&
+    !getIsNpcDialogOpen() &&
+    !getIsCinematicActive() &&
+    distSq <= 20.25 // 4.5m al cuadrado
+  ) {
+    setHasTriggeredProximityIntro(true)
+    openNpcDialog('firstTimeCheck')
+    triggerSilasWaveEmote()
+    console.log('🧭 [Silas Proximity] Diálogo proactivo de bienvenida iniciado por cercanía del jugador.')
+  }
 
   emoteTimer += dt
 
@@ -255,23 +324,12 @@ export function welcomeNpcAnimationSystem(dt: number) {
   if (emoteTimer >= 9) {
     emoteTimer = 0
 
-    if (Transform.has(engine.PlayerEntity)) {
-      const pPos = Transform.get(engine.PlayerEntity).position
-      const npcPos = Transform.has(silasNpcEntity) ? Transform.get(silasNpcEntity).position : Vector3.Zero()
-      const worldNpcX = 15.8 + npcPos.x
-      const worldNpcZ = 5.9 + npcPos.z
-
-      const dx = pPos.x - worldNpcX
-      const dz = pPos.z - worldNpcZ
-      const distSq = dx * dx + dz * dz
-
-      // Si está a menos de 10 metros, realiza un emote de saludo
-      if (distSq <= 100) {
-        const avatar = AvatarShape.getMutable(silasNpcEntity)
-        currentEmoteIndex = (currentEmoteIndex + 1) % 2
-        avatar.expressionTriggerId = currentEmoteIndex === 0 ? 'wave' : 'raiseHand'
-        avatar.expressionTriggerTimestamp = (avatar.expressionTriggerTimestamp ?? 0) + 1
-      }
+    // Si está a menos de 10 metros, realiza un emote de saludo
+    if (distSq <= 100) {
+      const avatar = AvatarShape.getMutable(silasNpcEntity)
+      currentEmoteIndex = (currentEmoteIndex + 1) % 2
+      avatar.expressionTriggerId = currentEmoteIndex === 0 ? 'wave' : 'raiseHand'
+      avatar.expressionTriggerTimestamp = (avatar.expressionTriggerTimestamp ?? 0) + 1
     }
   }
 }

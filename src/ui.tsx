@@ -9,10 +9,17 @@ import {
   setNpcDialogStep,
   closeNpcDialog,
   getIsCinematicActive,
+  getIsSilasTourActive,
+  getSilasTourSubtitle,
   NpcDialogStep
 } from './state'
 import { updateWelcomeNpcLanguage } from './objects/welcomeNpc'
 import { playSilasCinematic, stopSilasCinematic } from './cinematics/silasCinematic'
+import {
+  startSilasGuidedTour,
+  advanceSilasTourToNextWaypoint,
+  finishSilasGuidedTour
+} from './systems/silasTourSystem'
 import { MinimapWidget, BigMapModal } from './ui/minimapComponent'
 
 /**
@@ -63,10 +70,6 @@ export function getAffinityIcon(affinity: string): string {
 
 /**
  * Componente Indicador de Ubicación y Tilemap en Tiempo Real (Mobile-First / HUD)
- * Muestra:
- * - Parcela actual del grid 25x25 (de [0,0] a [24,24]).
- * - Coordenadas métricas exactas (X, Z).
- * - Nombre y símbolo del Distrito o Zona actual.
  */
 export const LocationIndicator = () => {
   const loc = getPlayerLocationInfo()
@@ -157,20 +160,52 @@ export const NpcDialog = () => {
 
   const step: NpcDialogStep = getNpcDialogStep()
 
-  // Determina el texto a mostrar según la rama activa
+  // Determinar título y contenido narrativo según la rama activa
+  let title = t('npc.dialogTitle')
   let bodyContent = t('npc.dialogIntro')
-  if (step === 'lore') bodyContent = t('npc.loreText')
-  else if (step === 'golems') bodyContent = t('npc.golemsText')
-  else if (step === 'zones') bodyContent = t('npc.zonesText')
-  else if (step === 'tips') bodyContent = t('npc.tipsText')
+
+  if (step === 'firstTimeCheck') {
+    bodyContent = t('npc.firstTimeQuestion')
+  } else if (step === 'veteranFarewell') {
+    bodyContent = t('npc.veteranFarewell')
+  } else if (step === 'uiLanguage') {
+    bodyContent = t('npc.uiLanguageExplanation')
+  } else if (step === 'uiMinimap') {
+    bodyContent = t('npc.uiMinimapExplanation')
+  } else if (step === 'mechanicsOverview') {
+    bodyContent = t('npc.mechanicsExplanation')
+  } else if (step === 'tourHideout') {
+    title = t('npc.tourHideoutTitle')
+    bodyContent = t('npc.tourHideoutText')
+  } else if (step === 'tourMarketWest') {
+    title = t('npc.tourMarketWestTitle')
+    bodyContent = t('npc.tourMarketWestText')
+  } else if (step === 'tourFactory') {
+    title = t('npc.tourFactoryTitle')
+    bodyContent = t('npc.tourFactoryText')
+  } else if (step === 'tourMarketSouth') {
+    title = t('npc.tourMarketSouthTitle')
+    bodyContent = t('npc.tourMarketSouthText')
+  } else if (step === 'tourFinish') {
+    title = t('npc.tourFinishTitle')
+    bodyContent = t('npc.tourFinishText')
+  } else if (step === 'lore') {
+    bodyContent = t('npc.loreText')
+  } else if (step === 'golems') {
+    bodyContent = t('npc.golemsText')
+  } else if (step === 'zones') {
+    bodyContent = t('npc.zonesText')
+  } else if (step === 'tips') {
+    bodyContent = t('npc.tipsText')
+  }
 
   return (
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
         position: { bottom: 40 },
-        width: 860,
-        minHeight: 320,
+        width: 880,
+        minHeight: 330,
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'center',
@@ -200,7 +235,7 @@ export const NpcDialog = () => {
         >
           <UiEntity
             uiText={{
-              value: t('npc.dialogTitle'),
+              value: title,
               fontSize: 18,
               color: Color4.create(1.0, 0.85, 0.35, 1.0),
               textAlign: 'middle-left'
@@ -244,14 +279,14 @@ export const NpcDialog = () => {
       <UiEntity
         uiTransform={{
           width: '100%',
-          minHeight: 90,
-          padding: { top: 10, bottom: 10, left: 14, right: 14 },
+          minHeight: 110,
+          padding: { top: 12, bottom: 12, left: 16, right: 16 },
           margin: { bottom: 16 },
           justifyContent: 'center',
           alignItems: 'flex-start'
         }}
         uiBackground={{
-          color: Color4.create(0.12, 0.15, 0.2, 0.85)
+          color: Color4.create(0.12, 0.15, 0.2, 0.88)
         }}
       >
         <UiEntity
@@ -267,8 +302,227 @@ export const NpcDialog = () => {
         />
       </UiEntity>
 
-      {/* Opciones de Conversación / Respuestas Táctiles */}
-      {step === 'intro' ? (
+      {/* Opciones y Botones según la Rama Activa */}
+      {step === 'firstTimeCheck' && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+          }}
+        >
+          <UiEntity
+            uiTransform={{
+              width: '58%',
+              height: 46,
+              justifyContent: 'center',
+              alignItems: 'center',
+              pointerFilter: 'block'
+            }}
+            uiBackground={{
+              color: Color4.create(0.16, 0.32, 0.22, 0.95)
+            }}
+            onMouseDown={() => {
+              setNpcDialogStep('uiLanguage')
+            }}
+            uiText={{
+              value: t('npc.optFirstTimeYes'),
+              fontSize: 13,
+              color: Color4.create(0.4, 1.0, 0.5, 1.0)
+            }}
+          />
+          <UiEntity
+            uiTransform={{
+              width: '39%',
+              height: 46,
+              justifyContent: 'center',
+              alignItems: 'center',
+              pointerFilter: 'block'
+            }}
+            uiBackground={{
+              color: Color4.create(0.25, 0.2, 0.22, 0.95)
+            }}
+            onMouseDown={() => {
+              setNpcDialogStep('veteranFarewell')
+            }}
+            uiText={{
+              value: t('npc.optFirstTimeNo'),
+              fontSize: 13,
+              color: Color4.create(0.9, 0.85, 0.75, 1.0)
+            }}
+          />
+        </UiEntity>
+      )}
+
+      {step === 'veteranFarewell' && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.18, 0.28, 0.38, 0.95)
+          }}
+          onMouseDown={() => {
+            closeNpcDialog()
+          }}
+          uiText={{
+            value: t('npc.optClose'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.95, 0.5, 1.0)
+          }}
+        />
+      )}
+
+      {step === 'uiLanguage' && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.18, 0.32, 0.44, 0.95)
+          }}
+          onMouseDown={() => {
+            setNpcDialogStep('uiMinimap')
+          }}
+          uiText={{
+            value: t('npc.nextButton'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.9, 0.4, 1.0)
+          }}
+        />
+      )}
+
+      {step === 'uiMinimap' && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.18, 0.32, 0.44, 0.95)
+          }}
+          onMouseDown={() => {
+            setNpcDialogStep('mechanicsOverview')
+          }}
+          uiText={{
+            value: t('npc.nextButton'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.9, 0.4, 1.0)
+          }}
+        />
+      )}
+
+      {step === 'mechanicsOverview' && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+          }}
+        >
+          <UiEntity
+            uiTransform={{
+              width: '64%',
+              height: 46,
+              justifyContent: 'center',
+              alignItems: 'center',
+              pointerFilter: 'block'
+            }}
+            uiBackground={{
+              color: Color4.create(0.16, 0.35, 0.25, 0.95)
+            }}
+            onMouseDown={() => {
+              startSilasGuidedTour()
+            }}
+            uiText={{
+              value: t('npc.optStartTour'),
+              fontSize: 14,
+              color: Color4.create(0.4, 1.0, 0.6, 1.0)
+            }}
+          />
+          <UiEntity
+            uiTransform={{
+              width: '33%',
+              height: 46,
+              justifyContent: 'center',
+              alignItems: 'center',
+              pointerFilter: 'block'
+            }}
+            uiBackground={{
+              color: Color4.create(0.22, 0.2, 0.24, 0.95)
+            }}
+            onMouseDown={() => {
+              closeNpcDialog()
+            }}
+            uiText={{
+              value: t('npc.optExploreAlone'),
+              fontSize: 13,
+              color: Color4.create(0.85, 0.85, 0.85, 1.0)
+            }}
+          />
+        </UiEntity>
+      )}
+
+      {/* Paradas del Tour Guiado */}
+      {(step === 'tourHideout' || step === 'tourMarketWest' || step === 'tourFactory' || step === 'tourMarketSouth') && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 46,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.18, 0.36, 0.48, 0.95)
+          }}
+          onMouseDown={() => {
+            advanceSilasTourToNextWaypoint()
+          }}
+          uiText={{
+            value: t('npc.continueButton'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.95, 0.4, 1.0)
+          }}
+        />
+      )}
+
+      {step === 'tourFinish' && (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: 46,
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'block'
+          }}
+          uiBackground={{
+            color: Color4.create(0.16, 0.38, 0.22, 0.95)
+          }}
+          onMouseDown={() => {
+            finishSilasGuidedTour()
+          }}
+          uiText={{
+            value: t('npc.finishTourButton'),
+            fontSize: 14,
+            color: Color4.create(1.0, 0.95, 0.4, 1.0)
+          }}
+        />
+      )}
+
+      {/* Menú tradicional de diálogo */}
+      {step === 'intro' && (
         <UiEntity
           uiTransform={{
             width: '100%',
@@ -388,7 +642,6 @@ export const NpcDialog = () => {
               margin: { bottom: 4 }
             }}
           >
-            {/* Opción para repetir la cinemática de Silas */}
             <UiEntity
               uiTransform={{
                 width: '64%',
@@ -411,7 +664,6 @@ export const NpcDialog = () => {
               }}
             />
 
-            {/* Opción Salir */}
             <UiEntity
               uiTransform={{
                 width: '34%',
@@ -434,8 +686,9 @@ export const NpcDialog = () => {
             />
           </UiEntity>
         </UiEntity>
-      ) : (
-        /* Botón de retroceso a la rama principal */
+      )}
+
+      {(step === 'lore' || step === 'golems' || step === 'zones' || step === 'tips') && (
         <UiEntity
           uiTransform={{
             width: '100%',
@@ -457,6 +710,92 @@ export const NpcDialog = () => {
           }}
         />
       )}
+    </UiEntity>
+  )
+}
+
+/**
+ * Barra Flotante de Subtítulos de Silas durante la Marcha del Tour (Mobile-First / HUD)
+ */
+export const SilasTourSubtitleHUD = () => {
+  if (!getIsSilasTourActive()) return null
+  if (getIsNpcDialogOpen() || getIsCinematicActive()) return null
+
+  const subtitle = getSilasTourSubtitle()
+  if (!subtitle) return null
+
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { bottom: 35 },
+        width: 820,
+        minHeight: 70,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: { top: 8, bottom: 8, left: 16, right: 16 },
+        pointerFilter: 'block'
+      }}
+      uiBackground={{
+        color: Color4.create(0.06, 0.08, 0.12, 0.94)
+      }}
+    >
+      {/* Contenedor de Texto y Speaker Badge */}
+      <UiEntity
+        uiTransform={{
+          width: '78%',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'flex-start'
+        }}
+      >
+        <UiEntity
+          uiTransform={{
+            height: 18,
+            margin: { bottom: 2 }
+          }}
+          uiText={{
+            value: t('tour.speakerBadge'),
+            fontSize: 12,
+            color: Color4.create(1.0, 0.85, 0.35, 1.0),
+            textAlign: 'middle-left'
+          }}
+        />
+        <UiEntity
+          uiTransform={{
+            width: '100%'
+          }}
+          uiText={{
+            value: subtitle,
+            fontSize: 14,
+            color: Color4.create(0.95, 0.95, 0.95, 1.0),
+            textAlign: 'middle-left'
+          }}
+        />
+      </UiEntity>
+
+      {/* Botón Salir / Cancelar Tour */}
+      <UiEntity
+        uiTransform={{
+          width: 140,
+          height: 38,
+          justifyContent: 'center',
+          alignItems: 'center',
+          pointerFilter: 'block'
+        }}
+        uiBackground={{
+          color: Color4.create(0.24, 0.14, 0.14, 0.9)
+        }}
+        onMouseDown={() => {
+          finishSilasGuidedTour()
+        }}
+        uiText={{
+          value: t('tour.skipTour'),
+          fontSize: 12,
+          color: Color4.create(1.0, 0.6, 0.6, 1.0)
+        }}
+      />
     </UiEntity>
   )
 }
@@ -621,6 +960,9 @@ export const uiComponent = () => {
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />
+
+      {/* Subtítulos Flotantes durante la Marcha del Tour de Silas */}
+      <SilasTourSubtitleHUD />
 
       {/* Superposición Cinemática de Presentación de Silas */}
       <CinematicOverlay />

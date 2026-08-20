@@ -16,7 +16,22 @@ export interface CombatLogEntry {
   timestamp: number
 }
 
-export type NpcDialogStep = 'intro' | 'lore' | 'golems' | 'zones' | 'tips'
+export type NpcDialogStep =
+  | 'intro'
+  | 'lore'
+  | 'golems'
+  | 'zones'
+  | 'tips'
+  | 'firstTimeCheck'
+  | 'veteranFarewell'
+  | 'uiLanguage'
+  | 'uiMinimap'
+  | 'mechanicsOverview'
+  | 'tourHideout'
+  | 'tourMarketWest'
+  | 'tourFactory'
+  | 'tourMarketSouth'
+  | 'tourFinish'
 
 export interface SceneState {
   isInitialized: boolean
@@ -30,6 +45,10 @@ export interface SceneState {
   isCinematicActive: boolean
   hasPlayedSilasIntro: boolean
   isBigMapOpen: boolean
+  isSilasTourActive: boolean
+  silasTourCurrentWaypoint: number
+  silasTourSubtitle: string
+  hasTriggeredProximityIntro: boolean
 }
 
 export const sceneState: SceneState = {
@@ -40,10 +59,14 @@ export const sceneState: SceneState = {
   playerTotalKills: 0,
   combatLogs: [],
   isNpcDialogOpen: false,
-  npcDialogStep: 'intro',
+  npcDialogStep: 'firstTimeCheck',
   isCinematicActive: false,
   hasPlayedSilasIntro: false,
-  isBigMapOpen: false
+  isBigMapOpen: false,
+  isSilasTourActive: false,
+  silasTourCurrentWaypoint: 0,
+  silasTourSubtitle: '',
+  hasTriggeredProximityIntro: false
 }
 
 /**
@@ -97,9 +120,65 @@ export function setHasPlayedSilasIntro(played: boolean) {
 }
 
 /**
+ * Consulta si el tour guiado de Silas está en progreso.
+ */
+export function getIsSilasTourActive(): boolean {
+  return sceneState.isSilasTourActive
+}
+
+/**
+ * Establece el estado activo del tour guiado de Silas.
+ */
+export function setIsSilasTourActive(active: boolean) {
+  sceneState.isSilasTourActive = active
+}
+
+/**
+ * Obtiene el índice del waypoint actual del tour.
+ */
+export function getSilasTourCurrentWaypoint(): number {
+  return sceneState.silasTourCurrentWaypoint
+}
+
+/**
+ * Establece el índice del waypoint actual del tour.
+ */
+export function setSilasTourCurrentWaypoint(wpIndex: number) {
+  sceneState.silasTourCurrentWaypoint = wpIndex
+}
+
+/**
+ * Obtiene el subtítulo activo que narra Silas durante la marcha.
+ */
+export function getSilasTourSubtitle(): string {
+  return sceneState.silasTourSubtitle
+}
+
+/**
+ * Establece el subtítulo activo que narra Silas durante la marcha.
+ */
+export function setSilasTourSubtitle(subtitle: string) {
+  sceneState.silasTourSubtitle = subtitle
+}
+
+/**
+ * Consulta si ya se disparó la introducción proactiva por proximidad.
+ */
+export function getHasTriggeredProximityIntro(): boolean {
+  return sceneState.hasTriggeredProximityIntro
+}
+
+/**
+ * Marca si ya se disparó la introducción proactiva por proximidad.
+ */
+export function setHasTriggeredProximityIntro(triggered: boolean) {
+  sceneState.hasTriggeredProximityIntro = triggered
+}
+
+/**
  * Abre la ventana modal de diálogo del NPC.
  */
-export function openNpcDialog(step: NpcDialogStep = 'intro') {
+export function openNpcDialog(step: NpcDialogStep = 'firstTimeCheck') {
   sceneState.isNpcDialogOpen = true
   sceneState.npcDialogStep = step
 }
@@ -109,7 +188,7 @@ export function openNpcDialog(step: NpcDialogStep = 'intro') {
  */
 export function closeNpcDialog() {
   sceneState.isNpcDialogOpen = false
-  sceneState.npcDialogStep = 'intro'
+  sceneState.npcDialogStep = 'firstTimeCheck'
 }
 
 /**

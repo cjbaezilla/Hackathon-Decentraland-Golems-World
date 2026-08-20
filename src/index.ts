@@ -31,6 +31,8 @@ import { createWreckageLab } from './objects/wreckageLabBuilder'
 import { createWelcomeNpc, welcomeNpcAnimationSystem } from './objects/welcomeNpc'
 import { createUserHideout } from './objects/userHideoutBuilder'
 import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinematics/silasCinematic'
+import { initTourFollowCamera, initMarketOrbitalCamera } from './cinematics/marketCinematic'
+import { silasTourSystem } from './systems/silasTourSystem'
 import {
   setupSquadSyncListeners,
   announceLocalSquad,
@@ -106,20 +108,23 @@ export function main() {
   // 9. Instanciar el Escondite y Bóveda de Inventario del Usuario (Parcelas [0, 0] y [0, 1] en X: 2.6m-2.8m, Z: 13.7m-19.8m)
   createUserHideout()
 
-  // 10. Inicializar la cámara cinemática de presentación de Silas
+  // 10. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
   initSilasCinematicCamera()
+  initTourFollowCamera()
+  initMarketOrbitalCamera()
 
   // 11. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
   scheduleSilasIntroCinematic()
 
-  // 12. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS
+  // 12. Registrar los sistemas de seguimiento, combate, animación, trampolín, NPCs y tour guiado
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(trampolineSystem)
   engine.addSystem(welcomeNpcAnimationSystem)
+  engine.addSystem(silasTourSystem)
 
-  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente, cinemática de presentación y sistemas activos.')
+  console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente, cinemática de presentación y sistema de tour guiado activo.')
 }
 
 /**

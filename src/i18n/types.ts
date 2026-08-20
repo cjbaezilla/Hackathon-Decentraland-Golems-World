@@ -106,12 +106,53 @@ export interface TranslationSchema {
     tipsText: string
     backButton: string
     optReplayCinematic: string
+    firstTimeQuestion: string
+    optFirstTimeYes: string
+    optFirstTimeNo: string
+    veteranFarewell: string
+    uiLanguageExplanation: string
+    uiMinimapExplanation: string
+    mechanicsExplanation: string
+    optStartTour: string
+    optExploreAlone: string
+    nextButton: string
+    continueButton: string
+    finishTourButton: string
+    tourHideoutTitle: string
+    tourHideoutText: string
+    tourMarketWestTitle: string
+    tourMarketWestText: string
+    tourFactoryTitle: string
+    tourFactoryText: string
+    tourMarketSouthTitle: string
+    tourMarketSouthText: string
+    tourFinishTitle: string
+    tourFinishText: string
+  }
+  tour: {
+    speakerBadge: string
+    skipTour: string
+    subtitleWp1: string
+    subtitleWp2: string
+    subtitleWp3: string
+    subtitleWp4: string
+    subtitleWp5: string
+    subtitleWp6: string
+    subtitleWp7: string
+    subtitleWp8: string
+    subtitleWp9: string
+    subtitleWp10: string
+    subtitleWp11: string
   }
   cinematic: {
     title: string
     subtitle: string
     skipButton: string
     hintPrompt: string
+    marketWestTitle: string
+    marketWestSubtitle: string
+    marketSouthTitle: string
+    marketSouthSubtitle: string
   }
   map: {
     title: string

@@ -1,21 +1,141 @@
-# 📖 Guía Maestra: NPC de Bienvenida «Silas el Sobreviviente» y Campamento de la Forja
+# 📖 Guía Maestra: NPC de Bienvenida «Silas el Sobreviviente» y Sistema de Tour Guiado
 
 > [!IMPORTANT]
 > **ESPECIFICACIÓN OFICIAL DE GOLEMS WORLD (SDK7 & MOBILE-FIRST)**:  
-> Esta guía documenta la arquitectura, diseño visual, micro-ambientación, sistema de diálogo interactivo (React-ECS), soporte bilingüe (`src/i18n`) y mecánicas de interacción del NPC de bienvenida **«Silas el Sobreviviente»** en Decentraland SDK7.
+> Esta guía documenta la arquitectura, diseño visual, micro-ambientación, sistema de diálogo interactivo (React-ECS), árbol de tutoriales bilingües (`src/i18n`), cinemáticas orbitales de cámara (`src/cinematics/marketCinematic.ts`) y el sistema de navegación por waypoints del **Tour Guiado de Silas el Sobreviviente** en Decentraland SDK7.
 
 ---
 
 ## 📑 Tabla de Contenidos
 
 1. [Resumen y Propósito del NPC](#1-resumen-y-propósito-del-npc)
-2. [Ubicación Espacial y Coordenadas Métricas](#2-ubicación-espacial-y-coordenadas-métricas)
-3. [Modelado y Representación Visual (`AvatarShape`)](#3-modelado-y-representación-visual-avatarshape)
-4. [Micro-Campamento de Supervivencia y Props Ambientales](#4-micro-campamento-de-supervivencia-y-props-ambientales)
-5. [Árbol de Diálogos Ramificado e Internacionalización (i18n)](#5-árbol-de-diálogos-ramificado-e-internacionalización-i18n)
-6. [Interfaz de Usuario y Modal RPG Mobile-First (`ui.tsx`)](#6-interfaz-de-usuario-y-modal-rpg-mobile-first-uitsx)
-7. [Sistema de Animación Reactiva (`welcomeNpcAnimationSystem`)](#7-sistema-de-animación-reactiva-welcomempcanimationsystem)
-8. [Estructura de Archivos e Integración en la Escena](#8-estructura-de-archivos-e-integración-en-la-escena)
+2. [Ubicación Espacial y Coordenadas del Campamento](#2-ubicación-espacial-y-coordenadas-del-campamento)
+3. [Detección Proactiva y Clic Táctil Mobile-First](#3-detección-proactiva-y-clic-táctil-mobile-first)
+4. [Árbol de Diálogos y Tutorial de Bienvenida (i18n)](#4-árbol-de-diálogos-y-tutorial-de-bienvenida-i18n)
+5. [Sistema de Tour Guiado y Circuito de 11 Waypoints](#5-sistema-de-tour-guiado-y-circuito-de-11-waypoints)
+6. [Cámaras Cinemáticas y Barridos Orbitales del Mercado](#6-cámaras-cinemáticas-y-barridos-orbitales-del-mercado)
+7. [Interfaz de Usuario React-ECS y Subtítulos en Movimiento](#7-interfaz-de-usuario-react-ecs-y-subtítulos-en-movimiento)
+8. [Estructura Modular de Archivos](#8-estructura-modular-de-archivos)
+
+---
+
+## 1. Resumen y Propósito del NPC
+
+**Silas el Sobreviviente** es el primer personaje no jugable con el que interactúa el jugador al ingresar a **Golems World**. Actúa como el mentor y guía de supervivencia del páramo industrial:
+
+- **Fantasea y Rol**: Un veterano chatarrero y forjador que ha sobrevivido décadas a la Gran Sobrecarga. Viste indumentaria de cuero resistente y desgastada por el humo y las chispas.
+- **Función Tutorial Orgánica**:
+  1. Consulta amigablemente si es la primera vez del jugador en el reino.
+  2. Enseña a utilizar el **Selector de Idioma** (`🌐 ES | EN`) en la esquina superior derecha.
+  3. Explica el funcionamiento del **Minimapa en tiempo real** y su botón táctil para ampliar a pantalla completa (grid 25x25 / 625 parcelas).
+  4. Detalla las mecánicas troncales: **Radar de Calor**, **Forja Determinista** (5 a 12 piezas), **Pentágono de Afinidades** y la **Gran Arena** de combate FFA a 200m, 200m.
+  5. Ofrece un **Tour Guiado a pie** recorriendo los 4 puntos neurálgicos de la Forja (Escondite y 3 Cofres, Mercado Oeste, Fábrica de Golems, Mercado Sur y retorno al campamento).
+
+---
+
+## 2. Ubicación Espacial y Coordenadas del Campamento
+
+Silas y su campamento base están situados en la plataforma adoquinada de bienvenida en la esquina suroeste del mapa:
+
+| Parámetro | Valor Canónico | Notas de Diseño |
+| :--- | :--- | :--- |
+| **Parcela del Grid** | `[0, 0]` (Base del mapa 25x25) | Primera parcela del Distrito de la Forja |
+| **Coordenadas Métricas** | `X: 15.8m | Y: 0.25m | Z: 5.9m` | Elevado a $Y=0.25\text{m}$ sobre el piso de madera |
+| **Distrito** | Distrito de la Forja | Zona 🟢 Segura (Sin PK / Libre de Daño) |
+| **Proximidad al Spawn** | A 5.4 metros del punto de aparición | Punto de Spawn en `(12.2m, 2.0m)` |
+| **Orientación Base** | $180^\circ$ (Mirando hacia el Sur / Acceso) | Recibe de frente al avatar recién aparecido |
+
+---
+
+## 3. Detección Proactiva y Clic Táctil Mobile-First
+
+1. **Detección por Proximidad ($\le 4.5\text{m}$)**:  
+   Implementada dentro de `welcomeNpcAnimationSystem` en `src/objects/welcomeNpc.ts`. Al aproximarse el avatar por primera vez, Silas realiza un emote de saludo (`wave`) y abre automáticamente la ventana modal de diálogo.
+2. **Interacción Táctil / Puntero (`InputAction.IA_POINTER`)**:  
+   Hitbox táctil generosa ($\ge 8\text{m}$) sobre el avatar de Silas y su mini-golem acompañante Pistón, permitiendo reanudar o consultar información en cualquier instante.
+
+---
+
+## 4. Árbol de Diálogos y Tutorial de Bienvenida (i18n)
+
+```mermaid
+graph TD
+    A["⚙️ Detección Proactiva / Clic Táctil"] --> B["¿Es tu primera vez en Golems Realm?"]
+    B -->|"🛡️ No, ya soy veterano"| C["Silas desea buena suerte y cierra chat"]
+    B -->|"⭐ Sí, soy nuevo"| D["Explicación: Selector de Idioma (Top-Right)"]
+    D --> E["Explicación: Minimapa y Ampliación 2D (Grid 25x25)"]
+    E --> F["Explicación: Mecánicas Troncales (Radar, Forja, Afinidades, Arena)"]
+    F --> G["¿Iniciar Tour Guiado?"]
+    G -->|"🧭 Sí, iniciar Tour"| H["Silas arranca el Tour Guiado a pie"]
+    G -->|"🚶 Explorar por mi cuenta"| I["Cierre amigable del diálogo"]
+```
+
+---
+
+## 5. Sistema de Tour Guiado y Circuito de 11 Waypoints
+
+El sistema (`src/systems/silasTourSystem.ts`) orquesta una máquina de estados que desplaza a Silas suavemente entre 11 waypoints con rotación continua en la dirección de marcha y subtítulos flotantes sincronizados:
+
+| WP # | Parcela | Coordenadas $(X, Z)$ | Acción / Parada | Explicación Narrativa |
+| :--- | :--- | :--- | :--- | :--- |
+| **WP 0** | `[0, 0]` | `(15.8m, 5.9m)` | Inicio del Tour | Silas invita al jugador a seguirlo. |
+| **WP 1** | `[0, 0]` | `(15.8m, 10.3m)` | Marcha Norte | Subtítulo: Te llevaré a conocer tu refugio personal. |
+| **WP 2** | `[0, 0]` | `(9.7m, 15.5m)` | **Parada 1: Escondite** | **3 Cofres de Bóveda**: Común (Sur), Raro (Centro) y Épico/Legendario (Norte). |
+| **WP 3** | `[0, 1]` | `(15.7m, 21.9m)` | Marcha Calle Norte | Subtítulo: Nos dirigimos al concurrido Paseo Comercial. |
+| **WP 4** | `[0, 1]` | `(15.4m, 25.8m)` | Marcha Aproximación | Subtítulo: Camino de abastecimiento de repuestos. |
+| **WP 5** | `[0, 1]` | `(10.6m, 29.0m)` | **Parada 2: Mercado Oeste** | Quioscos 06 al 10 + **Cámara Orbital Panorámica 1**. |
+| **WP 6** | `[0, 1]` | `(15.6m, 29.4m)` | Marcha Hacia el Este | Subtítulo: Te mostraré la Fábrica de Golems. |
+| **WP 7** | `[1, 1]` | `(23.6m, 25.8m)` | Marcha Corredor Central | Subtítulo: Siente el calor de las calderas y turbinas. |
+| **WP 8** | `[2, 1]` | `(42.4m, 25.8m)` | **Parada 3: Fábrica Golems** | Forja determinista, combinaciones 5-12 y afinidades. |
+| **WP 9** | `[1, 0]` | `(30.0m, 11.5m)` | **Parada 4: Mercado Sur** | Quioscos 01 al 05 + **Cámara Orbital Panorámica 2**. |
+| **WP 10**| `[1, 0]` | `(16.0m, 9.8m)` | Marcha Regreso | Subtítulo: Ya estamos regresando a mi campamento. |
+| **WP 11**| `[0, 0]` | `(15.8m, 5.9m)` | **Parada 5: Retorno Final** | Silas regresa a su puesto, gira $180^\circ$, saluda y gradúa al jugador. |
+
+---
+
+## 6. Cámaras Cinemáticas y Barridos Orbitales del Mercado
+
+Implementadas en `src/cinematics/marketCinematic.ts`:
+
+1. **Cámara de Seguimiento Continuo (`activateTourFollowCamera`)**:  
+   Mantiene una `VirtualCamera` en tercera persona centrada en Silas ($Y+2.5\text{m}, Z-3.8\text{m}$ con interpolación suave), asegurando que el jugador visualice a Silas y el camino a cada paso.
+2. **Cámara Orbital Paseo Oeste (`playMarketWestCinematic`)**:  
+   Barrido cinemático de 4.5s sobre los quioscos 06 al 10 en el eje Z ($25\text{m} \rightarrow 58\text{m}$).
+3. **Cámara Orbital Bulevar Sur (`playMarketSouthCinematic`)**:  
+   Barrido cinemático de 4.5s sobre los quioscos 01 al 05 en el eje X ($25\text{m} \rightarrow 66\text{m}$).
+
+---
+
+## 7. Interfaz de Usuario React-ECS y Subtítulos en Movimiento
+
+1. **Modal de Diálogo RPG (`<NpcDialog />` en `src/ui.tsx`)**:  
+   Panel táctil Mobile-First con botones de avance (`Siguiente ➔`, `Continuar ➔`, `Finalizar 🏆`).
+2. **HUD de Subtítulos en Marcha (`<SilasTourSubtitleHUD />`)**:  
+   Barra flotante inferior no invasiva con distintivo `[ ⚙️ Silas el Sobreviviente ]` y botón de salto rápido (`Finalizar Tour ✖`), garantizando que no obstaculice los joysticks táctiles nativos.
+
+---
+
+## 8. Estructura Modular de Archivos
+
+```text
+src/
+├── cinematics/
+│   ├── silasCinematic.ts        # Cinemática de presentación inicial de Silas
+│   └── marketCinematic.ts       # Cámaras orbitales del mercado y cámara de seguimiento del tour
+├── objects/
+│   └── welcomeNpc.ts            # Fábrica del NPC Silas, campamento y detección proactiva
+├── systems/
+│   └── silasTourSystem.ts       # Sistema de navegación ECS por 11 waypoints y orquestación del tour
+├── state.ts                     # Estado global del tour y ramas de diálogo
+├── ui.tsx                       # Componentes <NpcDialog /> y <SilasTourSubtitleHUD />
+├── i18n/
+│   ├── types.ts                 # Esquema de traducciones tipado
+│   └── locales/
+│       ├── es.ts                # Textos en español
+│       └── en.ts                # Textos en inglés
+└── index.ts                     # Inicialización de cámaras y registro de silasTourSystem
+```
+
 
 ---
 
