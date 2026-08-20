@@ -20,7 +20,11 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
    - [4.1 Arquitectura y Paleta por Rareza](#41-arquitectura-y-paleta-por-rareza)
    - [4.2 Manual de Uso y Ejecución](#42-manual-de-uso-y-ejecución)
    - [4.3 Catálogo Maestro de los 46 Ítems](#43-catálogo-maestro-de-los-46-ítems)
-5. [Integración en Decentraland SDK7 (`GltfContainer`)](#5-integración-en-decentraland-sdk7-gltfcontainer)
+5. [`generate_item_htmls.js`: Generador de Fichas HTML Estáticas Bilingües y Showcase (46 Fichas)](#5-generate_item_htmlsjs-generador-de-fichas-html-estáticas-bilingües-y-showcase-46-fichas)
+   - [5.1 Propósito y Características Principales](#51-propósito-y-características-principales)
+   - [5.2 Estructura en `showcase/` e i18n](#52-estructura-en-showcase-e-i18n)
+   - [5.3 Manual de Uso y Servidor Local PHP](#53-manual-de-uso-y-servidor-local-php)
+6. [Integración en Decentraland SDK7 (`GltfContainer`)](#6-integración-en-decentraland-sdk7-gltfcontainer)
 
 ---
 
@@ -31,6 +35,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) | Descarga y organiza modelos `.glb` y texturas oficiales de DCL (Pack Steampunk) para la **Gran Arena de Torneo**. | `assets/asset-packs/<slug>/` |
 | [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera proceduralmente los 25 modelos binarios `.glb` PBR con canales emisivos para los **5 tipos de Golems**. | `assets/models/<tipo>/` |
 | [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) | Genera proceduralmente los 46 modelos binarios `.glb` PBR organizados por rareza para los **materiales coleccionables**. | `assets/items/<rareza>/` |
+| [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) | Genera las 46 fichas HTML estáticas bilingües (EN/ES) con visor 3D, navegación secuencial y botón de copiado de fotogramas a PNG. | `showcase/<rareza>/` y `showcase/index.html` |
 
 ---
 
@@ -213,7 +218,46 @@ assets/items/
 
 ---
 
-## 5. Integración en Decentraland SDK7 (`GltfContainer`)
+## 5. `generate_item_htmls.js`: Generador de Fichas HTML Estáticas Bilingües y Showcase (46 Fichas)
+
+### 5.1 Propósito y Características Principales
+El script [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) compila la base de metadatos de los 46 materiales coleccionables (`src/config/items.ts`) y genera 46 páginas HTML estáticas independientes junto con un catálogo maestre central `showcase/index.html`.
+
+Características destacadas:
+- 🌐 **Soporte Bilingüe Dual (English Default / Español)**: Selector `[ ES | EN ]` en la cabecera con persistencia en `localStorage`.
+- 📱 **Diseño Mobile Horizontal (Landscape First)**: Renderizador 3D WebGL basado en `<model-viewer>` ocupando el **55% de pantalla**, con tipografía ampliada y tarjetas responsivas.
+- 📋 **Botón "Copy Rendered Photo"**: Extrae el fotograma 3D en resolución HD a formato PNG y lo copia directamente al portapapeles (`ClipboardItem`), con descarga de fallback.
+- ↔️ **Navegación Secuencial Multicanal**: Botones de acceso directo `Previous` / `Next`, soporte para atajos de teclado (`←` / `→`) y gestos táctiles (*swipe*) en móviles.
+
+### 5.2 Estructura en `showcase/` e i18n
+Los archivos HTML generados se alojan en la carpeta aislada `showcase/` manteniendo la referencia relativa hacia los modelos `.glb` en `assets/items/`:
+
+```text
+showcase/
+├── index.html        # Catálogo maestre bilingüe con buscador y filtro por rareza
+├── common/           # 14 fichas (alambre_cobre.html, tornillos_pernos.html, etc.)
+├── uncommon/         # 11 fichas (transistores.html, valvulas_vapor.html, etc.)
+├── rare/             # 10 fichas (motor_vapor.html, bobinas_tesla.html, etc.)
+├── epic/             # 7 fichas (nucleo_mana.html, reactor_eter.html, etc.)
+└── legendary/        # 4 fichas (ojo_dragon.html, relicario_astral.html, etc.)
+```
+
+### 5.3 Manual de Uso y Servidor Local PHP
+
+```bash
+# Compilar las 46 fichas HTML y el catálogo showcase/
+node scripts/generate_item_htmls.js
+
+# Iniciar servidor web PHP (desde la raíz del proyecto para resolver showcase/ y assets/)
+php -S localhost:8000
+```
+
+Acceso en el navegador:
+👉 **`http://localhost:8000/showcase/`**
+
+---
+
+## 6. Integración en Decentraland SDK7 (`GltfContainer`)
 
 Cualquier modelo descargado o generado puede instanciarse directamente mediante el componente `GltfContainer`:
 
@@ -251,3 +295,4 @@ GltfContainer.create(itemNode, {
   src: 'assets/items/epic/reactor_eter.glb'
 })
 ```
+

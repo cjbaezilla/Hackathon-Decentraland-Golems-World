@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Automaton Brain - Material Spec Sheet | Golems Decentraland</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+  <style>
+    :root {
+      --rarity-color: #C038FF;
+      --rarity-glow: rgba(192, 56, 255, 0.4);
+      --bg-gradient: linear-gradient(135deg, #261438 0%, #140b20 100%);
+      --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-gradient);
+      font-family: var(--font-main);
+      color: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      height: 62px;
+      padding: 0 20px;
+      background: rgba(10, 12, 16, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 20;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-badge {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      color: #00D4FF;
+      font-weight: 800;
+    }
+
+    .lang-switcher {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: #7b8fa8;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn.active {
+      background: var(--rarity-color);
+      color: #080a0f;
+      box-shadow: 0 0 10px var(--rarity-glow);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      color: #e0e8f5;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      white-space: nowrap;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+      transform: translateY(-1px);
+      border-color: var(--rarity-color);
+      box-shadow: 0 0 12px var(--rarity-glow);
+    }
+
+    .nav-btn.center-catalog {
+      background: var(--rarity-color);
+      color: #080a0f;
+      border: none;
+      font-weight: 900;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 55% 45%;
+      height: calc(100vh - 62px);
+      overflow: hidden;
+    }
+
+    .viewer-column {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.06) 0%, transparent 75%);
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 20px;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      max-height: calc(100vh - 135px);
+      --poster-color: transparent;
+    }
+
+    .action-toolbar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      background: rgba(10, 12, 18, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 10px 18px;
+      border-radius: 40px;
+      border: 1px solid var(--rarity-color);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 20px var(--rarity-glow);
+      z-index: 10;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 25px;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-action.primary {
+      background: var(--rarity-color);
+      color: #080a0f;
+      border: none;
+      box-shadow: 0 0 16px var(--rarity-glow);
+    }
+
+    .btn-action.primary:hover {
+      transform: translateY(-2px) scale(1.04);
+      filter: brightness(1.2);
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .details-column {
+      padding: 28px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .details-column::-webkit-scrollbar { width: 8px; }
+    .details-column::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.25); }
+    .details-column::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 4px; }
+
+    .item-header { display: flex; flex-direction: column; gap: 8px; }
+    .badge-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .rarity-pill {
+      background: var(--rarity-color);
+      color: #080a0f;
+      font-weight: 900;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 14px;
+      letter-spacing: 0.8px;
+    }
+
+    .unique-pill {
+      background: rgba(255, 77, 77, 0.25);
+      color: #ff5555;
+      border: 1px solid #ff4444;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border-radius: 14px;
+    }
+
+    .item-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1.15;
+      color: #ffffff;
+      text-shadow: 0 3px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    .item-subtitle {
+      font-size: 1.05rem;
+      color: #9ab0c8;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .location-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 5px solid var(--rarity-color);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .loc-label {
+      font-size: 0.82rem;
+      color: #90a4be;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 800;
+    }
+
+    .loc-value {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .loc-risk {
+      font-size: 0.85rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: rgba(255, 200, 0, 0.15);
+      color: #ffcc00;
+      border: 1px solid rgba(255, 200, 0, 0.3);
+    }
+
+    .stats-section { display: flex; flex-direction: column; gap: 12px; }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #9ab0c8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: rgba(16, 20, 28, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 12px 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-name { font-size: 1.02rem; font-weight: 700; color: #b8cbe0; }
+    .stat-val { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 900; color: var(--rarity-color); }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-key { font-size: 0.78rem; color: #7b8fa8; text-transform: uppercase; font-weight: 800; }
+    .meta-val { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 800; color: #e8f0f8; }
+
+    .desc-box {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: #c8d8ea;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 16px 20px;
+      border-radius: 10px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .toast {
+      position: fixed;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(10, 230, 110, 0.95);
+      color: #051a0d;
+      font-weight: 900;
+      font-size: 0.95rem;
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 6px 20px rgba(0, 255, 100, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 100;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .quick-nav-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .quick-nav-link {
+      color: #8fa0b5;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .quick-nav-link:hover { color: var(--rarity-color); }
+
+    @media (max-width: 850px) and (orientation: portrait) {
+      main { grid-template-columns: 1fr; grid-template-rows: 45vh auto; overflow-y: auto; }
+      body { height: auto; overflow: auto; }
+      .item-title { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR (ENGLISH DEFAULT) -->
+  <header>
+    <div class="header-left">
+      <a href="../index.html" class="brand-title">
+        ⚙️ GOLEMS <span class="brand-badge" id="badge-counter">Item 37 of 46</span>
+      </a>
+
+      <div class="lang-switcher">
+        <button id="btn-lang-es" class="lang-btn" onclick="setLanguage('es')">ES</button>
+        <button id="btn-lang-en" class="lang-btn active" onclick="setLanguage('en')">EN</button>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <a href="../epic/nucleo_mana.html" class="nav-btn" id="link-prev">
+        <span id="label-prev">◀ Condensed Mana Core</span>
+      </a>
+      <a href="../index.html" class="nav-btn center-catalog" id="link-cat">
+        <span id="label-cat">☰ Catalog</span>
+      </a>
+      <a href="../epic/reactor_eter.html" class="nav-btn" id="link-next">
+        <span id="label-next">Aether Reactor ▶</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="viewer-column">
+      <model-viewer 
+        id="item-viewer"
+        src="../../assets/items/epic/cerebro_automata.glb"
+        alt="3D Model of Automaton Brain"
+        auto-rotate
+        camera-controls
+        shadow-intensity="1.5"
+        shadow-softness="0.8"
+        exposure="1.2"
+        environment-image="neutral"
+        interaction-prompt="none">
+      </model-viewer>
+
+      <div class="action-toolbar">
+        <button class="btn-action primary" id="btn-copy-photo" onclick="copyRenderedPhoto()">
+          📋 Copy Rendered Photo
+        </button>
+        <button class="btn-action" id="btn-download" onclick="downloadSnapshot()">
+          💾 Download PNG
+        </button>
+      </div>
+    </section>
+
+    <section class="details-column">
+      <div class="item-header">
+        <div class="badge-row">
+          <span class="rarity-pill" id="rarity-tag">Epic</span>
+          <span class="unique-pill" id="unique-tag">⚠️ Unique Instance (Limit 1)</span>
+        </div>
+        <h1 class="item-title" id="item-title">Automaton Brain</h1>
+        <div class="item-subtitle" id="item-subtitle">Cerebro de autómata • ID: cerebro_automata</div>
+      </div>
+
+      <div class="location-box">
+        <div>
+          <div class="loc-label" id="loc-label">Spawn Location</div>
+          <div class="loc-value" id="loc-value">📍 Mining Reserve</div>
+        </div>
+        <span class="loc-risk" id="loc-risk">Safe Zone</span>
+      </div>
+
+      <div class="stats-section">
+        <div class="section-title" id="stats-title">🔨 Forge Attribute Contribution</div>
+        <div class="stats-grid">
+          
+          <div class="stat-card">
+            <span class="stat-name" id="label-att">⚔️ Attack</span>
+            <span class="stat-val">+8</span>
+          </div>
+          
+          
+          
+          
+          <div class="stat-card" style="grid-column: span 2; border-color: #FFAA00">
+            <span class="stat-name" id="label-aff">✨ Element Affinity</span>
+            <span class="stat-val" id="val-aff" style="color: #FFAA00">Mechanical ⚙️</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-key" id="key-meta-weight">Spawn Rate</span>
+          <span class="meta-val">0.80%</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key" id="key-meta-respawn">Respawn Time</span>
+          <span class="meta-val" id="val-meta-respawn">20-30 mins</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-key" id="key-meta-model">3D Model</span>
+          <span class="meta-val">.GLB 2.0</span>
+        </div>
+      </div>
+
+      <div class="desc-box" id="desc-box">
+        Complex differential logic processor endowing the golem with calculated combat tactics.
+      </div>
+
+      <div class="quick-nav-footer">
+        <a href="../epic/nucleo_mana.html" class="quick-nav-link" id="quick-prev">
+          ◀ Condensed Mana Core
+        </a>
+        <a href="../epic/reactor_eter.html" class="quick-nav-link" id="quick-next">
+          Aether Reactor ▶
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">
+    Material photo copied to clipboard! 📸
+  </div>
+
+  <script>
+    const i18nData = {"es":{"badgeCounter":"Ítem 37 de 46","rarity":"Épico","unique":"⚠️ Instancia Única (Límite 1)","title":"Cerebro de autómata","subtitle":"Automaton Brain • ID: cerebro_automata","locLabel":"Zona de Aparición","locValue":"📍 Reserva de Minería","locRisk":"Zona Segura","statsTitle":"🔨 Aporte de Atributos para la Forja","attack":"⚔️ Ataque","defense":"🛡️ Defensa","hp":"❤️ Vitalidad (HP)","speed":"⚡ Velocidad","affinity":"✨ Elemento de Afinidad","affinityName":"Mecánico ⚙️","metaWeightKey":"Peso Spawn","metaRespawnKey":"Tiempo Respawn","metaModelKey":"Modelo 3D","respawnVal":"20-30 min","desc":"Procesador lógico diferencial de alta complejidad. Dota al golem de tácticas de combate calculadas.","copyBtn":"📋 Copiar Foto Renderizada","downloadBtn":"💾 Descargar PNG","catalogLabel":"Catálogo","prevLabel":"◀ Núcleo de maná condensado","nextLabel":"Reactor de éter ▶","toastCopy":"¡Foto del material copiada al portapapeles! 📸","toastLocal":"Imagen guardada localmente","toastDownload":"¡Foto renderizada descargada! 💾"},"en":{"badgeCounter":"Item 37 of 46","rarity":"Epic","unique":"⚠️ Unique Instance (Limit 1)","title":"Automaton Brain","subtitle":"Cerebro de autómata • ID: cerebro_automata","locLabel":"Spawn Location","locValue":"📍 Mining Reserve","locRisk":"Safe Zone","statsTitle":"🔨 Forge Attribute Contribution","attack":"⚔️ Attack","defense":"🛡️ Defense","hp":"❤️ Vitality (HP)","speed":"⚡ Speed","affinity":"✨ Element Affinity","affinityName":"Mechanical ⚙️","metaWeightKey":"Spawn Rate","metaRespawnKey":"Respawn Time","metaModelKey":"3D Model","respawnVal":"20-30 mins","desc":"Complex differential logic processor endowing the golem with calculated combat tactics.","copyBtn":"📋 Copy Rendered Photo","downloadBtn":"💾 Download PNG","catalogLabel":"Catalog","prevLabel":"◀ Condensed Mana Core","nextLabel":"Aether Reactor ▶","toastCopy":"Material photo copied to clipboard! 📸","toastLocal":"Image saved locally","toastDownload":"Rendered photo downloaded! 💾"}};
+    const modelViewer = document.getElementById('item-viewer');
+    const toast = document.getElementById('toast');
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('golems_lang', lang);
+      document.documentElement.lang = lang;
+
+      document.getElementById('btn-lang-es').classList.toggle('active', lang === 'es');
+      document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+
+      const d = i18nData[lang];
+      document.getElementById('badge-counter').textContent = d.badgeCounter;
+      document.getElementById('rarity-tag').textContent = d.rarity;
+      const uniqueEl = document.getElementById('unique-tag');
+      if (uniqueEl) uniqueEl.textContent = d.unique;
+      document.getElementById('item-title').textContent = d.title;
+      document.getElementById('item-subtitle').textContent = d.subtitle;
+      document.getElementById('loc-label').textContent = d.locLabel;
+      document.getElementById('loc-value').textContent = d.locValue;
+      document.getElementById('loc-risk').textContent = d.locRisk;
+      document.getElementById('stats-title').textContent = d.statsTitle;
+      document.getElementById('key-meta-weight').textContent = d.metaWeightKey;
+      document.getElementById('key-meta-respawn').textContent = d.metaRespawnKey;
+      document.getElementById('key-meta-model').textContent = d.metaModelKey;
+      document.getElementById('val-meta-respawn').textContent = d.respawnVal;
+      document.getElementById('desc-box').textContent = d.desc;
+      document.getElementById('btn-copy-photo').textContent = d.copyBtn;
+      document.getElementById('btn-download').textContent = d.downloadBtn;
+      document.getElementById('label-cat').textContent = '☰ ' + d.catalogLabel;
+      document.getElementById('label-prev').textContent = d.prevLabel;
+      document.getElementById('label-next').textContent = d.nextLabel;
+      document.getElementById('quick-prev').textContent = d.prevLabel;
+      document.getElementById('quick-next').textContent = d.nextLabel;
+
+      const attL = document.getElementById('label-att'); if (attL) attL.textContent = d.attack;
+      const defL = document.getElementById('label-def'); if (defL) defL.textContent = d.defense;
+      const hpL = document.getElementById('label-hp'); if (hpL) hpL.textContent = d.hp;
+      const spdL = document.getElementById('label-spd'); if (spdL) spdL.textContent = d.speed;
+      const affL = document.getElementById('label-aff'); if (affL) affL.textContent = d.affinity;
+      const affV = document.getElementById('val-aff'); if (affV) affV.textContent = d.affinityName;
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    async function copyRenderedPhoto() {
+      try {
+        const blob = await modelViewer.toBlob({
+          mimeType: 'image/png',
+          idealAspect: true,
+          qualityArgument: 0.95
+        });
+
+        if (!blob) throw new Error('Blob non-existent');
+
+        if (navigator.clipboard && window.ClipboardItem) {
+          const item = new ClipboardItem({ 'image/png': blob });
+          await navigator.clipboard.write([item]);
+          showToast(i18nData[currentLang].toastCopy);
+        } else {
+          downloadBlob(blob, 'cerebro_automata_render.png');
+          showToast(i18nData[currentLang].toastLocal);
+        }
+      } catch (err) {
+        try {
+          const canvas = modelViewer.shadowRoot.querySelector('canvas');
+          if (canvas) {
+            canvas.toBlob(async (blob) => {
+              if (blob && navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                showToast(i18nData[currentLang].toastCopy);
+              } else if (blob) {
+                downloadBlob(blob, 'cerebro_automata_render.png');
+              }
+            });
+          } else {
+            showToast('Error copying snapshot.');
+          }
+        } catch (e) {
+          showToast('Clipboard access error.');
+        }
+      }
+    }
+
+    async function downloadSnapshot() {
+      try {
+        const blob = await modelViewer.toBlob({
+          mimeType: 'image/png',
+          idealAspect: true
+        });
+        downloadBlob(blob, 'cerebro_automata_render.png');
+        showToast(i18nData[currentLang].toastDownload);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        window.location.href = '../epic/nucleo_mana.html';
+      } else if (e.key === 'ArrowRight') {
+        window.location.href = '../epic/reactor_eter.html';
+      }
+    });
+
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+    document.addEventListener('touchend', (e) => {
+      let touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX - touchStartX > 80) {
+        window.location.href = '../epic/nucleo_mana.html';
+      } else if (touchStartX - touchEndX > 80) {
+        window.location.href = '../epic/reactor_eter.html';
+      }
+    }, {passive: true});
+
+    // Auto-inicializar idioma guardado (Default: English)
+    const savedLang = localStorage.getItem('golems_lang') || 'en';
+    setLanguage(savedLang);
+  </script>
+</body>
+</html>

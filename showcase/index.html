@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Materials Catalog - Golems Decentraland</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0b0d12;
+      color: #f0f4f8;
+      font-family: 'Outfit', sans-serif;
+      padding: 28px;
+      min-height: 100vh;
+    }
+    header {
+      max-width: 1300px;
+      margin: 0 auto 35px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 {
+      font-size: 2.3rem;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .tag {
+      background: rgba(0, 212, 255, 0.15);
+      color: #00D4FF;
+      border: 1px solid #00D4FF;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .lang-switcher {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      color: #7b8fa8;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 5px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .lang-btn.active {
+      background: #00D4FF;
+      color: #080a0f;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+    }
+
+    .controls {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    input, select {
+      background: #161a23;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #00D4FF;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+    .grid {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #141822;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .card-rarity {
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      align-self: flex-start;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .card-zone {
+      font-size: 0.88rem;
+      color: #9ab0c8;
+      font-weight: 600;
+    }
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      color: #00D4FF;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <h1 id="page-title">⚙️ Master Materials Catalog <span class="tag">46 Items</span></h1>
+
+      <div class="lang-switcher">
+        <button id="btn-lang-es" class="lang-btn" onclick="setLanguage('es')">ES</button>
+        <button id="btn-lang-en" class="lang-btn active" onclick="setLanguage('en')">EN</button>
+      </div>
+    </div>
+    <div class="controls">
+      <input type="text" id="search" placeholder="🔍 Search by name or zone..." oninput="filterItems()">
+      <select id="filter-rarity" onchange="filterItems()">
+        <option value="all" id="opt-all">All Rarities</option>
+        <option value="common" id="opt-common">Commons</option>
+        <option value="uncommon" id="opt-uncommon">Uncommons</option>
+        <option value="rare" id="opt-rare">Rares</option>
+        <option value="epic" id="opt-epic">Epics</option>
+        <option value="legendary" id="opt-legendary">Legendaries</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="grid" id="items-grid">
+    
+    <a href="./common/alambre_cobre.html" class="card" data-name-es="alambre de cobre los chatarrales" data-name-en="copper wire the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Alambre de cobre" data-title-en="Copper Wire">Copper Wire</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/tornillos_pernos.html" class="card" data-name-es="tornillos y pernos los chatarrales" data-name-en="screws & bolts the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Tornillos y pernos" data-title-en="Screws & Bolts">Screws & Bolts</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/engranajes_desgastados.html" class="card" data-name-es="engranajes desgastados los chatarrales" data-name-en="worn gears the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Engranajes desgastados" data-title-en="Worn Gears">Worn Gears</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/tubos_cobre.html" class="card" data-name-es="tubos de cobre los chatarrales" data-name-en="copper pipes the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Tubos de cobre" data-title-en="Copper Pipes">Copper Pipes</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/sartenes.html" class="card" data-name-es="sartenes los chatarrales" data-name-en="frying pans the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Sartenes" data-title-en="Frying Pans">Frying Pans</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/ollas_cocinar.html" class="card" data-name-es="ollas de cocinar los chatarrales" data-name-en="cooking pots the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Ollas de cocinar" data-title-en="Cooking Pots">Cooking Pots</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/placas_laton.html" class="card" data-name-es="placas de latón los chatarrales" data-name-en="brass plates the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Placas de latón" data-title-en="Brass Plates">Brass Plates</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/clavos_oxidados.html" class="card" data-name-es="clavos oxidados los chatarrales" data-name-en="rusty nails the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Clavos oxidados" data-title-en="Rusty Nails">Rusty Nails</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/latas_conserva.html" class="card" data-name-es="latas de conserva los chatarrales" data-name-en="tin cans the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Latas de conserva" data-title-en="Tin Cans">Tin Cans</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/cadenas_hierro.html" class="card" data-name-es="cadenas de hierro los chatarrales" data-name-en="iron chains the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Cadenas de hierro" data-title-en="Iron Chains">Iron Chains</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/tuercas_gigantes.html" class="card" data-name-es="tuercas gigantes los chatarrales" data-name-en="giant nuts the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Tuercas gigantes" data-title-en="Giant Nuts">Giant Nuts</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/tapas_alcantarilla.html" class="card" data-name-es="tapas de alcantarilla los chatarrales" data-name-en="manhole covers the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Tapas de alcantarilla" data-title-en="Manhole Covers">Manhole Covers</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/cables_deshilachados.html" class="card" data-name-es="cables deshilachados los chatarrales" data-name-en="frayed cables the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Cables deshilachados" data-title-en="Frayed Cables">Frayed Cables</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./common/residuos_carbon.html" class="card" data-name-es="residuos de carbón los chatarrales" data-name-en="coal residue the junkyards" data-rarity="common" style="border-top: 4px solid #A0A0A0">
+      <span class="card-rarity" style="background: #A0A0A0; color: #000" data-rarity-es="Común" data-rarity-en="Common">Common</span>
+      <div class="card-title" data-title-es="Residuos de carbón" data-title-en="Coal Residue">Coal Residue</div>
+      <div class="card-zone" data-zone-es="📍 Los Chatarrales" data-zone-en="📍 The Junkyards">📍 The Junkyards</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/transistores.html" class="card" data-name-es="transistores fábrica abandonada" data-name-en="transistors abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Transistores" data-title-en="Transistors">Transistors</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/bombillas_filamento.html" class="card" data-name-es="bombillas de filamento fábrica abandonada" data-name-en="filament bulbs abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Bombillas de filamento" data-title-en="Filament Bulbs">Filament Bulbs</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/resortes_reloj.html" class="card" data-name-es="resortes de reloj fábrica abandonada" data-name-en="clock springs abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Resortes de reloj" data-title-en="Clock Springs">Clock Springs</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/manometros.html" class="card" data-name-es="manómetros fábrica abandonada" data-name-en="pressure gauges abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Manómetros" data-title-en="Pressure Gauges">Pressure Gauges</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/valvulas_vapor.html" class="card" data-name-es="válvulas de vapor fábrica abandonada" data-name-en="steam valves abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Válvulas de vapor" data-title-en="Steam Valves">Steam Valves</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/lentes_tv_viejo.html" class="card" data-name-es="lentes de televisor viejo fábrica abandonada" data-name-en="old tv lens abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Lentes de televisor viejo" data-title-en="Old TV Lens">Old TV Lens</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/fusibles_fundidos.html" class="card" data-name-es="fusibles fundidos fábrica abandonada" data-name-en="blown fuses abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Fusibles fundidos" data-title-en="Blown Fuses">Blown Fuses</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/relojes_bolsillo.html" class="card" data-name-es="relojes de bolsillo rotos fábrica abandonada" data-name-en="broken pocket watches abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Relojes de bolsillo rotos" data-title-en="Broken Pocket Watches">Broken Pocket Watches</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/brujulas_magneticas.html" class="card" data-name-es="brújulas magnéticas fábrica abandonada" data-name-en="magnetic compasses abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Brújulas magnéticas" data-title-en="Magnetic Compasses">Magnetic Compasses</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/tubos_vacio.html" class="card" data-name-es="tubos de vacío fábrica abandonada" data-name-en="vacuum tubes abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Tubos de vacío" data-title-en="Vacuum Tubes">Vacuum Tubes</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./uncommon/palancas_interruptor.html" class="card" data-name-es="palancas de interruptor fábrica abandonada" data-name-en="switch levers abandoned factory" data-rarity="uncommon" style="border-top: 4px solid #00FF44">
+      <span class="card-rarity" style="background: #00FF44; color: #000" data-rarity-es="Poco Común" data-rarity-en="Uncommon">Uncommon</span>
+      <div class="card-title" data-title-es="Palancas de interruptor" data-title-en="Switch Levers">Switch Levers</div>
+      <div class="card-zone" data-zone-es="📍 Fábrica Abandonada" data-zone-en="📍 Abandoned Factory">📍 Abandoned Factory</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/motor_vapor.html" class="card" data-name-es="motor de vapor subestación eléctrica" data-name-en="steam engine power substation" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Motor de vapor" data-title-en="Steam Engine">Steam Engine</div>
+      <div class="card-zone" data-zone-es="📍 Subestación Eléctrica" data-zone-en="📍 Power Substation">📍 Power Substation</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/bobinas_tesla.html" class="card" data-name-es="bobinas de tesla subestación eléctrica" data-name-en="tesla coils power substation" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Bobinas de Tesla" data-title-en="Tesla Coils">Tesla Coils</div>
+      <div class="card-zone" data-zone-es="📍 Subestación Eléctrica" data-zone-en="📍 Power Substation">📍 Power Substation</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/antenas_radio.html" class="card" data-name-es="antenas de radio torre de radio" data-name-en="radio antennas radio tower" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Antenas de radio" data-title-en="Radio Antennas">Radio Antennas</div>
+      <div class="card-zone" data-zone-es="📍 Torre de Radio" data-zone-en="📍 Radio Tower">📍 Radio Tower</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/diodos_led.html" class="card" data-name-es="diodos led torre de radio" data-name-en="led diodes radio tower" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Diodos LED" data-title-en="LED Diodes">LED Diodes</div>
+      <div class="card-zone" data-zone-es="📍 Torre de Radio" data-zone-en="📍 Radio Tower">📍 Radio Tower</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/baterias_alquimicas.html" class="card" data-name-es="baterías alquímicas subestación eléctrica" data-name-en="alchemical batteries power substation" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Baterías alquímicas" data-title-en="Alchemical Batteries">Alchemical Batteries</div>
+      <div class="card-zone" data-zone-es="📍 Subestación Eléctrica" data-zone-en="📍 Power Substation">📍 Power Substation</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/engranajes_bronce.html" class="card" data-name-es="engranajes de bronce perfectos reserva de minería" data-name-en="perfect bronze gears mining reserve" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Engranajes de bronce perfectos" data-title-en="Perfect Bronze Gears">Perfect Bronze Gears</div>
+      <div class="card-zone" data-zone-es="📍 Reserva de Minería" data-zone-en="📍 Mining Reserve">📍 Mining Reserve</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/dinamo_galvanica.html" class="card" data-name-es="dínamo galvánica subestación eléctrica" data-name-en="galvanic dynamo power substation" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Dínamo galvánica" data-title-en="Galvanic Dynamo">Galvanic Dynamo</div>
+      <div class="card-zone" data-zone-es="📍 Subestación Eléctrica" data-zone-en="📍 Power Substation">📍 Power Substation</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/cristal_fuerza.html" class="card" data-name-es="cristal de cuarzo resonante torre de radio" data-name-en="resonating quartz crystal radio tower" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Cristal de cuarzo resonante" data-title-en="Resonating Quartz Crystal">Resonating Quartz Crystal</div>
+      <div class="card-zone" data-zone-es="📍 Torre de Radio" data-zone-en="📍 Radio Tower">📍 Radio Tower</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/giroscopio_precision.html" class="card" data-name-es="giróscopo de precisión reserva de minería" data-name-en="precision gyroscope mining reserve" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Giróscopo de precisión" data-title-en="Precision Gyroscope">Precision Gyroscope</div>
+      <div class="card-zone" data-zone-es="📍 Reserva de Minería" data-zone-en="📍 Mining Reserve">📍 Mining Reserve</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./rare/condensador_presion.html" class="card" data-name-es="condensador de alta presión subestación eléctrica" data-name-en="high-pressure condenser power substation" data-rarity="rare" style="border-top: 4px solid #00D4FF">
+      <span class="card-rarity" style="background: #00D4FF; color: #000" data-rarity-es="Raro" data-rarity-en="Rare">Rare</span>
+      <div class="card-title" data-title-es="Condensador de alta presión" data-title-en="High-Pressure Condenser">High-Pressure Condenser</div>
+      <div class="card-zone" data-zone-es="📍 Subestación Eléctrica" data-zone-en="📍 Power Substation">📍 Power Substation</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/nucleo_mana.html" class="card" data-name-es="núcleo de maná condensado reserva de minería" data-name-en="condensed mana core mining reserve" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Núcleo de maná condensado" data-title-en="Condensed Mana Core">Condensed Mana Core</div>
+      <div class="card-zone" data-zone-es="📍 Reserva de Minería" data-zone-en="📍 Mining Reserve">📍 Mining Reserve</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/cerebro_automata.html" class="card" data-name-es="cerebro de autómata reserva de minería" data-name-en="automaton brain mining reserve" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Cerebro de autómata" data-title-en="Automaton Brain">Automaton Brain</div>
+      <div class="card-zone" data-zone-es="📍 Reserva de Minería" data-zone-en="📍 Mining Reserve">📍 Mining Reserve</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/reactor_eter.html" class="card" data-name-es="reactor de éter calderas de la fundición (pk)" data-name-en="aether reactor foundry boilers (pk)" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Reactor de éter" data-title-en="Aether Reactor">Aether Reactor</div>
+      <div class="card-zone" data-zone-es="📍 Calderas de la Fundición (PK)" data-zone-en="📍 Foundry Boilers (PK)">📍 Foundry Boilers (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/corazon_caldera.html" class="card" data-name-es="corazón de caldera calderas de la fundición (pk)" data-name-en="boiler heart foundry boilers (pk)" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Corazón de caldera" data-title-en="Boiler Heart">Boiler Heart</div>
+      <div class="card-zone" data-zone-es="📍 Calderas de la Fundición (PK)" data-zone-en="📍 Foundry Boilers (PK)">📍 Foundry Boilers (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/bateria_plasma.html" class="card" data-name-es="batería de plasma supercargada subestación eléctrica" data-name-en="supercharged plasma battery power substation" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Batería de plasma supercargada" data-title-en="Supercharged Plasma Battery">Supercharged Plasma Battery</div>
+      <div class="card-zone" data-zone-es="📍 Subestación Eléctrica" data-zone-en="📍 Power Substation">📍 Power Substation</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/matriz_optica_solar.html" class="card" data-name-es="matriz óptica solar torre de radio" data-name-en="solar optical array radio tower" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Matriz óptica solar" data-title-en="Solar Optical Array">Solar Optical Array</div>
+      <div class="card-zone" data-zone-es="📍 Torre de Radio" data-zone-en="📍 Radio Tower">📍 Radio Tower</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./epic/embolo_titanio.html" class="card" data-name-es="émbolo de titanio forjado calderas de la fundición (pk)" data-name-en="forged titanium piston foundry boilers (pk)" data-rarity="epic" style="border-top: 4px solid #C038FF">
+      <span class="card-rarity" style="background: #C038FF; color: #000" data-rarity-es="Épico" data-rarity-en="Epic">Epic</span>
+      <div class="card-title" data-title-es="Émbolo de titanio forjado" data-title-en="Forged Titanium Piston">Forged Titanium Piston</div>
+      <div class="card-zone" data-zone-es="📍 Calderas de la Fundición (PK)" data-zone-en="📍 Foundry Boilers (PK)">📍 Foundry Boilers (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./legendary/ojo_dragon.html" class="card" data-name-es="ojo de dragón mecánico desierto de chatarra (pk)" data-name-en="mechanical dragon eye scrap desert (pk)" data-rarity="legendary" style="border-top: 4px solid #FFAA00">
+      <span class="card-rarity" style="background: #FFAA00; color: #000" data-rarity-es="Legendario" data-rarity-en="Legendary">Legendary</span>
+      <div class="card-title" data-title-es="Ojo de dragón mecánico" data-title-en="Mechanical Dragon Eye">Mechanical Dragon Eye</div>
+      <div class="card-zone" data-zone-es="📍 Desierto de Chatarra (PK)" data-zone-en="📍 Scrap Desert (PK)">📍 Scrap Desert (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./legendary/corazon_primigenio.html" class="card" data-name-es="corazón de golem primigenio desierto de chatarra (pk)" data-name-en="primordial golem heart scrap desert (pk)" data-rarity="legendary" style="border-top: 4px solid #FFAA00">
+      <span class="card-rarity" style="background: #FFAA00; color: #000" data-rarity-es="Legendario" data-rarity-en="Legendary">Legendary</span>
+      <div class="card-title" data-title-es="Corazón de golem primigenio" data-title-en="Primordial Golem Heart">Primordial Golem Heart</div>
+      <div class="card-zone" data-zone-es="📍 Desierto de Chatarra (PK)" data-zone-en="📍 Scrap Desert (PK)">📍 Scrap Desert (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./legendary/singularidad_eterica.html" class="card" data-name-es="singularidad etérica desierto de chatarra (pk)" data-name-en="aetheric singularity scrap desert (pk)" data-rarity="legendary" style="border-top: 4px solid #FFAA00">
+      <span class="card-rarity" style="background: #FFAA00; color: #000" data-rarity-es="Legendario" data-rarity-en="Legendary">Legendary</span>
+      <div class="card-title" data-title-es="Singularidad etérica" data-title-en="Aetheric Singularity">Aetheric Singularity</div>
+      <div class="card-zone" data-zone-es="📍 Desierto de Chatarra (PK)" data-zone-en="📍 Scrap Desert (PK)">📍 Scrap Desert (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+
+    <a href="./legendary/relicario_astral.html" class="card" data-name-es="relicario de engranajes astrales desierto de chatarra (pk)" data-name-en="celestial gear reliquary scrap desert (pk)" data-rarity="legendary" style="border-top: 4px solid #FFAA00">
+      <span class="card-rarity" style="background: #FFAA00; color: #000" data-rarity-es="Legendario" data-rarity-en="Legendary">Legendary</span>
+      <div class="card-title" data-title-es="Relicario de engranajes astrales" data-title-en="Celestial Gear Reliquary">Celestial Gear Reliquary</div>
+      <div class="card-zone" data-zone-es="📍 Desierto de Chatarra (PK)" data-zone-en="📍 Scrap Desert (PK)">📍 Scrap Desert (PK)</div>
+      <div class="card-footer">
+        <span class="view-label" data-view-es="Ver Ficha 3D ➔" data-view-en="View 3D Card ➔">View 3D Card ➔</span>
+      </div>
+    </a>
+  </main>
+
+  <script>
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('golems_lang', lang);
+      document.documentElement.lang = lang;
+
+      document.getElementById('btn-lang-es').classList.toggle('active', lang === 'es');
+      document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+
+      if (lang === 'en') {
+        document.getElementById('page-title').childNodes[0].nodeValue = '⚙️ Master Materials Catalog ';
+        document.getElementById('search').placeholder = '🔍 Search by name or zone...';
+        document.getElementById('opt-all').textContent = 'All Rarities';
+        document.getElementById('opt-common').textContent = 'Commons';
+        document.getElementById('opt-uncommon').textContent = 'Uncommons';
+        document.getElementById('opt-rare').textContent = 'Rares';
+        document.getElementById('opt-epic').textContent = 'Epics';
+        document.getElementById('opt-legendary').textContent = 'Legendaries';
+      } else {
+        document.getElementById('page-title').childNodes[0].nodeValue = '⚙️ Catálogo Maestro de Materiales ';
+        document.getElementById('search').placeholder = '🔍 Buscar por nombre o zona...';
+        document.getElementById('opt-all').textContent = 'Todas las Rarezas';
+        document.getElementById('opt-common').textContent = 'Comunes';
+        document.getElementById('opt-uncommon').textContent = 'Poco Comunes';
+        document.getElementById('opt-rare').textContent = 'Raros';
+        document.getElementById('opt-epic').textContent = 'Épicos';
+        document.getElementById('opt-legendary').textContent = 'Legendarios';
+      }
+
+      document.querySelectorAll('.card').forEach(card => {
+        const rEl = card.querySelector('.card-rarity');
+        const tEl = card.querySelector('.card-title');
+        const zEl = card.querySelector('.card-zone');
+        const vEl = card.querySelector('.view-label');
+
+        rEl.textContent = rEl.getAttribute('data-rarity-' + lang);
+        tEl.textContent = tEl.getAttribute('data-title-' + lang);
+        zEl.textContent = zEl.getAttribute('data-zone-' + lang);
+        vEl.textContent = vEl.getAttribute('data-view-' + lang);
+      });
+
+      filterItems();
+    }
+
+    function filterItems() {
+      const q = document.getElementById('search').value.toLowerCase();
+      const r = document.getElementById('filter-rarity').value;
+      const cards = document.querySelectorAll('.card');
+
+      cards.forEach(card => {
+        const nameMatch = card.getAttribute('data-name-' + currentLang).includes(q);
+        const rarityMatch = r === 'all' || card.dataset.rarity === r;
+        if (nameMatch && rarityMatch) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Auto-inicializar idioma guardado (Default: English)
+    const savedLang = localStorage.getItem('golems_lang') || 'en';
+    setLanguage(savedLang);
+  </script>
+</body>
+</html>
