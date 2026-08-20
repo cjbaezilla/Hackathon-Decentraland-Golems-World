@@ -18,6 +18,7 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 | **08** | **Soporte Bilingüe e Internacionalización (i18n)** | Motor dinámico `src/i18n`, selector de idioma táctil en HUD, diccionarios canónicos tipados (ES/EN) y suscripciones reactivas en tiempo real. | [📖 Leer Guía](guia-soporte-bilingue-i18n.md) |
 | **09** | **Sistema de Cámaras, Cinemáticas y Presentación** | Cámara orbital SDK7 con `VirtualCamera`, `lookAtEntity`, bloqueo de avatar con `InputModifier`, botón de salto Mobile-First y presentación de Silas. | [📖 Leer Guía](guia-cinematicas-y-camaras.md) |
 | **10** | **Sistema de Minimapa, Cartografía 2D y Orientación** | Proyección matemática 2D del Grid 25x25 (400m × 400m), cono de visión 360° (Sight Cone), texturas bilingües HD y modal panorámico Mobile-First en 2 columnas. | [📖 Leer Guía](guia-sistema-minimapa-y-cartografia.md) |
+| **11** | **Escondite y Bóveda del Jugador (User's Hideout & Vault)** | Taller clandestino en punto medio `(Z: 17.70m, X: 3.8m-8.0m)` entre Trampolín y Mercado #06, silla steampunk, tejadillo, chatarra lateral y 3 cofres cerrados frontales. | [📖 Leer Guía](guia-escondite-y-boveda-usuario.md) |
 
 ---
 
@@ -52,4 +53,7 @@ Manual técnico del sistema de cinemáticas y cámaras virtuales. Detalla la orq
 
 ### 10. [guia-sistema-minimapa-y-cartografia.md](guia-sistema-minimapa-y-cartografia.md)
 Manual completo del sistema de minimapa HUD y modal panorámico de mapa grande. Detalla las ecuaciones de proyección métrica a porcentaje en el Grid 25x25 (400m × 400m), cálculo del vector director y cono de visión 360° (*Sight Cone*), diseño apaisado en 2 columnas optimizado para la resolución virtual móvil `1600x720` e intercambio dinámico de texturas bilingües (`minimap.jpg` / `minimap_en.jpg`).
+
+### 11. [guia-escondite-y-boveda-usuario.md](guia-escondite-y-boveda-usuario.md)
+Manual técnico del Escondite y Bóveda del Jugador. Detalla la ubicación en el punto medio exacto `(Z: 17.70m, X: 3.8m-8.0m)` entre el trampolín y el puesto de mercado #06, la distribución de los 3 cofres cerrados frontales con separación de 2.3m, la zona de descanso con silla steampunk y tejadillo inclinado, y el confinamiento de chatarra/wreckages en los laterales.
 

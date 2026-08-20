@@ -164,6 +164,11 @@ Las cuatro esquinas del mapa están diseñadas con **dimensiones simétricas id�
     2. *Núcleo Central (Fusión)*: Tanque caldera presurizado masivo (`Tank.glb`), 2 chimeneas de humo activas (`Smoker.glb`), tren de transmisión mecánica con engranaje horizontal monumental (`Gear Big.glb`) y consola maestra de control.
     3. *Ala Este (Salida y Despliegue)*: Podio elevado con prototipo de golem de vapor en exhibición (`golem_steam.glb`), hidrante de purga (`Hidrant.glb`), barriles de enfriamiento y placa `SteamPunk_Number_02`.
 - **Trampolín de Vapor**: Parcela `[0, 0]` • `(X: 5.1m, Z: 7.1m)` para propulsión vertical en la plaza inicial.
+- **Escondite y Bóveda del Jugador (*User's Hideout & Vault*)**:
+  - *Ubicación*: Punto medio exacto entre el Trampolín de Vapor y el Puesto de Mercado #06 • `(Z: 17.70m, X: 3.8m a 8.0m)` en Parcelas `[0, 0]` y `[0, 1]`.
+  - *Estructura*: Taller clandestino bajo tejadillo inclinado (`Ceiling 4x4M.glb`), silla steampunk (`Steampunk Chair.glb`), mesa con lámpara, calderín y chatarra lateral.
+  - *Bóveda Frontal*: **3 cofres cerrados** y estáticos (`chest_pirates.glb`, `Chest Plates.glb`, `Chest Gear.glb`) separados 2.3m entre sí y adelantados a la línea `X = 7.6m-8.0m`.
+  - *Documentación detallada*: [📖 Leer Guía del Escondite](guia-escondite-y-boveda-usuario.md).
 - **Escombros y Transición**: Cúmulos de tablones rotos y engranajes semienterrados en los exteriores de las puertas `(70, 146)` y `(146, 70)`.
 
 ---

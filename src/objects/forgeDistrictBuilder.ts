@@ -130,9 +130,9 @@ function buildRoadNetwork(parent: Entity) {
   for (let x = 20; x <= 36; x += 4) {
     spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(x, 0.02, 40), Quaternion.fromEulerDegrees(0, 90, 0))
   }
-  for (let c = 40; c <= 64; c += 6) {
+  for (let c = 40; c <= 67; c += 3) {
     spawnProp(parent, ASSETS.roadCobbleStraight, Vector3.create(c, 0.02, c), Quaternion.fromEulerDegrees(0, 45, 0))
-    if (c % 12 === 0) {
+    if (c === 46 || c === 58) {
       spawnProp(parent, ASSETS.lamp, Vector3.create(c - 3.5, 0.02, c + 3.5))
     }
   }

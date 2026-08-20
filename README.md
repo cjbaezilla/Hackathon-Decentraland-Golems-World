@@ -82,7 +82,7 @@ La experiencia se ubica en el Decentraland World `golems.dcl.eth`, compuesto por
 
 | Zona | Ubicación (Coords Metros) | Dimensión | Nivel de Riesgo | Materiales Principales | Descripción |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Punto de spawn `(12.2, 2.0)`, **Silas el Sobreviviente** en `(15.8, 5.9)`, Plaza Mayor `(70, 70)`, 4 talleres, Wreckage Lab `[1,2]` y puertas. |
+| **Distrito de la Forja** | Esquina Suroeste `(0,0)` a `(140,140)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Ninguno (Taller/Forja) | Spawn `(16, 6)`, **Silas** en `(15.8, 5.9)`, Plaza Mayor `(70, 70)`, 10 Trading Posts, Wreckage Lab `[1,2]`, Trampolín y **Escondite/Bóveda del Jugador** en `(Z: 17.7m, X: 3.8m-8.0m)`. |
 | **Desierto de Chatarra** | Esquina Noroeste `(0,260)` a `(140,400)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Legendarios (`ojo_dragon`, `corazon_primigenio`) | Páramo desolado de máxima dificultad, Cráter del Autómata Primigenio `(70, 330)`, Nido del Dragón y portal `(130, 270)`. |
 | **Reserva de Minería** | Esquina Noreste `(260,260)` a `(400,400)` | 140m × 140m (19.600 m²) | 🟢 Zona Segura (No PK) | Épicos (`nucleo_mana`, `cerebro_automata`, `engranajes_bronce`) | Cantera protegida de éter `(340, 340)`, taller de relojería, pozo profundo, refugio de exploradores y portal `(270, 270)`. |
 | **Calderas de la Fundición** | Esquina Sureste `(260,0)` a `(400,140)` | 140m × 140m (19.600 m²) | 🔴 Zona PK Libre | Épicos (`corazon_caldera`, `reactor_eter`) | Complejo volcánico y térmico, Gran Horno Central `(330, 70)`, Reactor de Éter y portal `(270, 130)`. |
@@ -391,6 +391,8 @@ Hackathon/
 │   │   └── locales/            # Diccionarios canónicos tipados (es.ts y en.ts)
 │   ├── config/                 # Configuraciones maestras y constantes
 │   │   ├── arenaConfig.ts      # Configuración espacial, dimensiones y modelos de la Arena Steampunk
+│   │   ├── userHideoutConfig.ts# Configuración del Escondite y Bóveda del Jugador (3 cofres cerrados)
+│   │   ├── forgeDistrictConfig.ts # Configuración y trazado vial del Distrito de la Forja
 │   │   └── golems.ts           # Configuración de golems, afinidades, pentágono y generador RPG
 │   ├── components/             # Componentes ECS personalizados (Schemas)
 │   │   ├── arena.ts            # ArenaRotatorComponent (Rotación determinista continua)
@@ -398,9 +400,10 @@ Hackathon/
 │   │   └── follower.ts         # GolemFollowerComponent (con ownerAddress y DTOs de escuadrón)
 │   ├── objects/                # Patrón Factory de GameObjects
 │   │   ├── welcomeNpc.ts       # Fábrica del NPC de Bienvenida Silas, campamento y animación reactiva
+│   │   ├── userHideoutBuilder.ts# Fábrica constructora del Escondite y Bóveda del Jugador
 │   │   ├── arenaBuilder.ts     # Constructor procedimental de la Gran Arena de Torneo Steampunk
 │   │   ├── wreckageLabBuilder.ts# Constructor del Laboratorio de Desguace (Wreckage Lab)
-│   │   ├── tradingPostsBuilder.ts# Constructor de los 5 puestos de comercio steampunk
+│   │   ├── tradingPostsBuilder.ts# Constructor de los 10 puestos de comercio steampunk
 │   │   ├── golemFactory.ts     # Fábrica de entidades, billboards, salud ASCII y números flotantes
 │   │   └── trampoline.ts       # Trampolín propulsor steampunk de vapor
 │   └── systems/                # Sistemas ECS

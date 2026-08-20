@@ -29,6 +29,7 @@ import { createTrampoline } from './objects/trampoline'
 import { createTradingPosts } from './objects/tradingPostsBuilder'
 import { createWreckageLab } from './objects/wreckageLabBuilder'
 import { createWelcomeNpc, welcomeNpcAnimationSystem } from './objects/welcomeNpc'
+import { createUserHideout } from './objects/userHideoutBuilder'
 import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinematics/silasCinematic'
 import {
   setupSquadSyncListeners,
@@ -102,13 +103,16 @@ export function main() {
   // 8. Instanciar al NPC de bienvenida Silas el Sobreviviente en Parcela [0, 0] (15.8m, 5.9m sobre el piso de madera)
   createWelcomeNpc(Vector3.create(15.8, 0.25, 5.9))
 
-  // 9. Inicializar la cámara cinemática de presentación de Silas
+  // 9. Instanciar el Escondite y Bóveda de Inventario del Usuario (Parcelas [0, 0] y [0, 1] en X: 2.6m-2.8m, Z: 13.7m-19.8m)
+  createUserHideout()
+
+  // 10. Inicializar la cámara cinemática de presentación de Silas
   initSilasCinematicCamera()
 
-  // 10. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
+  // 11. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
   scheduleSilasIntroCinematic()
 
-  // 11. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS
+  // 12. Registrar los sistemas de seguimiento, combate, animación, trampolín y NPCs en el motor ECS
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
