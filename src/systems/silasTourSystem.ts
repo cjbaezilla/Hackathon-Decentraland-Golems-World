@@ -1,4 +1,6 @@
 import { Vector3, Quaternion } from '@dcl/sdk/math'
+import { engine, Transform } from '@dcl/sdk/ecs'
+import { movePlayerTo } from '~system/RestrictedActions'
 import {
   getIsSilasTourActive,
   setIsSilasTourActive,
@@ -29,7 +31,8 @@ import {
  * SISTEMA DE TOUR GUIADO DE SILAS EL SOBREVIVIENTE (SDK7 ECS)
  * ============================================================================
  * Maneja la navegación autónoma por waypoints, narración en movimiento,
- * paradas explicativas en puntos de interés y control de cámaras cinemáticas.
+ * orientación continua hacia el jugador en paradas, acompañamiento automático
+ * del usuario (auto-follow) y control de cámaras cinemáticas.
  */
 
 export interface TourWaypointNode {
@@ -37,7 +40,6 @@ export interface TourWaypointNode {
   targetPos: Vector3
   walkSpeed: number
   speechKey: string
-  finalLookRotationDeg: number // Grados en Y para encarar la atracción al llegar
   stopAction?: 'none' | 'dialog_hideout' | 'dialog_market_west' | 'dialog_factory' | 'dialog_market_south' | 'dialog_finish'
   triggerOrbitalCamera?: 'none' | 'market_west' | 'market_south'
 }
@@ -52,7 +54,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(15.8, 0.25, 10.3),
     walkSpeed: 2.4,
     speechKey: 'tour.subtitleWp1',
-    finalLookRotationDeg: 0,
     stopAction: 'none'
   },
   // WP 1: Llegada al Escondite del Usuario y 3 Cofres de la Bóveda (Img 2)
@@ -61,7 +62,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(9.7, 0.25, 15.5),
     walkSpeed: 2.4,
     speechKey: 'tour.subtitleWp2',
-    finalLookRotationDeg: 270, // Mirando hacia el oeste (hacia los cofres y el refugio)
     stopAction: 'dialog_hideout'
   },
   // WP 2: Salida del escondite hacia la calle principal (Img 3)
@@ -70,7 +70,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(15.7, 0.25, 21.9),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp3',
-    finalLookRotationDeg: 0,
     stopAction: 'none'
   },
   // WP 3: Aproximación al bulevar comercial (Img 4)
@@ -79,7 +78,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(15.4, 0.25, 25.8),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp4',
-    finalLookRotationDeg: 0,
     stopAction: 'none'
   },
   // WP 4: Llegada a los Puestos de Mercado Oeste (Img 5)
@@ -88,7 +86,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(10.6, 0.25, 29.0),
     walkSpeed: 2.4,
     speechKey: 'tour.subtitleWp5',
-    finalLookRotationDeg: 270, // Mirando hacia el puesto 06 del oeste
     stopAction: 'dialog_market_west',
     triggerOrbitalCamera: 'market_west'
   },
@@ -98,7 +95,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(15.6, 0.25, 29.4),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp6',
-    finalLookRotationDeg: 90,
     stopAction: 'none'
   },
   // WP 6: Cruce de la parcela central hacia la forja (Img 7)
@@ -107,7 +103,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(23.6, 0.25, 25.8),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp7',
-    finalLookRotationDeg: 90,
     stopAction: 'none'
   },
   // WP 7: Llegada a la Fábrica y Laboratorio de Golems (Img 8)
@@ -116,7 +111,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(42.4, 0.25, 25.8),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp8',
-    finalLookRotationDeg: 90, // Mirando hacia el laboratorio y el crisol
     stopAction: 'dialog_factory'
   },
   // WP 8: Descenso hacia los Puestos de Mercado Sur (Img 9)
@@ -125,7 +119,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(30.0, 0.25, 11.5),
     walkSpeed: 2.5,
     speechKey: 'tour.subtitleWp9',
-    finalLookRotationDeg: 180, // Mirando hacia los puestos del sur
     stopAction: 'dialog_market_south',
     triggerOrbitalCamera: 'market_south'
   },
@@ -135,7 +128,6 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(16.0, 0.25, 9.8),
     walkSpeed: 2.4,
     speechKey: 'tour.subtitleWp10',
-    finalLookRotationDeg: 180,
     stopAction: 'none'
   },
   // WP 10: Llegada y finalización en el campamento base
@@ -144,12 +136,69 @@ export const SILAS_TOUR_WAYPOINTS: TourWaypointNode[] = [
     targetPos: Vector3.create(15.8, 0.25, 5.9),
     walkSpeed: 2.4,
     speechKey: 'tour.subtitleWp11',
-    finalLookRotationDeg: 180, // Mirando al sur recibiendo al jugador
     stopAction: 'dialog_finish'
   }
 ]
 
 let isPausedForStopDialog: boolean = false
+
+/**
+ * Teletransporta al usuario exactamente frente a Silas al detenerse en un punto de interés.
+ */
+export function teleportPlayerInFrontOfSilas(stopAction?: string) {
+  let playerTargetPos = { x: 15.8, y: 0.25, z: 4.2 }
+  let cameraLookTarget = { x: 15.8, y: 1.5, z: 5.9 }
+
+  if (stopAction === 'dialog_hideout') {
+    // Silas en (9.7, 0.25, 15.5) en el refugio; usuario colocado a (11.5, 0.25, 15.5) mirándolo
+    playerTargetPos = { x: 11.5, y: 0.25, z: 15.5 }
+    cameraLookTarget = { x: 9.7, y: 1.5, z: 15.5 }
+  } else if (stopAction === 'dialog_market_west') {
+    // Silas en (10.6, 0.25, 29.0) en Mercado Oeste; usuario colocado a (12.4, 0.25, 29.0)
+    playerTargetPos = { x: 12.4, y: 0.25, z: 29.0 }
+    cameraLookTarget = { x: 10.6, y: 1.5, z: 29.0 }
+  } else if (stopAction === 'dialog_factory') {
+    // Silas en (42.4, 0.25, 25.8) en la Fábrica de Golems; usuario colocado a (40.6, 0.25, 25.8)
+    playerTargetPos = { x: 40.6, y: 0.25, z: 25.8 }
+    cameraLookTarget = { x: 42.4, y: 1.5, z: 25.8 }
+  } else if (stopAction === 'dialog_market_south') {
+    // Silas en (30.0, 0.25, 11.5) en Mercado Sur; usuario colocado a (30.0, 0.25, 13.3)
+    playerTargetPos = { x: 30.0, y: 0.25, z: 13.3 }
+    cameraLookTarget = { x: 30.0, y: 1.5, z: 11.5 }
+  } else if (stopAction === 'dialog_finish') {
+    // Silas en (15.8, 0.25, 5.9) en campamento; usuario colocado a (15.8, 0.25, 4.2)
+    playerTargetPos = { x: 15.8, y: 0.25, z: 4.2 }
+    cameraLookTarget = { x: 15.8, y: 1.5, z: 5.9 }
+  }
+
+  try {
+    movePlayerTo({
+      newRelativePosition: playerTargetPos,
+      cameraTarget: cameraLookTarget
+    })
+  } catch (err) {
+    // Manejo de entorno
+  }
+}
+
+/**
+ * Gira a Silas dinámicamente para encarar y mirar directamente al avatar del jugador.
+ */
+export function orientSilasTowardsPlayer() {
+  if (!Transform.has(engine.PlayerEntity)) return
+
+  const pPos = Transform.get(engine.PlayerEntity).position
+  const sPos = getSilasPosition()
+
+  const dx = pPos.x - sPos.x
+  const dz = pPos.z - sPos.z
+
+  if (dx * dx + dz * dz > 0.04) {
+    const angleRad = Math.atan2(dx, dz)
+    const angleDeg = angleRad * (180 / Math.PI)
+    setSilasPositionAndRotation(sPos, Quaternion.fromEulerDegrees(0, angleDeg, 0))
+  }
+}
 
 /**
  * Inicia la ejecución del Tour Guiado de Silas desde el principio.
@@ -225,7 +274,12 @@ export function finishSilasGuidedTour() {
  */
 export function silasTourSystem(dt: number) {
   if (!getIsSilasTourActive()) return
-  if (isPausedForStopDialog) return
+
+  // Si Silas está en una parada explicativa, mantener su orientación encarando al jugador
+  if (isPausedForStopDialog) {
+    orientSilasTowardsPlayer()
+    return
+  }
 
   const currentIndex = getSilasTourCurrentWaypoint()
   if (currentIndex >= SILAS_TOUR_WAYPOINTS.length) {
@@ -245,23 +299,28 @@ export function silasTourSystem(dt: number) {
 
   // 1. Llegada al Waypoint actual (distancia <= 0.35m)
   if (distance <= 0.35) {
-    // Fijar posición exacta y orientación final
-    const finalRot = Quaternion.fromEulerDegrees(0, wp.finalLookRotationDeg, 0)
-    setSilasPositionAndRotation(wp.targetPos, finalRot)
+    // Fijar posición exacta en el objetivo
+    setSilasPositionAndRotation(wp.targetPos, Quaternion.fromEulerDegrees(0, 180, 0))
 
     // Manejar acciones de parada
     if (wp.stopAction && wp.stopAction !== 'none') {
       isPausedForStopDialog = true
       triggerSilasWaveEmote()
 
+      // Teletransportar al usuario automáticamente frente a Silas al detenerse en la parada
+      teleportPlayerInFrontOfSilas(wp.stopAction)
+      orientSilasTowardsPlayer()
+
       // Si tiene cámara orbital asignada, dispararla
       if (wp.triggerOrbitalCamera === 'market_west') {
         playMarketWestCinematic(() => {
           openNpcDialog('tourMarketWest')
+          orientSilasTowardsPlayer()
         })
       } else if (wp.triggerOrbitalCamera === 'market_south') {
         playMarketSouthCinematic(() => {
           openNpcDialog('tourMarketSouth')
+          orientSilasTowardsPlayer()
         })
       } else {
         // Abrir el diálogo correspondiente a la parada
