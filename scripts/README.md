@@ -16,7 +16,11 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
    - [3.1 Arquitectura glTF 2.0 Binaria Pura](#31-arquitectura-gltf-20-binaria-pura)
    - [3.2 Manual de Uso CLI](#32-manual-de-uso-cli)
    - [3.3 Catálogo Maestro de los 25 Modelos de Golems](#33-catálogo-maestro-de-los-25-modelos-de-golems)
-4. [Integración en Decentraland SDK7 (`GltfContainer`)](#4-integración-en-decentraland-sdk7-gltfcontainer)
+4. [`generate_items.js`: Generador Procedural Binario de Ítems Coleccionables (46 Ítems)](#4-generate_itemsjs-generador-procedural-binario-de-ítems-coleccionables-46-ítems)
+   - [4.1 Arquitectura y Paleta por Rareza](#41-arquitectura-y-paleta-por-rareza)
+   - [4.2 Manual de Uso y Ejecución](#42-manual-de-uso-y-ejecución)
+   - [4.3 Catálogo Maestro de los 46 Ítems](#43-catálogo-maestro-de-los-46-ítems)
+5. [Integración en Decentraland SDK7 (`GltfContainer`)](#5-integración-en-decentraland-sdk7-gltfcontainer)
 
 ---
 
@@ -26,6 +30,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | :--- | :--- | :--- |
 | [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) | Descarga y organiza modelos `.glb` y texturas oficiales de DCL (Pack Steampunk) para la **Gran Arena de Torneo**. | `assets/asset-packs/<slug>/` |
 | [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) | Genera proceduralmente los 25 modelos binarios `.glb` PBR con canales emisivos para los **5 tipos de Golems**. | `assets/models/<tipo>/` |
+| [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) | Genera proceduralmente los 46 modelos binarios `.glb` PBR organizados por rareza para los **materiales coleccionables**. | `assets/items/<rareza>/` |
 
 ---
 
@@ -174,7 +179,41 @@ assets/models/
 
 ---
 
-## 4. Integración en Decentraland SDK7 (`GltfContainer`)
+## 4. `generate_items.js`: Generador Procedural Binario de Ítems Coleccionables (46 Ítems)
+
+### 4.1 Arquitectura y Paleta por Rareza
+El script [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) construye los 46 modelos binarios `.glb` autocompresos para los materiales coleccionables del juego descritos en el GDD.
+
+Aplica propiedades PBR y matices emisivos diferenciados según el nivel de rareza:
+
+- 🟩 **Común** (`assets/items/common/` - 14 ítems): Base metálica/latón mate (`#A0A0A0`).
+- 🟩 **Poco Común** (`assets/items/uncommon/` - 11 ítems): Resplandor Verde Neón incandescente (`#00FF44`).
+- 🟦 **Raro** (`assets/items/rare/` - 10 ítems): Destellos Azul Galvánico / Eléctrico (`#00D4FF`).
+- 🟪 **Épico** (`assets/items/epic/` - 7 ítems): Brillo Violeta Éter resplandeciente (`#C038FF`).
+- 🟧 **Legendario** (`assets/items/legendary/` - 4 ítems): Aura Dorado Incandescente (`#FFAA00`).
+
+### 4.2 Manual de Uso y Ejecución
+
+```bash
+node scripts/generate_items.js
+```
+
+El script genera automáticamente las 5 subcarpetas por rareza en `assets/items/` y guarda los 46 modelos en disco.
+
+### 4.3 Catálogo Maestro de los 46 Ítems
+
+```text
+assets/items/
+├── common/       # 14 ítems comunes (Alambre, Tornillos, Engranajes, Tubos, Clavos, etc.)
+├── uncommon/     # 11 ítems poco comunes (Transistores, Bombillas, Fusibles, Relojes, etc.)
+├── rare/         # 10 ítems raros (Motor Vapor, Tesla, Antenas, Diodos, Dínamos, etc.)
+├── epic/         # 7 ítems épicos (Núcleo Maná, Cerebro, Reactor Éter, Batería Plasma, etc.)
+└── legendary/    # 4 ítems legendarios (Ojo Dragón, Corazón Primigenio, Singularidad, Relicario)
+```
+
+---
+
+## 5. Integración en Decentraland SDK7 (`GltfContainer`)
 
 Cualquier modelo descargado o generado puede instanciarse directamente mediante el componente `GltfContainer`:
 
@@ -200,5 +239,15 @@ Transform.create(golem, {
 })
 GltfContainer.create(golem, {
   src: 'assets/models/galvanic/golem_galvanic_03.glb'
+})
+
+// 3. Instanciar un Ítem Coleccionable Épico (Reactor de Éter)
+const itemNode = engine.addEntity()
+Transform.create(itemNode, {
+  position: Vector3.create(270, 0.3, 130),
+  scale: Vector3.create(1.0, 1.0, 1.0)
+})
+GltfContainer.create(itemNode, {
+  src: 'assets/items/epic/reactor_eter.glb'
 })
 ```
