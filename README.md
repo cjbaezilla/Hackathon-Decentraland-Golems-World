@@ -429,14 +429,15 @@ graph LR
 
 ---
 
-## 🛡️ Hostile NPCs and Zone Guardians
+## 🛡️ Ambient Map Golems (150 Units) and Hostile Patrols
 
-The world features mechanical NPC patrols and guardians guarding the most valuable areas:
+To bring organic life to the vast 160,000 m² map, the scene procedurally populates **150 Ambient Map Golems** distributed across all 10 zones according to a dual concentric gradient:
 
-- **Waypoint Behavior**: Optimized patrol routes without overloading mobile device CPUs.
-- **Aggression Radius**: When a player approaches, the NPC enters combat mode against the user's golems.
-- **Elite Guardians**: In the *Scrap Desert* and *Smelting Boilers*, NPC golems have advanced stats to protect epic and legendary parts.
-- **Rewards**: Defeating NPCs awards experience to the player and golems, along with a chance for direct material drops.
+- **Density Gradient**: 50 Golems in Ring 1 (districts near Home City), 30 in Ring 2, 36 in Ring 3, and 34 in Ring 4 (outer borders).
+- **Rarity Gradient**: Ring 1 features **Common (Tier 1)** golems, progressing through **Uncommon (Tier 2)** and **Rare (Tier 3)** to **Epic/Legendary (Tier 4)** in dangerous border & PK zones.
+- **Procedural Session Randomization (`src/data/mapGolemsCatalog.ts`)**: Spawn positions ($5\text{m} \le X, Z \le 395\text{m}$) and 3D models ($N \in [1..150]$) vary dynamically on every load.
+- **Organic Patrol System (`src/systems/mapGolemPatrolSystem.ts`)**: `MapGolemPatrolComponent` manages smooth walking ($0.9 - 1.4\text{ m/s}$) and organic resting pauses ($3 - 8\text{ s}$) within a $3.5\text{m} - 6.0\text{m}$ safe patrol radius around their spawn origin.
+- **Mobile-First DOP Performance**: Optimized for 60 FPS on mobile clients with zero memory leaks.
 
 ---
 
@@ -641,6 +642,9 @@ Hackathon/
 │   │   ├── types.ts            # Type schemas and TranslationSchema
 │   │   ├── index.ts            # Engine t(), toggleLanguage() and reactive subscriptions
 │   │   └── locales/            # Canonical typed dictionaries (es.ts and en.ts)
+│   ├── data/                   # Data catalogs & procedural generators
+│   │   ├── npcCatalog.ts       # 50 Catalog NPCs definitions
+│   │   └── mapGolemsCatalog.ts # 150 Ambient Map Golems procedural catalog & zone gradient matrix
 │   ├── config/                 # Master configurations and constants
 │   │   ├── arenaConfig.ts      # Spatial configuration, dimensions & models for Steampunk Arena
 │   │   ├── userHideoutConfig.ts# Player Hideout and Vault configuration (3 locked chests)
@@ -656,12 +660,15 @@ Hackathon/
 │   │   ├── arenaBuilder.ts     # Steampunk Tournament Grand Arena procedural builder
 │   │   ├── wreckageLabBuilder.ts# Wreckage Lab builder
 │   │   ├── tradingPostsBuilder.ts# Steampunk trading posts builder (10 posts)
+│   │   ├── mapGolemsGenerator.ts# 150 Ambient Map Golems entity factory & billboards
 │   │   ├── golemFactory.ts     # Entities factory, billboards, ASCII health & floating numbers
 │   │   └── trampoline.ts       # Steampunk steam booster trampoline
 │   └── systems/                # ECS Systems
 │       ├── arenaAnimationSystem.ts # Arena gears and crowns continuous animation system
 │       ├── followerSystem.ts   # Multi-Trail FIFO LERP/SLERP following system & arena leap
 │       ├── golemCombatSystem.ts# FFA Combat ECS system, tactical AI, ring & Boids repulsion
+│       ├── mapGolemPatrolSystem.ts # 150 Map Golems organic patrol & movement system
+│       ├── npcPatrolSystem.ts  # 50 Catalog NPCs patrol & movement system
 │       └── trampolineSystem.ts # Trampoline detection and jump system
 ├── scene.json                  # World metadata (25x25 parcels, spawn, rating)
 ├── package.json                # Dependencies and build scripts

@@ -25,6 +25,7 @@ Esta guía técnica y documental detalla exhaustivamente la arquitectura espacia
 7. [Catálogo Completo de Modelos 3D y Assets Utilizados](#7-catálogo-completo-de-modelos-3d-y-assets-utilizados)
 8. [Patrones de Construcción y Principios Mobile-First](#8-patrones-de-construcción-y-principios-mobile-first)
 9. [Sistema de Minimapa, Cartografía 2D y Orientación](#9-sistema-de-minimapa-cartografía-2d-y-orientación)
+10. [Sistema de 150 Golems Ambientales y Patrullaje Orgánico](#10-sistema-de-150-golems-ambientales-y-patrullaje-orgánico)
 
 ---
 
@@ -351,3 +352,32 @@ Para navegar por esta matriz espacial de 400m × 400m, la escena incorpora un si
 - **Modal de Mapa Completo (`BigMapModal`)**: Tarjeta panorámica en 2 columnas ($880\text{px} \times 480\text{px}$) con fondo semitransparente (`rgba(5, 8, 15, 0.86)`), diseñada específicamente para encajar en la resolución virtual de teléfonos móviles (`1600x720`).
 - **Mapeo de Zonas y Distritos**: Refleja con precisión las 4 esquinas simétricas, los anillos intermedios y la Gran Arena Central, con leyenda de peligros en tiempo real.
 - **Documentación Completa**: Consulta todos los algoritmos de proyección y código fuente en la [Guía Maestra: Sistema de Minimapa y Cartografía 2D](guia-sistema-minimapa-y-cartografia.md).
+
+---
+
+## 10. Sistema de 150 Golems Ambientales y Patrullaje Orgánico
+
+Para dotar de vida orgánica a los 160.000 m² del mapa, la escena instancian **150 Golems ambientales** distribuidos proceduralmente en todas las zonas del mundo. Este sistema implementa un doble gradiente concéntrico partiendo de la zona inicial (**Distrito de la Forja / Home City** en `20m, 20m`):
+
+### 10.1 Matriz de Distribución por Anillos Concéntricos (150 Golems)
+
+| Anillo | Rango de Distancia ($d$) | Zonas Incluidas | Cantidad | Densidad | Rareza Dominante | Tiers de Recetas |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Anillo 1 (Interior)** | $0 \le d \le 120\text{m}$ | Distrito de la Forja (15), Los Chatarrales (20), Corredor Sur (15) | **50** | 33.3% | 🟢 Común | Tier 1 (`#001` - `#040`) |
+| **Anillo 2 (Medio)** | $120 < d \le 220\text{m}$ | Fábrica Abandonada (20), Periferia de la Arena (10) | **30** | 20.0% | 🟡 Poco Común | Tier 2 (`#041` - `#090`) |
+| **Anillo 3 (Norte/Este)** | $220 < d \le 320\text{m}$ | Subestación Eléctrica (18), Torre de Radio (18) | **36** | 24.0% | 🟠 Raro | Tier 3 (`#091` - `#125`) |
+| **Anillo 4 (Bordes/PK)** | $d > 320\text{m}$ | Desierto Chatarra (12), Calderas Fundición (11), Reserva Minería (11) | **34** | 22.7% | 🟣 Épico / 🔴 Legendario | Tier 4 (`#126` - `#150`) |
+
+### 10.2 Características Principales
+1. **Generación Procedural Dinámica (`src/data/mapGolemsCatalog.ts`)**:
+   - En cada sesión/carga de la escena, las coordenadas $(X, Z)$ se calculan proceduralmente dentro de las cotas permitidas ($5\text{m} \le X, Z \le 395\text{m}$).
+   - Los modelos 3D se seleccionan aleatoriamente a partir del pool del Tier del anillo correspondiente.
+   - Exclusión estricta del suelo interior de la Gran Arena Central ($r < 38\text{m}$ de `(200, 200)`).
+2. **Factoría de Entidades SDK7 (`src/objects/mapGolemsGenerator.ts`)**:
+   - Carga del modelo GLTF `assets/models/<afinidad>/golem_<NNN>.glb`.
+   - Etiqueta `Billboard` superior con texto `🤖 [Afinidad] Nombre Golem • Rareza` en los colores elementales (sin niveles ni estadísticas).
+3. **Patrullaje Orgánico DOP (`src/systems/mapGolemPatrolSystem.ts`)**:
+   - Componente `MapGolemPatrolComponent`: Controla desplazamientos de caminata suave ($0.9 - 1.4\text{ m/s}$) y reposos periódicos ($3.0 - 8.0\text{ s}$).
+   - Radio de patrulla seguro entre $3.5\text{m}$ y $6.0\text{m}$ alrededor del origen.
+   - Orientación suave encarando el sentido de marcha.
+

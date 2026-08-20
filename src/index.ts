@@ -30,12 +30,14 @@ import { createTradingPosts } from './objects/tradingPostsBuilder'
 import { createWreckageLab } from './objects/wreckageLabBuilder'
 import { createWelcomeNpc, welcomeNpcAnimationSystem } from './objects/welcomeNpc'
 import { spawnAllCatalogNpcs } from './objects/npcGenerator'
+import { spawnMapGolems } from './objects/mapGolemsGenerator'
 import { createUserHideout } from './objects/userHideoutBuilder'
 import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinematics/silasCinematic'
 import { initTourFollowCamera, initMarketOrbitalCamera } from './cinematics/marketCinematic'
 import { silasTourSystem } from './systems/silasTourSystem'
 import { sceneLoaderSystem } from './systems/sceneLoaderSystem'
 import { npcPatrolSystem } from './systems/npcPatrolSystem'
+import { mapGolemPatrolSystem } from './systems/mapGolemPatrolSystem'
 
 import {
   setupSquadSyncListeners,
@@ -115,6 +117,9 @@ export function main() {
   // 10. Instanciar los 50 NPCs del catálogo distribuidos proporcionalmente por todo el mapa (excluyendo la Arena Central y el poblado inicial de la Forja)
   spawnAllCatalogNpcs(50)
 
+  // 11. Instanciar los 150 golems ambientales distribuidos dinámicamente con mayor presencia en los bordes del mapa
+  spawnMapGolems(150)
+
   // 11. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
   initSilasCinematicCamera()
   initTourFollowCamera()
@@ -132,6 +137,7 @@ export function main() {
   engine.addSystem(welcomeNpcAnimationSystem)
   engine.addSystem(silasTourSystem)
   engine.addSystem(npcPatrolSystem)
+  engine.addSystem(mapGolemPatrolSystem)
 
   console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente, cinemática de presentación y sistema de tour guiado activo.')
 }

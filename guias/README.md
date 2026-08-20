@@ -27,7 +27,7 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 ## 🧭 Resumen Rápido por Guía
 
 ### 1. [guia-mapa-zonas-y-distritos.md](guia-mapa-zonas-y-distritos.md)
-Documento espacial exhaustivo que detalla la matriz de 25x25 parcelas desde `0,0` hasta `24,24`. Explica los rangos de coordenadas de las 4 esquinas simétricas (140m × 140m cada una: Distrito de la Forja, Desierto de Chatarra, Reserva de Minería y Calderas de Fundición), anillos intermedios, pasillos viales, trampolines propulsores y los 5 puestos de comercio steampunk.
+Documento espacial exhaustivo que detalla la matriz de 25x25 parcelas desde `0,0` hasta `24,24`. Explica los rangos de coordenadas de las 4 esquinas simétricas (140m × 140m cada una: Distrito de la Forja, Desierto de Chatarra, Reserva de Minería y Calderas de Fundición), anillos intermedios, pasillos viales, trampolines propulsores, los 5 puestos de comercio steampunk y el **sistema de 150 golems ambientales distribuidos por gradientes con movimiento de patrullaje orgánico DOP (`mapGolemPatrolSystem`)**.
 
 ### 2. [guia-npc-bienvenida-silas.md](guia-npc-bienvenida-silas.md)
 Manual completo del mentor inicial del juego: **Silas el Sobreviviente**, ubicado en la plataforma de bienvenida `(X: 15.8m, Y: 0.25m, Z: 5.9m)`. Detalla sus wearables, props ambientales (chimenea humeante, cofre de engranajes, barril con farol, mini-golem leal «Pistón»), árbol narrativo ramificado y el sistema de animación reactiva con emotes periódicos.
