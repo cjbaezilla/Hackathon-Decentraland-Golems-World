@@ -91,16 +91,17 @@ export function getNpcLabelEntity(npcEntity: Entity): Entity | undefined {
 }
 
 /**
- * Instancia los 100 NPCs del catálogo distribuidos proporcionalmente por todo el mapa de 400m x 400m,
+ * Instancia 50 NPCs del catálogo (o la cantidad especificada por `limit`) distribuidos proporcionalmente por todo el mapa de 400m x 400m,
  * excluyendo estrictamente la Forja Inicial (0..140m, 0..140m) y el interior de la Gran Arena Central (r < 42m).
  * Cada NPC se ubica en las coordenadas correspondientes a su distrito temático con orientaciones dinámicas.
  */
-export function spawnAllCatalogNpcs(): Entity[] {
+export function spawnAllCatalogNpcs(limit: number = 50): Entity[] {
   const spawnedEntities: Entity[] = []
-  const totalNpcs = NPC_CATALOG.length // 100 NPCs
+  const npcsToSpawn = NPC_CATALOG.slice(0, limit)
+  const totalNpcs = npcsToSpawn.length
   const customWearableKeys = Object.keys(CUSTOM_WEARABLES)
 
-  NPC_CATALOG.forEach((npcData, index) => {
+  npcsToSpawn.forEach((npcData, index) => {
     const posData = NPC_POSITIONS[npcData.id] || { x: 200, y: 0, z: 154, rot: 180 }
     const spawnPos = Vector3.create(posData.x, posData.y, posData.z)
 

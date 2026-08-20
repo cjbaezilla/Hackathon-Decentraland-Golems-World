@@ -7,156 +7,147 @@ const catalogCode = fs.readFileSync(catalogPath, 'utf-8');
 
 const matches = [...catalogCode.matchAll(/id:\s*'(NPC-\d{3})',\s*name:\s*'([^']+)',\s*title:\s*'([^']+)',\s*zone:\s*'([^']+)'/g)];
 
-// Definir límites de spawn seguros para cada zona excluyendo Initial Town (0..140, 0..140) y Central Arena (200, 200 r=42)
+// Semilla pseudo-aleatoria determinista para reproducibilidad (LCG)
+let seed = 987654321;
+function pseudoRandom() {
+  seed = (seed * 1664525 + 1013904223) % 4294967296;
+  return seed / 4294967296;
+}
+
+function randomRange(min, max) {
+  return min + pseudoRandom() * (max - min);
+}
+
+// Definir límites de spawn seguros excluyendo Initial Town (0..138, 0..138) y Gran Arena Central Extendida (200, 200 r=65m)
 const isExcluded = (x, z) => {
   // Exclusión 1: Initial Town (Distrito de la Forja Hub)
-  if (x <= 140 && z <= 140) return true;
-  // Exclusión 2: Gran Arena Central Interior
-  const distArena = Math.sqrt((x - 200) ** 2 + (z - 200) ** 2);
-  if (distArena < 42) return true;
+  if (x <= 138 && z <= 138) return true;
+  // Exclusión 2: Gran Arena Central y sus alrededores inmediatos (r = 65m del centro 200, 200)
+  const distArena = Math.hypot(x - 200, z - 200);
+  if (distArena < 65) return true;
   // Exclusión 3: Fuera de los bordes del mapa (400x400)
-  if (x < 10 || x > 390 || z < 10 || z > 390) return true;
+  if (x < 15 || x > 385 || z < 15 || z > 385) return true;
   return false;
 };
 
-// Mapa de generadores por zona
-const zoneSpawners = {
-  'Desierto de Chatarra': (idx, total) => {
-    // NW: X: 20..130, Z: 265..385
-    const cols = 4;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 25 + col * 32 + (row % 2) * 10;
-    const z = 275 + row * 32;
-    return { x, z, rot: (idx * 37) % 360 };
-  },
-  'Reserva de Minería': (idx, total) => {
-    // NE: X: 270..380, Z: 270..380
-    const cols = 4;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 275 + col * 32;
-    const z = 275 + row * 32;
-    return { x, z, rot: (idx * 43) % 360 };
-  },
-  'Calderas de Fundición': (idx, total) => {
-    // SE: X: 270..380, Z: 20..130
-    const cols = 4;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 275 + col * 32;
-    const z = 25 + row * 32;
-    return { x, z, rot: (idx * 51) % 360 };
-  },
-  'Subestación Eléctrica': (idx, total) => {
-    // Norte: X: 155..245, Z: 285..385
-    const cols = 3;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 160 + col * 38;
-    const z = 290 + row * 30;
-    return { x, z, rot: (idx * 29) % 360 };
-  },
-  'Torre de Radio': (idx, total) => {
-    // Este: X: 285..385, Z: 155..245
-    const cols = 3;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 290 + row * 30;
-    const z = 160 + col * 38;
-    return { x, z, rot: (idx * 67) % 360 };
-  },
-  'Los Chatarrales': (idx, total) => {
-    // Oeste: X: 20..130, Z: 155..250
-    const cols = 3;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 25 + col * 40;
-    const z = 160 + row * 26;
-    return { x, z, rot: (idx * 73) % 360 };
-  },
-  'Fábrica Abandonada': (idx, total) => {
-    // Anillos Intermedios (NW y NE de la Arena)
-    const points = [
-      { x: 150, z: 255 }, { x: 180, z: 260 }, { x: 220, z: 260 }, { x: 250, z: 255 },
-      { x: 135, z: 220 }, { x: 265, z: 220 }, { x: 135, z: 180 }, { x: 265, z: 180 },
-      { x: 150, z: 145 }
-    ];
-    const pt = points[idx % points.length];
-    return { x: pt.x, z: pt.y || pt.z, rot: (idx * 83) % 360 };
-  },
-  'Gran Arena Steampunk': (idx, total) => {
-    // Anillo exterior de la Arena (Radio 48m alrededor de 200, 200)
-    const angleRad = (idx / total) * 2 * Math.PI;
-    const radius = 48;
-    const x = 200 + radius * Math.cos(angleRad);
-    const z = 200 + radius * Math.sin(angleRad);
-    // Mirando hacia el centro de la arena o hacia afuera
-    const rot = (angleRad * 180 / Math.PI + 90) % 360;
-    return { x: Math.round(x * 10) / 10, z: Math.round(z * 10) / 10, rot: Math.round(rot) };
-  },
-  'Corredores y Vías Sur': (idx, total) => {
-    // Bulevar Sur: X: 150..250, Z: 25..125
-    const cols = 2;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = 165 + col * 70;
-    const z = 25 + row * 26;
-    return { x, z, rot: (idx * 97) % 360 };
-  },
-  'Distrito de la Forja': (idx, total) => {
-    // Bulevares Exteriores / Transición (Fuera de Initial Town 0..140, 0..140)
-    const points = [
-      { x: 148, z: 25 }, { x: 148, z: 50 }, { x: 148, z: 75 }, { x: 148, z: 100 }, { x: 148, z: 125 },
-      { x: 25, z: 148 }, { x: 50, z: 148 }, { x: 75, z: 148 }, { x: 100, z: 148 }, { x: 125, z: 148 },
-      { x: 170, z: 145 }, { x: 145, z: 170 }, { x: 230, z: 145 }
-    ];
-    const pt = points[idx % points.length];
-    return { x: pt.x, z: pt.z, rot: (idx * 103) % 360 };
-  }
+// Bounding boxes por zona para distribución orgánica desalineada lejos de la Arena Central
+const zoneBounds = {
+  'Desierto de Chatarra': { minX: 20, maxX: 135, minZ: 265, maxZ: 385 },
+  'Reserva de Minería': { minX: 265, maxX: 385, minZ: 265, maxZ: 385 },
+  'Calderas de Fundición': { minX: 265, maxX: 385, minZ: 20, maxZ: 135 },
+  'Subestación Eléctrica': { minX: 145, maxX: 255, minZ: 275, maxZ: 385 },
+  'Torre de Radio': { minX: 275, maxX: 385, minZ: 145, maxZ: 255 },
+  'Los Chatarrales': { minX: 20, maxX: 135, minZ: 145, maxZ: 255 },
+  'Fábrica Abandonada': { minX: 145, maxX: 255, minZ: 145, maxZ: 255 },
+  'Gran Arena Steampunk': { isArenaRing: true },
+  'Corredores y Vías Sur': { minX: 145, maxX: 255, minZ: 20, maxZ: 135 },
+  'Distrito de la Forja': { minX: 140, maxX: 255, minZ: 20, maxZ: 135 }
 };
 
-// Asignar posiciones y validar
+const placedPositions = []; // [{x, z}]
 const npcPositions = {};
-const zoneIndices = {};
-
 let excludedCount = 0;
 
-matches.forEach(m => {
+matches.forEach((m) => {
   const id = m[1];
   const name = m[2];
   const zone = m[4];
 
-  zoneIndices[zone] = (zoneIndices[zone] || 0);
-  const idx = zoneIndices[zone];
-  zoneIndices[zone]++;
+  const bounds = zoneBounds[zone] || zoneBounds['Los Chatarrales'];
 
-  const spawner = zoneSpawners[zone] || zoneSpawners['Los Chatarrales'];
-  const pos = spawner(idx, 12);
+  let bestX = null;
+  let bestZ = null;
+  let found = false;
 
-  if (isExcluded(pos.x, pos.z)) {
-    console.error(`⚠️ ALERTA: ${id} (${name}) en ${zone} cayó en zona excluida: (${pos.x}, ${pos.z})`);
+  // Intentar encontrar una posición orgánica lejos de la arena con separación mínima
+  let minDistanceThreshold = 18; // 18m de separación mínima ideal
+  for (let attempt = 0; attempt < 800; attempt++) {
+    let candidateX, candidateZ;
+
+    if (attempt > 100) {
+      // Si el bounding box de la zona es reducido por la exclusión de la arena, ampliar a todo el mapa válido
+      candidateX = randomRange(20, 385);
+      candidateZ = randomRange(20, 385);
+    } else if (bounds.isArenaRing) {
+      const angle = pseudoRandom() * Math.PI * 2;
+      const radius = randomRange(70, 95); // Anillo exterior lejano (fuera del radio de exclusión de 65m)
+      candidateX = 200 + Math.cos(angle) * radius;
+      candidateZ = 200 + Math.sin(angle) * radius;
+    } else {
+      candidateX = randomRange(bounds.minX, bounds.maxX);
+      candidateZ = randomRange(bounds.minZ, bounds.maxZ);
+    }
+
+    if (isExcluded(candidateX, candidateZ)) {
+      continue;
+    }
+
+    // Verificar distancia mínima con todos los NPCs ya colocados
+    let isTooClose = false;
+    for (const pos of placedPositions) {
+      const dist = Math.hypot(candidateX - pos.x, candidateZ - pos.z);
+      if (dist < minDistanceThreshold) {
+        isTooClose = true;
+        break;
+      }
+    }
+
+    if (!isTooClose) {
+      bestX = candidateX;
+      bestZ = candidateZ;
+      found = true;
+      break;
+    }
+
+    // Relajar umbrales de distancia progresivamente
+    if (attempt === 300) minDistanceThreshold = 14;
+    if (attempt === 500) minDistanceThreshold = 10;
+    if (attempt === 700) minDistanceThreshold = 6;
+  }
+
+  if (!found || bestX === null) {
+    // Buscar cualquier coordenada libre no excluida en el mapa
+    for (let fallback = 0; fallback < 1000; fallback++) {
+      const fx = randomRange(20, 385);
+      const fz = randomRange(20, 385);
+      if (!isExcluded(fx, fz)) {
+        bestX = fx;
+        bestZ = fz;
+        found = true;
+        break;
+      }
+    }
+  }
+
+  if (isExcluded(bestX, bestZ)) {
+    console.error(`⚠️ ALERTA: ${id} (${name}) cayó en zona excluida: (${bestX}, ${bestZ})`);
     excludedCount++;
   }
 
+  bestX = Math.round(bestX * 10) / 10;
+  bestZ = Math.round(bestZ * 10) / 10;
+  const bestRot = Math.round(pseudoRandom() * 360);
+
+  placedPositions.push({ x: bestX, z: bestZ });
+
   npcPositions[id] = {
-    x: Math.round(pos.x * 10) / 10,
+    x: bestX,
     y: 0,
-    z: Math.round(pos.z * 10) / 10,
-    rot: Math.round(pos.rot)
+    z: bestZ,
+    rot: bestRot
   };
 });
 
-console.log(`✅ 100 NPCs procesados. Violaciones de exclusión: ${excludedCount}`);
+console.log(`✅ ${matches.length} NPCs procesados sin presencia cerca de la Gran Arena Central (r >= 65m). Violaciones: ${excludedCount}`);
 
 // Generar módulo TypeScript src/data/npcPositions.ts
 const tsContent = `/**
  * ============================================================================
  * MATRIZ DE POSICIONAMIENTO ESPACIAL DE NPCS (NPC SPATIAL POSITIONS)
  * ============================================================================
- * Coordenadas deterministas distribuidas proporcionalmente por todo el terreno
+ * Coordenadas deterministas distribuidas orgánicamente por todo el terreno
  * de 400m x 400m, excluyendo estrictamente la Forja Inicial (0..140m, 0..140m)
- * y el interior de la Gran Arena Central (r < 42m).
+ * y la Gran Arena Central con su perímetro circundante (r < 65m de 200, 200).
  */
 
 export interface NpcTransformData {

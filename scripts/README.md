@@ -43,7 +43,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
    - [9.1 Propósito y Arquitectura Técnica](#91-propósito-y-arquitectura-técnica)
    - [9.2 Estructura de Salida en `GOLEMS/wearables_imgs/`](#92-estructura-de-salida-en-golemswearables_imgs)
    - [9.3 Manual de Uso y Ejecución CLI](#93-manual-de-uso-y-ejecución-cli)
-10. [`build_npc_positions.js`: Generador de Posiciones Espaciales de NPCs (100 NPCs)](#10-build_npc_positionsjs-generador-de-posiciones-espaciales-de-npcs-100-npcs)
+10. [`build_npc_positions.js`: Generador de Posiciones Espaciales de NPCs (50 NPCs)](#10-build_npc_positionsjs-generador-de-posiciones-espaciales-de-npcs-50-npcs)
     - [10.1 Propósito y Funcionamiento](#101-propósito-y-funcionamiento)
     - [10.2 Manual de Uso y Ejecución CLI](#102-manual-de-uso-y-ejecución-cli)
 11. [Integración en Decentraland SDK7 (`GltfContainer` & `AvatarAttach`)](#11-integración-en-decentraland-sdk7-gltfcontainer--avatarattach)
@@ -62,9 +62,9 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 150 Golems 3D organizados por afinidad elemental. | `GOLEMS/golems_imgs/<afinidad>/<golem_id>.png` |
 | [`generate_wearables.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_wearables.js) | Genera proceduralmente **18 modelos binarios 3D `.glb`** PBR autocompresos para accesorios y vestimenta equipable en NPCs y jugadores. | `assets/wearables/<wearable_id>.glb` |
 | [`generate_wearables_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_wearables_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) en WebGL para los 18 accesorios 3D con fondo temático PBR. | `GOLEMS/wearables_imgs/<wearable_id>.png` |
-| [`generate_100_npcs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_100_npcs.js) | Genera y actualiza el catálogo TypeScript de **100 NPCs** en `src/data/npcCatalog.ts` con vestimentas y frases bilingües. | `src/data/npcCatalog.ts` |
-| [`generate_100_npcs_docs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_100_npcs_docs.js) | Genera y sincroniza la documentación oficial en Markdown para los 100 NPCs en español e inglés. | `GOLEMS/Golems-NPCs-100.md` y `GOLEMS/Golems-NPCs-100_eng.md` |
-| [`build_npc_positions.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/build_npc_positions.js) | Calcula y genera la matriz determinista de posiciones de los 100 NPCs distribuidos proporcionalmente por todo el terreno de 400m×400m. | `src/data/npcPositions.ts` |
+| [`generate_50_npcs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_50_npcs.js) | Genera y actualiza el catálogo TypeScript de **50 NPCs** en `src/data/npcCatalog.ts` con vestimentas y frases bilingües. | `src/data/npcCatalog.ts` |
+| `generate_50_npcs_docs.js` | Genera y sincroniza la documentación oficial en Markdown para los 50 NPCs en español e inglés. | `GOLEMS/Golems-NPCs-50.md` y `GOLEMS/Golems-NPCs-50_eng.md` |
+| [`build_npc_positions.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/build_npc_positions.js) | Calcula y genera la matriz determinista de posiciones de los 50 NPCs distribuidos proporcionalmente por todo el terreno de 400m×400m. | `src/data/npcPositions.ts` |
 
 ---
 
@@ -195,10 +195,10 @@ node scripts/generate_wearables_pngs.js
 
 ---
 
-## 10. `build_npc_positions.js`: Generador de Posiciones Espaciales de NPCs (100 NPCs)
+## 10. `build_npc_positions.js`: Generador de Posiciones Espaciales de NPCs (50 NPCs)
 
 ### 10.1 Propósito y Funcionamiento
-El script [`build_npc_positions.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/build_npc_positions.js) procesa la información temática del catálogo `src/data/npcCatalog.ts` y calcula coordenadas deterministas `(x, y, z, rot)` para los **100 NPCs**, distribuyéndolos proporcionalmente por todo el mapa de 400m × 400m.
+El script [`build_npc_positions.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/build_npc_positions.js) procesa la información temática del catálogo `src/data/npcCatalog.ts` y calcula coordenadas deterministas `(x, y, z, rot)` para los **50 NPCs**, distribuyéndolos proporcionalmente por todo el mapa de 400m × 400m.
 
 - **Exclusiones Garantizadas**: Evaluadas con `isExcluded(x, z)`:
   1. **Poblado Inicial (Distrito de la Forja Hub)**: `X: 0..140m, Z: 0..140m` (0 NPCs en el área inicial).

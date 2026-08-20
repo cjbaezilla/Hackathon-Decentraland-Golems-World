@@ -8,7 +8,7 @@ import { getLanguage } from '../i18n'
  * PANTALLA DE CARGA STEAMPUNK FULLSCREEN (REACT-ECS SDK7)
  * ============================================================================
  * Mantiene la pantalla bloqueada con estética visual steampunk y barra de
- * progreso dinámico mientras se descargan e instancian los 100 NPCs y la
+ * progreso dinámico mientras se descargan e instancian los 50 NPCs y la
  * arquitectura 3D de 400m x 400m. Se desinstala automáticamente al 100%.
  */
 export const LoadingScreenWidget = () => {
@@ -67,8 +67,8 @@ export const LoadingScreenWidget = () => {
           }}
           uiText={{
             value: isEn
-              ? 'Loading 400x400m Steampunk World & 100 NPCs...'
-              : 'Cargando Mundo Steampunk de 400x400m y 100 NPCs...',
+              ? 'Loading 400x400m Steampunk World & 50 NPCs...'
+              : 'Cargando Mundo Steampunk de 400x400m y 50 NPCs...',
             fontSize: 16,
             color: Color4.create(0.85, 0.88, 0.92, 0.95)
           }}
@@ -116,8 +116,8 @@ export const LoadingScreenWidget = () => {
         <UiEntity
           uiText={{
             value: isEn
-              ? 'Downloading 100 NPCs, wearables & compiling 3D districts...'
-              : 'Descargando 100 avatares de NPCs, accesorios y distritos 3D...',
+              ? 'Downloading 50 NPCs, wearables & compiling 3D districts...'
+              : 'Descargando 50 avatares de NPCs, accesorios y distritos 3D...',
             fontSize: 13,
             color: Color4.create(0.65, 0.7, 0.75, 0.85)
           }}

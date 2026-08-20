@@ -218,7 +218,7 @@ TouchScreenControls.createOrReplace(engine.RootEntity, {
 
 ### 4.4 Carga Garantizada de Escena y Posicionamiento Inicial (`sceneLoaderSystem` y `LoadingScreenWidget`)
 
-Para evitar que el cliente móvil instancie al avatar del jugador en medio de un mapa incompleto mientras se descargan e instancian asíncronamente las mallas 3D y los 100 NPCs, se implementó una **Pantalla de Carga y Reposicionamiento Garantizado**:
+Para evitar que el cliente móvil instancie al avatar del jugador en medio de un mapa incompleto mientras se descargan e instancian asíncronamente las mallas 3D y los 50 NPCs, se implementó una **Pantalla de Carga y Reposicionamiento Garantizado**:
 
 1. **Monitoreo con `GltfContainerLoadingState` (`src/systems/sceneLoaderSystem.ts`)**:
    - Monitorea el estado de carga (`LoadingState.FINISHED` o `LoadingState.FINISHED_WITH_ERROR`) de todas las mallas `.glb` registradas (estructuras y accesorios de los NPCs).

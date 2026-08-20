@@ -13,7 +13,7 @@ import { movePlayerTo } from '~system/RestrictedActions'
  * ============================================================================
  * Inspecciona en tiempo real el componente nativo `GltfContainerLoadingState`
  * de cada modelo 3D GLTF en la escena (incluyendo utilería de Silas y wearables
- * de los 100 NPCs). Retiene la pantalla de carga durante un mínimo de 6.0 segundos
+ * de los 50 NPCs). Retiene la pantalla de carga durante un mínimo de 6.0 segundos
  * para garantizar la transmisión por red y renderizado completo en GPU de Silas,
  * el campamento inicial y los avatares del mapa.
  */
@@ -25,10 +25,10 @@ let isSceneLoaded = false
 let loadProgressPercent = 0
 let elapsedTime = 0
 
-// Tiempo mínimo de retención (6.0s) para asegurar que la mallas de Silas y los 100 NPCs estén renderizadas en GPU
+// Tiempo mínimo de retención (6.0s) para asegurar que la mallas de Silas y los 50 NPCs estén renderizadas en GPU
 const MIN_SAFETY_LOAD_TIME_SECONDS = 6.0
 const MAX_SAFETY_TIMEOUT_SECONDS = 15.0
-const EXPECTED_MIN_ENTITIES = 80
+const EXPECTED_MIN_ENTITIES = 40
 
 /**
  * Registra una entidad que contiene o contendrá un GltfContainer para su monitoreo.
@@ -131,7 +131,7 @@ export function sceneLoaderSystem(deltaTime: number) {
     loadProgressPercent = 100
 
     console.log(
-      `✅ [Scene Loader] Carga real de Silas, campamento y 100 NPCs finalizada al 100% (${loaded}/${total} modelos GLTF cargados | ${elapsedTime.toFixed(
+      `✅ [Scene Loader] Carga real de Silas, campamento y 50 NPCs finalizada al 100% (${loaded}/${total} modelos GLTF cargados | ${elapsedTime.toFixed(
         1
       )}s transcurridos). Posicionando al jugador...`
     )

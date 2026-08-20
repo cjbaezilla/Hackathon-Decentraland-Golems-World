@@ -1,28 +1,18 @@
-# 🤖 Catálogo Maestro y Registro de 100 NPCs: Golems World
+# 🤖 Catálogo Maestro y Registro de 50 NPCs: Golems World
 
 > [!IMPORTANT]
 > **ESPECIFICACIÓN DE PERSONAJES NO JUGADORES (SDK7 & MOBILE-FIRST)**:  
-> Este documento contiene el catálogo oficial de **100 NPCs** distribuidos proporcionalmente por todo el mapa de **400m × 400m** de **Golems World**, excluyendo estrictamente la zona inicial del Distrito de la Forja (0..140m, 0..140m) y el interior de la Gran Arena Central (r < 42m). Cada NPC está definido con su arquetipo visual (`AvatarShape`), combinación de wearables nativos de Decentraland, tonos de piel, pelo y ojos, rol temático en su distrito correspondiente y frases características bilingües (ES / EN).
+> Este documento contiene el catálogo oficial de **50 NPCs** distribuidos proporcionalmente por todo el mapa de **400m × 400m** de **Golems World**, excluyendo estrictamente la zona inicial del Distrito de la Forja (0..140m, 0..140m) y el interior de la Gran Arena Central (r < 42m). Cada NPC está definido con su arquetipo visual (`AvatarShape`), combinación de wearables nativos de Decentraland, tonos de piel, pelo y ojos, rol temático en su distrito correspondiente y frases características bilingües (ES / EN).
 
 ---
 
 ## 1. Disposición Espacial y Cobertura Proporcional del Terreno
 
-Los 100 NPCs se encuentran distribuidos por todos los distritos del mapa con separaciones óptimas de 15m a 35m entre cada personaje:
-- **Desierto de Chatarra (NW - PK)**: 10 NPCs distribuidos entre X: 20m..130m, Z: 270m..380m.
-- **Reserva de Minería (NE - Segura)**: 11 NPCs distribuidos entre X: 270m..380m, Z: 270m..380m.
-- **Calderas de Fundición (SE - PK)**: 10 NPCs distribuidos entre X: 270m..380m, Z: 20m..130m.
-- **Subestación Eléctrica (Norte)**: 9 NPCs distribuidos entre X: 150m..250m, Z: 280m..380m.
-- **Torre de Radio (Este)**: 9 NPCs distribuidos entre X: 280m..380m, Z: 150m..250m.
-- **Los Chatarrales (Oeste)**: 11 NPCs distribuidos entre X: 20m..130m, Z: 150m..250m.
-- **Fábrica Abandonada (Anillos Intermedios)**: 9 NPCs distribuidos en los corredores de enlace.
-- **Gran Arena Steampunk (Plaza Exterior)**: 10 NPCs bordeando el anillo exterior (Radio 48m de 200, 200).
-- **Corredores y Vías Sur**: 8 NPCs a lo largo de las vías principales.
-- **Distrito de la Forja (Bulevares Exteriores)**: 13 NPCs bordeando los limites fuera de la zona inicial (0..140m, 0..140m).
+Los 50 NPCs se encuentran distribuidos por todos los distritos del mapa con separaciones óptimas de 15m a 35m entre cada personaje:
 
 ---
 
-## 2. Catálogo Maestro de los 100 NPCs
+## 2. Catálogo Maestro de los 50 NPCs
 
 | ID | Nombre y Título | Distrito / Zona | Rol / Arquetipo | Género | Frase Características (ES) | Frase Características (EN) |
 | :-: | :--- | :--- | :--- | :-: | :--- | :--- |

@@ -112,8 +112,8 @@ export function main() {
   // 9. Instanciar el Escondite y Bóveda de Inventario del Usuario (Parcelas [0, 0] y [0, 1] en X: 2.6m-2.8m, Z: 13.7m-19.8m)
   createUserHideout()
 
-  // 10. Instanciar los 100 NPCs del catálogo distribuidos proporcionalmente por todo el mapa (excluyendo la Arena Central y el poblado inicial de la Forja)
-  spawnAllCatalogNpcs()
+  // 10. Instanciar los 50 NPCs del catálogo distribuidos proporcionalmente por todo el mapa (excluyendo la Arena Central y el poblado inicial de la Forja)
+  spawnAllCatalogNpcs(50)
 
   // 11. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
   initSilasCinematicCamera()

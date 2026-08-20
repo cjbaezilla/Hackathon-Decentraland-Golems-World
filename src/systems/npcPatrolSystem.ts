@@ -30,7 +30,7 @@ export const NpcPatrolComponent = engine.defineComponent('NpcPatrolComponent', {
  * ============================================================================
  * SISTEMA ECS: PATRULLA ORGÁNICA DE NPCS (NPC PATROL SYSTEM)
  * ============================================================================
- * Procesa el movimiento dinámico y sutil de los 100 NPCs distribuidos en la escena:
+ * Procesa el movimiento dinámico y sutil de los 50 NPCs distribuidos en la escena:
  * 1. Alterna orgánicamente entre caminata ('WALKING') y descanso ('IDLE').
  * 2. Mantiene a cada NPC dentro de un radio de patrulla seguro alrededor de su origen.
  * 3. Rotación suave encarando el sentido de desplazamiento.

@@ -1,28 +1,18 @@
-# 🤖 Master Catalog and Register of 100 NPCs: Golems World
+# 🤖 Master Catalog and Register of 50 NPCs: Golems World
 
 > [!IMPORTANT]
 > **NON-PLAYER CHARACTER SPECIFICATION (SDK7 & MOBILE-FIRST)**:  
-> This document contains the official catalog of **100 NPCs** proportionally distributed across the entire **400m × 400m** map of **Golems World**, strictly excluding the Initial Town area in Forge District (0..140m, 0..140m) and the Central Arena interior (r < 42m). Each NPC is defined with its visual archetype (`AvatarShape`), Decentraland base wearables combination, skin/hair/eye color palettes, thematic role, wasteland backstory, and bilingual catchphrases (ES / EN).
+> This document contains the official catalog of **50 NPCs** proportionally distributed across the entire **400m × 400m** map of **Golems World**, strictly excluding the Initial Town area in Forge District (0..140m, 0..140m) and the Central Arena interior (r < 42m). Each NPC is defined with its visual archetype (`AvatarShape`), Decentraland base wearables combination, skin/hair/eye color palettes, thematic role, wasteland backstory, and bilingual catchphrases (ES / EN).
 
 ---
 
 ## 1. Spatial Layout and Proportional Terrain Coverage
 
-The 100 NPCs are positioned across all map districts with optimal separation distances of 15m to 35m between characters:
-- **Scrap Desert (NW - PK)**: 10 NPCs scattered across X: 20m..130m, Z: 270m..380m.
-- **Mining Reserve (NE - Safe)**: 11 NPCs scattered across X: 270m..380m, Z: 270m..380m.
-- **Foundry Boilers (SE - PK)**: 10 NPCs scattered across X: 270m..380m, Z: 20m..130m.
-- **Electrical Substation (North)**: 9 NPCs scattered across X: 150m..250m, Z: 280m..380m.
-- **Radio Tower (East)**: 9 NPCs scattered across X: 280m..380m, Z: 150m..250m.
-- **Scrap Heaps (West)**: 11 NPCs scattered across X: 20m..130m, Z: 150m..250m.
-- **Abandoned Factory (Intermediate Rings)**: 9 NPCs positioned along connecting corridors.
-- **Steampunk Grand Arena (Outer Plaza)**: 10 NPCs surrounding the outer perimeter (Radius 48m from 200, 200).
-- **South Corridors & Roadways**: 8 NPCs along main thoroughfares.
-- **Forge District (Outer Boulevards)**: 13 NPCs positioned around outer borders excluding Initial Town (0..140m, 0..140m).
+The 50 NPCs are positioned across all map districts with optimal separation distances of 15m to 35m between characters:
 
 ---
 
-## 2. Master Catalog of 100 NPCs
+## 2. Master Catalog of 50 NPCs
 
 | ID | Name & Title | District / Zone | Role / Archetype | Gender | Catchphrase (ES) | Catchphrase (EN) |
 | :-: | :--- | :--- | :--- | :-: | :--- | :--- |

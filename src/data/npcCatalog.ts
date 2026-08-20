@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * CATÁLOGO MAESTRO DE 100 NPCS MAD MAX STEAMPUNK (NPC CATALOG) - GOLEMS WORLD
+ * CATÁLOGO MAESTRO DE 50 NPCS MAD MAX STEAMPUNK (NPC CATALOG) - GOLEMS WORLD
  * ============================================================================
  * Estructuras de datos tipadas con avatares de sobrevivientes, chatarreros,
  * guerreros del páramo, fogoneros y mecánicos Mad Max de Golems World.
@@ -38,16 +38,9 @@ export const URN_FEMALE = 'urn:decentraland:off-chain:base-avatars:BaseFemale'
 const u = (name: string) => `urn:decentraland:off-chain:base-avatars:${name}`
 
 /**
- * Catálogo completo de 100 NPCs con estética Mad Max / Steampunk Wasteland.
+ * Catálogo completo de 50 NPCs con estética Mad Max / Steampunk Wasteland.
  */
 export const NPC_CATALOG: NpcDefinition[] = [
-] = [
-] = [
-] = [
-] = [
-] = [
-] = [
-] = [
   {
     id: 'NPC-001',
     name: 'Vance el Forjador',
