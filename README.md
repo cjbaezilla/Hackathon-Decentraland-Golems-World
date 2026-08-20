@@ -169,6 +169,22 @@ There are **46 types of materials**, categorized into 5 rarity tiers. Epic and L
 | 45 | <img src="showcase/legendary/singularidad_eterica.png" width="40" alt="singularidad_eterica" /> | **Aetheric Singularity** (`singularidad_eterica`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Attack (12), +Speed (6) & Aether Affinity |
 | 46 | <img src="showcase/legendary/relicario_astral.png" width="40" alt="relicario_astral" /> | **Celestial Gear Reliquary** (`relicario_astral`) | Legendary | 0.35% | 45 to 60 min | Scrap Desert (PK) | +Defense (10), +Vitality (30) & Aether Affinity |
 
+### 🌐 Interactive 3D Showcase Pages
+
+All 46 materials can be previewed in an interactive 3D showcase web application featuring rotating 3D glTF models, bilingual metadata (ES / EN), stat breakdowns, and high-resolution PNG exports.
+
+To launch the local showcase server:
+
+```bash
+php -S localhost:8000
+```
+
+Then navigate to the showcase index or individual item pages in your web browser:
+- **Main Showcase Catalog**: [http://localhost:8000/showcase/](http://localhost:8000/showcase/)
+- **Sample Item Page (Precision Gyroscope)**: [http://localhost:8000/showcase/rare/giroscopio_precision.html](http://localhost:8000/showcase/rare/giroscopio_precision.html)
+
+![Interactive 3D Material Showcase](GOLEMS/showcase.jpg)
+
 ---
 
 ## 🔨 The Forge and Golem Uniqueness (Deterministic Hash)
@@ -366,8 +382,23 @@ npm start
 | `npm run build` | Compiles TypeScript code to JavaScript in `bin/index.js`. |
 | `npm run deploy` | Deploys scene to assigned Decentraland World (`golems.dcl.eth`). |
 | `npm run upgrade-sdk` | Upgrades `@dcl/sdk` to latest available version. |
+| `php -S localhost:8000` | Launches a local PHP server to view the interactive 3D material showcase at `http://localhost:8000/showcase/`. |
 | `node scripts/download_steampunk_assets.js` | Automatically downloads and organizes official Decentraland Steampunk package 3D models and textures. |
 | `node scripts/generate_models.js` | Procedurally generates 25 GLB 3D models (glTF 2.0) organized by type (`--help` to see CLI options). |
+| `node scripts/generate_item_htmls.js` | Generates the 46 bilingual HTML showcase pages and index catalog in `showcase/`. |
+| `node scripts/generate_item_pngs.js` | Generates 1024x1024 PNG showcase cards for all 46 materials in `showcase/`. |
+
+### 🌐 Viewing the 3D Material Showcase
+
+To inspect all 46 collectible scrap materials with interactive 3D viewports, stat breakdown cards, and bilingual descriptions:
+
+```bash
+php -S localhost:8000
+```
+
+Access the showcase in your browser at:
+- **Catalog Index**: [http://localhost:8000/showcase/](http://localhost:8000/showcase/)
+- **Example Item Showcase Page**: [http://localhost:8000/showcase/rare/giroscopio_precision.html](http://localhost:8000/showcase/rare/giroscopio_precision.html)
 
 ---
 
