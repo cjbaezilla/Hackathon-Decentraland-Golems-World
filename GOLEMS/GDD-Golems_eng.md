@@ -352,6 +352,33 @@ Reserve golems can be dispatched on offline expeditions from the UI:
 - **Silas the Survivor**: Tutorial mentor NPC at spawn point `(15.8m, 5.9m)`.
 - **Hostile NPCs & Zone Guardians**: Mechanical patrols with waypoint paths and aggression radii defending PK zones (*Scrap Desert* & *Boilers*), guarding epic and legendary materials with high-level golems.
 
+### 10.1 Wearables and Equippable 3D Accessories (18 Pieces)
+
+In addition to native `base-avatars` clothing, the project procedurally generates **18 `.glb` 3D accessories** in `assets/wearables/`, equippable on both NPCs and players via `AvatarAttach` (mobile-first PBR, emissive-only glow material, no dynamic lights):
+
+| # | Render | Wearable | Anchor (`AAPT_`) | Category | Tris |
+| :-: | :-: | :--- | :--- | :--- | :-: |
+| 1 | <img src="wearables_imgs/goggles_steampunk.png" width="70" /> | Steampunk Aviator Goggles | `HEAD` | Eyewear | 788 |
+| 2 | <img src="wearables_imgs/welding_mask.png" width="70" /> | Mad Max Welding Mask | `HEAD` | Mask | 684 |
+| 3 | <img src="wearables_imgs/steam_backpack.png" width="70" /> | Steam Boiler Backpack | `SPINE2` | Back | 884 |
+| 4 | <img src="wearables_imgs/tesla_backpack.png" width="70" /> | Tesla Galvanic Generator | `SPINE2` | Back | 996 |
+| 5 | <img src="wearables_imgs/wrench_heavy.png" width="70" /> | Giant Mechatronic Wrench | `RIGHT_HAND` | Hand | 372 |
+| 6 | <img src="wearables_imgs/flamethrower_pipe.png" width="70" /> | Industrial Steam Flamethrower | `RIGHT_HAND` | Hand | 604 |
+| 7 | <img src="wearables_imgs/shoulder_pad_spiked.png" width="70" /> | Spiked Armored Shoulder Pad | `LEFT_SHOULDER` | Shoulder | 644 |
+| 8 | <img src="wearables_imgs/aether_crown.png" width="70" /> | Aether Crystal Crown | `HEAD` | Tiara | 176 |
+| 9 | <img src="wearables_imgs/monocle_brass.png" width="70" /> | Brass Monocle | `HEAD` | Eyewear | 680 |
+| 10 | <img src="wearables_imgs/top_hat_steam.png" width="70" /> | Steam Top Hat | `HEAD` | Hat | 938 |
+| 11 | <img src="wearables_imgs/neck_cog_collar.png" width="70" /> | Cog Collar | `NECK` | Neck | 1200 |
+| 12 | <img src="wearables_imgs/chest_armor_plate.png" width="70" /> | Riveted Chest Armor Plate | `SPINE1` | Chest | 1040 |
+| 13 | <img src="wearables_imgs/belt_utility_pouch.png" width="70" /> | Utility Belt Pouch | `HIP` | Hip | 956 |
+| 14 | <img src="wearables_imgs/gauntlet_left.png" width="70" /> | Left Armored Gauntlet | `LEFT_FOREARM` | Handwear | 768 |
+| 15 | <img src="wearables_imgs/gauntlet_right.png" width="70" /> | Right Armored Gauntlet | `RIGHT_FOREARM` | Handwear | 768 |
+| 16 | <img src="wearables_imgs/mechanical_arm_left.png" width="70" /> | Mechanical Piston Arm | `LEFT_ARM` | Arm | 992 |
+| 17 | <img src="wearables_imgs/shoulder_cannon.png" width="70" /> | Steam Shoulder Cannon | `RIGHT_SHOULDER` | Shoulder | 840 |
+| 18 | <img src="wearables_imgs/boot_plated_right.png" width="70" /> | Plated Boot with Greaves | `RIGHT_FOOT` | Feet | 648 |
+
+- 📖 *Master guide*: [`guias/guia-fabricacion-y-catalogo-npcs.md`](guias/guia-fabricacion-y-catalogo-npcs.md) · Full catalog: [`GOLEMS/Golems-Wearables-18.md`](Golems-Wearables-18.md).
+
 ## 11. Progression and Levels
 
 - **Player Level**: Unlocks extra expedition slots, hideout vault storage, and extended radar range.

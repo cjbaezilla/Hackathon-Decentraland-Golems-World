@@ -7,7 +7,8 @@ import {
   Billboard
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
-import { NpcDefinition } from '../data/npcCatalog'
+import { NpcDefinition, NPC_CATALOG } from '../data/npcCatalog'
+import { equipCustomWearable, CUSTOM_WEARABLES } from './npcWearables'
 
 /**
  * ============================================================================
@@ -15,7 +16,7 @@ import { NpcDefinition } from '../data/npcCatalog'
  * ============================================================================
  * Módulo reutilizable que instancia personajes no jugadores en SDK7 utilizando
  * el componente nativo `AvatarShape`, asignando sus wearables `base-avatars`,
- * paletas de colores de piel/pelo/ojos y rótulos 3D flotantes con Billboard.
+ * paletas de colores de piel/pelo/ojos, rótulos 3D flotantes y accesorios .glb.
  */
 
 /**
@@ -45,7 +46,7 @@ export function createNpcAvatar(
     scale: Vector3.create(1, 1, 1)
   })
 
-  // 2. Creación del componente AvatarShape nativo de Decentraland
+  // 2. Creación del componente AvatarShape nativo de Decentraland (IDLE sin animación)
   AvatarShape.create(npcEntity, {
     id: npcData.id,
     name: '', // El nombre visible se renderiza con TextShape 3D
@@ -55,7 +56,7 @@ export function createNpcAvatar(
     skinColor: npcData.avatarSpec.skinColor,
     hairColor: npcData.avatarSpec.hairColor,
     eyeColor: npcData.avatarSpec.eyeColor,
-    expressionTriggerId: 'wave',
+    expressionTriggerId: '', // IDLE sin animación
     expressionTriggerTimestamp: 0
   })
 
@@ -85,4 +86,45 @@ export function createNpcAvatar(
  */
 export function getNpcLabelEntity(npcEntity: Entity): Entity | undefined {
   return npcLabelMap.get(npcEntity)
+}
+
+/**
+ * Instancia los 50 NPCs del catálogo alineados uno al lado del otro
+ * afuera de la Gran Arena Central (al sur, Z: 154m, de X: 151m a 249m)
+ * con vestimenta base garantizada, accesorios 3D GLB equipados y en estado IDLE.
+ *
+ * @param centerPos Punto central de la alineación (por defecto afuera de la Arena en X: 200, Z: 154).
+ * @param spacing Separación entre cada NPC en metros (por defecto 2.0m).
+ * @param facingAngle Ángulo de rotación en grados (por defecto 180° para mirar hacia el Sur).
+ */
+export function spawnAllCatalogNpcs(
+  centerPos: Vector3 = Vector3.create(200, 0, 154),
+  spacing: number = 2.0,
+  facingAngle: number = 180
+): Entity[] {
+  const spawnedEntities: Entity[] = []
+  const totalNpcs = NPC_CATALOG.length // 50 NPCs
+  const startX = centerPos.x - ((totalNpcs - 1) * spacing) / 2
+  const customWearableKeys = Object.keys(CUSTOM_WEARABLES)
+
+  NPC_CATALOG.forEach((npcData, index) => {
+    const posX = startX + index * spacing
+    const spawnPos = Vector3.create(posX, centerPos.y, centerPos.z)
+
+    const entity = createNpcAvatar(npcData, spawnPos, facingAngle)
+
+    // Equipar accesorio 3D GLB temático en el cuerpo del NPC usando AvatarAttach por su ID
+    const wearableId = customWearableKeys[index % customWearableKeys.length]
+    equipCustomWearable(npcData.id, wearableId)
+
+    spawnedEntities.push(entity)
+  })
+
+  console.log(
+    `👥 [NPC Generator] ${totalNpcs} NPCs instanciados con vestimenta completa y accesorios 3D GLB equipados afuera de la Arena Central (Z: ${
+      centerPos.z
+    }m, X: ${startX.toFixed(1)}m a ${(startX + (totalNpcs - 1) * spacing).toFixed(1)}m).`
+  )
+
+  return spawnedEntities
 }

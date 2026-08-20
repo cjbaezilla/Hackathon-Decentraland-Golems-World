@@ -29,6 +29,7 @@ import { createTrampoline } from './objects/trampoline'
 import { createTradingPosts } from './objects/tradingPostsBuilder'
 import { createWreckageLab } from './objects/wreckageLabBuilder'
 import { createWelcomeNpc, welcomeNpcAnimationSystem } from './objects/welcomeNpc'
+import { spawnAllCatalogNpcs } from './objects/npcGenerator'
 import { createUserHideout } from './objects/userHideoutBuilder'
 import { initSilasCinematicCamera, scheduleSilasIntroCinematic } from './cinematics/silasCinematic'
 import { initTourFollowCamera, initMarketOrbitalCamera } from './cinematics/marketCinematic'
@@ -108,7 +109,10 @@ export function main() {
   // 9. Instanciar el Escondite y Bóveda de Inventario del Usuario (Parcelas [0, 0] y [0, 1] en X: 2.6m-2.8m, Z: 13.7m-19.8m)
   createUserHideout()
 
-  // 10. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
+  // 10. Instanciar los 50 NPCs del catálogo en fila alineada lado a lado afuera de la Arena Central (Z: 154m, X: 151m..249m, IDLE sin animación)
+  spawnAllCatalogNpcs()
+
+  // 11. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
   initSilasCinematicCamera()
   initTourFollowCamera()
   initMarketOrbitalCamera()

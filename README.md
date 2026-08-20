@@ -28,13 +28,14 @@
 7. [Stats, Affinities, and Real-Time Combat](#-stats-affinities-and-real-time-combat)
 8. [Companion Golems and Real-Time Multiplayer Following](#-companion-golems-and-real-time-multiplayer-following)
 9. [Hostile NPCs and Zone Guardians](#-hostile-npcs-and-zone-guardians)
-10. [Progression and Level System](#-progression-and-level-system)
-11. [Competitive Ladder Tournament (1v1 and 2v2)](#-competitive-ladder-tournament-1v1-and-2v2)
-12. [Colossal 72m Steampunk Tournament Arena (Cell Games Ring)](#-colossal-72m-steampunk-tournament-arena-cell-games-ring)
-13. [Technical Architecture and Persistence](#-technical-architecture-and-persistence)
-14. [Mobile-First Design and Performance Constraints](#-mobile-first-design-and-performance-constraints)
-15. [Installation, Development, and Deployment](#-installation-development-and-deployment)
-16. [Project Structure](#-project-structure)
+10. [Wearables and Equippable 3D Accessories (18 Pieces)](#-wearables-and-equippable-3d-accessories-18-pieces)
+11. [Progression and Level System](#-progression-and-level-system)
+12. [Competitive Ladder Tournament (1v1 and 2v2)](#-competitive-ladder-tournament-1v1-and-2v2)
+13. [Colossal 72m Steampunk Tournament Arena (Cell Games Ring)](#-colossal-72m-steampunk-tournament-arena-cell-games-ring)
+14. [Technical Architecture and Persistence](#-technical-architecture-and-persistence)
+15. [Mobile-First Design and Performance Constraints](#-mobile-first-design-and-performance-constraints)
+16. [Installation, Development, and Deployment](#-installation-development-and-deployment)
+17. [Project Structure](#-project-structure)
 
 ---
 
@@ -436,6 +437,35 @@ The world features mechanical NPC patrols and guardians guarding the most valuab
 - **Aggression Radius**: When a player approaches, the NPC enters combat mode against the user's golems.
 - **Elite Guardians**: In the *Scrap Desert* and *Smelting Boilers*, NPC golems have advanced stats to protect epic and legendary parts.
 - **Rewards**: Defeating NPCs awards experience to the player and golems, along with a chance for direct material drops.
+
+---
+
+## 🧰 Wearables and Equippable 3D Accessories (18 Pieces)
+
+Beyond native `base-avatars` clothing, the project procedurally generates **18 `.glb` 3D accessories** in `assets/wearables/`, equippable on both NPCs and players via `AvatarAttach` (mobile-first PBR, emissive-only glow material, no dynamic lights):
+
+| # | Render | Wearable | Anchor (`AAPT_`) | Category | Tris |
+| :-: | :-: | :--- | :--- | :--- | :-: |
+| 1 | <img src="GOLEMS/wearables_imgs/goggles_steampunk.png" width="70" /> | Steampunk Aviator Goggles | `HEAD` | Eyewear | 788 |
+| 2 | <img src="GOLEMS/wearables_imgs/welding_mask.png" width="70" /> | Mad Max Welding Mask | `HEAD` | Mask | 684 |
+| 3 | <img src="GOLEMS/wearables_imgs/steam_backpack.png" width="70" /> | Steam Boiler Backpack | `SPINE2` | Back | 884 |
+| 4 | <img src="GOLEMS/wearables_imgs/tesla_backpack.png" width="70" /> | Tesla Galvanic Generator | `SPINE2` | Back | 996 |
+| 5 | <img src="GOLEMS/wearables_imgs/wrench_heavy.png" width="70" /> | Giant Mechatronic Wrench | `RIGHT_HAND` | Hand | 372 |
+| 6 | <img src="GOLEMS/wearables_imgs/flamethrower_pipe.png" width="70" /> | Industrial Steam Flamethrower | `RIGHT_HAND` | Hand | 604 |
+| 7 | <img src="GOLEMS/wearables_imgs/shoulder_pad_spiked.png" width="70" /> | Spiked Armored Shoulder Pad | `LEFT_SHOULDER` | Shoulder | 644 |
+| 8 | <img src="GOLEMS/wearables_imgs/aether_crown.png" width="70" /> | Aether Crystal Crown | `HEAD` | Tiara | 176 |
+| 9 | <img src="GOLEMS/wearables_imgs/monocle_brass.png" width="70" /> | Brass Monocle | `HEAD` | Eyewear | 680 |
+| 10 | <img src="GOLEMS/wearables_imgs/top_hat_steam.png" width="70" /> | Steam Top Hat | `HEAD` | Hat | 938 |
+| 11 | <img src="GOLEMS/wearables_imgs/neck_cog_collar.png" width="70" /> | Cog Collar | `NECK` | Neck | 1200 |
+| 12 | <img src="GOLEMS/wearables_imgs/chest_armor_plate.png" width="70" /> | Riveted Chest Armor Plate | `SPINE1` | Chest | 1040 |
+| 13 | <img src="GOLEMS/wearables_imgs/belt_utility_pouch.png" width="70" /> | Utility Belt Pouch | `HIP` | Hip | 956 |
+| 14 | <img src="GOLEMS/wearables_imgs/gauntlet_left.png" width="70" /> | Left Armored Gauntlet | `LEFT_FOREARM` | Handwear | 768 |
+| 15 | <img src="GOLEMS/wearables_imgs/gauntlet_right.png" width="70" /> | Right Armored Gauntlet | `RIGHT_FOREARM` | Handwear | 768 |
+| 16 | <img src="GOLEMS/wearables_imgs/mechanical_arm_left.png" width="70" /> | Mechanical Piston Arm | `LEFT_ARM` | Arm | 992 |
+| 17 | <img src="GOLEMS/wearables_imgs/shoulder_cannon.png" width="70" /> | Steam Shoulder Cannon | `RIGHT_SHOULDER` | Shoulder | 840 |
+| 18 | <img src="GOLEMS/wearables_imgs/boot_plated_right.png" width="70" /> | Plated Boot with Greaves | `RIGHT_FOOT` | Feet | 648 |
+
+- 📖 *Master guide*: [`guias/guia-fabricacion-y-catalogo-npcs.md`](guias/guia-fabricacion-y-catalogo-npcs.md) · Full catalog: [`GOLEMS/Golems-Wearables-18.md`](GOLEMS/Golems-Wearables-18.md).
 
 ---
 

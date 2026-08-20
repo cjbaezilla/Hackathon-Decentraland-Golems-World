@@ -1,10 +1,9 @@
 /**
  * ============================================================================
- * CATÁLOGO MAESTRO DE 50 NPCS (NPC CATALOG) - GOLEMS WORLD
+ * CATÁLOGO MAESTRO DE 50 NPCS MAD MAX STEAMPUNK (NPC CATALOG) - GOLEMS WORLD
  * ============================================================================
- * Estructuras de datos tipadas con las especificaciones de AvatarShape,
- * wearables nativos, paletas de colores y frases bilingües de ambientación
- * para los 50 personajes no jugadores del mapa de 25x25 (400m × 400m).
+ * Estructuras de datos tipadas con avatares de sobrevivientes, chatarreros,
+ * guerreros del páramo, fogoneros y mecánicos Mad Max de Golems World.
  */
 
 export interface ColorRGB {
@@ -36,8 +35,10 @@ export interface NpcDefinition {
 export const URN_MALE = 'urn:decentraland:off-chain:base-avatars:BaseMale'
 export const URN_FEMALE = 'urn:decentraland:off-chain:base-avatars:BaseFemale'
 
+const u = (name: string) => `urn:decentraland:off-chain:base-avatars:${name}`
+
 /**
- * Catálogo completo ejecutable de los 50 NPCs.
+ * Catálogo completo de 50 NPCs con estética Mad Max / Steampunk Wasteland.
  */
 export const NPC_CATALOG: NpcDefinition[] = [
   {
@@ -49,19 +50,10 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:beard',
-        'urn:decentraland:off-chain:base-avatars:messy_hair',
-        'urn:decentraland:off-chain:base-avatars:leather_jacket',
-        'urn:decentraland:off-chain:base-avatars:brown_pants',
-        'urn:decentraland:off-chain:base-avatars:boots'
-      ],
-      skinColor: { r: 0.82, g: 0.68, b: 0.55 },
-      hairColor: { r: 0.42, g: 0.32, b: 0.22 },
-      eyeColor: { r: 0.35, g: 0.65, b: 0.85 }
+      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'punk', 'beard', 'black_jacket', 'trash_jean', 'm_mountainshoes.glb', 'black_glove'].map(u),
+      skinColor: { r: 0.65, g: 0.48, b: 0.35 },
+      hairColor: { r: 0.3, g: 0.2, b: 0.1 },
+      eyeColor: { r: 0.9, g: 0.4, b: 0.1 }
     },
     phraseEs: 'Si la chispa no prende en tres golpes, agrega carbón extra.',
     phraseEn: "If the spark doesn't catch in three hits, add extra coal."
@@ -75,16 +67,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:casual_hair_01',
-        'urn:decentraland:off-chain:base-avatars:turtleneck',
-        'urn:decentraland:off-chain:base-avatars:denim_pants',
-        'urn:decentraland:off-chain:base-avatars:sneakers'
-      ],
-      skinColor: { r: 0.92, g: 0.82, b: 0.75 },
+      wearables: ['eyebrows_01', 'mouth_01', 'eyes_01', 'hair_punk', 'full_beard', 'sleeveless_punk_shirt', 'distressed_black_Jeans', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.72, g: 0.58, b: 0.44 },
       hairColor: { r: 0.15, g: 0.15, b: 0.2 },
       eyeColor: { r: 0.2, g: 0.8, b: 0.9 }
     },
@@ -100,17 +84,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:short_hair',
-        'urn:decentraland:off-chain:base-avatars:jacket_01',
-        'urn:decentraland:off-chain:base-avatars:cargo_pants',
-        'urn:decentraland:off-chain:base-avatars:boots'
-      ],
-      skinColor: { r: 0.78, g: 0.62, b: 0.48 },
-      hairColor: { r: 0.6, g: 0.4, b: 0.2 },
+      wearables: ['eyebrows_02', 'f_mouth_02', 'eyes_02', 'cornrows', 'f_blue_jacket', 'safari_pants', 'classic_shoes'].map(u),
+      skinColor: { r: 0.68, g: 0.5, b: 0.36 },
+      hairColor: { r: 0.5, g: 0.3, b: 0.15 },
       eyeColor: { r: 0.4, g: 0.7, b: 0.4 }
     },
     phraseEs: 'Un ojo entrenado ve oro donde otros solo ven latas oxidadas.',
@@ -125,17 +101,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:beard',
-        'urn:decentraland:off-chain:base-avatars:trench_coat',
-        'urn:decentraland:off-chain:base-avatars:brown_pants',
-        'urn:decentraland:off-chain:base-avatars:shoes_01'
-      ],
-      skinColor: { r: 0.75, g: 0.6, b: 0.45 },
-      hairColor: { r: 0.25, g: 0.2, b: 0.15 },
+      wearables: ['eyebrows_03', 'mouth_03', 'eyes_03', 'cool_hair', 'short_boxed_beard', 'puffer_jacket', 'hip_hop_joggers', 'sport_black_shoes', 'piratepatch'].map(u),
+      skinColor: { r: 0.62, g: 0.45, b: 0.32 },
+      hairColor: { r: 0.2, g: 0.15, b: 0.1 },
       eyeColor: { r: 0.3, g: 0.5, b: 0.7 }
     },
     phraseEs: 'Esta reserva está protegida. Ningún asaltante tocará los cristales.',
@@ -146,20 +114,12 @@ export const NPC_CATALOG: NpcDefinition[] = [
     name: 'Sora la Cazadora',
     title: 'Mercenaria de Éter',
     zone: 'Desierto de Chatarra',
-    role: 'Exploradora PK',
+    role: 'Exploradora PK Mad Max',
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:pony_tail',
-        'urn:decentraland:off-chain:base-avatars:leather_jacket',
-        'urn:decentraland:off-chain:base-avatars:tight_pants',
-        'urn:decentraland:off-chain:base-avatars:high_boots'
-      ],
-      skinColor: { r: 0.7, g: 0.52, b: 0.4 },
+      wearables: ['eyebrows_04', 'f_mouth_04', 'eyes_04', 'pony_tail', 'f_white_shirt', 'f_country_pants', 'sneakers'].map(u),
+      skinColor: { r: 0.64, g: 0.46, b: 0.32 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.7, b: 0.2 }
     },
@@ -169,23 +129,15 @@ export const NPC_CATALOG: NpcDefinition[] = [
   {
     id: 'NPC-006',
     name: 'Tobias el Comerciante',
-    title: 'Mercader Ambulante',
+    title: 'Mercader de Bronce',
     zone: 'Distrito de la Forja',
     role: 'Vendedor de Chatarra',
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:top_hat',
-        'urn:decentraland:off-chain:base-avatars:vest',
-        'urn:decentraland:off-chain:base-avatars:formal_pants',
-        'urn:decentraland:off-chain:base-avatars:oxford_shoes'
-      ],
-      skinColor: { r: 0.85, g: 0.72, b: 0.6 },
-      hairColor: { r: 0.5, g: 0.35, b: 0.2 },
+      wearables: ['eyebrows_05', 'mouth_00', 'eyes_05', 'keanu_hair', 'Mustache_Short_Beard', 'Red_topcoat', 'brown_pants', 'm_mountainshoes.glb'].map(u),
+      skinColor: { r: 0.7, g: 0.52, b: 0.38 },
+      hairColor: { r: 0.4, g: 0.25, b: 0.1 },
       eyeColor: { r: 0.4, g: 0.6, b: 0.3 }
     },
     phraseEs: '¡Tengo los mejores engranajes de bronce de todo el distrito!',
@@ -200,16 +152,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:bob_hair',
-        'urn:decentraland:off-chain:base-avatars:overall',
-        'urn:decentraland:off-chain:base-avatars:boots',
-        'urn:decentraland:off-chain:base-avatars:goggles_01'
-      ],
-      skinColor: { r: 0.88, g: 0.75, b: 0.65 },
+      wearables: ['eyebrows_06', 'f_mouth_06', 'eyes_06', 'shoulder_bob_hair', 'puffer_jacket', 'grey_joggers', 'citycomfortableshoes', 'cyclope'].map(u),
+      skinColor: { r: 0.74, g: 0.56, b: 0.42 },
       hairColor: { r: 0.75, g: 0.25, b: 0.15 },
       eyeColor: { r: 0.3, g: 0.7, b: 0.9 }
     },
@@ -225,17 +169,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:bald_head',
-        'urn:decentraland:off-chain:base-avatars:tshirt_01',
-        'urn:decentraland:off-chain:base-avatars:torn_jeans',
-        'urn:decentraland:off-chain:base-avatars:work_boots'
-      ],
-      skinColor: { r: 0.72, g: 0.55, b: 0.42 },
-      hairColor: { r: 0.2, g: 0.2, b: 0.2 },
+      wearables: ['eyebrows_07', 'mouth_02', 'eyes_07', 'short_hair', 'granpa_beard', 'baggy_pullover', 'comfortablepants', 'classic_shoes'].map(u),
+      skinColor: { r: 0.6, g: 0.42, b: 0.28 },
+      hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.5, g: 0.4, b: 0.3 }
     },
     phraseEs: 'Todo se reutiliza en el páramo. Nada se tira a la basura.',
@@ -250,17 +186,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:pixie_cut',
-        'urn:decentraland:off-chain:base-avatars:sweater',
-        'urn:decentraland:off-chain:base-avatars:skirt_01',
-        'urn:decentraland:off-chain:base-avatars:casual_shoes'
-      ],
-      skinColor: { r: 0.85, g: 0.7, b: 0.6 },
-      hairColor: { r: 0.3, g: 0.2, b: 0.4 },
+      wearables: ['eyebrows_00', 'f_mouth_00', 'eyes_08', 'double_bun', 'red_square_shirt', 'trash_jean', 'sport_black_shoes'].map(u),
+      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
+      hairColor: { r: 0.25, g: 0.15, b: 0.3 },
       eyeColor: { r: 0.2, g: 0.6, b: 0.8 }
     },
     phraseEs: 'Las antenas captan susurros de otros mundos entre la estática.',
@@ -271,27 +199,18 @@ export const NPC_CATALOG: NpcDefinition[] = [
     name: 'Darius el Gladiador',
     title: 'Campeón Veterano',
     zone: 'Gran Arena Steampunk',
-    role: 'Gladiador de Cell Ring',
+    role: 'Gladiador Mad Max',
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: [
-        'urn:decentraland:off-chain:base-avatars:eyebrows_00',
-        'urn:decentraland:off-chain:base-avatars:mouth_00',
-        'urn:decentraland:off-chain:base-avatars:eyes_00',
-        'urn:decentraland:off-chain:base-avatars:buzz_cut',
-        'urn:decentraland:off-chain:base-avatars:armored_vest',
-        'urn:decentraland:off-chain:base-avatars:combat_pants',
-        'urn:decentraland:off-chain:base-avatars:heavy_boots'
-      ],
-      skinColor: { r: 0.68, g: 0.5, b: 0.38 },
-      hairColor: { r: 0.15, g: 0.15, b: 0.15 },
-      eyeColor: { r: 0.8, g: 0.2, b: 0.2 }
+      wearables: ['eyebrows_01', 'mouth_04', 'eyes_09', 'moptop', 'full_beard', 'm_sweater_02', 'oxford_pants', 'sneakers', 'aviatorstyle'].map(u),
+      skinColor: { r: 0.58, g: 0.4, b: 0.26 },
+      hairColor: { r: 0.85, g: 0.1, b: 0.1 },
+      eyeColor: { r: 0.9, g: 0.2, b: 0.1 }
     },
     phraseEs: 'Demuestra tu valor en la arena o regresa a calentar calderas.',
     phraseEn: 'Prove your worth in the arena or go back to warming boilers.'
   },
-  // NPCs 011 a 050 estructurados con la misma precisión
   {
     id: 'NPC-011',
     name: 'Eliza la Alquimista',
@@ -301,11 +220,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'long_wavy_hair', 'lab_coat', 'slacks', 'flats'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.9, g: 0.8, b: 0.72 },
-      hairColor: { r: 0.5, g: 0.2, b: 0.6 },
+      wearables: ['eyebrows_02', 'f_mouth_02', 'eyes_00', 'short_hair', 'black_jacket', 'safari_pants', 'm_mountainshoes.glb'].map(u),
+      skinColor: { r: 0.76, g: 0.6, b: 0.48 },
+      hairColor: { r: 0.4, g: 0.15, b: 0.5 },
       eyeColor: { r: 0.3, g: 0.8, b: 0.7 }
     },
     phraseEs: 'Una gota mal calculada y la reacción galvánica fundirá el crisol.',
@@ -320,11 +237,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'messy_hair', 'tshirt_02', 'shorts', 'sneakers'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.8, g: 0.65, b: 0.52 },
-      hairColor: { r: 0.7, g: 0.5, b: 0.2 },
+      wearables: ['eyebrows_03', 'mouth_01', 'eyes_01', 'semi_bold', 'short_boxed_beard', 'red_square_shirt', 'distressed_black_Jeans', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.7, g: 0.52, b: 0.38 },
+      hairColor: { r: 0.6, g: 0.4, b: 0.15 },
       eyeColor: { r: 0.4, g: 0.6, b: 0.8 }
     },
     phraseEs: 'Silas me enseñó que la paciencia forja los mejores autómatas.',
@@ -339,11 +254,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'braid_hair', 'heavy_apron', 'thick_pants', 'safety_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.76, g: 0.58, b: 0.44 },
-      hairColor: { r: 0.3, g: 0.15, b: 0.1 },
+      wearables: ['eyebrows_04', 'f_mouth_04', 'eyes_02', 'cool_hair', 'f_blue_jacket', 'f_country_pants', 'classic_shoes', 'black_glove'].map(u),
+      skinColor: { r: 0.66, g: 0.48, b: 0.34 },
+      hairColor: { r: 0.25, g: 0.1, b: 0.05 },
       eyeColor: { r: 0.8, g: 0.4, b: 0.1 }
     },
     phraseEs: 'Las válvulas están al límite. ¡El vapor quema si te acercas demasiado!',
@@ -358,11 +271,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'beard_full', 'miner_helmet', 'overalls', 'heavy_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
-      hairColor: { r: 0.2, g: 0.2, b: 0.2 },
+      wearables: ['eyebrows_05', 'mouth_03', 'eyes_03', 'hair_punk', 'Mustache_Short_Beard', 'black_jacket', 'hip_hop_joggers', 'sport_black_shoes'].map(u),
+      skinColor: { r: 0.6, g: 0.42, b: 0.28 },
+      hairColor: { r: 0.15, g: 0.15, b: 0.15 },
       eyeColor: { r: 0.4, g: 0.4, b: 0.4 }
     },
     phraseEs: 'El terreno es duro, pero el mineral de éter paga cada picada.',
@@ -377,10 +288,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'straight_hair', 'jacket_02', 'camo_pants', 'tactical_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.84, g: 0.68, b: 0.56 },
+      wearables: ['eyebrows_06', 'f_mouth_06', 'eyes_04', 'curly_hair', 'f_white_shirt', 'grey_joggers', 'sneakers'].map(u),
+      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
       hairColor: { r: 0.1, g: 0.1, b: 0.15 },
       eyeColor: { r: 0.3, g: 0.8, b: 0.6 }
     },
@@ -396,10 +305,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'scar_face', 'tactical_vest', 'cargo_pants', 'combat_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.65, g: 0.48, b: 0.35 },
+      wearables: ['eyebrows_07', 'mouth_00', 'eyes_05', 'cool_hair', 'granpa_beard', 'sport_jacket', 'brown_pants', 'm_mountainshoes.glb', 'piratepatch'].map(u),
+      skinColor: { r: 0.58, g: 0.4, b: 0.28 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.3, b: 0.1 }
     },
@@ -415,11 +322,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'curly_hair', 'hoodie', 'jeans', 'canvas_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.82, g: 0.66, b: 0.54 },
-      hairColor: { r: 0.45, g: 0.25, b: 0.1 },
+      wearables: ['eyebrows_00', 'f_mouth_00', 'eyes_06', 'shoulder_hair', 'puffer_jacket', 'trash_jean', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
+      hairColor: { r: 0.4, g: 0.2, b: 0.1 },
       eyeColor: { r: 0.5, g: 0.7, b: 0.3 }
     },
     phraseEs: 'Tengo tres cajas llenas de pernos si los necesitas para tu receta.',
@@ -434,11 +339,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'cap', 'windbreaker', 'track_pants', 'running_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.86, g: 0.72, b: 0.6 },
-      hairColor: { r: 0.6, g: 0.4, b: 0.2 },
+      wearables: ['eyebrows_01', 'mouth_02', 'eyes_07', 'keanu_hair', 'full_beard', 'puffer_jacket_hoodie', 'comfortablepants', 'classic_shoes'].map(u),
+      skinColor: { r: 0.74, g: 0.58, b: 0.44 },
+      hairColor: { r: 0.5, g: 0.3, b: 0.15 },
       eyeColor: { r: 0.3, g: 0.6, b: 0.8 }
     },
     phraseEs: '¡Dicen que apareció un corazón primigenio en el desierto norte!',
@@ -453,11 +356,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'short_bob', 'work_shirt', 'utility_pants', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.8, g: 0.64, b: 0.5 },
-      hairColor: { r: 0.2, g: 0.2, b: 0.2 },
+      wearables: ['eyebrows_02', 'f_mouth_02', 'eyes_08', 'hair_bun', 'red_square_shirt', 'safari_pants', 'sport_black_shoes', 'cyclope'].map(u),
+      skinColor: { r: 0.7, g: 0.52, b: 0.38 },
+      hairColor: { r: 0.15, g: 0.15, b: 0.15 },
       eyeColor: { r: 0.4, g: 0.8, b: 0.5 }
     },
     phraseEs: 'Un ajuste a tiempo evita que el autómata pierda presión en combate.',
@@ -472,11 +373,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'glasses', 'safari_jacket', 'khaki_pants', 'walking_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.88, g: 0.74, b: 0.62 },
-      hairColor: { r: 0.7, g: 0.7, b: 0.7 },
+      wearables: ['eyebrows_03', 'mouth_04', 'eyes_09', 'short_hair', 'short_boxed_beard', 'poloblacktshirt', 'oxford_pants', 'sneakers'].map(u),
+      skinColor: { r: 0.78, g: 0.62, b: 0.48 },
+      hairColor: { r: 0.6, g: 0.6, b: 0.6 },
       eyeColor: { r: 0.2, g: 0.5, b: 0.7 }
     },
     phraseEs: 'Los depósitos de éter laten a la misma frecuencia que la tierra.',
@@ -491,10 +390,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'red_hair', 'leather_vest', 'leather_pants', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.82, g: 0.64, b: 0.52 },
+      wearables: ['eyebrows_04', 'f_mouth_04', 'eyes_00', 'two_tails', 'black_jacket', 'f_country_pants', 'm_mountainshoes.glb'].map(u),
+      skinColor: { r: 0.72, g: 0.52, b: 0.38 },
       hairColor: { r: 0.85, g: 0.2, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.5, b: 0.1 }
     },
@@ -510,11 +407,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'bun_hair', 'dress_01', 'flats', 'glasses'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.9, g: 0.78, b: 0.68 },
-      hairColor: { r: 0.35, g: 0.25, b: 0.15 },
+      wearables: ['eyebrows_05', 'f_mouth_05', 'eyes_01', 'short_hair', 'f_red_elegant_jacket', 'f_brown_trousers', 'citycomfortableshoes', 'aviatorstyle'].map(u),
+      skinColor: { r: 0.78, g: 0.62, b: 0.5 },
+      hairColor: { r: 0.3, g: 0.2, b: 0.1 },
       eyeColor: { r: 0.3, g: 0.6, b: 0.4 }
     },
     phraseEs: 'Cada autómata forjado guarda un fragmento de nuestra historia.',
@@ -529,10 +424,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'short_hair_02', 'work_coat', 'dark_jeans', 'work_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.78, g: 0.6, b: 0.46 },
+      wearables: ['eyebrows_06', 'mouth_02', 'eyes_02', 'hair_undere', 'handlebar', 'm_sweater_02', 'safari_pants', 'classic_shoes'].map(u),
+      skinColor: { r: 0.68, g: 0.5, b: 0.36 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.2, g: 0.7, b: 0.9 }
     },
@@ -548,11 +441,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'athletic_cut', 'sports_top', 'leggings', 'athletic_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.74, g: 0.56, b: 0.42 },
-      hairColor: { r: 0.9, g: 0.7, b: 0.2 },
+      wearables: ['eyebrows_07', 'f_mouth_07', 'eyes_03', 'cool_hair', 'f_sweater', 'comfortablepants', 'sport_black_shoes'].map(u),
+      skinColor: { r: 0.66, g: 0.48, b: 0.34 },
+      hairColor: { r: 0.85, g: 0.65, b: 0.15 },
       eyeColor: { r: 0.4, g: 0.8, b: 0.3 }
     },
     phraseEs: 'La agilidad es más destructiva que la fuerza bruta.',
@@ -567,11 +458,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'beard', 'flannel_shirt', 'jeans', 'work_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.82, g: 0.68, b: 0.55 },
-      hairColor: { r: 0.4, g: 0.3, b: 0.2 },
+      wearables: ['eyebrows_00', 'mouth_04', 'eyes_04', 'punk', 'beard', 'red_square_shirt', 'grey_joggers', 'sneakers', 'black_glove'].map(u),
+      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
+      hairColor: { r: 0.35, g: 0.25, b: 0.15 },
       eyeColor: { r: 0.35, g: 0.65, b: 0.85 }
     },
     phraseEs: 'Si buscas a mi hermano Silas, está junto al campamento de bienvenida.',
@@ -586,10 +475,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'ponytail_02', 'camo_jacket', 'tactical_pants', 'combat_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.7, g: 0.52, b: 0.38 },
+      wearables: ['eyebrows_01', 'f_mouth_01', 'eyes_05', 'curly_hair', 'sleeveless_punk_shirt', 'distressed_black_Jeans', 'm_mountainshoes.glb'].map(u),
+      skinColor: { r: 0.64, g: 0.46, b: 0.32 },
       hairColor: { r: 0.15, g: 0.15, b: 0.2 },
       eyeColor: { r: 0.8, g: 0.6, b: 0.2 }
     },
@@ -605,11 +492,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'bald_beard', 'black_apron', 'work_pants', 'heavy_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.68, g: 0.48, b: 0.34 },
-      hairColor: { r: 0.2, g: 0.2, b: 0.2 },
+      wearables: ['eyebrows_02', 'mouth_01', 'eyes_06', 'rasta', 'balbo_beard', 'black_jacket', 'brown_pants_02', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.58, g: 0.4, b: 0.26 },
+      hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.4, b: 0.1 }
     },
     phraseEs: 'El metal líquido debe fluir libremente sin burbujas de aire.',
@@ -624,10 +509,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'silver_hair', 'robe', 'sandals', 'pendant'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.92, g: 0.84, b: 0.78 },
+      wearables: ['eyebrows_03', 'f_mouth_03', 'eyes_07', 'shoulder_hair', 'baggy_pullover', 'f_jeans', 'classic_shoes', 'piratepatch'].map(u),
+      skinColor: { r: 0.8, g: 0.68, b: 0.58 },
       hairColor: { r: 0.9, g: 0.9, b: 0.95 },
       eyeColor: { r: 0.7, g: 0.3, b: 0.9 }
     },
@@ -643,11 +526,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'fedora_hat', 'trench_coat_02', 'brown_pants', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.76, g: 0.6, b: 0.46 },
-      hairColor: { r: 0.4, g: 0.25, b: 0.15 },
+      wearables: ['eyebrows_04', 'mouth_03', 'eyes_08', 'hair_coolshortstyle', 'goatee_beard', 'sport_jacket', 'corduroysandypants', 'sport_black_shoes'].map(u),
+      skinColor: { r: 0.66, g: 0.48, b: 0.34 },
+      hairColor: { r: 0.35, g: 0.2, b: 0.1 },
       eyeColor: { r: 0.4, g: 0.5, b: 0.3 }
     },
     phraseEs: 'Las mejores piezas de cobre están sepultadas bajo dos metros de grava.',
@@ -662,11 +543,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'neat_hair', 'shirt_and_tie', 'trousers', 'dress_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.86, g: 0.74, b: 0.64 },
-      hairColor: { r: 0.2, g: 0.15, b: 0.1 },
+      wearables: ['eyebrows_05', 'mouth_04', 'eyes_09', 'keanu_hair', 'Mustache_Short_Beard', 'puffer_jacket', 'oxford_pants', 'sneakers'].map(u),
+      skinColor: { r: 0.74, g: 0.58, b: 0.46 },
+      hairColor: { r: 0.15, g: 0.1, b: 0.05 },
       eyeColor: { r: 0.3, g: 0.6, b: 0.8 }
     },
     phraseEs: 'Punto, punto, raya... la estación del norte confirma recepción.',
@@ -681,10 +560,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'braided_bun', 'welding_mask_neck', 'overalls', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.8, g: 0.62, b: 0.48 },
+      wearables: ['eyebrows_06', 'f_mouth_06', 'eyes_00', 'double_bun', 'black_jacket', 'grey_joggers', 'm_mountainshoes.glb', 'cyclope'].map(u),
+      skinColor: { r: 0.68, g: 0.5, b: 0.36 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.2, g: 0.8, b: 0.9 }
     },
@@ -700,10 +577,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'mohawk_hair', 'spiked_jacket', 'leather_pants', 'heavy_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.66, g: 0.46, b: 0.32 },
+      wearables: ['eyebrows_07', 'mouth_01', 'eyes_01', 'short_hair', 'granpa_beard', 'Red_topcoat', 'distressed_black_Jeans', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.55, g: 0.38, b: 0.24 },
       hairColor: { r: 0.9, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.1, b: 0.1 }
     },
@@ -719,11 +594,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'flower_hair', 'gardener_shirt', 'linen_pants', 'sandals'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.84, g: 0.7, b: 0.58 },
-      hairColor: { r: 0.5, g: 0.3, b: 0.1 },
+      wearables: ['eyebrows_00', 'f_mouth_00', 'eyes_02', 'short_hair', 'f_blue_jacket', 'trash_jean', 'classic_shoes'].map(u),
+      skinColor: { r: 0.72, g: 0.56, b: 0.42 },
+      hairColor: { r: 0.4, g: 0.25, b: 0.1 },
       eyeColor: { r: 0.3, g: 0.8, b: 0.4 }
     },
     phraseEs: 'Hasta en el metal frío la vida encuentra la forma de florecer.',
@@ -738,11 +611,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'cap_02', 'tshirt_black', 'jeans', 'sneakers'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.82, g: 0.66, b: 0.52 },
-      hairColor: { r: 0.3, g: 0.2, b: 0.1 },
+      wearables: ['eyebrows_01', 'mouth_03', 'eyes_03', 'moptop', 'full_beard', 'baggy_pullover', 'hip_hop_joggers', 'sport_black_shoes', 'aviatorstyle'].map(u),
+      skinColor: { r: 0.7, g: 0.52, b: 0.38 },
+      hairColor: { r: 0.25, g: 0.15, b: 0.05 },
       eyeColor: { r: 0.4, g: 0.6, b: 0.8 }
     },
     phraseEs: 'Si escuchas un chirrido metálico, aplica grasa de engranajes inmediatamente.',
@@ -757,10 +628,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'short_wavy', 'cardigan', 'skirt_long', 'flats'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.88, g: 0.76, b: 0.66 },
+      wearables: ['eyebrows_02', 'f_mouth_02', 'eyes_04', 'cool_hair', 'f_white_shirt', 'safari_pants', 'sneakers'].map(u),
+      skinColor: { r: 0.76, g: 0.6, b: 0.48 },
       hairColor: { r: 0.2, g: 0.2, b: 0.3 },
       eyeColor: { r: 0.5, g: 0.3, b: 0.8 }
     },
@@ -776,10 +645,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'shaved_head', 'sleeveless_shirt', 'cargo_pants', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.7, g: 0.5, b: 0.35 },
+      wearables: ['eyebrows_03', 'mouth_00', 'eyes_05', 'semi_bold', 'short_boxed_beard', 'm_sweater_02', 'brown_pants', 'm_mountainshoes.glb'].map(u),
+      skinColor: { r: 0.58, g: 0.4, b: 0.26 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.3, b: 0.1 }
     },
@@ -795,11 +662,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'beret_hat', 'vest_leather', 'trousers', 'shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.84, g: 0.7, b: 0.58 },
-      hairColor: { r: 0.4, g: 0.3, b: 0.1 },
+      wearables: ['eyebrows_04', 'mouth_01', 'eyes_06', 'punk', 'goatee_beard', 'green_square_shirt', 'brown_pants_02', 'citycomfortableshoes', 'black_glove'].map(u),
+      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
+      hairColor: { r: 0.35, g: 0.2, b: 0.1 },
       eyeColor: { r: 0.3, g: 0.5, b: 0.7 }
     },
     phraseEs: '¡Tengo serpentines a prueba de fugas a precios imbatibles!',
@@ -814,11 +679,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'sleek_hair', 'formal_suit', 'heels', 'clipboard_prop'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.88, g: 0.74, b: 0.64 },
-      hairColor: { r: 0.8, g: 0.7, b: 0.2 },
+      wearables: ['eyebrows_05', 'f_mouth_05', 'eyes_07', 'pony_tail', 'baggy_pullover', 'f_brown_trousers', 'classic_shoes'].map(u),
+      skinColor: { r: 0.74, g: 0.56, b: 0.42 },
+      hairColor: { r: 0.8, g: 0.65, b: 0.15 },
       eyeColor: { r: 0.2, g: 0.7, b: 0.8 }
     },
     phraseEs: '¿Tienes listo tu escuadrón? El próximo combate está por comenzar.',
@@ -833,11 +696,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'helmet_lamp', 'heavy_coat', 'miner_pants', 'steel_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
-      hairColor: { r: 0.3, g: 0.2, b: 0.1 },
+      wearables: ['eyebrows_06', 'mouth_03', 'eyes_08', 'rasta', 'handlebar', 'croupier_shirt', 'corduroysandypants', 'sport_black_shoes'].map(u),
+      skinColor: { r: 0.6, g: 0.44, b: 0.3 },
+      hairColor: { r: 0.2, g: 0.15, b: 0.1 },
       eyeColor: { r: 0.4, g: 0.4, b: 0.4 }
     },
     phraseEs: 'La veta principal de bronce se extiende hacia el noreste.',
@@ -852,10 +713,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'glasses_02', 'polo_shirt', 'slacks', 'casual_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.9, g: 0.8, b: 0.7 },
+      wearables: ['eyebrows_07', 'f_mouth_07', 'eyes_09', 'shoulder_bob_hair', 'black_top', 'comfortablepants', 'sneakers', 'piratepatch'].map(u),
+      skinColor: { r: 0.76, g: 0.6, b: 0.48 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.3, g: 0.8, b: 0.7 }
     },
@@ -871,10 +730,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'flame_hair', 'dark_coat', 'leather_pants', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.74, g: 0.52, b: 0.38 },
+      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'hair_coolshortstyle', 'beard', 'sleeveless_punk_shirt', 'trash_jean', 'm_mountainshoes.glb'].map(u),
+      skinColor: { r: 0.62, g: 0.42, b: 0.28 },
       hairColor: { r: 0.9, g: 0.3, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.4, b: 0.1 }
     },
@@ -890,11 +747,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'braids_long', 'leather_armor', 'pants_dark', 'boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.68, g: 0.48, b: 0.34 },
-      hairColor: { r: 0.2, g: 0.1, b: 0.05 },
+      wearables: ['eyebrows_01', 'f_mouth_01', 'eyes_01', 'double_bun', 'f_red_elegant_jacket', 'distressed_black_Jeans', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.58, g: 0.4, b: 0.26 },
+      hairColor: { r: 0.15, g: 0.1, b: 0.05 },
       eyeColor: { r: 0.8, g: 0.2, b: 0.8 }
     },
     phraseEs: 'La singularidad no se busca, se presiente en el pulso del terreno.',
@@ -909,11 +764,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'messy_beard', 'tshirt_gray', 'torn_shorts', 'sandals'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.78, g: 0.6, b: 0.46 },
-      hairColor: { r: 0.3, g: 0.2, b: 0.1 },
+      wearables: ['eyebrows_02', 'mouth_02', 'eyes_02', 'slicked_hair', 'balbo_beard', 'puffer_jacket', 'safari_pants', 'classic_shoes', 'cyclope'].map(u),
+      skinColor: { r: 0.66, g: 0.48, b: 0.34 },
+      hairColor: { r: 0.25, g: 0.15, b: 0.08 },
       eyeColor: { r: 0.4, g: 0.5, b: 0.4 }
     },
     phraseEs: 'Una buena cadena de hierro frena a cualquier autómata desbocado.',
@@ -928,11 +781,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'friendly_smile_hair', 'dress_casual', 'flats', 'bag'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.86, g: 0.72, b: 0.62 },
-      hairColor: { r: 0.6, g: 0.4, b: 0.2 },
+      wearables: ['eyebrows_03', 'f_mouth_03', 'eyes_03', 'short_hair', 'f_sweater', 'f_jeans', 'sport_black_shoes'].map(u),
+      skinColor: { r: 0.74, g: 0.58, b: 0.44 },
+      hairColor: { r: 0.5, g: 0.3, b: 0.15 },
       eyeColor: { r: 0.3, g: 0.7, b: 0.8 }
     },
     phraseEs: 'Si buscas transistores o bulbos, visita el Paseo Comercial Oeste.',
@@ -947,10 +798,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'bandana', 'work_vest', 'jeans_dark', 'work_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.74, g: 0.54, b: 0.4 },
+      wearables: ['eyebrows_04', 'mouth_04', 'eyes_04', 'modern_hair', 'goatee_beard', 'Red_topcoat', 'grey_joggers', 'sneakers'].map(u),
+      skinColor: { r: 0.62, g: 0.44, b: 0.3 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.4, g: 0.6, b: 0.5 }
     },
@@ -966,10 +815,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'short_cropped', 'sniper_coat', 'tactical_pants', 'combat_boots'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.7, g: 0.5, b: 0.36 },
+      wearables: ['eyebrows_05', 'f_mouth_05', 'eyes_05', 'cool_hair', 'sleeveless_punk_shirt', 'f_brown_trousers', 'm_mountainshoes.glb', 'aviatorstyle'].map(u),
+      skinColor: { r: 0.6, g: 0.42, b: 0.28 },
       hairColor: { r: 0.1, g: 0.1, b: 0.1 },
       eyeColor: { r: 0.9, g: 0.8, b: 0.2 }
     },
@@ -985,11 +832,9 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'white_hair_beard', 'judge_robe', 'formal_shoes', 'gavel_prop'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.88, g: 0.76, b: 0.66 },
-      hairColor: { r: 0.95, g: 0.95, b: 0.95 },
+      wearables: ['eyebrows_06', 'mouth_01', 'eyes_06', 'hair_undere', 'handlebar', 'baggy_pullover', 'brown_pants_02', 'citycomfortableshoes'].map(u),
+      skinColor: { r: 0.72, g: 0.56, b: 0.42 },
+      hairColor: { r: 0.85, g: 0.85, b: 0.85 },
       eyeColor: { r: 0.2, g: 0.5, b: 0.8 }
     },
     phraseEs: 'En esta arena triunfa la estrategia, no la trampa.',
@@ -1004,10 +849,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'female',
     avatarSpec: {
       bodyShape: URN_FEMALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'short_hair_red', 'messenger_bag', 'shorts_sport', 'sneakers'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.84, g: 0.7, b: 0.58 },
+      wearables: ['eyebrows_07', 'f_mouth_07', 'eyes_07', 'curly_hair', 'baggy_pullover', 'comfortablepants', 'classic_shoes'].map(u),
+      skinColor: { r: 0.72, g: 0.54, b: 0.4 },
       hairColor: { r: 0.85, g: 0.3, b: 0.1 },
       eyeColor: { r: 0.3, g: 0.7, b: 0.5 }
     },
@@ -1019,14 +862,12 @@ export const NPC_CATALOG: NpcDefinition[] = [
     name: 'Quinn el Espectador',
     title: 'Aficionado Afanoso',
     zone: 'Gran Arena Steampunk',
-    role: 'Espectador Veterano',
+    role: 'Espectador Mad Max',
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'curly_brown_hair', 'jacket_sport', 'jeans', 'casual_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.82, g: 0.68, b: 0.54 },
+      wearables: ['eyebrows_00', 'mouth_03', 'eyes_08', 'punk', 'beard', 'm_sweater_02', 'corduroysandypants', 'sport_black_shoes', 'black_glove'].map(u),
+      skinColor: { r: 0.68, g: 0.5, b: 0.36 },
       hairColor: { r: 0.4, g: 0.25, b: 0.15 },
       eyeColor: { r: 0.4, g: 0.6, b: 0.3 }
     },
@@ -1042,10 +883,8 @@ export const NPC_CATALOG: NpcDefinition[] = [
     gender: 'male',
     avatarSpec: {
       bodyShape: URN_MALE,
-      wearables: ['eyebrows_00', 'mouth_00', 'eyes_00', 'glasses_round', 'merchant_coat', 'trousers_dark', 'leather_shoes'].map(
-        (w) => `urn:decentraland:off-chain:base-avatars:${w}`
-      ),
-      skinColor: { r: 0.85, g: 0.72, b: 0.62 },
+      wearables: ['eyebrows_01', 'mouth_04', 'eyes_09', 'hair_punk', 'full_beard', 'green_square_shirt', 'oxford_pants', 'sneakers'].map(u),
+      skinColor: { r: 0.7, g: 0.52, b: 0.38 },
       hairColor: { r: 0.2, g: 0.2, b: 0.25 },
       eyeColor: { r: 0.6, g: 0.4, b: 0.8 }
     },

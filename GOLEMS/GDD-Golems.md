@@ -352,6 +352,33 @@ Los golems en reserva pueden enviarse a expediciones fuera de línea desde la in
 - **Silas el Sobreviviente**: Mentor tutorial pacifista en el punto de aparición `(15.8m, 5.9m)`.
 - **NPCs Hostiles y Guardianes de Zona**: Patrullas mecánicas con rutas de waypoints y radio de agresión que defienden las zonas PK (*Desierto Chatarra* y *Calderas*), custodiando los materiales épicos y legendarios con golems de alto nivel.
 
+### 10.1 Vestimenta y Accesorios 3D Equipables (18 Wearables)
+
+Además de la vestimenta nativa (`base-avatars`), el proyecto genera proceduralmente **18 accesorios 3D `.glb`** en `assets/wearables/`, equipables tanto en NPCs como en jugadores mediante `AvatarAttach` (PBR mobile-first, emisión solo en material `glow`, sin luces dinámicas):
+
+| # | Render | Wearable | Anclaje (`AAPT_`) | Categoría | Tris |
+| :-: | :-: | :--- | :--- | :--- | :-: |
+| 1 | <img src="wearables_imgs/goggles_steampunk.png" width="70" /> | Gafas de Aviador Steampunk | `HEAD` | Eyewear | 788 |
+| 2 | <img src="wearables_imgs/welding_mask.png" width="70" /> | Máscara de Soldar Mad Max | `HEAD` | Mask | 684 |
+| 3 | <img src="wearables_imgs/steam_backpack.png" width="70" /> | Mochila de Caldera de Vapor | `SPINE2` | Back | 884 |
+| 4 | <img src="wearables_imgs/tesla_backpack.png" width="70" /> | Generador Galvánico Tesla | `SPINE2` | Back | 996 |
+| 5 | <img src="wearables_imgs/wrench_heavy.png" width="70" /> | Llave Mecatrónica Gigante | `RIGHT_HAND` | Hand | 372 |
+| 6 | <img src="wearables_imgs/flamethrower_pipe.png" width="70" /> | Antorcha de Vapor Industrial | `RIGHT_HAND` | Hand | 604 |
+| 7 | <img src="wearables_imgs/shoulder_pad_spiked.png" width="70" /> | Hombrera Blindada con Púas | `LEFT_SHOULDER` | Shoulder | 644 |
+| 8 | <img src="wearables_imgs/aether_crown.png" width="70" /> | Corona de Cristal de Éter | `HEAD` | Tiara | 176 |
+| 9 | <img src="wearables_imgs/monocle_brass.png" width="70" /> | Monóculo de Latón | `HEAD` | Eyewear | 680 |
+| 10 | <img src="wearables_imgs/top_hat_steam.png" width="70" /> | Sombrero de Copa a Vapor | `HEAD` | Hat | 938 |
+| 11 | <img src="wearables_imgs/neck_cog_collar.png" width="70" /> | Collarín de Engranajes | `NECK` | Neck | 1200 |
+| 12 | <img src="wearables_imgs/chest_armor_plate.png" width="70" /> | Peto Blindado Remachado | `SPINE1` | Chest | 1040 |
+| 13 | <img src="wearables_imgs/belt_utility_pouch.png" width="70" /> | Cinturón de Herramientas | `HIP` | Hip | 956 |
+| 14 | <img src="wearables_imgs/gauntlet_left.png" width="70" /> | Guantelete Blindado Izquierdo | `LEFT_FOREARM` | Handwear | 768 |
+| 15 | <img src="wearables_imgs/gauntlet_right.png" width="70" /> | Guantelete Blindado Derecho | `RIGHT_FOREARM` | Handwear | 768 |
+| 16 | <img src="wearables_imgs/mechanical_arm_left.png" width="70" /> | Brazo Mecánico con Pistón | `LEFT_ARM` | Arm | 992 |
+| 17 | <img src="wearables_imgs/shoulder_cannon.png" width="70" /> | Cañón de Vapor al Hombro | `RIGHT_SHOULDER` | Shoulder | 840 |
+| 18 | <img src="wearables_imgs/boot_plated_right.png" width="70" /> | Bota Blindada con Grebas | `RIGHT_FOOT` | Feet | 648 |
+
+- 📖 *Guía maestra*: [`guias/guia-fabricacion-y-catalogo-npcs.md`](guias/guia-fabricacion-y-catalogo-npcs.md) · Catálogo completo: [`GOLEMS/Golems-Wearables-18.md`](Golems-Wearables-18.md).
+
 ## 11. Progresión y niveles
 
 - **Nivel del Jugador**: Desbloquea más ranuras de expedición, capacidad de bóveda en el escondite y mayor alcance del radar.

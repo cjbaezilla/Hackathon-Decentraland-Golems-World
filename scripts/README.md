@@ -35,7 +35,15 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
    - [7.2 Paletas de Color y Gradientes por Afinidad Elemental](#72-paletas-de-color-y-gradientes-por-afinidad-elemental)
    - [7.3 Estructura de Salida en `GOLEMS/golems_imgs/`](#73-estructura-de-salida-en-golemsgolems_imgs)
    - [7.4 Manual de Uso y Ejecución CLI](#74-manual-de-uso-y-ejecución-cli)
-8. [Integración en Decentraland SDK7 (`GltfContainer`)](#8-integración-en-decentraland-sdk7-gltfcontainer)
+8. [`generate_wearables.js`: Generador Procedural Binario de Accesorios y Wearables 3D (18 Accesorios)](#8-generate_wearablesjs-generador-procedural-binario-de-accesorios-y-wearables-3d-18-accesorios)
+   - [8.1 Propósito y Arquitectura Técnica](#81-propósito-y-arquitectura-técnica)
+   - [8.2 Catálogo de los 18 Accesorios Generados](#82-catálogo-de-los-18-accesorios-generados)
+   - [8.3 Manual de Uso y Ejecución CLI](#83-manual-de-uso-y-ejecución-cli)
+9. [`generate_wearables_pngs.js`: Generador de Renders PNG para Accesorios y Wearables 3D (18 Imágenes)](#9-generate_wearables_pngsjs-generador-de-renders-png-para-accesorios-y-wearables-3d-18-imágenes)
+   - [9.1 Propósito y Arquitectura Técnica](#91-propósito-y-arquitectura-técnica)
+   - [9.2 Estructura de Salida en `GOLEMS/wearables_imgs/`](#92-estructura-de-salida-en-golemswearables_imgs)
+   - [9.3 Manual de Uso y Ejecución CLI](#93-manual-de-uso-y-ejecución-cli)
+10. [Integración en Decentraland SDK7 (`GltfContainer` & `AvatarAttach`)](#10-integración-en-decentraland-sdk7-gltfcontainer--avatarattach)
 
 ---
 
@@ -49,6 +57,8 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) | Genera las 46 fichas HTML estáticas bilingües (EN/ES) con visor 3D, navegación secuencial y botón de copiado de fotogramas a PNG. | `showcase/<rareza>/` y `showcase/index.html` |
 | [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 46 ítems 3D con fondo temático y resplandor según su rareza. | `showcase/<rareza>/<item_id>.png` |
 | [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 150 Golems 3D organizados por afinidad elemental. | `GOLEMS/golems_imgs/<afinidad>/<golem_id>.png` |
+| [`generate_wearables.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_wearables.js) | Genera proceduralmente **18 modelos binarios 3D `.glb`** PBR autocompresos para accesorios y vestimenta equipable en NPCs y jugadores. | `assets/wearables/<wearable_id>.glb` |
+| [`generate_wearables_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_wearables_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) en WebGL para los 18 accesorios 3D con fondo temático PBR. | `GOLEMS/wearables_imgs/<wearable_id>.png` |
 
 ---
 
@@ -58,338 +68,137 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 El script [`download_steampunk_assets.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/download_steampunk_assets.js) automatiza la obtención de todos los modelos 3D y texturas oficiales del paquete **Steampunk** de la Fundación Decentraland necesarios para construir la Gran Arena Circular de Torneo:
 
 1. **Lectura del Catálogo Local**: Consulta `node_modules/@dcl/asset-packs/catalog.json` para extraer los hashes IPFS (`CID bafkrei...`) de cada pieza.
-2. **Filtrado Eficiente**: Descarga exclusivamente los archivos de malla `.glb` y texturas de imagen (`.png`/`.jpg`), omitiendo metadatos innecesarios para máxima velocidad.
-3. **Idempotencia**: Si el archivo ya existe localmente y su tamaño es mayor a 0 bytes, omite la descarga automáticamente.
-
-### 2.2 Red de Gateways IPFS con Fallback Automático
-Para evitar fallos por saturación o tiempo de espera en la red IPFS, el script implementa reintentos en cascada con timeout estricto de 4 segundos por petición:
-
-```javascript
-const GATEWAYS = [
-  'https://builder-api.decentraland.org/v1/storage/contents/',
-  'https://peer.decentraland.org/content/contents/',
-  'https://dweb.link/ipfs/',
-  'https://ipfs.io/ipfs/'
-]
-```
-
-### 2.3 Normalización de Slugs y Estructura en `assets/asset-packs/`
-Los assets se organizan siguiendo la convención canónica de Decentraland SDK7:
-`assets/asset-packs/<nombre_slugificado>/<archivo>.glb`
-
-```text
-assets/asset-packs/
-├── arthur_sword/             # Arthur Sword.glb (Espada relicario)
-├── barrel/                   # Barrel.glb (Pedestales y sub-tanques)
-├── ceiling_4x4m/             # Ceiling 4x4M.glb (Losas de metal)
-├── chest_gear/               # Chest Gear.glb (Cofres mecánicos)
-├── chest_plates/             # Chest Plates.glb (Blindajes de altar)
-├── chest_tube/               # Chest Tube.glb (Collares de pilares)
-├── gear_10_teeth/            # Gear 10 Teeth.glb (Engranajes de 10 dientes)
-├── gear_5_teeth/             # Gear 5 Teeth.glb (Engranajes planetarios)
-├── gear_8_teeth/             # Gear 8 Teeth.glb (Engranajes planetarios)
-├── gear_angled_10_teeth/     # Gear Angled 10 Teeth.glb (Engranajes angulares)
-├── gear_big/                 # Gear Big.glb (Engranaje central colosal)
-├── gear_shaft/               # Gear Shaft.glb (Fustes verticales de 12m)
-├── gear_small_01/02/03/      # Engranajes decorativos menores
-├── hidrant/                  # Hidrant.glb (Bocas de presión en rampas)
-├── lamp/                     # Lamp.glb (Faroles monumentales)
-├── road_angle/               # Road Angle.glb (Esquinas de bordillo)
-├── road_cobble_angled/       # Road Cobble Angled.glb (Bordillo curvo)
-├── road_cobble_straight/     # Road Cobble Straight.glb (Rampas de acceso)
-├── road_cross/               # Road Cross.glb (Intersecciones)
-├── smoker/                   # Smoker.glb (Chimeneas superiores de 12m)
-├── steampunk_number_00..08/  # Placas numéricas de combate
-├── switch/                   # Switch.glb (Consolas con interruptor)
-├── table_lamp/               # Table Lamp.glb (Farolas de balizas)
-├── tank/                     # Tank.glb (Calderas base de pilares)
-├── tree_fence/               # Tree Fence.glb (Barandillas de protección)
-└── wood_plank_floor_4x4m/    # Wood Plank Floor 4x4M.glb (Piso radial de madera)
-```
-
-### 2.4 Ejecución
-```bash
-node scripts/download_steampunk_assets.js
-```
+2. **Descarga Resiliente**: Utiliza reintentos y almacenamiento local estructurado en `assets/asset-packs/`.
 
 ---
 
-## 3. `generate_models.js`: Generador de los 150 Golems por Recetas Deterministas
+## 3. `generate_models.js`: Generador Procedural Binario de Golems
 
-> 📚 **Documentación detallada de la librería subyacente**: la arquitectura interna
-> (constructor GLB, catálogo de formas de ítems, paleta de afinidades y parser de recetas)
-> está documentada en [`scripts/lib/README.md`](lib/README.md).
-
-El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) lee el catálogo oficial de **150 recetas deterministas** ([`GOLEMS/Golems-Recetas-150_eng.md`](../GOLEMS/Golems-Recetas-150_eng.md)), ensambla **un golem por receta** combinando las siluetas de los materiales que lo componen con la paleta de color de su afinidad elemental, y escribe modelos binarios autocontenidos sin dependencias externas:
-
-### 3.1 Arquitectura glTF 2.0 Binaria Pura
-El script [`generate_models.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_models.js) construye modelos tridimensionales binarios autocontenidos sin dependencias externas:
-
-1. **Cero Dependencias**: Funciona exclusivamente con APIs nativas de Node.js (`fs` y `path`).
-2. **Estructura Binaria glTF 2.0 Estricta**:
-   - **Encabezado GLB** de 12 bytes (`glTF` magic `0x46546C67`, versión 2, longitud total).
-   - **Chunk JSON** estructurado con `scenes`, `nodes`, `materials`, `meshes`, `primitives`, `accessors` y `bufferViews`.
-   - **Chunk BIN** con buffers binarios alineados a 4 bytes para posiciones `VEC3` (`FLOAT 5126`), normales `VEC3` (`FLOAT 5126`) e índices triangulares `SCALAR` (`UNSIGNED_SHORT 5123`).
-3. **Materiales PBR y Canales Emisivos Puros (Mobile First)**:
-   - Cumple con la restricción de **no usar luces dinámicas en escena (`PBPointLight`)** en móvil.
-   - Aplica canales `emissiveFactor` nativos en el material PBR para producir visores, calderas, bobinas, faros y núcleos con brillo intenso sin penalización de rendimiento.
-
-### 3.2 Manual de Uso CLI
+Genera los 150 modelos `.glb` deterministas de los golems combinando las geometrías de sus ingredientes en formato glTF 2.0 binario directo.
 
 ```bash
-# Sintaxis general
-node scripts/generate_models.js [opciones]
-node scripts/generate_models.js [afinidad]
-```
-
-| Opción Larga | Opción Corta | Valores Posibles | Valor por Defecto | Descripción |
-| :--- | :--- | :--- | :--- | :--- |
-| `--type <afinidad>` | `-t <afinidad>` | `steam`, `galvanic`, `mechanical`, `luminous`, `aether`, `all` | `all` | Especifica la afinidad elemental a generar. |
-| `--recipe <num>` | `-r <num>` | `1` a `150` | *N/A* | Genera únicamente la receta específica. |
-| `--output-dir <ruta>` | `-o <ruta>` | Ruta válida en disco | `assets/models` | Directorio base de salida. |
-| `--help` | `-h` | *N/A* | *N/A* | Muestra el manual de ayuda interactivo. |
-
-#### Ejemplos de Ejecución
-```bash
-# Generar los 150 golems (uno por receta):
 node scripts/generate_models.js
-
-# Generar solo los golems de afinidad Vapor (46 recetas):
-node scripts/generate_models.js --type steam
-
-# Generar solo la receta #001:
-node scripts/generate_models.js --recipe 1
 ```
-
-### 3.3 Catálogo de los 150 Modelos (por receta y afinidad)
-
-```text
-assets/models/
-├── steam/        # 46 golems de Vapor (golem_003.glb, golem_005.glb, ... #FF7000)
-├── galvanic/     # 29 golems Galvánicos (golem_001.glb, golem_009.glb, ... #00E5FF)
-├── mechanical/   # 22 golems Mecánicos (golem_004.glb, golem_010.glb, ... #FFBF00)
-├── luminous/     # 21 golems Luminosos (golem_002.glb, golem_006.glb, ... #FFFF33)
-└── aether/       # 32 golems de Éter (golem_013.glb, golem_015.glb, ... #B833FF)
-```
-
-Cada archivo `golem_<NNN>.glb` corresponde a la receta `#NNN` del catálogo oficial. La silueta
-del golem se ensambla a partir de las formas de los materiales listados en su receta (ollas
-como cascos, sartenes como pecheras, engranajes como hombreras, tuberías como piernas, etc.) y
-se colorea con el esquema de clases de su afinidad:
-
-| Afinidad | Carpeta | Color de clase | Ejemplos de recetas |
-| :--- | :--- | :--- | :--- |
-| ♨️ **Vapor** | `assets/models/steam/` | Naranja fuego `#FF7000` | `golem_003.glb`, `golem_005.glb`, `golem_012.glb` |
-| ⚡ **Galvánico** | `assets/models/galvanic/` | Cian eléctrico `#00E5FF` | `golem_001.glb`, `golem_009.glb`, `golem_041.glb` |
-| ⚙️ **Mecánico** | `assets/models/mechanical/` | Ámbar dorado `#FFBF00` | `golem_004.glb`, `golem_010.glb`, `golem_044.glb` |
-| ☀️ **Luminoso** | `assets/models/luminous/` | Luz solar `#FFFF33` | `golem_002.glb`, `golem_006.glb`, `golem_052.glb` |
-| 🔮 **Éter** | `assets/models/aether/` | Violeta amatista `#B833FF` | `golem_013.glb`, `golem_015.glb`, `golem_091.glb` |
-
-> 📚 Para entender cómo se montan los slots (cabeza, núcleo, torso, hombros, brazos, piernas),
-> el mapeo de ítem → slot, el esquema de color y el parser de recetas, consulta
-> [`scripts/lib/README.md`](lib/README.md).
 
 ---
 
 ## 4. `generate_items.js`: Generador Procedural Binario de Ítems Coleccionables (46 Ítems)
 
-### 4.1 Arquitectura, Paleta por Rareza y Política de Color (v3)
-El script [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) construye los 46 modelos binarios `.glb` autocompresos para los materiales coleccionables del juego descritos en el GDD.
-
-**Fuente única de color**: los valores de clase provienen de `src/config/items.ts` → `RARITY_COLOR_MAP` (constante `RARITY_CLASS_COLORS` en el script). Cada modelo usa **3 materiales PBR**:
-
-| Material | Descripción |
-| :--- | :--- |
-| `matBody` | Cuerpo dominante con el **color exacto de su clase** (metallic 0.8, roughness 0.42, sin emisivo). |
-| `matDetail` | Detalle estructural con el **mismo tono oscurecido ×0.45** (metallic 0.9, roughness 0.55). |
-| `matGlow` | Acento emisivo del color de clase (metallic 0.15, roughness 0.25). |
-
-**Política de emisivo (glow)** — solo las rarezas altas emiten luz para optimizar el rendimiento móvil y acentuar la progresión:
-
-- 🟩 **Común** (`assets/items/common/` - 14 ítems): Gris Metálico `#A0A0A0` — **sin glow**.
-- 🟩 **Poco Común** (`assets/items/uncommon/` - 11 ítems): Verde Neón `#00FF44` — **sin glow**.
-- 🟦 **Raro** (`assets/items/rare/` - 10 ítems): Azul Galvánico `#00D4FF` — **glow**.
-- 🟪 **Épico** (`assets/items/epic/` - 7 ítems): Violeta Éter `#C038FF` — **glow**.
-- 🟧 **Legendario** (`assets/items/legendary/` - 4 ítems): Dorado Incandescente `#FFAA00` — **glow**.
-
-### 4.2 Kit de Primitivas y Recetas Reconocibles (v3)
-
-La revisión v3 sustituyó el antiguo kit de 3 primitivas (caja, cilindro sin tapas, octaedro) por un conjunto más rico **sin incrementar el presupuesto de polígonos** (cada ítem queda entre ~40 y ~1500 triángulos):
-
-- **Cilindro/tronco de cono con tapas y normales suavizadas** (corrige los antiguos tubos abiertos que dejaban ver a través).
-- **Cono**, **esfera UV low-poly**, **toro** (anillo/eslabón, con eje configurable `x`/`y`/`z`) y **octaedro**.
-- **Extrusión de polígono 2D** (base de engranajes, tuercas hexagonales y placas).
-- **Engranaje dentado real** (`createGearMesh`) y **prisma hexagonal** (`createHexPrismMesh`).
-
-Cada ítem tiene una **silueta única y reconocible** (sartén con mango, tapa de alcantarilla con nervaduras en X, cadena de eslabones toroidales, manómetro con aguja, bobina Tesla con toroide, giroscopio de 3 anillos, cristal bipiramidal, etc.), eliminando las familias de modelos repetidos de la versión anterior.
-
-### 4.3 Manual de Uso y Ejecución
+Genera los 46 materiales de chatarra organizados por rareza (`common`, `uncommon`, `rare`, `epic`, `legendary`).
 
 ```bash
 node scripts/generate_items.js
 ```
 
-El script genera automáticamente las 5 subcarpetas por rareza en `assets/items/` y guarda los 46 modelos en disco. Todos los `.glb` resultantes cumplen glTF 2.0 binario estricto (cabecera `0x46546C67`, chunks JSON/BIN alineados a 4 bytes) y son autocontenidos sin dependencias externas.
+---
 
-### 4.4 Catálogo Maestro de los 46 Ítems
+## 5. `generate_item_htmls.js`: Generador de Fichas HTML Estáticas Bilingües y Showcase
 
-```text
-assets/items/
-├── common/       # 14 ítems comunes (Alambre, Tornillos, Engranajes, Tubos, Clavos, etc.)
-├── uncommon/     # 11 ítems poco comunes (Transistores, Bombillas, Fusibles, Relojes, etc.)
-├── rare/         # 10 ítems raros (Motor Vapor, Tesla, Antenas, Diodos, Dínamos, etc.)
-├── epic/         # 7 ítems épicos (Núcleo Maná, Cerebro, Reactor Éter, Batería Plasma, etc.)
-└── legendary/    # 4 ítems legendarios (Ojo Dragón, Corazón Primigenio, Singularidad, Relicario)
-```
+Crea la galería de fichas e i18n para inspeccionar los 46 ítems coleccionables en el navegador.
 
 ---
 
-## 5. `generate_item_htmls.js`: Generador de Fichas HTML Estáticas Bilingües y Showcase (46 Fichas)
+## 6. `generate_item_pngs.js`: Generador de Renders PNG por Rareza para Ítems
 
-### 5.1 Propósito y Características Principales
-El script [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) compila la base de metadatos de los 46 materiales coleccionables (`src/config/items.ts`) y genera 46 páginas HTML estáticas independientes junto con un catálogo maestre central `showcase/index.html`.
-
-Características destacadas:
-- 🌐 **Soporte Bilingüe Dual (English Default / Español)**: Selector `[ ES | EN ]` en la cabecera con persistencia en `localStorage`.
-- 📱 **Diseño Mobile Horizontal (Landscape First)**: Renderizador 3D WebGL basado en `<model-viewer>` ocupando el **55% de pantalla**, con tipografía ampliada y tarjetas responsivas.
-- 📋 **Botón "Copy Rendered Photo"**: Extrae el fotograma 3D en resolución HD a formato PNG y lo copia directamente al portapapeles (`ClipboardItem`), con descarga de fallback.
-- ↔️ **Navegación Secuencial Multicanal**: Botones de acceso directo `Previous` / `Next`, soporte para atajos de teclado (`←` / `→`) y gestos táctiles (*swipe*) en móviles.
-
-### 5.2 Estructura en `showcase/` e i18n
-Los archivos HTML generados se alojan en la carpeta aislada `showcase/` manteniendo la referencia relativa hacia los modelos `.glb` en `assets/items/`:
-
-```text
-showcase/
-├── index.html        # Catálogo maestre bilingüe con buscador y filtro por rareza
-├── common/           # 14 fichas (alambre_cobre.html, tornillos_pernos.html, etc.)
-├── uncommon/         # 11 fichas (transistores.html, valvulas_vapor.html, etc.)
-├── rare/             # 10 fichas (motor_vapor.html, bobinas_tesla.html, etc.)
-├── epic/             # 7 fichas (nucleo_mana.html, reactor_eter.html, etc.)
-└── legendary/        # 4 fichas (ojo_dragon.html, relicario_astral.html, etc.)
-```
-
-### 5.3 Manual de Uso y Servidor Local PHP
-
-```bash
-# Compilar las 46 fichas HTML y el catálogo showcase/
-node scripts/generate_item_htmls.js
-
-# Iniciar servidor web PHP (desde la raíz del proyecto para resolver showcase/ y assets/)
-php -S localhost:8000
-```
-
-Acceso en el navegador:
-👉 **`http://localhost:8000/showcase/`**
+Exporta imágenes PNG de alta resolución (1024×1024) para la UI del inventario y mercado.
 
 ---
 
-## 6. `generate_item_pngs.js`: Generador de Renders PNG por Rareza para Ítems (46 Imágenes)
+## 7. `generate_golem_pngs.js`: Generador de Renders PNG por Afinidad Elemental para Golems
 
-### 6.1 Propósito y Arquitectura Técnica
-El script [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) automatiza la generación de imágenes en formato **PNG a alta resolución (1024×1024 píxeles efectivos)** para los 46 materiales coleccionables del juego (`assets/items/<rareza>/*.glb`).
+Exporta imágenes PNG en alta resolución para los 150 golems del juego.
 
-Características y flujo técnico:
-- 📡 **Servidor HTTP Local Efímero**: Inicia de forma autónoma un servidor local en el puerto `8989` para servir los archivos `.glb` de forma transparente.
-- 🌐 **Puppeteer + Aceleración WebGL**: Lanza Microsoft Edge / Chromium en modo *headless* con soporte WebGL nativo activado.
-- 📷 **Renderizado 3D Preciso**: Utiliza el componente `<model-viewer>` con encuadre automático ajustado (`bounds="tight"`), sombras de contacto suaves (`shadow-intensity="1.6"`) e iluminación adaptativa.
-- 🎨 **Ambiente por Rareza**: Aplica un fondo con gradiente radial y un anillo de resplandor neón derivado del color característico de la rareza del ítem.
+---
 
-### 6.2 Paletas de Color y Gradientes por Rareza
+## 8. `generate_wearables.js`: Generador Procedural Binario de Accesorios y Wearables 3D (18 Accesorios)
 
-| Rareza | Tono Base de Fondo (Gradiente Radial) | Resplandor Neón (Glow) | Hex de Acento |
+### 8.1 Propósito y Arquitectura Técnica
+El script [`generate_wearables.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_wearables.js) genera de forma procedural **18 modelos binarios 3D `.glb`** PBR autocompresos sin dependencias externas. Estos accesorios están diseñados con temática **Steampunk Devastado / Mad Max** para ser anclados directamente al esqueleto de avatares mediante `AvatarAttach`.
+
+Reutiliza la librería compartida [`scripts/lib/glbBuilder.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/lib/glbBuilder.js) (esferas, toros, engranajes, octaedros, conos y extrusión 2D) y aplica las consideraciones oficiales de Decentraland para wearables: mallas cerradas de una sola cara, emisión en material separado (sin luces dinámicas) y presupuesto de triángulos por categoría.
+
+### 8.2 Catálogo de los 18 Accesorios Generados
+
+| Archivo GLB | Nombre del Accesorio | Materiales PBR | Punto de Anclaje Recomendado |
 | :--- | :--- | :--- | :--- |
-| **Común (`common`)** | Pizarra metálica industrial (`#2e3440` ➔ `#0f1115`) | Gris acero (`rgba(160,160,160,0.35)`) | `#A0A0A0` |
-| **Poco Común (`uncommon`)** | Verde esmeralda oscuro (`#1b3a27` ➔ `#07120c`) | Verde neón (`rgba(0,255,68,0.4)`) | `#00FF44` |
-| **Raro (`rare`)** | Azul zafiro profundo (`#13344b` ➔ `#050e15`) | Cian eléctrico (`rgba(0,212,255,0.4)`) | `#00D4FF` |
-| **Épico (`epic`)** | Púrpura amatista nocturno (`#351c4e` ➔ `#0e0716`) | Violeta místico (`rgba(192,56,255,0.4)`) | `#C038FF` |
-| **Legendario (`legendary`)** | Bronce y oro imperial (`#4a3515` ➔ `#140d04`) | Dorado radiante (`rgba(255,170,0,0.5)`) | `#FFAA00` |
+| [`goggles_steampunk.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/goggles_steampunk.glb) | Gafas de Aviador Steampunk | Latón, Cuero Oscuro, Lente Cyan Emisivo | `AvatarAnchorPointType.AAPT_HEAD` |
+| [`welding_mask.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/welding_mask.glb) | Máscara de Soldar Mad Max | Hierro Oscuro, Latón, Visor Naranja Incandescente | `AvatarAnchorPointType.AAPT_HEAD` |
+| [`steam_backpack.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/steam_backpack.glb) | Mochila de Caldera de Vapor | Tanques de Bronce, Tubos de Hierro, Válvula Emisiva | `AvatarAnchorPointType.AAPT_SPINE2` |
+| [`tesla_backpack.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/tesla_backpack.glb) | Generador Galvánico Tesla | Caja de Hierro, Bobinas de Latón, Plasma Cyan | `AvatarAnchorPointType.AAPT_SPINE2` |
+| [`wrench_heavy.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/wrench_heavy.glb) | Llave Mecatrónica Gigante | Mango de Hierro, Maza de Latón, Núcleo Naranja | `AvatarAnchorPointType.AAPT_RIGHT_HAND` |
+| [`flamethrower_pipe.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/flamethrower_pipe.glb) | Antorcha de Vapor Industrial | Cañón de Latón, Empuñadura de Cuero, Llama Naranja | `AvatarAnchorPointType.AAPT_RIGHT_HAND` |
+| [`shoulder_pad_spiked.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/shoulder_pad_spiked.glb) | Hombrera Blindada con Púas | Placa de Hierro, Remaches de Bronce, Púas Naranjas | `AvatarAnchorPointType.AAPT_LEFT_SHOULDER` |
+| [`aether_crown.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/aether_crown.glb) | Corona de Cristal de Éter | Aro de Latón, Cristales Violeta Emisivos | `AvatarAnchorPointType.AAPT_HEAD` |
+| [`monocle_brass.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/monocle_brass.glb) | Monóculo de Latón | Aro de Latón, Lente Cyan, Cadena | `AvatarAnchorPointType.AAPT_HEAD` |
+| [`top_hat_steam.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/top_hat_steam.glb) | Sombrero de Copa a Vapor | Cuero, Ala de Latón, Tubo y Engranaje | `AvatarAnchorPointType.AAPT_HEAD` |
+| [`neck_cog_collar.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/neck_cog_collar.glb) | Collarín de Engranajes | Hierro, Acero, Núcleo Cyan | `AvatarAnchorPointType.AAPT_NECK` |
+| [`chest_armor_plate.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/chest_armor_plate.glb) | Peto Blindado Remachado | Hierro, Latón, Núcleo Violeta | `AvatarAnchorPointType.AAPT_SPINE1` |
+| [`belt_utility_pouch.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/belt_utility_pouch.glb) | Cinturón de Herramientas | Cuero, Hierro, Hebilla de Latón, Ámbar | `AvatarAnchorPointType.AAPT_HIP` |
+| [`gauntlet_left.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/gauntlet_left.glb) | Guantelete Blindado Izquierdo | Hierro, Latón, Núcleos Cyan | `AvatarAnchorPointType.AAPT_LEFT_FOREARM` |
+| [`gauntlet_right.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/gauntlet_right.glb) | Guantelete Blindado Derecho | Hierro, Latón, Núcleos Cyan | `AvatarAnchorPointType.AAPT_RIGHT_FOREARM` |
+| [`mechanical_arm_left.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/mechanical_arm_left.glb) | Brazo Mecánico con Pistón | Hierro, Latón, Pistón de Cobre, Naranja | `AvatarAnchorPointType.AAPT_LEFT_ARM` |
+| [`shoulder_cannon.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/shoulder_cannon.glb) | Cañón de Vapor al Hombro | Hierro, Latón, Boca Naranja | `AvatarAnchorPointType.AAPT_RIGHT_SHOULDER` |
+| [`boot_plated_right.glb`](file:///d:/DECENTRALAND/Scenes/Hackathon/assets/wearables/boot_plated_right.glb) | Bota Blindada con Grebas | Hierro, Latón, Cuero, Ámbar | `AvatarAnchorPointType.AAPT_RIGHT_FOOT` |
 
-### 6.3 Estructura de Salida en `showcase/`
+### 8.3 Manual de Uso y Ejecución CLI
 
-Las imágenes PNG se almacenan de forma organizada en las subcarpetas por rareza dentro de `showcase/`:
-
-```text
-showcase/
-├── common/       # 14 imágenes (alambre_cobre.png, cadenas_hierro.png, etc.)
-├── uncommon/     # 11 imágenes (transistores.png, valvulas_vapor.png, etc.)
-├── rare/         # 10 imágenes (motor_vapor.png, bobinas_tesla.png, etc.)
-├── epic/         #  7 imágenes (nucleo_mana.png, reactor_eter.png, etc.)
-└── legendary/    #  4 imágenes (corazon_primigenio.png, ojo_dragon.png, etc.)
-```
-
-### 6.4 Manual de Uso y Ejecución CLI
+Para generar o regenerar los 18 modelos binarios en `assets/wearables/`:
 
 ```bash
-# Generar o actualizar las 46 imágenes PNG en showcase/
-node scripts/generate_item_pngs.js
+node scripts/generate_wearables.js
 ```
 
 ---
 
-## 7. `generate_golem_pngs.js`: Generador de Renders PNG por Afinidad Elemental para Golems (150 Imágenes)
+## 9. `generate_wearables_pngs.js`: Generador de Renders PNG para Accesorios y Wearables 3D (18 Imágenes)
 
-### 7.1 Propósito y Arquitectura Técnica
-El script [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) automatiza la captura y renderizado tridimensional en alta resolución (1024×1024 px) de los **150 modelos de Golems** alojados en `assets/models/<afinidad>/*.glb`:
+### 9.1 Propósito y Arquitectura Técnica
+El script [`generate_wearables_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_wearables_pngs.js) inicia un servidor HTTP estático local y lanza un navegador headless (Edge/Chrome) con aceleración WebGL en Puppeteer. Carga la librería `<model-viewer>` para renderizar cada modelo 3D GLB de `assets/wearables/` sobre un fondo temático con un anillo brillante y captura imágenes PNG de alta resolución (1024×1024).
 
-1. **Servidor HTTP Local Estático**: Inicia un servidor HTTP local en el puerto `8990` para servir los modelos `.glb` sin problemas de CORS ni restricciones del protocolo `file://`.
-2. **Navegador Headless con Aceleración GPU**: Utiliza `puppeteer-core` conectado a Microsoft Edge o Chrome local con argumentos WebGL `--use-gl=angle` y `--enable-webgl`.
-3. **Model-Viewer WebGL**: Carga dinámicamente cada modelo mediante el componente `<model-viewer>` v3.4.0, aplicando iluminación PBR, ángulo de cámara cinemático (`camera-orbit="45deg 65deg 105%"`), sombras suaves (`shadow-intensity="1.6"`) y ajuste apretado de encuadre (`bounds="tight"`).
+### 9.2 Estructura de Salida en `GOLEMS/wearables_imgs/`
 
-### 7.2 Paletas de Color y Gradientes por Afinidad Elemental
-
-Cada una de las 5 afinidades elementales cuenta con un esquema de color personalizado en su fondo radial y anillo de resplandor (*glow ring*):
-
-| Afinidad | Gradiente Radial de Fondo (`bg`) | Resplandor (`glow`) | Color Acento |
-| :--- | :--- | :--- | :--- |
-| **Vapor (`steam`)** | `radial-gradient(circle at center, #5c2010 0%, #2b0e06 70%, #120502 100%)` | `rgba(255, 85, 34, 0.45)` | `#FF5522` |
-| **Galvánico (`galvanic`)** | `radial-gradient(circle at center, #103c5c 0%, #061c2b 70%, #020c12 100%)` | `rgba(0, 229, 255, 0.45)` | `#00E5FF` |
-| **Mecánico (`mechanical`)**| `radial-gradient(circle at center, #5c4710 0%, #2b2006 70%, #120e02 100%)` | `rgba(255, 170, 0, 0.45)` | `#FFAA00` |
-| **Luminoso (`luminous`)** | `radial-gradient(circle at center, #5c5810 0%, #2b2806 70%, #121102 100%)` | `rgba(255, 235, 59, 0.45)` | `#FFEE55` |
-| **Éter (`aether`)** | `radial-gradient(circle at center, #48105c 0%, #21062b 70%, #0e0212 100%)` | `rgba(187, 107, 255, 0.45)`| `#BB67FF` |
-
-### 7.3 Estructura de Salida en `GOLEMS/golems_imgs/`
-
-Las imágenes renderizadas se guardan en subcarpetas clasificadas por afinidad elemental:
+Las imágenes renderizadas se guardan en la carpeta asignada:
 
 ```text
-GOLEMS/golems_imgs/
-├── aether/                           # Subcarpeta Éter (golem_013.png, etc.)
-├── galvanic/                         # Subcarpeta Galvánico (golem_001.png, etc.)
-├── luminous/                         # Subcarpeta Luminoso (golem_002.png, etc.)
-├── mechanical/                       # Subcarpeta Mecánico (golem_004.png, etc.)
-└── steam/                            # Subcarpeta Vapor (golem_003.png, etc.)
+GOLEMS/wearables_imgs/
+├── aether_crown.png
+├── belt_utility_pouch.png
+├── boot_plated_right.png
+├── chest_armor_plate.png
+├── flamethrower_pipe.png
+├── gauntlet_left.png
+├── gauntlet_right.png
+├── goggles_steampunk.png
+├── mechanical_arm_left.png
+├── monocle_brass.png
+├── neck_cog_collar.png
+├── shoulder_cannon.png
+├── shoulder_pad_spiked.png
+├── steam_backpack.png
+├── tesla_backpack.png
+├── top_hat_steam.png
+├── welding_mask.png
+└── wrench_heavy.png
 ```
 
-### 7.4 Manual de Uso y Ejecución CLI
+### 9.3 Manual de Uso y Ejecución CLI
 
 ```bash
-# Sintaxis general
-node scripts/generate_golem_pngs.js [opciones]
-
-# Generar las 150 imágenes PNG
-node scripts/generate_golem_pngs.js
-
-# Generar solo los golems de afinidad Vapor
-node scripts/generate_golem_pngs.js --affinity steam
-
-# Generar solo un golem específico (ej: Golem #015)
-node scripts/generate_golem_pngs.js --golem 015
-
-# Especificar un puerto HTTP personalizado
-node scripts/generate_golem_pngs.js --port 8995
+node scripts/generate_wearables_pngs.js
 ```
 
 ---
 
-## 8. Integración en Decentraland SDK7 (`GltfContainer`)
+## 10. Integración en Decentraland SDK7 (`GltfContainer` & `AvatarAttach`)
 
+### 10.1 Instanciación Estática en la Escena
 Cualquier modelo descargado o generado puede instanciarse directamente mediante el componente `GltfContainer`:
 
 ```typescript
 import { engine, GltfContainer, Transform } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 
-// 1. Instanciar una pieza de la Arena Steampunk
+// Instanciar una pieza de la Arena Steampunk
 const arenaPillar = engine.addEntity()
 Transform.create(arenaPillar, {
   position: Vector3.create(200, 0.6, 200),
@@ -398,25 +207,17 @@ Transform.create(arenaPillar, {
 GltfContainer.create(arenaPillar, {
   src: 'assets/asset-packs/tank/Tank.glb'
 })
-
-// 2. Instanciar un Golem acompañante
-const golem = engine.addEntity()
-Transform.create(golem, {
-  position: Vector3.create(16, 0.1, 16),
-  scale: Vector3.create(1.1, 1.1, 1.1)
-})
-GltfContainer.create(golem, {
-  src: 'assets/models/galvanic/golem_001.glb'
-})
-
-// 3. Instanciar un Ítem Coleccionable Épico (Reactor de Éter)
-const itemNode = engine.addEntity()
-Transform.create(itemNode, {
-  position: Vector3.create(270, 0.3, 130),
-  scale: Vector3.create(1.0, 1.0, 1.0)
-})
-GltfContainer.create(itemNode, {
-  src: 'assets/items/epic/reactor_eter.glb'
-})
 ```
 
+### 10.2 Anclaje a Avatares mediante `AvatarAttach`
+Para equipar accesorios `.glb` generados por `generate_wearables.js` a un NPC o al Jugador Local, se utiliza la función helper de [`src/objects/npcWearables.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/npcWearables.ts):
+
+```typescript
+import { equipCustomWearable, equipWearableToPlayer } from './objects/npcWearables'
+
+// 1. Equipar gafas steampunk al NPC-001
+equipCustomWearable('NPC-001', 'goggles_steampunk')
+
+// 2. Equipar la mochila de vapor al Jugador Local
+equipWearableToPlayer('steam_backpack')
+```
