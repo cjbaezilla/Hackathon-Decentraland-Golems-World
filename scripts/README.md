@@ -48,7 +48,7 @@ Este directorio contiene herramientas y utilidades en Node.js para la gestión, 
 | [`generate_items.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_items.js) | Genera proceduralmente los 46 modelos binarios `.glb` PBR organizados por rareza para los **materiales coleccionables**. | `assets/items/<rareza>/` |
 | [`generate_item_htmls.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_htmls.js) | Genera las 46 fichas HTML estáticas bilingües (EN/ES) con visor 3D, navegación secuencial y botón de copiado de fotogramas a PNG. | `showcase/<rareza>/` y `showcase/index.html` |
 | [`generate_item_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_item_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 46 ítems 3D con fondo temático y resplandor según su rareza. | `showcase/<rareza>/<item_id>.png` |
-| [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 150 Golems 3D organizados por afinidad elemental. | `GOLEMS/golems_imgs/<afinidad>/<golem_id>.png` y `GOLEMS/golems_imgs/<golem_id>.png` |
+| [`generate_golem_pngs.js`](file:///d:/DECENTRALAND/Scenes/Hackathon/scripts/generate_golem_pngs.js) | Genera imágenes PNG en alta resolución (1024×1024) para los 150 Golems 3D organizados por afinidad elemental. | `GOLEMS/golems_imgs/<afinidad>/<golem_id>.png` |
 
 ---
 
@@ -349,11 +349,10 @@ Cada una de las 5 afinidades elementales cuenta con un esquema de color personal
 
 ### 7.3 Estructura de Salida en `GOLEMS/golems_imgs/`
 
-Las imágenes renderizadas se guardan simultáneamente en la raíz de `GOLEMS/golems_imgs/` para rápido acceso y vinculación en documentación markdown, así como en subcarpetas clasificadas por afinidad:
+Las imágenes renderizadas se guardan en subcarpetas clasificadas por afinidad elemental:
 
 ```text
 GOLEMS/golems_imgs/
-├── golem_001.png ... golem_150.png   # Acceso directo por ID de golem (1024x1024)
 ├── aether/                           # Subcarpeta Éter (golem_013.png, etc.)
 ├── galvanic/                         # Subcarpeta Galvánico (golem_001.png, etc.)
 ├── luminous/                         # Subcarpeta Luminoso (golem_002.png, etc.)

@@ -9,7 +9,7 @@ const puppeteer = require('puppeteer-core');
  * ============================================================================
  * Escanea la carpeta assets/models/<afinidad>/*.glb, renderiza cada modelo 3D
  * en WebGL con un fondo temático acorde a la afinidad elemental del golem
- * y guarda las imágenes resultantes en formato PNG dentro de GOLEMS/golems_imgs/.
+ * y guarda las imágenes resultantes en formato PNG dentro de GOLEMS/golems_imgs/<afinidad>/.
  */
 
 // Configuración de Paletas de Fondo por Afinidad Elemental (Hex, Gradiante Radial y Glow)
@@ -302,12 +302,10 @@ async function generateAllPNGs() {
         // Tiempo adicional para estabilización de renderizado y sombras
         await new Promise(r => setTimeout(r, 700));
 
-        // Guardar tanto en la raíz de golems_imgs/<golem_id>.png como en subcarpeta por afinidad golems_imgs/<afinidad>/<golem_id>.png
-        const rootOutputPath = path.join(options.outputDir, `${golemId}.png`);
+        // Guardar en la subcarpeta por afinidad golems_imgs/<afinidad>/<golem_id>.png
         const subFolderOutputPath = path.join(subOutputDir, `${golemId}.png`);
 
-        await page.screenshot({ path: rootOutputPath, type: 'png' });
-        fs.copyFileSync(rootOutputPath, subFolderOutputPath);
+        await page.screenshot({ path: subFolderOutputPath, type: 'png' });
 
         totalProcessed++;
         console.log(`  ✅ [${totalProcessed.toString().padStart(3, '0')}] ${affinity}/${golemId}.png`);
