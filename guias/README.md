@@ -20,6 +20,7 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 | **10** | **Sistema de Minimapa, Cartografía 2D y Orientación** | Proyección matemática 2D del Grid 25x25 (400m × 400m), cono de visión 360° (Sight Cone), texturas bilingües HD y modal panorámico Mobile-First en 2 columnas. | [📖 Leer Guía](guia-sistema-minimapa-y-cartografia.md) |
 | **11** | **Escondite y Bóveda del Jugador (User's Hideout & Vault)** | Taller clandestino en punto medio `(Z: 17.70m, X: 3.8m-8.0m)` entre Trampolín y Mercado #06, silla steampunk, tejadillo, chatarra lateral y 3 cofres cerrados frontales. | [📖 Leer Guía](guia-escondite-y-boveda-usuario.md) |
 | **12** | **Fórmulas, Criterios y Algoritmo de Recetas de Golems** | Especificación matemática del hash FNV-1a de 32 bits, serialización canónica, catálogo de 46 materiales, ecuaciones de derivación de atributos, Pentágono de Afinidades y balance de 150 recetas por Tiers. | [📖 Leer Guía](guia-formulas-y-recetas-golems.md) |
+| **13** | **Fabricación, Catálogo y Generador de NPCs (NPC Avatar Generator)** | Especificación técnica del generador modular de avatares `AvatarShape` de SDK7, catálogo de 50 NPCs, vestimenta `base-avatars`, tonos de piel/pelo, rótulos 3D flotantes, soporte i18n y distribución futura. | [📖 Leer Guía](guia-fabricacion-y-catalogo-npcs.md) |
 
 ---
 
@@ -60,5 +61,9 @@ Manual técnico del Escondite y Bóveda del Jugador. Detalla la ubicación en el
 
 ### 12. [guia-formulas-y-recetas-golems.md](guia-formulas-y-recetas-golems.md)
 Manual técnico exhaustivo sobre el sistema de forja determinista de golems. Explica la serialización canónica de recetas (`material:cantidad`), el algoritmo de hash FNV-1a de 32 bits, la matriz de 46 materiales de chatarra, las ecuaciones de derivación de atributos (ATK, DEF, HP, SPD), la selección de la afinidad elemental dominante, la escala métrica ($0.90\text{m} - 1.30\text{m}$), el tintado emisivo PBR y el balance de las 150 recetas por Tiers de poder.
+
+### 13. [guia-fabricacion-y-catalogo-npcs.md](guia-fabricacion-y-catalogo-npcs.md)
+Manual técnico exhaustivo sobre el generador de avatares `AvatarShape` de SDK7 y el catálogo de 50 NPCs. Detalla la selección de wearables nativos `off-chain:base-avatars`, esquemas de color de piel/pelo/ojos, la fábrica programática `createNpcAvatar`, rotuladores 3D flotantes elevados a $Y = +2.25\text{m}$ (`TextShape` + `Billboard`), soporte i18n y la guía de distribución por las 10 zonas del mapa.
+
 
 
