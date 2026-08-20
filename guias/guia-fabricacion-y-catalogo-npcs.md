@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **ESPECIFICACIÓN TÉCNICA REUTILIZABLE (SDK7 & MOBILE-FIRST)**:  
-> Esta guía documenta de forma exhaustiva la arquitectura de avatares `AvatarShape` de Decentraland SDK7, el descubrimiento del catálogo oficial de URNs mediante el API en vivo de Catalyst, la matriz de vestimentas temáticas **Steampunk Devastado / Mad Max**, la generación procedural de accesorios 3D GLB propios (`assets/wearables/`), el anclaje a huesos corporales mediante `AvatarAttach` (`src/objects/npcWearables.ts`) y la instanciación de los 50 NPCs afuera de la Gran Arena Central (`src/objects/npcGenerator.ts`).
+> Esta guía documenta de forma exhaustiva la arquitectura de avatares `AvatarShape` de Decentraland SDK7, el descubrimiento del catálogo oficial de URNs mediante el API en vivo de Catalyst, la matriz de vestimentas temáticas **Steampunk Devastado / Mad Max**, la generación procedural de accesorios 3D GLB propios (`assets/wearables/`), el anclaje a huesos corporales mediante `AvatarAttach` (`src/objects/npcWearables.ts`) y la instanciación y distribución proporcional de los 100 NPCs por todo el terreno de 400m × 400m (`src/objects/npcGenerator.ts`).
 
 ---
 
@@ -16,7 +16,7 @@
 3. [Reglas de Vestimenta Steampunk Devastado / Mad Max](#3-reglas-de-vestimenta-steampunk-devastado--mad-max)
 4. [Generador Procedural de Accesorios 3D GLB (`scripts/generate_wearables.js`)](#4-generador-procedural-de-accesorios-3d-glb-scriptsgenerate_wearablesjs)
 5. [Sistema de Anclaje a Huesos (`AvatarAttach` en `src/objects/npcWearables.ts`)](#5-sistema-de-anclaje-a-huesos-avatarattach-en-srcobjectsnpcwearablests)
-6. [Fábrica y Alineación de los 50 NPCs (`src/objects/npcGenerator.ts`)](#6-fábrica-y-alineación-de-los-50-npcs-srcobjectsnpcgeneratorts)
+6. [Distribución Espacial y Fábrica de los 100 NPCs (`src/objects/npcGenerator.ts`)](#6-distribución-espacial-y-fábrica-de-los-100-npcs-srcobjectsnpcgeneratorts)
 7. [Manual de Prevención de Errores y Comandos CLI](#7-manual-de-prevención-de-errores-y-comandos-cli)
 
 ---
@@ -25,7 +25,7 @@
 
 El sistema de avatares y vestimenta de **Golems World** resuelve dos desafíos fundamentales:
 1. **Eficiencia en Móvil (Mobile-First)**: Uso de avatares nativos `AvatarShape` que reutilizan las mallas precargadas en el cliente Godot/Móvil, garantizando un rendimiento alto a 60 FPS sin cargar mallas humanas externas pesadas.
-2. **Identidad Visual Steampunk Devastada**: Garantiza que los 50 NPCs tengan vestimentas oscuras de cuero, hollín, vaqueros de chatarra y capas de armadura, complementadas con accesorios 3D GLB propios anclados a sus extremidades y cabeza.
+2. **Identidad Visual Steampunk Devastada**: Garantiza que los 100 NPCs tengan vestimentas oscuras de cuero, hollín, vaqueros de chatarra y capas de armadura, complementadas con accesorios 3D GLB propios anclados a sus extremidades y cabeza.
 
 ---
 
@@ -107,7 +107,7 @@ Este endpoint retorna exactamente **282 prendas off-chain válidas**. Todas las 
 
 1. **Cero Sudaderas/Hoodies Coloridas**: Prohibido usar prendas verdes fosforescentes, azules celestes o rosadas.
 2. **Paleta de Color Oscura**: Cueros negros, marrones oxidados, telas oscuras, hollín, gris carbón y camuflaje.
-3. **50 Vestimentas Únicas**: Cada NPC en [`src/data/npcCatalog.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/data/npcCatalog.ts) cuenta con una combinación propia de URNs oficializadas.
+3. **100 Vestimentas Únicas**: Cada NPC en [`src/data/npcCatalog.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/data/npcCatalog.ts) cuenta con una combinación propia de URNs oficializadas.
 
 ```typescript
 // Ejemplo de especificación de avatar en npcCatalog.ts:
@@ -204,13 +204,15 @@ export function equipCustomWearable(avatarId: string, wearableId: string): Entit
 
 ---
 
-## 6. Fábrica y Alineación de los 50 NPCs (`src/objects/npcGenerator.ts`)
+## 6. Distribución Espacial y Fábrica de los 100 NPCs (`src/objects/npcGenerator.ts`)
 
-En [`src/objects/npcGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/npcGenerator.ts), se instancian los 50 NPCs alineados uno al lado del otro afuera de la Gran Arena Central:
+En [`src/objects/npcGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/npcGenerator.ts), se instancian los **100 NPCs** distribuidos proporcionalmente por todo el mapa de **400m × 400m**, utilizando las coordenadas deterministas de [`src/data/npcPositions.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/data/npcPositions.ts):
 
-- **Ubicación Espacial**: Coordenada Z = **154m** (afuera de la Arena Central, orientados a **180° hacia el Sur**).
-- **Extensión**: A lo largo de X desde **151.0m** hasta **249.0m** (con **2.0m de separación**).
-- **Estado IDLE Estático**: `expressionTriggerId: ''` en `AvatarShape` para prevenir animaciones accidentales.
+- **Zonas de Exclusión Estrictas**:
+  - **Poblado Inicial (Distrito de la Forja Hub)**: `X: 0..140m, Z: 0..140m` *(0 NPCs instanciados en el área inicial de bienvenida)*.
+  - **Gran Arena Central (Interior)**: `Radio < 42m` de `(X: 200m, Z: 200m)` *(0 NPCs instanciados dentro del Cell Ring)*.
+- **Cobertura del Terreno**: Repartidos homogéneamente en los 8 distritos (Desierto Chatarra, Reserva Minería, Calderas Fundición, Subestación, Torre de Radio, Los Chatarrales, Fábrica y Bulevares Exteriores) con separaciones de **15m a 35m** entre personajes.
+- **Estado IDLE Estático**: `expressionTriggerId: ''` en `AvatarShape` para mantener estabilidad de renderizado.
 - **Rótulo Flotante**: `TextShape` en tono dorado/ámbar elevado a $Y = +2.25\text{m}$ con `Billboard`.
 - **Accesorios 3D**: Cada NPC recibe automáticamente un accesorio `.glb` anclado a su cuerpo (`equipCustomWearable(npcData.id, wearableId)`).
 

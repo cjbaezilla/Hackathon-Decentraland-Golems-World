@@ -8,6 +8,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
 import { NpcDefinition, NPC_CATALOG } from '../data/npcCatalog'
+import { NPC_POSITIONS } from '../data/npcPositions'
 import { equipCustomWearable, CUSTOM_WEARABLES } from './npcWearables'
 
 /**
@@ -89,29 +90,20 @@ export function getNpcLabelEntity(npcEntity: Entity): Entity | undefined {
 }
 
 /**
- * Instancia los 50 NPCs del catálogo alineados uno al lado del otro
- * afuera de la Gran Arena Central (al sur, Z: 154m, de X: 151m a 249m)
- * con vestimenta base garantizada, accesorios 3D GLB equipados y en estado IDLE.
- *
- * @param centerPos Punto central de la alineación (por defecto afuera de la Arena en X: 200, Z: 154).
- * @param spacing Separación entre cada NPC en metros (por defecto 2.0m).
- * @param facingAngle Ángulo de rotación en grados (por defecto 180° para mirar hacia el Sur).
+ * Instancia los 100 NPCs del catálogo distribuidos proporcionalmente por todo el mapa de 400m x 400m,
+ * excluyendo estrictamente la Forja Inicial (0..140m, 0..140m) y el interior de la Gran Arena Central (r < 42m).
+ * Cada NPC se ubica en las coordenadas correspondientes a su distrito temático con orientaciones dinámicas.
  */
-export function spawnAllCatalogNpcs(
-  centerPos: Vector3 = Vector3.create(200, 0, 154),
-  spacing: number = 2.0,
-  facingAngle: number = 180
-): Entity[] {
+export function spawnAllCatalogNpcs(): Entity[] {
   const spawnedEntities: Entity[] = []
-  const totalNpcs = NPC_CATALOG.length // 50 NPCs
-  const startX = centerPos.x - ((totalNpcs - 1) * spacing) / 2
+  const totalNpcs = NPC_CATALOG.length // 100 NPCs
   const customWearableKeys = Object.keys(CUSTOM_WEARABLES)
 
   NPC_CATALOG.forEach((npcData, index) => {
-    const posX = startX + index * spacing
-    const spawnPos = Vector3.create(posX, centerPos.y, centerPos.z)
+    const posData = NPC_POSITIONS[npcData.id] || { x: 200, y: 0, z: 154, rot: 180 }
+    const spawnPos = Vector3.create(posData.x, posData.y, posData.z)
 
-    const entity = createNpcAvatar(npcData, spawnPos, facingAngle)
+    const entity = createNpcAvatar(npcData, spawnPos, posData.rot)
 
     // Equipar accesorio 3D GLB temático en el cuerpo del NPC usando AvatarAttach por su ID
     const wearableId = customWearableKeys[index % customWearableKeys.length]
@@ -121,9 +113,7 @@ export function spawnAllCatalogNpcs(
   })
 
   console.log(
-    `👥 [NPC Generator] ${totalNpcs} NPCs instanciados con vestimenta completa y accesorios 3D GLB equipados afuera de la Arena Central (Z: ${
-      centerPos.z
-    }m, X: ${startX.toFixed(1)}m a ${(startX + (totalNpcs - 1) * spacing).toFixed(1)}m).`
+    `👥 [NPC Generator] ${totalNpcs} NPCs instanciados y distribuidos proporcionalmente por todo el mapa (excluyendo Arena Central e Initial Town).`
   )
 
   return spawnedEntities
