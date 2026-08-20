@@ -33,6 +33,8 @@ export type NpcDialogStep =
   | 'tourMarketSouth'
   | 'tourFinish'
 
+export type CinematicType = 'silas_intro' | 'market_west' | 'market_south' | null
+
 export interface SceneState {
   isInitialized: boolean
   localSquad: GolemConfig[] | null
@@ -43,6 +45,7 @@ export interface SceneState {
   isNpcDialogOpen: boolean
   npcDialogStep: NpcDialogStep
   isCinematicActive: boolean
+  activeCinematicType: CinematicType
   hasPlayedSilasIntro: boolean
   isBigMapOpen: boolean
   isSilasTourActive: boolean
@@ -61,6 +64,7 @@ export const sceneState: SceneState = {
   isNpcDialogOpen: false,
   npcDialogStep: 'firstTimeCheck',
   isCinematicActive: false,
+  activeCinematicType: null,
   hasPlayedSilasIntro: false,
   isBigMapOpen: false,
   isSilasTourActive: false,
@@ -98,10 +102,28 @@ export function getIsCinematicActive(): boolean {
 }
 
 /**
+ * Consulta el tipo específico de cinemática activa.
+ */
+export function getActiveCinematicType(): CinematicType {
+  return sceneState.activeCinematicType
+}
+
+/**
+ * Establece el tipo específico de cinemática activa y sincroniza el flag booleano.
+ */
+export function setActiveCinematicType(type: CinematicType) {
+  sceneState.activeCinematicType = type
+  sceneState.isCinematicActive = type !== null
+}
+
+/**
  * Establece el estado activo de la cinemática de cámara.
  */
 export function setIsCinematicActive(active: boolean) {
   sceneState.isCinematicActive = active
+  if (!active) {
+    sceneState.activeCinematicType = null
+  }
 }
 
 

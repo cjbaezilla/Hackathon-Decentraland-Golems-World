@@ -7,7 +7,7 @@ import {
   timers
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
-import { setIsCinematicActive, getIsCinematicActive } from '../state'
+import { setIsCinematicActive, getIsCinematicActive, setActiveCinematicType } from '../state'
 import { getSilasAvatarEntity } from '../objects/welcomeNpc'
 
 /**
@@ -162,7 +162,7 @@ export function playMarketWestCinematic(onFinish?: () => void) {
   orbitalMode = 'west'
   orbitalElapsedTime = 0
   onOrbitalCompleteCallback = onFinish ?? null
-  setIsCinematicActive(true)
+  setActiveCinematicType('market_west')
 
   // Enfocar explícitamente hacia el centro de los quioscos del Oeste (X: 6.4m, Z: 45.6m)
   if (VirtualCamera.has(cam) && westMarketFocusEntity) {
@@ -199,7 +199,7 @@ export function playMarketSouthCinematic(onFinish?: () => void) {
   orbitalMode = 'south'
   orbitalElapsedTime = 0
   onOrbitalCompleteCallback = onFinish ?? null
-  setIsCinematicActive(true)
+  setActiveCinematicType('market_south')
 
   // Enfocar explícitamente hacia el centro del bulevar sur (X: 46.5m, Z: 8.8m)
   if (VirtualCamera.has(cam) && southMarketFocusEntity) {
@@ -232,7 +232,7 @@ export function stopMarketOrbital() {
   isOrbitalRunning = false
   orbitalMode = null
   orbitalElapsedTime = 0
-  setIsCinematicActive(false)
+  setActiveCinematicType(null)
 
   if (orbitalTimeoutId !== null) {
     timers.clearTimeout(orbitalTimeoutId)

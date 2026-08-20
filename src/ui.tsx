@@ -9,6 +9,7 @@ import {
   setNpcDialogStep,
   closeNpcDialog,
   getIsCinematicActive,
+  getActiveCinematicType,
   getIsSilasTourActive,
   getSilasTourSubtitle,
   NpcDialogStep
@@ -806,6 +807,25 @@ export const SilasTourSubtitleHUD = () => {
 export const CinematicOverlay = () => {
   if (!getIsCinematicActive()) return null
 
+  const cinematicType = getActiveCinematicType()
+
+  let title = t('cinematic.title')
+  let subtitle = t('cinematic.subtitle')
+  let hint: string | null = t('cinematic.hintPrompt')
+  let showSkipButton: boolean = true
+
+  if (cinematicType === 'market_west') {
+    title = t('cinematic.marketWestTitle')
+    subtitle = t('cinematic.marketWestSubtitle')
+    hint = null
+    showSkipButton = false
+  } else if (cinematicType === 'market_south') {
+    title = t('cinematic.marketSouthTitle')
+    subtitle = t('cinematic.marketSouthSubtitle')
+    hint = null
+    showSkipButton = false
+  }
+
   return (
     <UiEntity
       uiTransform={{
@@ -852,7 +872,7 @@ export const CinematicOverlay = () => {
             margin: { bottom: 4 }
           }}
           uiText={{
-            value: t('cinematic.title'),
+            value: title,
             fontSize: 21,
             color: Color4.create(1.0, 0.85, 0.35, 1.0),
             textAlign: 'middle-center'
@@ -866,48 +886,52 @@ export const CinematicOverlay = () => {
             margin: { bottom: 4 }
           }}
           uiText={{
-            value: t('cinematic.subtitle'),
+            value: subtitle,
             fontSize: 14,
             color: Color4.create(0.45, 0.88, 1.0, 0.95),
             textAlign: 'middle-center'
           }}
         />
 
-        {/* Prompt Orientativo */}
-        <UiEntity
-          uiTransform={{
-            height: 20,
-            margin: { bottom: 10 }
-          }}
-          uiText={{
-            value: t('cinematic.hintPrompt'),
-            fontSize: 13,
-            color: Color4.create(0.9, 0.95, 0.8, 0.9),
-            textAlign: 'middle-center'
-          }}
-        />
+        {/* Prompt Orientativo (solo si está disponible) */}
+        {hint ? (
+          <UiEntity
+            uiTransform={{
+              height: 20,
+              margin: { bottom: 10 }
+            }}
+            uiText={{
+              value: hint,
+              fontSize: 13,
+              color: Color4.create(0.9, 0.95, 0.8, 0.9),
+              textAlign: 'middle-center'
+            }}
+          />
+        ) : null}
 
-        {/* Botón Táctil Mobile-First de Salto (Skip) */}
-        <UiEntity
-          uiTransform={{
-            width: 170,
-            height: 44,
-            justifyContent: 'center',
-            alignItems: 'center',
-            pointerFilter: 'block'
-          }}
-          uiBackground={{
-            color: Color4.create(0.24, 0.16, 0.1, 0.95)
-          }}
-          onMouseDown={() => {
-            stopSilasCinematic()
-          }}
-          uiText={{
-            value: t('cinematic.skipButton'),
-            fontSize: 14,
-            color: Color4.create(1.0, 0.85, 0.4, 1.0)
-          }}
-        />
+        {/* Botón Táctil Mobile-First de Salto (Skip) - Solo visible en presentación de Silas */}
+        {showSkipButton ? (
+          <UiEntity
+            uiTransform={{
+              width: 170,
+              height: 44,
+              justifyContent: 'center',
+              alignItems: 'center',
+              pointerFilter: 'block'
+            }}
+            uiBackground={{
+              color: Color4.create(0.24, 0.16, 0.1, 0.95)
+            }}
+            onMouseDown={() => {
+              stopSilasCinematic()
+            }}
+            uiText={{
+              value: t('cinematic.skipButton'),
+              fontSize: 14,
+              color: Color4.create(1.0, 0.85, 0.4, 1.0)
+            }}
+          />
+        ) : null}
       </UiEntity>
     </UiEntity>
   )

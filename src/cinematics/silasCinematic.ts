@@ -15,6 +15,7 @@ import { Vector3, Quaternion } from '@dcl/sdk/math'
 import {
   setIsCinematicActive,
   getIsCinematicActive,
+  setActiveCinematicType,
   setHasPlayedSilasIntro,
   getHasPlayedSilasIntro
 } from '../state'
@@ -173,7 +174,7 @@ export function playSilasCinematic() {
 
   isRunning = true
   cinematicElapsedTime = 0
-  setIsCinematicActive(true)
+  setActiveCinematicType('silas_intro')
   setHasPlayedSilasIntro(true)
 
   // 1. Posicionar la cámara al inicio del arco de forma unificada
@@ -219,7 +220,7 @@ export function stopSilasCinematic() {
 
   isRunning = false
   cinematicElapsedTime = 0
-  setIsCinematicActive(false)
+  setActiveCinematicType(null)
 
   if (cinematicTimeoutId !== null) {
     timers.clearTimeout(cinematicTimeoutId)
