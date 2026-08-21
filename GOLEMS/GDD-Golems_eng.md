@@ -62,21 +62,46 @@ The experience is deployed across a twenty-five by twenty-five parcel Decentrala
 
 Materials are camouflaged or buried, revealing themselves only when getting close using the **Heat Radar** and the **real-time 2D Minimap**.
 
-### 4.1 Heat Radar (React-ECS)
-- **Far (> 30m)**: Sensor inactive with cool blue tones and off pulse.
-- **Medium Distance (15m - 30m)**: Gentle rhythmic pulse in yellow tones.
-- **Close (< 15m)**: Accelerated pulse in bright red/orange tones.
-- **Immediate Proximity (< 4m)**: Scrap part visually emerges from ground ($Y = -0.5\text{m} \rightarrow Y = 0.3\text{m}$) with emissive particle effects.
-- **Touch Scavenging**: Wide pointer hitbox ($\ge 1.2\text{m}$) collected with a single tap.
+### 4.1 Heat Radar (React-ECS UI)
+- **Screen Position**: Top right safe area (`top: 80, right: 240`), positioned immediately to the left of the Minimap HUD.
+- **Thermal Gradient**:
+  - **Far (> 30m)**: Inactive sensor with cool blue tones (`#0D1F38`) and off pulse.
+  - **Medium Distance (15m - 30m)**: Gentle rhythmic pulse in yellow tones (`#332E05`).
+  - **Close (< 15m)**: Accelerated pulse in bright red/orange tones (`#401700`).
+  - **Immediate Proximity (< 4m)**: Incandescent glow (`#380D00`) with item detection readout (`🔥 ITEM DETECTED!`). Scrap part visually emerges from ground ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) with emissive glow.
+- **Mobile-First Touch Scavenging**: Wide pointer hitbox ($\ge 1.5\text{m}$) collected with a single touchscreen tap (`pointerEventsSystem.onPointerDown`).
 
 ### 4.2 Real-Time 2D Minimap & Cartography
-The React-ECS HUD features a **2D Minimap** widget projecting avatar position on the 25x25 grid (400m × 400m). Tapping it expands to a full-screen view displaying resource signals, danger zones, and the Grand Arena location.
+The React-ECS HUD features a **2D Minimap** widget (`top: 80, right: 28`) projecting avatar position on the 25x25 grid (400m × 400m). Tapping it expands to a full-screen view displaying resource signals, danger zones, and the Grand Arena location.
 
-![radar](golems_radar_eng.png)
+---
 
-## 5. Materials Catalog
+## 5. Materials & 130 Active Items Spawner
 
-The complete catalog consists of **forty-six (46) collectable material types**, categorized across 5 rarity tiers, all styled as scrap, mechatronics, and post-industrial artifacts. Spawn weights are calibrated to sum to exactly **100%**:
+The complete catalog consists of **forty-six (46) collectable material types**, categorized across 5 rarity tiers, all styled as scrap, mechatronics, and post-industrial artifacts.
+
+### 5.1 Spawner Rules & Lifecycle (130 Active Items)
+- **Constant Population of 130 Items**: The map maintains a fixed density of **exactly 130 active materials** distributed proportionally across all 7 sectors.
+- **Strict PK Zone Isolation**: Free-PK danger zone materials (**Scrap Desert PK** and **Smelting Boilers PK**) **NEVER** spawn outside their assigned zone coordinates.
+- **Unique Instance Capping (`isUniqueInstance: true`)**: Epic and Legendary materials are capped at **only 1 active instance at a time** across the world.
+- **30-Minute Rotation Timeout**: Any item remaining undiscovered for 30 minutes automatically despawns and rotates to a new random location within its zone.
+
+### 5.2 Zone Item Breakdown (130 Concurrent Items)
+
+| Spawn Zone | X Range (m) | Z Range (m) | Zone Type | Weight | Target Active Items | Material Category |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **The Junklands** | `5` to `135` | `145` to `255` | 🟢 Safe Zone | 50.0% | **65 items** | 14 Commons (Wire, Screws, Pots) |
+| **Abandoned Factory** | `145` to `255` | `145` to `255` | 🟡 Medium | 27.7% | **36 items** | 11 Uncommons (Transistors, Gauges) |
+| **Electrical Substation** | `145` to `255` | `285` to `395` | 🟠 High Risk | 6.9% | **9 items** | Rares (Galvanic/Steam) & Epic Plasma |
+| **Radio Tower** | `285` to `395` | `145` to `255` | 🟠 High Risk | 5.4% | **7 items** | Rares (Luminous) & Epic Solar |
+| **Mining Reserve** | `265` to `395` | `265` to `395` | 🟢 Safe Zone | 5.4% | **7 items** | Rares (Mechanical) & Epic Mana/Automa |
+| **Smelting Boilers (PK)**| `265` to `395` | `5` to `135` | 🔴 **Free PK** | 3.1% | **4 items** | Smelting Epics (`reactor_eter`, etc.) |
+| **Scrap Desert (PK)** | `5` to `135` | `265` to `395` | 🔴 **Free PK** | 1.5% | **2 items** | 4 Legendaries (`ojo_dragon`, `corazon_primigenio`) |
+
+---
+
+### 5.3 Complete Materials Catalog (46 Items)
+
 
 | Icon | Material | Rarity | Weight | Respawn | Zone | Primary Contribution |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |

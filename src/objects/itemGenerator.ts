@@ -23,7 +23,7 @@ export interface ZoneBounds {
   maxX: number
   minZ: number
   maxZ: number
-  weight: number // Peso proporcional de zona para la distribución de 90 ítems
+  weight: number // Peso proporcional de zona para la distribución de 130 ítems
 }
 
 export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
@@ -33,7 +33,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 135,
     minZ: 145,
     maxZ: 255,
-    weight: 0.50 // 50% de los ítems (45 ítems)
+    weight: 0.50 // 50% de los ítems (65 ítems)
   },
   'Fábrica Abandonada': {
     name: 'Fábrica Abandonada',
@@ -41,7 +41,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 255,
     minZ: 145,
     maxZ: 255,
-    weight: 0.28 // 28% de los ítems (25 ítems)
+    weight: 0.277 // 27.7% de los ítems (36 ítems)
   },
   'Subestación Eléctrica': {
     name: 'Subestación Eléctrica',
@@ -49,7 +49,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 255,
     minZ: 285,
     maxZ: 395,
-    weight: 0.07 // 7% de los ítems (6 ítems)
+    weight: 0.069 // 6.9% de los ítems (9 ítems)
   },
   'Torre de Radio': {
     name: 'Torre de Radio',
@@ -57,7 +57,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 395,
     minZ: 145,
     maxZ: 255,
-    weight: 0.05 // 5% de los ítems (4 ítems)
+    weight: 0.054 // 5.4% de los ítems (7 ítems)
   },
   'Reserva de Minería': {
     name: 'Reserva de Minería',
@@ -65,7 +65,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 395,
     minZ: 265,
     maxZ: 395,
-    weight: 0.05 // 5% de los ítems (4 ítems)
+    weight: 0.054 // 5.4% de los ítems (7 ítems)
   },
   'Calderas de la Fundición (PK)': {
     name: 'Calderas de la Fundición (PK)',
@@ -73,7 +73,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 395,
     minZ: 5,
     maxZ: 135,
-    weight: 0.035 // 3.5% de los ítems (3 ítems)
+    weight: 0.031 // 3.1% de los ítems (4 ítems)
   },
   'Desierto de Chatarra (PK)': {
     name: 'Desierto de Chatarra (PK)',
@@ -81,7 +81,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 135,
     minZ: 265,
     maxZ: 395,
-    weight: 0.015 // 1.5% de los ítems (3 ítems)
+    weight: 0.015 // 1.5% de los ítems (2 ítems legendarios activos simultáneos)
   }
 }
 
@@ -273,9 +273,9 @@ function itemConfigColorHex(rarity: string): string {
 }
 
 /**
- * Inicializa exactamente 90 ítems distribuidos por todo el mapa.
+ * Inicializa exactamente 130 ítems distribuidos por todo el mapa.
  */
-export function spawnInitialMapItems(targetTotalCount: number = 90) {
+export function spawnInitialMapItems(targetTotalCount: number = 130) {
   let spawnedCount = 0
 
   for (const [zoneName, zoneBounds] of Object.entries(ITEM_ZONE_BOUNDS)) {

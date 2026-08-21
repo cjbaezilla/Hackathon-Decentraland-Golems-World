@@ -103,15 +103,15 @@ The experience takes place in the Decentraland World `golems.dcl.eth`, made of a
 
 ---
 
-## 📡 The Heat Radar, Spawner (90 Active Items), and Scavenging
+## 📡 The Heat Radar, Spawner (130 Active Items), and Scavenging
 
 > 📘 **Technical Spawner & Radar Documentation**: For deep architectural details, zone coordinates, unique instance rules, and timers, see the [Master Guide: Material Item Placement & Heat Radar](guias/guia-ubicacion-y-recoleccion-de-materiales.md).
 
-To ensure optimal performance and engagement, the map maintains a constant density of **exactly 90 active items** distributed proportionally across all 7 sectors, strictly respecting zone bounds (e.g. Legendary items only spawn inside the **Scrap Desert PK**, and Smelting Epics only inside the **Smelting Boilers PK**).
+To ensure optimal performance and engagement, the map maintains a constant density of **exactly 130 active items** distributed proportionally across all 7 sectors, strictly respecting zone bounds (e.g. Legendary items only spawn inside the **Scrap Desert PK**, and Smelting Epics only inside the **Smelting Boilers PK**).
 
 ![Heat Radar](GOLEMS/golems_radar_eng.png)
 
-- **90 Concurrent Map Items & Lifecycle**:
+- **130 Concurrent Map Items & Lifecycle**:
   - **Weighted Zone Roulette**: Items are picked based on `spawnWeight` per zone.
   - **Strict PK Zone Isolation**: PK Zone items **NEVER** spawn outside their danger zones.
   - **Unique Instance Rule (`isUniqueInstance: true`)**: Epic & Legendary items are capped at **only 1 active instance** at a time across the entire 400m × 400m world.

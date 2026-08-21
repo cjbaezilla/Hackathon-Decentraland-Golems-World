@@ -62,21 +62,46 @@ La experiencia se despliega en un Decentraland World de veinticinco por veintici
 
 Los materiales no están visibles a simple vista. Están enterrados o camuflados, y se revelan cuando el jugador se acerca lo suficiente utilizando el **Radar de Calor** y el **Minimapa 2D en tiempo real**.
 
-### 4.1 El Radar de Calor (React-ECS)
-- **Lejos (> 30m)**: Sensor inactivo con tonalidades frías y pulso apagado.
-- **Distancia Media (15m - 30m)**: Pulso rítmico suave en tonos amarillos.
-- **Cercanía (< 15m)**: Pulso acelerado en tonos rojos/naranjas brillantes.
-- **Proximidad Inmediata (< 4m)**: La pieza emerge visualmente del suelo ($Y = -0.5\text{m} \rightarrow Y = 0.3\text{m}$) con efecto de partículas emisivas.
-- **Recolección Táctil**: Hitbox amplia ($\ge 1.2\text{m}$) recolectable con un toque en pantalla móvil.
+### 4.1 El Radar de Calor (React-ECS UI)
+- **Ubicación en Pantalla**: Esquina superior derecha (`top: 80, right: 240`), posicionado inmediatamente a la izquierda del Minimapa HUD.
+- **Gradiente Térmico**:
+  - **Lejos (> 30m)**: Sensor inactivo con tonalidades frías (`#0D1F38`) y pulso apagado.
+  - **Distancia Media (15m - 30m)**: Pulso rítmico suave en tonos amarillos (`#332E05`).
+  - **Cercanía (< 15m)**: Pulso acelerado en tonos naranjas y rojos brillantes (`#401700`).
+  - **Proximidad Inmediata (< 4m)**: Tono incandescente (`#380D00`) con identificación del material (`🔥 ¡OBJETO DETECTADO!`). La pieza emerge visualmente del suelo ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) con efecto emisivo.
+- **Recolección Táctil Mobile-First**: Hitbox amplia ($\ge 1.5\text{m}$) recolectable con un simple toque en pantalla táctil (`pointerEventsSystem.onPointerDown`).
 
 ### 4.2 Sistema de Minimapa 2D y Cartografía
-El HUD incluye un widget de **Minimapa 2D** en la interfaz React-ECS que proyecta la posición del avatar en tiempo real dentro del mapa de 25x25 parcelas (400m × 400m). Permite conmutar a vista desplegada a pantalla completa mediante toque táctil, mostrando íconos de recursos detectados, zonas de riesgo y la ubicación de la Gran Arena Central.
+El HUD incluye un widget de **Minimapa 2D** (`top: 80, right: 28`) en la interfaz React-ECS que proyecta la posición del avatar en tiempo real dentro del mapa de 25x25 parcelas (400m × 400m). Permite conmutar a vista desplegada a pantalla completa mediante toque táctil, mostrando íconos de recursos detectados, zonas de riesgo y la ubicación de la Gran Arena Central.
 
-![radar](golems_radar.png)
+---
 
-## 5. Los materiales
+## 5. Los materiales y el Spawner de 130 Ítems Concurrentes
 
-El catálogo completo se compone de **cuarenta y seis (46) tipos de materiales coleccionables**, distribuidos en 5 niveles de rareza, todos diseñados como piezas de chatarra, mecatrónica y utensilios de un mundo post-industrial. Los porcentajes de aparición están calibrados para sumar exactamente el **100%**:
+El catálogo completo se compone de **cuarenta y seis (46) tipos de materiales coleccionables**, distribuidos en 5 niveles de rareza, todos diseñados como piezas de chatarra, mecatrónica y utensilios de un mundo post-industrial.
+
+### 5.1 Reglas del Spawner y Ciclo de Vida (130 Ítems Activos)
+- **Poblado Fijo de 130 Ítems**: El mapa mantiene una densidad fija de **exactamente 130 materiales activos** repartidos proporcionalmente por las 7 zonas.
+- **Aislamiento Estricto de Zonas PK**: Los materiales de zonas de peligro libre PK (**Desierto de Chatarra PK** y **Calderas de la Fundición PK**) **NUNCA** aparecen fuera de las coordenadas métricas de sus zonas.
+- **Instancias Únicas (`isUniqueInstance: true`)**: Los materiales Épicos y Legendarios están restringidos a **máximo 1 sola instancia activa simultánea** en todo el mundo.
+- **Timeout de Rotación (30 min)**: Todo ítem que permanezca 30 minutos sin ser descubierto/recolectado expira automáticamente y rota a una nueva ubicación aleatoria de su zona.
+
+### 5.2 Desglose de Distribución de Ítems por Zona (130 Ítems)
+
+| Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Simultáneos | Categoría de Materiales |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Los Chatarrales** | `5` a `135` | `145` a `255` | 🟢 Segura | 50.0% | **65 ítems** | 14 Comunes (Alambre, Tornillos, Ollas) |
+| **Fábrica Abandonada** | `145` a `255` | `145` a `255` | 🟡 Media | 27.7% | **36 ítems** | 11 Poco Comunes (Transistores, Manómetros) |
+| **Subestación Eléctrica** | `145` a `255` | `285` a `395` | 🟠 Alta | 6.9% | **9 ítems** | Raros Galvánicos/Vapor y Épico Plasma |
+| **Torre de Radio** | `285` a `395` | `145` a `255` | 🟠 Alta | 5.4% | **7 ítems** | Raros Luminosos y Épico Solar |
+| **Reserva de Minería** | `265` a `395` | `265` a `395` | 🟢 Segura | 5.4% | **7 ítems** | Raros Mecánicos y Épico Maná/Autómata |
+| **Calderas Fundición (PK)**| `265` a `395` | `5` a `135` | 🔴 **PK Libre** | 3.1% | **4 ítems** | Épicos de Fundición (`reactor_eter`, etc.) |
+| **Desierto Chatarra (PK)** | `5` a `135` | `265` a `395` | 🔴 **PK Libre** | 1.5% | **2 ítems** | 4 Legendarios (`ojo_dragon`, `corazon_primigenio`) |
+
+---
+
+### 5.3 Catálogo Completo de los 46 Materiales Coleccionables
+
 
 | Icono | Material | Rareza | Peso | Reaparición | Zona | Aporte principal |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- |

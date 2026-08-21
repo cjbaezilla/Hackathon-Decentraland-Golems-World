@@ -3,7 +3,7 @@
 > **Ubicación del Código y Módulos**:
 > - 📄 **Catálogo y Configuración de Materiales**: [`src/config/items.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/config/items.ts)
 > - 🧱 **Componente ECS SDK7**: [`src/components/item.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/components/item.ts)
-> - 🛠️ **Generador y Spawner de 90 Ítems**: [`src/objects/itemGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/itemGenerator.ts)
+> - 🛠️ **Generador y Spawner de 130 Ítems**: [`src/objects/itemGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/itemGenerator.ts)
 > - ⚡ **Sistema de Respawns, Timeouts y Radar**: [`src/systems/itemSpawnSystem.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/systems/itemSpawnSystem.ts)
 > - 🖥️ **Widget de Radar de Calor React-ECS**: [`src/ui/heatRadarComponent.tsx`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/ui/heatRadarComponent.tsx)
 
@@ -14,7 +14,7 @@
 En el universo de **Golems World**, los materiales para la Forja no crecen en la superficie de forma estática; representan piezas de chatarra, mecatrónica y utensilios reutilizados camuflados o enterrados a lo largo y ancho del mundo de 25x25 parcelas (400m × 400m / 160.000 m²).
 
 El sistema se basa en 4 pilares fundamentales:
-1. **Poblado Constante de 90 Ítems Activos**: El mapa mantiene una densidad fija de **90 ítems concurrentes**, distribuidos proporcionalmente por zona según el peso total de sus materiales.
+1. **Poblado Constante de 130 Ítems Activos**: El mapa mantiene una densidad fija de **130 ítems concurrentes**, distribuidos proporcionalmente por zona según el peso total de sus materiales.
 2. **Aislamiento Estricto por Zonas (Incluyendo Zonas de Peligro PK)**: Cada uno de los 46 materiales pertenece a una zona específica. Los ítems de zonas de peligro PK (**Desierto de Chatarra PK** y **Calderas de la Fundición PK**) **JAMÁS** aparecen fuera de las coordenadas métricas de sus zonas correspondientes.
 3. **Ciclo de Vida Dinámico (Respawns y Timeout de 30 min)**: Al recolectar un ítem, se programa un respawn temporizado ($T \in [\text{respawnMinMinutes}, \text{respawnMaxMinutes}]$). Si un ítem no es descubierto tras **30 minutos**, expira automáticamente y rota a una nueva ubicación aleatoria en la misma zona.
 4. **Radar de Calor y Emergencia del Suelo (< 4m)**: Los ítems permanecen camuflados a $Y = -0.5\text{m}$. Al acercarse el avatar a menos de 4 metros, la pieza asciende a $Y = 0.25\text{m}$ y activa su hitbox táctil Mobile-First.
@@ -29,36 +29,36 @@ El mapa de 400m × 400m se divide en 7 sectores de aparición, excluyendo la zon
 (0, 400m) ┌───────────────────────────┬───────────────────────────┐ (400m, 400m)
           │  DESIERTO DE CHATARRA (PK)│    RESERVA DE MINERÍA     │
           │  (0..140m X, 260..400m Z) │    (260..400m X, 260..400m Z)│
-          │  🔴 Legendarios (Peso 1.5%)│   🟢 Raros/Épicos (Peso 5%) │
+          │  🔴 Legendarios (Peso 1.5%)│   🟢 Raros/Épicos (Peso 5.4%)│
           ├───────────────────────────┼───────────────────────────┤
           │  SUBESTACIÓN ELÉCTRICA    │    TORRE DE RADIO         │
           │  (140..260m X, 280..400m Z)│   (280..400m X, 140..260m Z) │
-          │  🟠 Galvánicos (Peso 7%)  │   🟠 Luminosos (Peso 5%)  │
+          │  🟠 Galvánicos (Peso 6.9%)│   🟠 Luminosos (Peso 5.4%)│
           ├───────────────────────────┴───────────────────────────┤
           │               GRAN ARENA DE TORNEO STEAMPUNK          │
           │               (Excluida: 164..236 X, 164..236 Z)      │
           ├───────────────────────────────────────────────────────┤
           │   LOS CHATARRALES         │   FÁBRICA ABANDONADA      │
           │   (0..140m X, 140..260m Z)│   (140..260m X, 140..260m Z) │
-          │   🟢 Comunes (Peso 50%)   │   🟡 Poco Comunes (28%)   │
+          │   🟢 Comunes (Peso 50%)   │   🟡 Poco Comunes (27.7%) │
           ├───────────────────────────┼───────────────────────────┤
           │  DISTRITO DE LA FORJA     │   CALDERAS FUNDICIÓN (PK) │
           │  (Excluido: Hub Seguro)   │   (260..400m X, 0..140m Z)│
-          │  (0..140m X, 0..140m Z)   │   🔴 Épicos Vapor (Peso 3.5%)│
+          │  (0..140m X, 0..140m Z)   │   🔴 Épicos Vapor (Peso 3.1%)│
 (0, 0m)   └───────────────────────────┴───────────────────────────┘ (400m, 0m)
 ```
 
-### Tabla de Delimitación y Pesos Proporcionales (90 Ítems)
+### Tabla de Delimitación y Pesos Proporcionales (130 Ítems)
 
 | Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Objetivo | Categoría de Materiales |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Los Chatarrales** | `5` a `135` | `145` a `255` | 🟢 Segura | 50.0% (0.50) | ~45 ítems | 14 Comunes (Alambre, Tornillos, Ollas) |
-| **Fábrica Abandonada** | `145` a `255` | `145` a `255` | 🟡 Media | 28.0% (0.28) | ~25 ítems | 11 Poco Comunes (Transistores, Manómetros) |
-| **Subestación Eléctrica** | `145` a `255` | `285` a `395` | 🟠 Alta | 7.0% (0.07) | ~6 ítems | Raros Galvánicos/Vapor y Épico Plasma |
-| **Torre de Radio** | `285` a `395` | `145` a `255` | 🟠 Alta | 5.0% (0.05) | ~5 ítems | Raros Luminosos y Épico Solar |
-| **Reserva de Minería** | `265` a `395` | `265` a `395` | 🟢 Segura | 5.0% (0.05) | ~5 ítems | Raros Mecánicos y Épico Maná/Autómata |
-| **Calderas Fundición (PK)**| `265` a `395` | `5` a `135` | 🔴 **PK Libre** | 3.5% (0.035) | ~3 ítems | Épicos de Fundición (`reactor_eter`, etc.) |
-| **Desierto Chatarra (PK)** | `5` a `135` | `265` a `395` | 🔴 **PK Libre** | 1.5% (0.015) | ~3 ítems | 4 Legendarios (`ojo_dragon`, `corazon_primigenio`) |
+| **Los Chatarrales** | `5` a `135` | `145` a `255` | 🟢 Segura | 50.0% (0.50) | 65 ítems | 14 Comunes (Alambre, Tornillos, Ollas) |
+| **Fábrica Abandonada** | `145` a `255` | `145` a `255` | 🟡 Media | 27.7% (0.277) | 36 ítems | 11 Poco Comunes (Transistores, Manómetros) |
+| **Subestación Eléctrica** | `145` a `255` | `285` a `395` | 🟠 Alta | 6.9% (0.069) | 9 ítems | Raros Galvánicos/Vapor y Épico Plasma |
+| **Torre de Radio** | `285` a `395` | `145` a `255` | 🟠 Alta | 5.4% (0.054) | 7 ítems | Raros Luminosos y Épico Solar |
+| **Reserva de Minería** | `265` a `395` | `265` a `395` | 🟢 Segura | 5.4% (0.054) | 7 ítems | Raros Mecánicos y Épico Maná/Autómata |
+| **Calderas Fundición (PK)**| `265` a `395` | `5` a `135` | 🔴 **PK Libre** | 3.1% (0.031) | 4 ítems | Épicos de Fundición (`reactor_eter`, etc.) |
+| **Desierto Chatarra (PK)** | `5` a `135` | `265` a `395` | 🔴 **PK Libre** | 1.5% (0.015) | 2 ítems | 4 Legendarios (`ojo_dragon`, `corazon_primigenio`) |
 
 ---
 

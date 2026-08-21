@@ -123,8 +123,8 @@ export function main() {
   // 11. Instanciar los 150 golems ambientales distribuidos dinámicamente con mayor presencia en los bordes del mapa
   spawnMapGolems(150)
 
-  // 12. Instanciar exactamente 90 materiales coleccionables distribuidos por las 7 zonas del mapa
-  spawnInitialMapItems(90)
+  // 12. Instanciar exactamente 130 materiales coleccionables distribuidos por las 7 zonas del mapa
+  spawnInitialMapItems(130)
 
   // 13. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
   initSilasCinematicCamera()
