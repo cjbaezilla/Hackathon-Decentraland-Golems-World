@@ -64,13 +64,14 @@ export const DesktopActionBarWidget = () => {
   if (getIsBigMapOpen() || isMobile()) return null
 
   const isInventoryOpen = getIsInventoryOpen()
+  const isGolemInventoryOpen = getIsGolemInventoryOpen()
 
   return (
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
         position: { top: 286, right: 28 },
-        width: 200,
+        width: 240,
         height: 48,
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -78,7 +79,16 @@ export const DesktopActionBarWidget = () => {
         pointerFilter: 'none'
       }}
     >
-      {/* Primer Icono (Extremo Derecho): Mochila / Inventario */}
+      {/* Botón de Robot / Reserva de Golems (Aparece a la IZQUIERDA de la mochila) */}
+      <ActionIconButton
+        keyId="btn_golem_inventory"
+        textureSrc="assets/images/golem_icon.png"
+        tooltip={t('golemInventory.robotTooltip')}
+        isActive={isGolemInventoryOpen}
+        onClick={() => toggleGolemInventory()}
+      />
+
+      {/* Botón de Mochila / Inventario de Chatarra (Extremo Derecho) */}
       <ActionIconButton
         keyId="btn_backpack_inventory"
         textureSrc="assets/images/backpack_icon.png"
@@ -90,6 +100,7 @@ export const DesktopActionBarWidget = () => {
   )
 }
 ```
+
 
 ### 3.2 Botones de Acción Sin Marco Interno (`ActionIconButton`)
 

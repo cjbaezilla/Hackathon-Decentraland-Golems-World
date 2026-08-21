@@ -53,6 +53,7 @@ export interface SceneState {
   silasTourSubtitle: string
   hasTriggeredProximityIntro: boolean
   isInventoryOpen: boolean
+  isGolemInventoryOpen: boolean
   playerInventory: Record<string, number>
   nearestItemDistance: number
   nearestItemRarity: string
@@ -75,6 +76,7 @@ export const sceneState: SceneState = {
   hasPlayedSilasIntro: false,
   isBigMapOpen: false,
   isInventoryOpen: false,
+  isGolemInventoryOpen: false,
   isSilasTourActive: false,
   silasTourCurrentWaypoint: 0,
   silasTourSubtitle: '',
@@ -88,25 +90,47 @@ export const sceneState: SceneState = {
 }
 
 /**
- * Consulta si la ventana modal del inventario está abierta.
+ * Consulta si la ventana modal del inventario de chatarra está abierta.
  */
 export function getIsInventoryOpen(): boolean {
   return sceneState.isInventoryOpen
 }
 
 /**
- * Establece el estado de apertura del inventario.
+ * Establece el estado de apertura del inventario de chatarra.
  */
 export function setIsInventoryOpen(open: boolean) {
   sceneState.isInventoryOpen = open
 }
 
 /**
- * Alterna el estado de apertura del inventario (abrir/cerrar).
+ * Alterna el estado de apertura del inventario de chatarra (abrir/cerrar).
  */
 export function toggleInventory() {
   sceneState.isInventoryOpen = !sceneState.isInventoryOpen
 }
+
+/**
+ * Consulta si la ventana modal del inventario/reserva de golems está abierta.
+ */
+export function getIsGolemInventoryOpen(): boolean {
+  return sceneState.isGolemInventoryOpen
+}
+
+/**
+ * Establece el estado de apertura del inventario de golems.
+ */
+export function setIsGolemInventoryOpen(open: boolean) {
+  sceneState.isGolemInventoryOpen = open
+}
+
+/**
+ * Alterna el estado de apertura del inventario de golems (abrir/cerrar).
+ */
+export function toggleGolemInventory() {
+  sceneState.isGolemInventoryOpen = !sceneState.isGolemInventoryOpen
+}
+
 
 /**
  * Consulta si la ventana modal del mapa grande está abierta.

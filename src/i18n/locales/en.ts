@@ -226,7 +226,28 @@ export const en: TranslationSchema = {
     statHp: 'HP Bonus',
     statSpeed: 'Speed Bonus',
     statAffinity: 'Elemental Affinity'
+  },
+  golemInventory: {
+    title: '🤖 GOLEM SQUAD & RESERVE',
+    empty: 'No golems in your reserve. Visit the Golem Factory to craft new automatons.',
+    activeSquad: 'Active Squad (3/3)',
+    reserve: 'In Reserve',
+    filterAll: 'All',
+    golemDetails: 'Automaton Details',
+    robotTooltip: 'Golem Reserve (🤖 / E)',
+    assignToSquad: 'Assign to Squad',
+    sendExpedition: 'Send on Expedition',
+    inExpedition: 'On Offline Expedition',
+    statAttack: 'Base Attack',
+    statDefense: 'Base Defense',
+    statHp: 'Health / HP',
+    statSpeed: 'Movement Speed',
+    statExp: 'Accumulated Exp',
+    affinityAdvantage: 'Elemental Advantage',
+    golemTip: '💡 You can keep up to 3 Golems in your active squad to explore and battle.',
+    selectGolem: 'Select a golem to inspect its combat stats.'
   }
 }
+
 
 

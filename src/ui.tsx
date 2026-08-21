@@ -26,6 +26,9 @@ import { LoadingScreenWidget } from './ui/loadingScreenComponent'
 import { HeatRadarWidget } from './ui/heatRadarComponent'
 import { DesktopActionBarWidget } from './ui/actionBarComponent'
 import { InventoryModal } from './ui/inventoryComponent'
+import { GolemInventoryModal } from './ui/golemInventoryComponent'
+
+
 
 
 
@@ -1000,14 +1003,19 @@ export const uiComponent = () => {
       {/* Widget de Minimapa Compacto (Esquina Superior Derecha, bajo TopHeaderBar) */}
       <MinimapWidget />
 
-      {/* Barra de Botones de Acción (Debajo del Minimapa, justificado a la derecha con el icono de Mochila) */}
+      {/* Barra de Botones de Acción Desktop (Debajo del Minimapa) */}
       <DesktopActionBarWidget />
+
+
 
       {/* Widget de Radar de Calor (Esquina Superior Derecha, 200x200 px junto al minimapa) */}
       <HeatRadarWidget />
 
       {/* Modal de Inventario de Chatarra */}
       <InventoryModal />
+
+      {/* Modal de Reserva e Inventario de Golems */}
+      <GolemInventoryModal />
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />

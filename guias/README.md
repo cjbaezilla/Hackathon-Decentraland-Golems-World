@@ -24,10 +24,12 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 | **14** | **Ubicación, Spawner y Recolección de Materiales (Item Placement & Heat Radar)** | Generación aleatoria ponderada de los 46 materiales en el mapa 25x25 (400m × 400m), densidad fija de 150 ítems concurrentes, aislamiento estricto de zonas de peligro PK (Desierto PK y Calderas PK), respawns temporizados, rotación automática a los 30 min, emergencia visual ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) a $< 4\text{m}$ y widget del Radar de Calor React-ECS (`top: 80, right: 240`). | [📖 Leer Guía](guia-ubicacion-y-recoleccion-de-materiales.md) |
 | **15** | **Sistema de Radar de Calor, Sonar 2D y Recolección Táctica** | Especificación completa del widget táctico cuadrado de 200px × 200px (mismas dimensiones que el Minimapa), pantalla circular de sonar con retícula axial (10m, 20m, 30m), barrido de onda expansiva animado, algoritmo de proyección vectorial Heading-UP, punto palpitante (blip) e indicador de distancia continuo. | [📖 Leer Guía](guia-radar-de-calor-y-sonar.md) |
 | **16** | **Sistema de Inventario de Chatarra y Botones de Acción (Desktop & Mobile UI)** | Manual técnico de la interfaz modal de inventario (46 materiales), filtros por rareza, inspección de bonos de atributos para la forja, barra de acción Desktop debajo del minimapa (`top: 286, right: 28`) e integración con `TouchScreenControls` con textura personalizada (`backpack_icon.png`) en móviles. | [📖 Leer Guía](guia-sistema-inventario-y-botones-accion.md) |
+| **17** | **Sistema de Reserva e Inventario de Golems y Gestión de Escuadrón (Desktop & Mobile UI)** | Manual técnico de la interfaz modal de reserva y squad de golems (3/3), filtros por las 5 afinidades elementales, inspección de estadísticas RPG de combate (ATK, DEF, HP, SPD, EXP), ventajas del Pentágono Elemental (`×1.40` / `×0.75`), botón del robot (`golem_icon.png`) posicionado a la izquierda de la mochila en Desktop e integración con `InputAction.IA_PRIMARY` (E) y `IA_SECONDARY` (F) en móviles. | [📖 Leer Guía](guia-reserva-y-escuadron-de-golems.md) |
 
 ---
 
 ## 🧭 Resumen Rápido por Guía
+
 
 
 
@@ -78,5 +80,9 @@ Manual técnico completo sobre el sistema de Radar de Calor e Interfaz de Sonar 
 
 ### 16. [guia-sistema-inventario-y-botones-accion.md](guia-sistema-inventario-y-botones-accion.md)
 Manual técnico maestro sobre el subsistema de Inventario de Chatarra (46 materiales) y la arquitectura de Botones de Acción para Desktop y Mobile. Detalla el centrado absoluto (vertical y horizontal) del modal (`width: '100%', height: '100%'` con `justifyContent: 'center'` y `alignItems: 'center'`), la regla de `pointerFilter: 'none'` en el contenedor para permitir el toggle bidireccional en pantallas táctiles, el sistema de filtros por rareza, el panel de inspección de aportes para la Forja de Golems (Ataque, Defensa, Vitalidad, Velocidad, Afinidad), el anclaje de la barra Desktop debajo del minimapa (`top: 286px, right: 28px`), el reemplazo del glifo "F" en `TouchScreenControls` con el asset `assets/images/backpack_icon.png` (sin círculo exterior y con fondo oscuro) y el soporte bilingüe completo (`src/i18n`).
+
+### 17. [guia-reserva-y-escuadron-de-golems.md](guia-reserva-y-escuadron-de-golems.md)
+Manual técnico maestro sobre el subsistema de Reserva y Squad de Golems. Detalla el centrado absoluto del modal (920px × 540px), la regla de `pointerFilter: 'none'` para toggle bidireccional, el filtrado por las 5 afinidades elementales (Vapor, Galvánico, Mecánico, Luminoso, Éter), la lista de escuadrón y reserva con nivel (`Nv. X`), barra de vida proporcional `💚 HP` e insigne de estado, el panel de inspección de atributos RPG (Ataque, Defensa, HP, Velocidad, Experiencia), los multiplicadores del Pentágono Elemental (`×1.40` / `×0.75`), el anclaje del botón del robot (`golem_icon.png`) a la izquierda de la mochila en Desktop (`top: 286px, right: 28px`), la configuración de `TouchScreenControls` nativos en móviles en `InputAction.IA_PRIMARY` (E) e `IA_SECONDARY` (F) y el soporte bilingüe completo (`src/i18n`).
+
 
 

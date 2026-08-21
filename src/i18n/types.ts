@@ -200,6 +200,27 @@ export interface TranslationSchema {
     statSpeed: string
     statAffinity: string
   }
+  golemInventory: {
+    title: string
+    empty: string
+    activeSquad: string
+    reserve: string
+    filterAll: string
+    golemDetails: string
+    robotTooltip: string
+    assignToSquad: string
+    sendExpedition: string
+    inExpedition: string
+    statAttack: string
+    statDefense: string
+    statHp: string
+    statSpeed: string
+    statExp: string
+    affinityAdvantage: string
+    golemTip: string
+    selectGolem: string
+  }
 }
+
 
 

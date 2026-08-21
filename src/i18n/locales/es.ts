@@ -226,7 +226,28 @@ export const es: TranslationSchema = {
     statHp: 'Bono de Vitalidad',
     statSpeed: 'Bono de Velocidad',
     statAffinity: 'Afinidad Elemental'
+  },
+  golemInventory: {
+    title: '🤖 RESERVA Y ESCUADRÓN DE GOLEMS',
+    empty: 'No tienes golems en tu reserva. Acude a la Fábrica de Golems para forjar nuevos autómatas.',
+    activeSquad: 'Escuadrón Activo (3/3)',
+    reserve: 'En Reserva',
+    filterAll: 'Todos',
+    golemDetails: 'Detalles del Autómata',
+    robotTooltip: 'Reserva de Golems (🤖 / E)',
+    assignToSquad: 'Asignar a Escuadrón',
+    sendExpedition: 'Enviar a Expedición',
+    inExpedition: 'En Expedición fuera de línea',
+    statAttack: 'Ataque Base',
+    statDefense: 'Defensa Base',
+    statHp: 'Salud / HP',
+    statSpeed: 'Velocidad de Movimiento',
+    statExp: 'Experiencia Acumulada',
+    affinityAdvantage: 'Ventaja Elemental',
+    golemTip: '💡 Puedes mantener hasta 3 Golems en tu escuadrón activo para explorar y combatir.',
+    selectGolem: 'Selecciona un golem para inspeccionar sus estadísticas de combate.'
   }
 }
+
 
 

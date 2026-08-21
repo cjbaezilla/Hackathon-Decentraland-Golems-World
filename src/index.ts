@@ -10,7 +10,7 @@ import {
 import { Vector3 } from '@dcl/sdk/math'
 import { setupUi } from './ui'
 import { GolemConfig, generateRandomSquad } from './config/golems'
-import { setLocalActiveSquad, toggleInventory } from './state'
+import { setLocalActiveSquad, toggleInventory, toggleGolemInventory } from './state'
 import { createFollowerGolem, removePlayerSquad } from './objects/golemFactory'
 import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
 import { golemCombatSystem } from './systems/golemCombatSystem'
@@ -76,11 +76,17 @@ export function main() {
   // 1. Inicializar la Interfaz de Usuario 2D (React-ECS)
   setupUi()
 
-  // 2. Configurar controles táctiles Mobile-First (Botón de Mochila/Inventario para IA_SECONDARY)
+  // 2. Configurar controles táctiles Mobile-First (Ocultar botones nativos para usar MobileActionBarWidget de React-ECS)
+  // 2. Configurar controles táctiles Mobile-First (Botón Robot en IA_PRIMARY / E y Mochila en IA_SECONDARY / F)
   TouchScreenControls.createOrReplace(engine.RootEntity, {
     hideJoystick: false,
     hideCrosshair: false,
     touchInputs: [
+      {
+        inputAction: InputAction.IA_PRIMARY,
+        hide: false,
+        icon: { tex: { $case: 'texture', texture: { src: 'assets/images/golem_icon.png' } } }
+      },
       {
         inputAction: InputAction.IA_SECONDARY,
         hide: false,
@@ -93,12 +99,19 @@ export function main() {
     ]
   })
 
-  // 2.1. Registrar el sistema de entrada para la tecla "F" (Desktop) y botón "F" táctil (Mobile)
+
+
+  // 2.1. Registrar el sistema de entrada para atajos de teclado (Desktop E y F) y touchpad (Mobile)
   engine.addSystem(() => {
+    if (inputSystem.isTriggered(InputAction.IA_PRIMARY, PointerEventType.PET_DOWN)) {
+      toggleGolemInventory()
+    }
     if (inputSystem.isTriggered(InputAction.IA_SECONDARY, PointerEventType.PET_DOWN)) {
       toggleInventory()
     }
   })
+
+
 
   // 3. Configurar infraestructura multijugador P2P (MessageBus)
   setupSquadSyncListeners(onRemoteSquadUpdated)

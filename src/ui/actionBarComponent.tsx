@@ -1,7 +1,13 @@
 import ReactEcs, { UiEntity } from '@dcl/sdk/react-ecs'
 import { Color4 } from '@dcl/sdk/math'
 import { isMobile } from '@dcl/sdk/platform'
-import { getIsBigMapOpen, getIsInventoryOpen, toggleInventory } from '../state'
+import {
+  getIsBigMapOpen,
+  getIsInventoryOpen,
+  toggleInventory,
+  getIsGolemInventoryOpen,
+  toggleGolemInventory
+} from '../state'
 import { t } from '../i18n'
 
 /**
@@ -12,10 +18,9 @@ import { t } from '../i18n'
  * - Minimapa: top: 80px, right: 28px, height: 200px (termina en top: 280px).
  * - Barra de Botones: top: 286px, right: 28px.
  * - Justificación a la derecha (`flexDirection: 'row'`, `justifyContent: 'flex-end'`).
- * - El icono de mochila es el primer botón (extremo derecho). Próximos iconos
- *   añadidos a la fila se posicionarán automáticamente a la izquierda de la mochila.
+ * - El icono del robot (golem_icon.png) se coloca a la izquierda de la mochila (backpack_icon.png).
  * - En dispositivos móviles (isMobile), esta barra se oculta ya que el usuario utiliza
- *   el botón táctil nativo "F" para abrir el inventario.
+ *   los botones táctiles nativos del touchpad (1 y F).
  */
 
 /**
@@ -90,13 +95,14 @@ export const DesktopActionBarWidget = () => {
   if (getIsBigMapOpen() || isMobile()) return null
 
   const isInventoryOpen = getIsInventoryOpen()
+  const isGolemInventoryOpen = getIsGolemInventoryOpen()
 
   return (
     <UiEntity
       uiTransform={{
         positionType: 'absolute',
         position: { top: 286, right: 28 },
-        width: 200,
+        width: 240,
         height: 48,
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -104,13 +110,16 @@ export const DesktopActionBarWidget = () => {
         pointerFilter: 'none'
       }}
     >
-      {/* 
-        LISTA DE BOTONES DE ACCIÓN:
-        Para agregar más iconos a la izquierda en el futuro, simplemente inserta 
-        los nuevos componentes <ActionIconButton /> antes del botón de mochila.
-      */}
+      {/* Botón de Robot / Reserva de Golems (Aparece a la IZQUIERDA de la mochila) */}
+      <ActionIconButton
+        keyId="btn_golem_inventory"
+        textureSrc="assets/images/golem_icon.png"
+        tooltip={t('golemInventory.robotTooltip')}
+        isActive={isGolemInventoryOpen}
+        onClick={() => toggleGolemInventory()}
+      />
 
-      {/* Primer Icono (Extremo Derecho): Mochila / Inventario */}
+      {/* Botón de Mochila / Inventario de Chatarra (Extremo Derecho) */}
       <ActionIconButton
         keyId="btn_backpack_inventory"
         textureSrc="assets/images/backpack_icon.png"
@@ -121,4 +130,7 @@ export const DesktopActionBarWidget = () => {
     </UiEntity>
   )
 }
+
+
+
 
