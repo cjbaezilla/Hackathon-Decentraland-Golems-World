@@ -24,6 +24,8 @@ import {
 import { MinimapWidget, BigMapModal } from './ui/minimapComponent'
 import { LoadingScreenWidget } from './ui/loadingScreenComponent'
 import { HeatRadarWidget } from './ui/heatRadarComponent'
+import { DesktopActionBarWidget } from './ui/actionBarComponent'
+import { InventoryModal } from './ui/inventoryComponent'
 
 
 
@@ -75,6 +77,7 @@ export function getAffinityIcon(affinity: string): string {
 
 /**
  * Componente Indicador de Ubicación y Tilemap en Tiempo Real (Mobile-First / HUD)
+ * Inicia en el mismo punto X que el Radar de Calor (HeatRadarWidget) con un ancho ampliado de 300px.
  */
 export const LocationIndicator = () => {
   const loc = getPlayerLocationInfo()
@@ -85,9 +88,9 @@ export const LocationIndicator = () => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        padding: { top: 6, bottom: 6, left: 16, right: 16 },
-        margin: { right: 12 },
-        minWidth: 340,
+        padding: { top: 6, bottom: 6, left: 12, right: 12 },
+        margin: { right: 10 },
+        width: 300,
         height: 52,
         pointerFilter: 'none'
       }}
@@ -103,7 +106,7 @@ export const LocationIndicator = () => {
         }}
         uiText={{
           value: `🗺️ ${t('common.parcel')} [${loc.parcelX}, ${loc.parcelZ}] • X: ${loc.x.toFixed(1)}m | Z: ${loc.z.toFixed(1)}m`,
-          fontSize: 14,
+          fontSize: 13.5,
           color: Color4.create(1.0, 0.85, 0.35, 1.0),
           textAlign: 'middle-left'
         }}
@@ -127,6 +130,7 @@ export const LocationIndicator = () => {
 
 /**
  * Componente Selector de Idioma Táctil (Mobile-First / Safe Area)
+ * Formato compacto (100px) para ceder espacio al HUD de Coordenadas.
  */
 export const LanguageToggle = () => {
   const currentLang = getLanguage()
@@ -135,7 +139,7 @@ export const LanguageToggle = () => {
   return (
     <UiEntity
       uiTransform={{
-        width: 140,
+        width: 100,
         height: 52,
         justifyContent: 'center',
         alignItems: 'center',
@@ -150,7 +154,7 @@ export const LanguageToggle = () => {
       }}
       uiText={{
         value: isEs ? '🌐 ES | en' : '🌐 es | EN',
-        fontSize: 18,
+        fontSize: 15,
         color: isEs ? Color4.create(1.0, 0.85, 0.3, 1.0) : Color4.create(0.4, 0.9, 1.0, 1.0)
       }}
     />
@@ -996,9 +1000,14 @@ export const uiComponent = () => {
       {/* Widget de Minimapa Compacto (Esquina Superior Derecha, bajo TopHeaderBar) */}
       <MinimapWidget />
 
+      {/* Barra de Botones de Acción (Debajo del Minimapa, justificado a la derecha con el icono de Mochila) */}
+      <DesktopActionBarWidget />
+
       {/* Widget de Radar de Calor (Esquina Superior Derecha, 200x200 px junto al minimapa) */}
       <HeatRadarWidget />
 
+      {/* Modal de Inventario de Chatarra */}
+      <InventoryModal />
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />

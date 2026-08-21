@@ -181,6 +181,25 @@ export interface TranslationSchema {
     arenaZone: string
     playerTooltip: string
   }
+  inventory: {
+    title: string
+    empty: string
+    filterAll: string
+    totalTypes: string
+    itemDetails: string
+    statContribution: string
+    selectItem: string
+    forgeTip: string
+    backpackTooltip: string
+    ownedQuantity: string
+    originZone: string
+    spawnWeight: string
+    statAttack: string
+    statDefense: string
+    statHp: string
+    statSpeed: string
+    statAffinity: string
+  }
 }
 
 

@@ -207,6 +207,25 @@ export const es: TranslationSchema = {
     pkZone: 'Zona de Peligro (PK Libre)',
     arenaZone: 'Gran Arena de Torneo',
     playerTooltip: 'Tu Posición'
+  },
+  inventory: {
+    title: '🎒 INVENTARIO DE CHATARRA',
+    empty: 'Tu inventario está vacío. Explora el mapa con el Radar Térmico para recolectar piezas de chatarra.',
+    filterAll: 'Todos',
+    totalTypes: 'Variedades',
+    itemDetails: 'Detalles del Material',
+    statContribution: 'Aporte para la Forja',
+    selectItem: 'Selecciona una pieza de chatarra para ver sus propiedades.',
+    forgeTip: '💡 Combina de 5 a 12 piezas de chatarra en la Forja para dar vida a un Golem único.',
+    backpackTooltip: 'Abrir Inventario (🎒)',
+    ownedQuantity: 'Cantidad en Posesión',
+    originZone: 'Zona de Origen',
+    spawnWeight: 'Frecuencia de Aparición',
+    statAttack: 'Bono de Ataque',
+    statDefense: 'Bono de Defensa',
+    statHp: 'Bono de Vitalidad',
+    statSpeed: 'Bono de Velocidad',
+    statAffinity: 'Afinidad Elemental'
   }
 }
 

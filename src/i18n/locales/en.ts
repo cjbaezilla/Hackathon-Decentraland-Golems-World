@@ -207,6 +207,25 @@ export const en: TranslationSchema = {
     pkZone: 'Hazard Zone (Free PK)',
     arenaZone: 'Tournament Grand Arena',
     playerTooltip: 'Your Position'
+  },
+  inventory: {
+    title: '🎒 SCRAP INVENTORY',
+    empty: 'Your inventory is empty. Explore the map using the Heat Radar to collect scrap items.',
+    filterAll: 'All',
+    totalTypes: 'Types',
+    itemDetails: 'Material Details',
+    statContribution: 'Forge Stat Contribution',
+    selectItem: 'Select a scrap item to inspect its properties.',
+    forgeTip: '💡 Combine 5 to 12 scrap items in the Forge to craft a unique Golem.',
+    backpackTooltip: 'Open Inventory (🎒)',
+    ownedQuantity: 'Quantity Owned',
+    originZone: 'Origin Zone',
+    spawnWeight: 'Spawn Frequency',
+    statAttack: 'Attack Bonus',
+    statDefense: 'Defense Bonus',
+    statHp: 'HP Bonus',
+    statSpeed: 'Speed Bonus',
+    statAffinity: 'Elemental Affinity'
   }
 }
 

@@ -3,12 +3,14 @@ import {
   Transform,
   InputAction,
   TouchScreenControls,
+  inputSystem,
+  PointerEventType,
   timers
 } from '@dcl/sdk/ecs'
 import { Vector3 } from '@dcl/sdk/math'
 import { setupUi } from './ui'
 import { GolemConfig, generateRandomSquad } from './config/golems'
-import { setLocalActiveSquad } from './state'
+import { setLocalActiveSquad, toggleInventory } from './state'
 import { createFollowerGolem, removePlayerSquad } from './objects/golemFactory'
 import { golemFollowerSystem, onRemoteSquadUpdated } from './systems/followerSystem'
 import { golemCombatSystem } from './systems/golemCombatSystem'
@@ -74,16 +76,28 @@ export function main() {
   // 1. Inicializar la Interfaz de Usuario 2D (React-ECS)
   setupUi()
 
-  // 2. Configurar controles táctiles Mobile-First
+  // 2. Configurar controles táctiles Mobile-First (Botón de Mochila/Inventario para IA_SECONDARY)
   TouchScreenControls.createOrReplace(engine.RootEntity, {
     hideJoystick: false,
     hideCrosshair: false,
     touchInputs: [
+      {
+        inputAction: InputAction.IA_SECONDARY,
+        hide: false,
+        icon: { tex: { $case: 'texture', texture: { src: 'assets/images/backpack_icon.png' } } }
+      },
       { inputAction: InputAction.IA_ACTION_3, hide: true },
       { inputAction: InputAction.IA_ACTION_4, hide: true },
       { inputAction: InputAction.IA_ACTION_5, hide: true },
       { inputAction: InputAction.IA_ACTION_6, hide: true }
     ]
+  })
+
+  // 2.1. Registrar el sistema de entrada para la tecla "F" (Desktop) y botón "F" táctil (Mobile)
+  engine.addSystem(() => {
+    if (inputSystem.isTriggered(InputAction.IA_SECONDARY, PointerEventType.PET_DOWN)) {
+      toggleInventory()
+    }
   })
 
   // 3. Configurar infraestructura multijugador P2P (MessageBus)

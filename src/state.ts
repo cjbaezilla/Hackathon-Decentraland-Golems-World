@@ -52,6 +52,7 @@ export interface SceneState {
   silasTourCurrentWaypoint: number
   silasTourSubtitle: string
   hasTriggeredProximityIntro: boolean
+  isInventoryOpen: boolean
   playerInventory: Record<string, number>
   nearestItemDistance: number
   nearestItemRarity: string
@@ -73,6 +74,7 @@ export const sceneState: SceneState = {
   activeCinematicType: null,
   hasPlayedSilasIntro: false,
   isBigMapOpen: false,
+  isInventoryOpen: false,
   isSilasTourActive: false,
   silasTourCurrentWaypoint: 0,
   silasTourSubtitle: '',
@@ -83,6 +85,27 @@ export const sceneState: SceneState = {
   nearestItemId: '',
   nearestItemX: 0,
   nearestItemZ: 0
+}
+
+/**
+ * Consulta si la ventana modal del inventario está abierta.
+ */
+export function getIsInventoryOpen(): boolean {
+  return sceneState.isInventoryOpen
+}
+
+/**
+ * Establece el estado de apertura del inventario.
+ */
+export function setIsInventoryOpen(open: boolean) {
+  sceneState.isInventoryOpen = open
+}
+
+/**
+ * Alterna el estado de apertura del inventario (abrir/cerrar).
+ */
+export function toggleInventory() {
+  sceneState.isInventoryOpen = !sceneState.isInventoryOpen
 }
 
 /**
