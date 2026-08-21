@@ -20,8 +20,8 @@ export interface RespawnTask {
 // Cola global de tareas de respawn
 const respawnQueue: RespawnTask[] = []
 
-// Target fijo de ítems activos en el mapa (130 ítems)
-const TARGET_MAP_ITEMS_COUNT = 130
+// Target fijo de ítems activos en el mapa (150 ítems)
+const TARGET_MAP_ITEMS_COUNT = 150
 
 // Timeout de rotación de ítems no recolectados (30 minutos en ms)
 const ITEM_ROTATION_TIMEOUT_MS = 30 * 60 * 1000

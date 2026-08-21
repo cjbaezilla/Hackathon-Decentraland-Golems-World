@@ -76,28 +76,28 @@ The React-ECS HUD features a **2D Minimap** widget (`top: 80, right: 28`) projec
 
 ---
 
-## 5. Materials & 130 Active Items Spawner
+## 5. Materials & 150 Active Items Spawner
 
 The complete catalog consists of **forty-six (46) collectable material types**, categorized across 5 rarity tiers, all styled as scrap, mechatronics, and post-industrial artifacts.
 
-### 5.1 Spawner Rules & Lifecycle (130 Active Items)
-- **Constant Population of 130 Items**: The map maintains a fixed density of **exactly 130 active materials** distributed proportionally across all 7 sectors.
+### 5.1 Spawner Rules & Lifecycle (150 Active Items)
+- **Constant Population of 150 Items**: The map maintains a fixed density of **exactly 150 active materials** distributed proportionally across all 8 sectors.
 - **Strict PK Zone Isolation**: Free-PK danger zone materials (**Scrap Desert PK** and **Smelting Boilers PK**) **NEVER** spawn outside their assigned zone coordinates.
 - **Unique Instance Capping (`isUniqueInstance: true`)**: Epic and Legendary materials are capped at **only 1 active instance at a time** across the world.
 - **30-Minute Rotation Timeout**: Any item remaining undiscovered for 30 minutes automatically despawns and rotates to a new random location within its zone.
 
-### 5.2 Zone Item Breakdown (130 Concurrent Items)
+### 5.2 Zone Item Breakdown (150 Concurrent Items)
 
 | Spawn Zone | X Range (m) | Z Range (m) | Zone Type | Weight | Target Active Items | Thematic Material Category |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **The Junklands** | `4` to `136` | `144` to `256` | 🟢 Safe Zone | 13.8% | **18 items** | Commons (Wire, Screws, Pots) |
-| **Abandoned Factory** | `144` to `256` | `144` to `256` | 🟡 Medium | 13.8% | **18 items** | Uncommons (Transistors, Gauges) |
-| **South Corridor & Grand Way**| `144` to `256` | `4` to `136` | 🟢 Safe Zone | 9.2% | **12 items** | South Transition (Commons / Uncommons) |
-| **Electrical Substation** | `144` to `256` | `264` to `396` | 🟠 High Risk | 12.3% | **16 items** | Galvanic & Electric (Tesla Coils, Batteries) |
-| **Radio Tower** | `264` to `396` | `144` to `256` | 🟠 High Risk | 12.3% | **16 items** | Luminous & Optical (Antennas, LEDs) |
-| **Mining Reserve** | `264` to `396` | `264` to `396` | 🟢 Safe Zone | 12.3% | **16 items** | Mechanical & Bronze (Gears, Gyroscopes) |
-| **Smelting Boilers (PK)**| `264` to `396` | `4` to `136` | 🔴 **Free PK** | 13.8% | **18 items** (Free PK) | Smelting & Thermal Epics (`reactor_eter`) |
-| **Scrap Desert (PK)** | `4` to `136` | `264` to `396` | 🔴 **Free PK** | 12.3% | **16 items** (Free PK) | Legendaries & Aether Relics (`ojo_dragon`) |
+| **The Junklands** | `4` to `136` | `144` to `256` | 🟢 Safe Zone | 14.0% | **21 items** | Commons (Wire, Screws, Pots) |
+| **Abandoned Factory** | `144` to `256` | `144` to `256` | 🟡 Medium | 14.0% | **21 items** | Uncommons (Transistors, Gauges) |
+| **South Corridor & Grand Way**| `144` to `256` | `4` to `136` | 🟢 Safe Zone | 10.0% | **15 items** | South Transition (Commons / Uncommons) |
+| **Electrical Substation** | `144` to `256` | `264` to `396` | 🟠 High Risk | 12.6% | **19 items** | Galvanic & Electric (Tesla Coils, Batteries) |
+| **Radio Tower** | `264` to `396` | `144` to `256` | 🟠 High Risk | 12.6% | **19 items** | Luminous & Optical (Antennas, LEDs) |
+| **Mining Reserve** | `264` to `396` | `264` to `396` | 🟢 Safe Zone | 12.6% | **19 items** | Mechanical & Bronze (Gears, Gyroscopes) |
+| **Smelting Boilers (PK)**| `264` to `396` | `4` to `136` | 🔴 **Free PK** | 12.1% | **18 items** (Free PK) | Smelting & Thermal Epics (`reactor_eter`) |
+| **Scrap Desert (PK)** | `4` to `136` | `264` to `396` | 🔴 **Free PK** | 12.1% | **18 items** (Free PK) | Legendaries & Aether Relics (`ojo_dragon`) |
 
 ---
 

@@ -36,7 +36,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 136,
     minZ: 144,
     maxZ: 256,
-    weight: 0.138 // 13.8% (18 ítems)
+    weight: 0.140 // 14.0% (21 ítems)
   },
   'Fábrica Abandonada': {
     name: 'Fábrica Abandonada',
@@ -44,7 +44,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 256,
     minZ: 144,
     maxZ: 256,
-    weight: 0.138 // 13.8% (18 ítems)
+    weight: 0.140 // 14.0% (21 ítems)
   },
   'Corredor y Gran Vía Sur': {
     name: 'Corredor y Gran Vía Sur',
@@ -52,7 +52,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 256,
     minZ: 4,
     maxZ: 136,
-    weight: 0.092 // 9.2% (12 ítems)
+    weight: 0.100 // 10.0% (15 ítems)
   },
   'Subestación Eléctrica': {
     name: 'Subestación Eléctrica',
@@ -60,7 +60,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 256,
     minZ: 264,
     maxZ: 396,
-    weight: 0.123 // 12.3% (16 ítems)
+    weight: 0.1267 // 12.67% (19 ítems)
   },
   'Torre de Radio': {
     name: 'Torre de Radio',
@@ -68,7 +68,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 396,
     minZ: 144,
     maxZ: 256,
-    weight: 0.123 // 12.3% (16 ítems)
+    weight: 0.1267 // 12.67% (19 ítems)
   },
   'Reserva de Minería': {
     name: 'Reserva de Minería',
@@ -76,7 +76,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 396,
     minZ: 264,
     maxZ: 396,
-    weight: 0.123 // 12.3% (16 ítems)
+    weight: 0.1267 // 12.67% (19 ítems)
   },
   'Calderas de la Fundición (PK)': {
     name: 'Calderas de la Fundición (PK)',
@@ -84,7 +84,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 396,
     minZ: 4,
     maxZ: 136,
-    weight: 0.138 // 13.8% (18 ítems) - PK
+    weight: 0.120 // 12.0% (18 ítems) - PK
   },
   'Desierto de Chatarra (PK)': {
     name: 'Desierto de Chatarra (PK)',
@@ -92,7 +92,7 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxX: 136,
     minZ: 264,
     maxZ: 396,
-    weight: 0.123 // 12.3% (16 ítems) - PK
+    weight: 0.120 // 12.0% (18 ítems) - PK
   }
 }
 
@@ -433,9 +433,9 @@ function itemConfigColorHex(rarity: string): string {
 }
 
 /**
- * Inicializa exactamente 130 ítems distribuidos por todo el mapa.
+ * Inicializa exactamente 150 ítems distribuidos por todo el mapa.
  */
-export function spawnInitialMapItems(targetTotalCount: number = 130) {
+export function spawnInitialMapItems(targetTotalCount: number = 150) {
   let spawnedCount = 0
 
   for (const [zoneName, zoneBounds] of Object.entries(ITEM_ZONE_BOUNDS)) {

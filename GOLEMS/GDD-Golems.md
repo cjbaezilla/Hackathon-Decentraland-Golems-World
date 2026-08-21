@@ -76,28 +76,28 @@ El HUD incluye un widget de **Minimapa 2D** (`top: 80, right: 28`) en la interfa
 
 ---
 
-## 5. Los materiales y el Spawner de 130 Ítems Concurrentes
+## 5. Los materiales y el Spawner de 150 Ítems Concurrentes
 
 El catálogo completo se compone de **cuarenta y seis (46) tipos de materiales coleccionables**, distribuidos en 5 niveles de rareza, todos diseñados como piezas de chatarra, mecatrónica y utensilios de un mundo post-industrial.
 
-### 5.1 Reglas del Spawner y Ciclo de Vida (130 Ítems Activos)
-- **Poblado Fijo de 130 Ítems**: El mapa mantiene una densidad fija de **exactamente 130 materiales activos** repartidos proporcionalmente por las 7 zonas.
+### 5.1 Reglas del Spawner y Ciclo de Vida (150 Ítems Activos)
+- **Poblado Fijo de 150 Ítems**: El mapa mantiene una densidad fija de **exactamente 150 materiales activos** repartidos proporcionalmente por las 8 zonas.
 - **Aislamiento Estricto de Zonas PK**: Los materiales de zonas de peligro libre PK (**Desierto de Chatarra PK** y **Calderas de la Fundición PK**) **NUNCA** aparecen fuera de las coordenadas métricas de sus zonas.
 - **Instancias Únicas (`isUniqueInstance: true`)**: Los materiales Épicos y Legendarios están restringidos a **máximo 1 sola instancia activa simultánea** en todo el mundo.
 - **Timeout de Rotación (30 min)**: Todo ítem que permanezca 30 minutos sin ser descubierto/recolectado expira automáticamente y rota a una nueva ubicación aleatoria de su zona.
 
-### 5.2 Desglose de Distribución de Ítems por Zona (130 Ítems)
+### 5.2 Desglose de Distribución de Ítems por Zona (150 Ítems)
 
 | Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Simultáneos | Categoría de Materiales Temáticos |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Los Chatarrales** | `4` a `136` | `144` a `256` | 🟢 Segura | 13.8% | **18 ítems** | Comunes (Alambre, Tornillos, Ollas) |
-| **Fábrica Abandonada** | `144` a `256` | `144` a `256` | 🟡 Media | 13.8% | **18 ítems** | Poco Comunes (Transistores, Manómetros) |
-| **Corredor y Gran Vía Sur**| `144` a `256` | `4` a `136` | 🟢 Segura | 9.2% | **12 ítems** | Transición Sur (Comunes / Poco Comunes) |
-| **Subestación Eléctrica** | `144` a `256` | `264` a `396` | 🟠 Alta | 12.3% | **16 ítems** | Galvánicos y Eléctricos (Bobinas Tesla, Baterías) |
-| **Torre de Radio** | `264` a `396` | `144` a `256` | 🟠 Alta | 12.3% | **16 ítems** | Luminosos y Transmisión (Antenas, Diodos LED) |
-| **Reserva de Minería** | `264` a `396` | `264` a `396` | 🟢 Segura | 12.3% | **16 ítems** | Mecánicos y Bronce (Engranajes, Giróscopos) |
-| **Calderas Fundición (PK)**| `264` a `396` | `4` a `136` | 🔴 **PK Libre** | 13.8% | **18 ítems** (PK Libre) | Épicos de Fundición y Térmicos (`reactor_eter`) |
-| **Desierto Chatarra (PK)** | `4` a `136` | `264` a `396` | 🔴 **PK Libre** | 12.3% | **16 ítems** (PK Libre) | Legendarios y Reliquias Éter (`ojo_dragon`, etc.) |
+| **Los Chatarrales** | `4` a `136` | `144` a `256` | 🟢 Segura | 14.0% | **21 ítems** | Comunes (Alambre, Tornillos, Ollas) |
+| **Fábrica Abandonada** | `144` a `256` | `144` a `256` | 🟡 Media | 14.0% | **21 ítems** | Poco Comunes (Transistores, Manómetros) |
+| **Corredor y Gran Vía Sur**| `144` a `256` | `4` a `136` | 🟢 Segura | 10.0% | **15 ítems** | Transición Sur (Comunes / Poco Comunes) |
+| **Subestación Eléctrica** | `144` a `256` | `264` a `396` | 🟠 Alta | 12.6% | **19 ítems** | Galvánicos y Eléctricos (Bobinas Tesla, Baterías) |
+| **Torre de Radio** | `264` a `396` | `144` a `256` | 🟠 Alta | 12.6% | **19 ítems** | Luminosos y Transmisión (Antenas, Diodos LED) |
+| **Reserva de Minería** | `264` a `396` | `264` a `396` | 🟢 Segura | 12.6% | **19 ítems** | Mecánicos y Bronce (Engranajes, Giróscopos) |
+| **Calderas Fundición (PK)**| `264` a `396` | `4` a `136` | 🔴 **PK Libre** | 12.1% | **18 ítems** (PK Libre) | Épicos de Fundición y Térmicos (`reactor_eter`) |
+| **Desierto Chatarra (PK)** | `4` a `136` | `264` a `396` | 🔴 **PK Libre** | 12.1% | **18 ítems** (PK Libre) | Legendarios y Reliquias Éter (`ojo_dragon`, etc.) |
 
 ---
 

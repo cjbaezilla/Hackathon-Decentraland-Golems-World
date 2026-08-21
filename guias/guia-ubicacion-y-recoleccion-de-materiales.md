@@ -3,7 +3,7 @@
 > **Ubicación del Código y Módulos**:
 > - 📄 **Catálogo y Configuración de Materiales**: [`src/config/items.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/config/items.ts)
 > - 🧱 **Componente ECS SDK7**: [`src/components/item.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/components/item.ts)
-> - 🛠️ **Generador y Spawner de 130 Ítems**: [`src/objects/itemGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/itemGenerator.ts)
+> - 🛠️ **Generador y Spawner de 150 Ítems**: [`src/objects/itemGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/itemGenerator.ts)
 > - ⚡ **Sistema de Respawns, Timeouts y Radar**: [`src/systems/itemSpawnSystem.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/systems/itemSpawnSystem.ts)
 > - 🖥️ **Widget de Radar de Calor React-ECS**: [`src/ui/heatRadarComponent.tsx`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/ui/heatRadarComponent.tsx)
 
@@ -14,7 +14,7 @@
 En el universo de **Golems World**, los materiales para la Forja no crecen en la superficie de forma estática; representan piezas de chatarra, mecatrónica y utensilios reutilizados camuflados o enterrados a lo largo y ancho del mundo de 25x25 parcelas (400m × 400m / 160.000 m²).
 
 El sistema se basa en 4 pilares fundamentales:
-1. **Poblado Constante de 130 Ítems Activos**: El mapa mantiene una densidad fija de **130 ítems concurrentes**, distribuidos proporcionalmente por zona según el peso total de sus materiales.
+1. **Poblado Constante de 150 Ítems Activos**: El mapa mantiene una densidad fija de **150 ítems concurrentes**, distribuidos proporcionalmente por zona según el peso total de sus materiales.
 2. **Aislamiento Estricto por Zonas (Incluyendo Zonas de Peligro PK)**: Cada uno de los 46 materiales pertenece a una zona específica. Los ítems de zonas de peligro PK (**Desierto de Chatarra PK** y **Calderas de la Fundición PK**) **JAMÁS** aparecen fuera de las coordenadas métricas de sus zonas correspondientes.
 3. **Ciclo de Vida Dinámico (Respawns y Timeout de 30 min)**: Al recolectar un ítem, se programa un respawn temporizado ($T \in [\text{respawnMinMinutes}, \text{respawnMaxMinutes}]$). Si un ítem no es descubierto tras **30 minutos**, expira automáticamente y rota a una nueva ubicación aleatoria en la misma zona.
 4. **Radar de Calor y Emergencia del Suelo (< 4m)**: Los ítems permanecen camuflados a $Y = -0.5\text{m}$. Al acercarse el avatar a menos de 4 metros, la pieza asciende a $Y = 0.25\text{m}$ y activa su hitbox táctil Mobile-First.
@@ -48,18 +48,18 @@ El mapa de 400m × 400m se divide en 7 sectores de aparición, excluyendo la zon
 (0, 0m)   └───────────────────────────┴───────────────────────────┘ (400m, 0m)
 ```
 
-### Tabla de Delimitación y Pesos Proporcionales (130 Ítems)
+### Tabla de Delimitación y Pesos Proporcionales (150 Ítems)
 
 | Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Objetivo | Categoría de Materiales Temáticos |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Los Chatarrales** | `4` a `136` | `144` a `256` | 🟢 Segura | 13.8% (0.138) | **18 ítems** | Comunes (Alambre, Tornillos, Ollas) |
-| **Fábrica Abandonada** | `144` a `256` | `144` a `256` | 🟡 Media | 13.8% (0.138) | **18 ítems** | Poco Comunes (Transistores, Manómetros) |
-| **Corredor y Gran Vía Sur**| `144` a `256` | `4` a `136` | 🟢 Segura | 9.2% (0.092) | **12 ítems** | Transición Sur (Comunes / Poco Comunes) |
-| **Subestación Eléctrica** | `144` a `256` | `264` a `396` | 🟠 Alta | 12.3% (0.123) | **16 ítems** | Galvánicos y Eléctricos (Bobinas Tesla, Baterías) |
-| **Torre de Radio** | `264` a `396` | `144` a `256` | 🟠 Alta | 12.3% (0.123) | **16 ítems** | Luminosos y Transmisión (Antenas, Diodos LED) |
-| **Reserva de Minería** | `264` a `396` | `264` a `396` | 🟢 Segura | 12.3% (0.123) | **16 ítems** | Mecánicos y Bronce (Engranajes, Giróscopos) |
-| **Calderas Fundición (PK)**| `264` a `396` | `4` a `136` | 🔴 **PK Libre** | 13.8% (0.138) | **18 ítems** (PK Libre) | Épicos de Fundición y Térmicos (`reactor_eter`) |
-| **Desierto Chatarra (PK)** | `4` a `136` | `264` a `396` | 🔴 **PK Libre** | 12.3% (0.123) | **16 ítems** (PK Libre) | Legendarios y Reliquias Éter (`ojo_dragon`, etc.) |
+| **Los Chatarrales** | `4` a `136` | `144` a `256` | 🟢 Segura | 14.0% (0.140) | **21 ítems** | Comunes (Alambre, Tornillos, Ollas) |
+| **Fábrica Abandonada** | `144` a `256` | `144` a `256` | 🟡 Media | 14.0% (0.140) | **21 ítems** | Poco Comunes (Transistores, Manómetros) |
+| **Corredor y Gran Vía Sur**| `144` a `256` | `4` a `136` | 🟢 Segura | 10.0% (0.100) | **15 ítems** | Transición Sur (Comunes / Poco Comunes) |
+| **Subestación Eléctrica** | `144` a `256` | `264` a `396` | 🟠 Alta | 12.6% (0.126) | **19 ítems** | Galvánicos y Eléctricos (Bobinas Tesla, Baterías) |
+| **Torre de Radio** | `264` a `396` | `144` a `256` | 🟠 Alta | 12.6% (0.126) | **19 ítems** | Luminosos y Transmisión (Antenas, Diodos LED) |
+| **Reserva de Minería** | `264` a `396` | `264` a `396` | 🟢 Segura | 12.6% (0.126) | **19 ítems** | Mecánicos y Bronce (Engranajes, Giróscopos) |
+| **Calderas Fundición (PK)**| `264` a `396` | `4` a `136` | 🔴 **PK Libre** | 12.1% (0.121) | **18 ítems** (PK Libre) | Épicos de Fundición y Térmicos (`reactor_eter`) |
+| **Desierto Chatarra (PK)** | `4` a `136` | `264` a `396` | 🔴 **PK Libre** | 12.1% (0.121) | **18 ítems** (PK Libre) | Legendarios y Reliquias Éter (`ojo_dragon`, etc.) |
 
 > 🛡️ **Algoritmo de Separación Espacial Mínima (`isPositionValidAndSeparated`)**:
 > - **Distancia Mínima de Separación**: Cada ítem verifica mediante muestreo por rechazo que la distancia euclidiana a cualquier otro ítem activo sea $\ge 7.5\text{m}$ (evitando agrupamientos densos o solapamientos).
