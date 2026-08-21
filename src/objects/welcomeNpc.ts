@@ -10,7 +10,7 @@ import {
   Entity
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
-import { t } from '../i18n'
+import { t, onLanguageChange } from '../i18n'
 import {
   openNpcDialog,
   getHasTriggeredProximityIntro,
@@ -43,8 +43,26 @@ export interface WelcomeNpcEntities {
 
 let silasNpcEntity: Entity | null = null
 let silasLabelEntity: Entity | null = null
+let companionGolemLabelEntity: Entity | null = null
 let emoteTimer: number = 0
 let currentEmoteIndex: number = 0
+
+/**
+ * Actualiza los rótulos de Silas y Pistón en tiempo real al cambiar el idioma de la escena.
+ */
+export function updateWelcomeNpcLanguage() {
+  if (silasLabelEntity && TextShape.has(silasLabelEntity)) {
+    TextShape.getMutable(silasLabelEntity).text = t('npc.floatingLabel')
+  }
+  if (companionGolemLabelEntity && TextShape.has(companionGolemLabelEntity)) {
+    TextShape.getMutable(companionGolemLabelEntity).text = `♨️ ${t('npc.companionName')}`
+  }
+}
+
+// Suscripción al cambio global de idioma
+onLanguageChange(() => {
+  updateWelcomeNpcLanguage()
+})
 
 /**
  * Instancia al NPC Silas y su micro-campamento de supervivencia.
@@ -197,6 +215,7 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
     textColor: Color4.create(1.0, 0.6, 0.2, 1.0)
   })
   Billboard.create(golemLabel)
+  companionGolemLabelEntity = golemLabel
 
   // Interacción táctil con el campamento también abre el diálogo
   pointerEventsSystem.onPointerDown(
