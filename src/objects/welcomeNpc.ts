@@ -246,16 +246,6 @@ export function createWelcomeNpc(pos: Vector3 = Vector3.create(15.8, 0.25, 5.9))
 }
 
 /**
- * Actualiza el rótulo de Silas en tiempo real al cambiar el idioma de la escena.
- */
-export function updateWelcomeNpcLanguage() {
-  if (silasLabelEntity && TextShape.has(silasLabelEntity)) {
-    const textShape = TextShape.getMutable(silasLabelEntity)
-    textShape.text = t('npc.floatingLabel')
-  }
-}
-
-/**
  * Obtiene la entidad del avatar de Silas para seguimiento de cámara o interacción.
  */
 export function getSilasAvatarEntity(): Entity | null {

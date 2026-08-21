@@ -23,6 +23,8 @@ import {
 } from './systems/silasTourSystem'
 import { MinimapWidget, BigMapModal } from './ui/minimapComponent'
 import { LoadingScreenWidget } from './ui/loadingScreenComponent'
+import { HeatRadarWidget } from './ui/heatRadarComponent'
+
 
 
 /**
@@ -993,6 +995,10 @@ export const uiComponent = () => {
 
       {/* Widget de Minimapa Compacto (Esquina Superior Derecha, bajo TopHeaderBar) */}
       <MinimapWidget />
+
+      {/* Widget de Radar de Calor (Esquina Inferior Izquierda) */}
+      <HeatRadarWidget />
+
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />

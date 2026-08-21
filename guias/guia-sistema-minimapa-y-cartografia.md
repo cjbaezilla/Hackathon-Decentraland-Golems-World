@@ -23,6 +23,7 @@ El mundo de **Golems** se despliega sobre una cuadrícula monumental de **25x25 
 
 1. **Minimapa HUD Perenne**:
    - Widget compacto de $200\text{px} \times 200\text{px}$ ubicado en la esquina superior derecha (`top: 80, right: 28`), inmediatamente debajo de la barra de estado y selector de idioma (`TopHeaderBar`).
+   - Integrado horizontalmente a su lado izquierdo (`top: 80, right: 240`) se encuentra el **Widget de Radar de Calor** React-ECS (`HeatRadarWidget`), formando un bloque de exploración cohesivo en la safe area superior derecha.
    - Muestra la posición del jugador en vivo, el cono de visión y un botón táctil `⛶` para maximizar.
 2. **Modal de Mapa Completo Panorámico (*BigMapModal*)**:
    - Modal interactivo con fondo semitransparente (`rgba(5, 8, 15, 0.86)`), diseñado en **2 columnas apaisadas** ($880\text{px} \times 480\text{px}$) para adaptarse con total holgura a las pantallas horizontales de dispositivos móviles (`1600x720`) y monitores de escritorio (`1920x1080`).

@@ -54,6 +54,7 @@ d:/DECENTRALAND/Scenes/Hackathon/
 ├── src/
 │   ├── index.ts                            # Orquestador del ciclo de vida (main)
 │   ├── config/
+│   │   ├── items.ts                        # Catálogo de 46 materiales coleccionables (pesos y respawns)
 │   │   ├── forgeDistrictConfig.ts          # Coordenadas y assets del Distrito de la Forja (0..140, 0..140)
 │   │   ├── scrapDesertConfig.ts            # Coordenadas y assets del Desierto de Chatarra (0..140, 260..400)
 │   │   ├── miningReserveConfig.ts          # Coordenadas y assets de la Reserva de Minería (260..400, 260..400)
@@ -67,6 +68,7 @@ d:/DECENTRALAND/Scenes/Hackathon/
 │   │   ├── wreckageLabConfig.ts            # Coordenadas y assets del Laboratorio Wreckage Lab (16..36, 30..39)
 │   │   └── arenaConfig.ts                  # Parámetros geométricos de la Gran Arena Central (200, 200)
 │   └── objects/
+│       ├── itemGenerator.ts                # Spawner aleatorio ponderado de 90 materiales (aislamiento estricto PK)
 │       ├── forgeDistrictBuilder.ts         # Fábrica constructora del Distrito de la Forja
 │       ├── scrapDesertBuilder.ts           # Fábrica constructora del Desierto de Chatarra
 │       ├── miningReserveBuilder.ts         # Fábrica constructora de la Reserva de Minería

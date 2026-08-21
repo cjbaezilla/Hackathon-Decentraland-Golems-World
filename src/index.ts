@@ -38,6 +38,9 @@ import { silasTourSystem } from './systems/silasTourSystem'
 import { sceneLoaderSystem } from './systems/sceneLoaderSystem'
 import { npcPatrolSystem } from './systems/npcPatrolSystem'
 import { mapGolemPatrolSystem } from './systems/mapGolemPatrolSystem'
+import { spawnInitialMapItems } from './objects/itemGenerator'
+import { itemSpawnSystem } from './systems/itemSpawnSystem'
+
 
 import {
   setupSquadSyncListeners,
@@ -120,15 +123,18 @@ export function main() {
   // 11. Instanciar los 150 golems ambientales distribuidos dinámicamente con mayor presencia en los bordes del mapa
   spawnMapGolems(150)
 
-  // 11. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
+  // 12. Instanciar exactamente 90 materiales coleccionables distribuidos por las 7 zonas del mapa
+  spawnInitialMapItems(90)
+
+  // 13. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
   initSilasCinematicCamera()
   initTourFollowCamera()
   initMarketOrbitalCamera()
 
-  // 11. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
+  // 14. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
   scheduleSilasIntroCinematic()
 
-  // 12. Registrar los sistemas de carga, seguimiento, combate, animación, trampolín, NPCs y tour guiado
+  // 15. Registrar los sistemas de carga, seguimiento, combate, animación, trampolín, NPCs, materiales y tour guiado
   engine.addSystem(sceneLoaderSystem)
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
@@ -138,6 +144,8 @@ export function main() {
   engine.addSystem(silasTourSystem)
   engine.addSystem(npcPatrolSystem)
   engine.addSystem(mapGolemPatrolSystem)
+  engine.addSystem(itemSpawnSystem)
+
 
   console.log('🤖 [Golems World] Escena principal inicializada con el mapa completo de 9 zonas, Silas el Sobreviviente, cinemática de presentación y sistema de tour guiado activo.')
 }

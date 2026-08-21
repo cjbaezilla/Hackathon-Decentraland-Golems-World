@@ -21,10 +21,12 @@ Bienvenido al directorio de documentación técnica y guías maestras de **Golem
 | **11** | **Escondite y Bóveda del Jugador (User's Hideout & Vault)** | Taller clandestino en punto medio `(Z: 17.70m, X: 3.8m-8.0m)` entre Trampolín y Mercado #06, silla steampunk, tejadillo, chatarra lateral y 3 cofres cerrados frontales. | [📖 Leer Guía](guia-escondite-y-boveda-usuario.md) |
 | **12** | **Fórmulas, Criterios y Algoritmo de Recetas de Golems** | Especificación matemática del hash FNV-1a de 32 bits, serialización canónica, catálogo de 46 materiales, ecuaciones de derivación de atributos, Pentágono de Afinidades y balance de 150 recetas por Tiers. | [📖 Leer Guía](guia-formulas-y-recetas-golems.md) |
 | **13** | **Fabricación, Catálogo, Vestimenta y Accesorios 3D de NPCs y Jugadores** | Descubrimiento del API de Catalyst (`peer.decentraland.org`), catálogo completo de 282 URNs válidas, regla de vestimenta Steampunk Devastado / Mad Max, generador procedural de 18 accesorios 3D GLB (`assets/wearables/`), anclaje corporal `AvatarAttach` (`src/objects/npcWearables.ts`) y fábrica de posicionamiento de 50 NPCs distribuidos por todo el mapa. | [📖 Leer Guía](guia-fabricacion-y-catalogo-npcs.md) |
+| **14** | **Ubicación, Spawner y Recolección de Materiales (Item Placement & Heat Radar)** | Generación aleatoria ponderada de los 46 materiales en el mapa 25x25 (400m × 400m), densidad fija de 90 ítems concurrentes, aislamiento estricto de zonas de peligro PK (Desierto PK y Calderas PK), respawns temporizados, rotación automática a los 30 min, emergencia visual ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) a $< 4\text{m}$ y widget del Radar de Calor React-ECS (`top: 80, right: 240`). | [📖 Leer Guía](guia-ubicacion-y-recoleccion-de-materiales.md) |
 
 ---
 
 ## 🧭 Resumen Rápido por Guía
+
 
 ### 1. [guia-mapa-zonas-y-distritos.md](guia-mapa-zonas-y-distritos.md)
 Documento espacial exhaustivo que detalla la matriz de 25x25 parcelas desde `0,0` hasta `24,24`. Explica los rangos de coordenadas de las 4 esquinas simétricas (140m × 140m cada una: Distrito de la Forja, Desierto de Chatarra, Reserva de Minería y Calderas de Fundición), anillos intermedios, pasillos viales, trampolines propulsores, los 5 puestos de comercio steampunk y el **sistema de 150 golems ambientales distribuidos por gradientes con movimiento de patrullaje orgánico DOP (`mapGolemPatrolSystem`)**.
@@ -64,3 +66,7 @@ Manual técnico exhaustivo sobre el sistema de forja determinista de golems. Exp
 
 ### 13. [guia-fabricacion-y-catalogo-npcs.md](guia-fabricacion-y-catalogo-npcs.md)
 Manual técnico exhaustivo sobre el generador de avatares `AvatarShape` de SDK7, vestimenta y accesorios 3D. Detalla el descubrimiento del API en vivo de Catalyst (`peer.decentraland.org`), el catálogo de 282 URNs válidas, las reglas de vestimenta Steampunk Devastado / Mad Max, la generación procedural de 18 accesorios 3D GLB en `assets/wearables/`, el sistema de anclaje `AvatarAttach` (`src/objects/npcWearables.ts`), el registro de mallas `.glb` en el monitor de carga (`registerEntityForLoading`) junto a `sceneLoaderSystem`, y la fábrica de instanciación de los 50 NPCs distribuidos por todo el mapa.
+
+### 14. [guia-ubicacion-y-recoleccion-de-materiales.md](guia-ubicacion-y-recoleccion-de-materiales.md)
+Manual técnico maestro sobre el spawner y ciclo de vida de los 46 materiales coleccionables en el mapa 25x25 (400m × 400m). Detalla el mantenimiento constante de 90 ítems activos, la delimitación estricta y aislamiento 100% de zonas de peligro PK (Desierto de Chatarra PK y Calderas de la Fundición PK), la ruleta de selección por `spawnWeight`, el límite de 1 sola instancia activa para ítems Épicos y Legendarios (`isUniqueInstance: true`), la cola de respawn temporizado, el timeout de rotación preventiva a los 30 minutos, la mecánica de emergencia del suelo ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) a $< 4\text{m}$ y la integración con el widget del Radar de Calor React-ECS (`top: 80, right: 240`).
+

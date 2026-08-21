@@ -52,6 +52,10 @@ export interface SceneState {
   silasTourCurrentWaypoint: number
   silasTourSubtitle: string
   hasTriggeredProximityIntro: boolean
+  playerInventory: Record<string, number>
+  nearestItemDistance: number
+  nearestItemRarity: string
+  nearestItemId: string
 }
 
 export const sceneState: SceneState = {
@@ -70,7 +74,11 @@ export const sceneState: SceneState = {
   isSilasTourActive: false,
   silasTourCurrentWaypoint: 0,
   silasTourSubtitle: '',
-  hasTriggeredProximityIntro: false
+  hasTriggeredProximityIntro: false,
+  playerInventory: {},
+  nearestItemDistance: 999,
+  nearestItemRarity: 'common',
+  nearestItemId: ''
 }
 
 /**
@@ -350,5 +358,41 @@ export function isLocalSquadGolem(golemId: string): boolean {
   if (!sceneState.localSquad) return false
   return sceneState.localSquad.some((g) => g.id === golemId)
 }
+
+/**
+ * Añade una cantidad de un material de chatarra al inventario del jugador.
+ */
+export function addMaterialToInventory(itemId: string, count: number = 1) {
+  const current = sceneState.playerInventory[itemId] || 0
+  sceneState.playerInventory[itemId] = current + count
+}
+
+/**
+ * Devuelve el inventario completo de materiales del jugador.
+ */
+export function getPlayerInventory(): Record<string, number> {
+  return sceneState.playerInventory
+}
+
+/**
+ * Actualiza la información de proximidad para el Radar de Calor (React-ECS UI).
+ */
+export function updateHeatRadarState(distance: number, rarity: string, itemId: string) {
+  sceneState.nearestItemDistance = distance
+  sceneState.nearestItemRarity = rarity
+  sceneState.nearestItemId = itemId
+}
+
+/**
+ * Obtiene el estado actual del Radar de Calor.
+ */
+export function getHeatRadarState(): { distance: number; rarity: string; itemId: string } {
+  return {
+    distance: sceneState.nearestItemDistance,
+    rarity: sceneState.nearestItemRarity,
+    itemId: sceneState.nearestItemId
+  }
+}
+
 
 

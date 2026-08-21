@@ -11,9 +11,10 @@
 
 **Golems** is a massive multiplayer experience built on **Decentraland SDK7**, set in a fascinating universe of scrap metal, steampunk technology, and residual magic. Players explore a vast 160,000 m² world, track down hidden mechanical parts using an innovative **Heat Radar**, forge unique combat automatons using a **deterministic hashing** system, lead automated expeditions, and fight in real time both in the open world and in a competitive **Ladder Tournament** (1v1 and 2v2).
 
-> 📚 **Official Game Design Document (GDD) & Recipe Catalog**:
+> 📚 **Official Game Design Document (GDD) & Technical Guides**:
 > - 🇬🇧 **English**: [GOLEMS/GDD-Golems_eng.md](GOLEMS/GDD-Golems_eng.md) (GDD) | 📜 [GOLEMS/Golems-Recetas-150_eng.md](GOLEMS/Golems-Recetas-150_eng.md) (150 Deterministic Recipe Catalog)
-> - 🇪🇸 **Español**: [GOLEMS/GDD-Golems.md](GOLEMS/GDD-Golems.md) (GDD) | 📜 [GOLEMS/Golems-Recetas-150.md](GOLEMS/Golems-Recetas-150.md) (Catálogo Maestro de 150 Recetas)
+> - 🇪🇸 **Español**: [GOLEMS/GDD-Golems.md](GOLEMS/GDD-Golems.md) (GDD) | 📜 [GOLEMS/Golems-Recetas-150.md](GOLEMS/Golems-Recetas-150.md) (Catálogo Maestro) | 📦 [guias/guia-ubicacion-y-recoleccion-de-materiales.md](guias/guia-ubicacion-y-recoleccion-de-materiales.md) (Item Placement & Radar)
+
 
 ---
 
@@ -102,18 +103,26 @@ The experience takes place in the Decentraland World `golems.dcl.eth`, made of a
 
 ---
 
-## 📡 The Heat Radar and Scavenging
+## 📡 The Heat Radar, Spawner (90 Active Items), and Scavenging
 
-To ensure optimal performance on mobile devices, buried materials do not require complex aiming or *raycasting* systems. Instead, the **Heat Radar** (built with React-ECS) computes the Euclidean distance between the avatar and active resources:
+> 📘 **Technical Spawner & Radar Documentation**: For deep architectural details, zone coordinates, unique instance rules, and timers, see the [Master Guide: Material Item Placement & Heat Radar](guias/guia-ubicacion-y-recoleccion-de-materiales.md).
+
+To ensure optimal performance and engagement, the map maintains a constant density of **exactly 90 active items** distributed proportionally across all 7 sectors, strictly respecting zone bounds (e.g. Legendary items only spawn inside the **Scrap Desert PK**, and Smelting Epics only inside the **Smelting Boilers PK**).
 
 ![Heat Radar](GOLEMS/golems_radar_eng.png)
 
-- **Radar Behavior**:
-  - **Far (> 30m)**: Sensor inactive with cool blue tones and an off pulse.
-  - **Medium Distance (15m - 30m)**: Gentle rhythmic pulse in yellow tones.
-  - **Close (< 15m)**: Accelerated pulse in bright red/orange tones.
-  - **Immediate Proximity (< 4m)**: The scrap part visually emerges from the ground with an emissive particle effect.
-- **Touch Scavenging**: Upon emerging, the part features a wide pointer collider (a touch *hitbox* optimized for touchscreens) collected with a single tap.
+- **90 Concurrent Map Items & Lifecycle**:
+  - **Weighted Zone Roulette**: Items are picked based on `spawnWeight` per zone.
+  - **Strict PK Zone Isolation**: PK Zone items **NEVER** spawn outside their danger zones.
+  - **Unique Instance Rule (`isUniqueInstance: true`)**: Epic & Legendary items are capped at **only 1 active instance** at a time across the entire 400m × 400m world.
+  - **30-Minute Rotation Timeout**: Uncollected items automatically despawn after 30 minutes to refresh locations and prevent static accumulation.
+- **Heat Radar Widget (React-ECS UI)**:
+  - Positioned in the top right area (`top: 80, right: 240`), immediately to the left of the Minimap widget.
+  - **Far (> 30m)**: Cool blue inactive sensor (`#0D1F38`).
+  - **Medium (15m - 30m)**: Gentle rhythmic yellow pulse (`#332E05`).
+  - **Close (4m - 15m)**: Accelerated bright orange/red pulse (`#401700`).
+  - **Immediate Proximity (< 4m)**: The buried part visually emerges from $Y = -0.5\text{m}$ to $Y = 0.25\text{m}$ with an emissive PBR glow and wide touchscreen hitbox.
+
 
 ---
 
