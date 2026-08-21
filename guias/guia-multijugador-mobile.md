@@ -188,11 +188,16 @@ El SDK7 incluye el componente `TouchScreenControls` para limpiar la interfaz en 
 ```typescript
 import { engine, TouchScreenControls, InputAction } from '@dcl/sdk/ecs'
 
-// Ocultar botones de acción secundarios (3, 4, 5, 6) para eliminar el botón "+" de menú
+// Ocultar botones de acción secundarios (3, 4, 5, 6) y personalizar el botón "F" con la mochila
 TouchScreenControls.createOrReplace(engine.RootEntity, {
   hideJoystick: false,
   hideCrosshair: false,
   touchInputs: [
+    {
+      inputAction: InputAction.IA_SECONDARY,
+      hide: false,
+      icon: { tex: { $case: 'texture', texture: { src: 'assets/images/backpack_icon.png' } } }
+    },
     { inputAction: InputAction.IA_ACTION_3, hide: true },
     { inputAction: InputAction.IA_ACTION_4, hide: true },
     { inputAction: InputAction.IA_ACTION_5, hide: true },
@@ -200,6 +205,9 @@ TouchScreenControls.createOrReplace(engine.RootEntity, {
   ]
 })
 ```
+
+Ver especificación completa en la [Guía Maestra de Inventario y Botones de Acción](guia-sistema-inventario-y-botones-accion.md).
+
 
 ### 4.2 Interfaz 2D (React-ECS) Adaptada a Móviles (Safe Areas)
 

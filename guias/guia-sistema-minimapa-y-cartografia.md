@@ -207,3 +207,6 @@ graph TD
    - La geolocalización se evalúa por lectura directa de componentes `Transform.get(engine.PlayerEntity)` y `Transform.get(engine.CameraEntity)` con complejidad computacional $O(1)$.
 4. **Hitboxes Táctiles Accesibles**:
    - Todos los botones interactivos en el minimapa y modal grande poseen áreas mínimas de contacto de $36\text{px} \times 30\text{px}$ hasta $424\text{px} \times 40\text{px}$, superando los estándares ergonómicos táctiles.
+5. **Anclaje de Barra de Acción (`DesktopActionBarWidget`)**:
+   - Directamente debajo de `MinimapWidget` (`top: 80px, right: 28px, height: 200px`) se ancla la barra de botones de acción a `top: 286px, right: 28px`, justificada a la derecha para alojar el icono de la mochila (`assets/images/backpack_icon.png`) y futuros botones de acceso rápido ([guia-sistema-inventario-y-botones-accion.md](guia-sistema-inventario-y-botones-accion.md)).
+

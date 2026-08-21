@@ -22,63 +22,66 @@ import { t } from '../i18n'
  * Botón individual estilizado de la Barra de Acción Steampunk
  */
 export interface ActionIconButtonProps {
-  icon: string
+  icon?: string
+  textureSrc?: string
   tooltip?: string
   isActive: boolean
   onClick: () => void
   keyId: string
 }
 
-export const ActionIconButton = ({ icon, tooltip, isActive, onClick, keyId }: ActionIconButtonProps) => {
+export const ActionIconButton = ({ icon, textureSrc, tooltip, isActive, onClick, keyId }: ActionIconButtonProps) => {
   return (
     <UiEntity
       key={keyId}
       uiTransform={{
-        width: 44,
-        height: 44,
+        width: 48,
+        height: 48,
         margin: { left: 8 },
         justifyContent: 'center',
         alignItems: 'center',
+        padding: { top: 2, bottom: 2, left: 2, right: 2 },
         pointerFilter: 'block'
       }}
       uiBackground={{
         color: isActive
-          ? Color4.create(0.24, 0.20, 0.10, 0.95) // Dorado activo
-          : Color4.create(0.08, 0.10, 0.15, 0.92)  // Oscuro steampunk base
+          ? Color4.create(1.0, 0.85, 0.3, 0.95) // Resplandor dorado activo
+          : Color4.create(0.12, 0.16, 0.22, 0.92)  // Fondo base
       }}
       onMouseDown={() => onClick()}
     >
-      {/* Marco de borde resplandeciente */}
-      <UiEntity
-        uiTransform={{
-          width: 40,
-          height: 40,
-          justifyContent: 'center',
-          alignItems: 'center',
-          pointerFilter: 'none'
-        }}
-        uiBackground={{
-          color: isActive
-            ? Color4.create(0.40, 0.32, 0.12, 0.8)
-            : Color4.create(0.14, 0.18, 0.25, 0.6)
-        }}
-      >
-        {/* Icono Principal (Mochila u otro) */}
+      {textureSrc ? (
         <UiEntity
           uiTransform={{
             width: '100%',
-            height: '100%'
+            height: '100%',
+            pointerFilter: 'none'
+          }}
+          uiBackground={{
+            texture: { src: textureSrc },
+            textureMode: 'stretch'
+          }}
+        />
+      ) : (
+        <UiEntity
+          uiTransform={{
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            pointerFilter: 'none'
           }}
           uiText={{
-            value: icon,
-            fontSize: 22,
+            value: icon || '',
+            fontSize: 26,
             textAlign: 'middle-center'
           }}
         />
-      </UiEntity>
+      )}
     </UiEntity>
   )
 }
+
 
 /**
  * Widget de Barra de Acción para Desktop (Debajo del Minimapa, justificado a la derecha)
@@ -110,7 +113,7 @@ export const DesktopActionBarWidget = () => {
       {/* Primer Icono (Extremo Derecho): Mochila / Inventario */}
       <ActionIconButton
         keyId="btn_backpack_inventory"
-        icon="🎒"
+        textureSrc="assets/images/backpack_icon.png"
         tooltip={t('inventory.backpackTooltip')}
         isActive={isInventoryOpen}
         onClick={() => toggleInventory()}
@@ -118,3 +121,4 @@ export const DesktopActionBarWidget = () => {
     </UiEntity>
   )
 }
+

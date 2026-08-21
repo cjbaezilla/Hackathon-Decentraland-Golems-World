@@ -61,11 +61,12 @@ export const InventoryModal = () => {
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        pointerFilter: 'block'
+        pointerFilter: 'none'
       }}
       uiBackground={{
         color: Color4.create(0.02, 0.03, 0.06, 0.86)
       }}
+      onMouseDown={() => toggleInventory()}
     >
       {/* Tarjeta Central del Inventario (920x540px Centrada) */}
       <UiEntity
