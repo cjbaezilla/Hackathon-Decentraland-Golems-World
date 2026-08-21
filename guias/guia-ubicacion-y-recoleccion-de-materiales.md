@@ -50,15 +50,21 @@ El mapa de 400m × 400m se divide en 7 sectores de aparición, excluyendo la zon
 
 ### Tabla de Delimitación y Pesos Proporcionales (130 Ítems)
 
-| Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Objetivo | Categoría de Materiales |
+| Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Objetivo | Categoría de Materiales Temáticos |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Los Chatarrales** | `5` a `135` | `145` a `255` | 🟢 Segura | 50.0% (0.50) | 65 ítems | 14 Comunes (Alambre, Tornillos, Ollas) |
-| **Fábrica Abandonada** | `145` a `255` | `145` a `255` | 🟡 Media | 27.7% (0.277) | 36 ítems | 11 Poco Comunes (Transistores, Manómetros) |
-| **Subestación Eléctrica** | `145` a `255` | `285` a `395` | 🟠 Alta | 6.9% (0.069) | 9 ítems | Raros Galvánicos/Vapor y Épico Plasma |
-| **Torre de Radio** | `285` a `395` | `145` a `255` | 🟠 Alta | 5.4% (0.054) | 7 ítems | Raros Luminosos y Épico Solar |
-| **Reserva de Minería** | `265` a `395` | `265` a `395` | 🟢 Segura | 5.4% (0.054) | 7 ítems | Raros Mecánicos y Épico Maná/Autómata |
-| **Calderas Fundición (PK)**| `265` a `395` | `5` a `135` | 🔴 **PK Libre** | 3.1% (0.031) | 4 ítems | Épicos de Fundición (`reactor_eter`, etc.) |
-| **Desierto Chatarra (PK)** | `5` a `135` | `265` a `395` | 🔴 **PK Libre** | 1.5% (0.015) | 2 ítems | 4 Legendarios (`ojo_dragon`, `corazon_primigenio`) |
+| **Los Chatarrales** | `4` a `136` | `144` a `256` | 🟢 Segura | 13.8% (0.138) | **18 ítems** | Comunes (Alambre, Tornillos, Ollas) |
+| **Fábrica Abandonada** | `144` a `256` | `144` a `256` | 🟡 Media | 13.8% (0.138) | **18 ítems** | Poco Comunes (Transistores, Manómetros) |
+| **Corredor y Gran Vía Sur**| `144` a `256` | `4` a `136` | 🟢 Segura | 9.2% (0.092) | **12 ítems** | Transición Sur (Comunes / Poco Comunes) |
+| **Subestación Eléctrica** | `144` a `256` | `264` a `396` | 🟠 Alta | 12.3% (0.123) | **16 ítems** | Galvánicos y Eléctricos (Bobinas Tesla, Baterías) |
+| **Torre de Radio** | `264` a `396` | `144` a `256` | 🟠 Alta | 12.3% (0.123) | **16 ítems** | Luminosos y Transmisión (Antenas, Diodos LED) |
+| **Reserva de Minería** | `264` a `396` | `264` a `396` | 🟢 Segura | 12.3% (0.123) | **16 ítems** | Mecánicos y Bronce (Engranajes, Giróscopos) |
+| **Calderas Fundición (PK)**| `264` a `396` | `4` a `136` | 🔴 **PK Libre** | 13.8% (0.138) | **18 ítems** (PK Libre) | Épicos de Fundición y Térmicos (`reactor_eter`) |
+| **Desierto Chatarra (PK)** | `4` a `136` | `264` a `396` | 🔴 **PK Libre** | 12.3% (0.123) | **16 ítems** (PK Libre) | Legendarios y Reliquias Éter (`ojo_dragon`, etc.) |
+
+> 🛡️ **Algoritmo de Separación Espacial Mínima (`isPositionValidAndSeparated`)**:
+> - **Distancia Mínima de Separación**: Cada ítem verifica mediante muestreo por rechazo que la distancia euclidiana a cualquier otro ítem activo sea $\ge 7.5\text{m}$ (evitando agrupamientos densos o solapamientos).
+> - **Cobertura de Bordes Permetrales**: Extendido el rango de aparición hasta 4m de los bordes del mapa (`4..396m`).
+> - **Exclusiones Estrictas**: Ningún ítem puede aparecer en el Distrito de la Forja / Hub inicial (`0..140m X, 0..140m Z`) ni dentro de la Gran Arena Central (`distancia a 200,200 \le 39m`).
 
 ---
 

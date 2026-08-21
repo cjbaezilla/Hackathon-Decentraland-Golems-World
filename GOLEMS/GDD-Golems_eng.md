@@ -88,15 +88,16 @@ The complete catalog consists of **forty-six (46) collectable material types**, 
 
 ### 5.2 Zone Item Breakdown (130 Concurrent Items)
 
-| Spawn Zone | X Range (m) | Z Range (m) | Zone Type | Weight | Target Active Items | Material Category |
+| Spawn Zone | X Range (m) | Z Range (m) | Zone Type | Weight | Target Active Items | Thematic Material Category |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **The Junklands** | `5` to `135` | `145` to `255` | 🟢 Safe Zone | 50.0% | **65 items** | 14 Commons (Wire, Screws, Pots) |
-| **Abandoned Factory** | `145` to `255` | `145` to `255` | 🟡 Medium | 27.7% | **36 items** | 11 Uncommons (Transistors, Gauges) |
-| **Electrical Substation** | `145` to `255` | `285` to `395` | 🟠 High Risk | 6.9% | **9 items** | Rares (Galvanic/Steam) & Epic Plasma |
-| **Radio Tower** | `285` to `395` | `145` to `255` | 🟠 High Risk | 5.4% | **7 items** | Rares (Luminous) & Epic Solar |
-| **Mining Reserve** | `265` to `395` | `265` to `395` | 🟢 Safe Zone | 5.4% | **7 items** | Rares (Mechanical) & Epic Mana/Automa |
-| **Smelting Boilers (PK)**| `265` to `395` | `5` to `135` | 🔴 **Free PK** | 3.1% | **4 items** | Smelting Epics (`reactor_eter`, etc.) |
-| **Scrap Desert (PK)** | `5` to `135` | `265` to `395` | 🔴 **Free PK** | 1.5% | **2 items** | 4 Legendaries (`ojo_dragon`, `corazon_primigenio`) |
+| **The Junklands** | `4` to `136` | `144` to `256` | 🟢 Safe Zone | 13.8% | **18 items** | Commons (Wire, Screws, Pots) |
+| **Abandoned Factory** | `144` to `256` | `144` to `256` | 🟡 Medium | 13.8% | **18 items** | Uncommons (Transistors, Gauges) |
+| **South Corridor & Grand Way**| `144` to `256` | `4` to `136` | 🟢 Safe Zone | 9.2% | **12 items** | South Transition (Commons / Uncommons) |
+| **Electrical Substation** | `144` to `256` | `264` to `396` | 🟠 High Risk | 12.3% | **16 items** | Galvanic & Electric (Tesla Coils, Batteries) |
+| **Radio Tower** | `264` to `396` | `144` to `256` | 🟠 High Risk | 12.3% | **16 items** | Luminous & Optical (Antennas, LEDs) |
+| **Mining Reserve** | `264` to `396` | `264` to `396` | 🟢 Safe Zone | 12.3% | **16 items** | Mechanical & Bronze (Gears, Gyroscopes) |
+| **Smelting Boilers (PK)**| `264` to `396` | `4` to `136` | 🔴 **Free PK** | 13.8% | **18 items** (Free PK) | Smelting & Thermal Epics (`reactor_eter`) |
+| **Scrap Desert (PK)** | `4` to `136` | `264` to `396` | 🔴 **Free PK** | 12.3% | **16 items** (Free PK) | Legendaries & Aether Relics (`ojo_dragon`) |
 
 ---
 

@@ -88,15 +88,16 @@ El catálogo completo se compone de **cuarenta y seis (46) tipos de materiales c
 
 ### 5.2 Desglose de Distribución de Ítems por Zona (130 Ítems)
 
-| Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Simultáneos | Categoría de Materiales |
+| Zona de Aparición | Rango X (m) | Rango Z (m) | Tipo de Zona | Peso Proporcional | Ítems Activos Simultáneos | Categoría de Materiales Temáticos |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Los Chatarrales** | `5` a `135` | `145` a `255` | 🟢 Segura | 50.0% | **65 ítems** | 14 Comunes (Alambre, Tornillos, Ollas) |
-| **Fábrica Abandonada** | `145` a `255` | `145` a `255` | 🟡 Media | 27.7% | **36 ítems** | 11 Poco Comunes (Transistores, Manómetros) |
-| **Subestación Eléctrica** | `145` a `255` | `285` a `395` | 🟠 Alta | 6.9% | **9 ítems** | Raros Galvánicos/Vapor y Épico Plasma |
-| **Torre de Radio** | `285` a `395` | `145` a `255` | 🟠 Alta | 5.4% | **7 ítems** | Raros Luminosos y Épico Solar |
-| **Reserva de Minería** | `265` a `395` | `265` a `395` | 🟢 Segura | 5.4% | **7 ítems** | Raros Mecánicos y Épico Maná/Autómata |
-| **Calderas Fundición (PK)**| `265` a `395` | `5` a `135` | 🔴 **PK Libre** | 3.1% | **4 ítems** | Épicos de Fundición (`reactor_eter`, etc.) |
-| **Desierto Chatarra (PK)** | `5` a `135` | `265` a `395` | 🔴 **PK Libre** | 1.5% | **2 ítems** | 4 Legendarios (`ojo_dragon`, `corazon_primigenio`) |
+| **Los Chatarrales** | `4` a `136` | `144` a `256` | 🟢 Segura | 13.8% | **18 ítems** | Comunes (Alambre, Tornillos, Ollas) |
+| **Fábrica Abandonada** | `144` a `256` | `144` a `256` | 🟡 Media | 13.8% | **18 ítems** | Poco Comunes (Transistores, Manómetros) |
+| **Corredor y Gran Vía Sur**| `144` a `256` | `4` a `136` | 🟢 Segura | 9.2% | **12 ítems** | Transición Sur (Comunes / Poco Comunes) |
+| **Subestación Eléctrica** | `144` a `256` | `264` a `396` | 🟠 Alta | 12.3% | **16 ítems** | Galvánicos y Eléctricos (Bobinas Tesla, Baterías) |
+| **Torre de Radio** | `264` a `396` | `144` a `256` | 🟠 Alta | 12.3% | **16 ítems** | Luminosos y Transmisión (Antenas, Diodos LED) |
+| **Reserva de Minería** | `264` a `396` | `264` a `396` | 🟢 Segura | 12.3% | **16 ítems** | Mecánicos y Bronce (Engranajes, Giróscopos) |
+| **Calderas Fundición (PK)**| `264` a `396` | `4` a `136` | 🔴 **PK Libre** | 13.8% | **18 ítems** (PK Libre) | Épicos de Fundición y Térmicos (`reactor_eter`) |
+| **Desierto Chatarra (PK)** | `4` a `136` | `264` a `396` | 🔴 **PK Libre** | 12.3% | **16 ítems** (PK Libre) | Legendarios y Reliquias Éter (`ojo_dragon`, etc.) |
 
 ---
 
