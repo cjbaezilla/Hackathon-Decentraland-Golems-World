@@ -996,7 +996,7 @@ export const uiComponent = () => {
       {/* Widget de Minimapa Compacto (Esquina Superior Derecha, bajo TopHeaderBar) */}
       <MinimapWidget />
 
-      {/* Widget de Radar de Calor (Esquina Inferior Izquierda) */}
+      {/* Widget de Radar de Calor (Esquina Superior Derecha, 200x200 px junto al minimapa) */}
       <HeatRadarWidget />
 
 

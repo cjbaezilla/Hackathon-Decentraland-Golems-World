@@ -56,6 +56,8 @@ export interface SceneState {
   nearestItemDistance: number
   nearestItemRarity: string
   nearestItemId: string
+  nearestItemX: number
+  nearestItemZ: number
 }
 
 export const sceneState: SceneState = {
@@ -78,7 +80,9 @@ export const sceneState: SceneState = {
   playerInventory: {},
   nearestItemDistance: 999,
   nearestItemRarity: 'common',
-  nearestItemId: ''
+  nearestItemId: '',
+  nearestItemX: 0,
+  nearestItemZ: 0
 }
 
 /**
@@ -377,20 +381,36 @@ export function getPlayerInventory(): Record<string, number> {
 /**
  * Actualiza la información de proximidad para el Radar de Calor (React-ECS UI).
  */
-export function updateHeatRadarState(distance: number, rarity: string, itemId: string) {
+export function updateHeatRadarState(
+  distance: number,
+  rarity: string,
+  itemId: string,
+  itemX: number = 0,
+  itemZ: number = 0
+) {
   sceneState.nearestItemDistance = distance
   sceneState.nearestItemRarity = rarity
   sceneState.nearestItemId = itemId
+  sceneState.nearestItemX = itemX
+  sceneState.nearestItemZ = itemZ
 }
 
 /**
  * Obtiene el estado actual del Radar de Calor.
  */
-export function getHeatRadarState(): { distance: number; rarity: string; itemId: string } {
+export function getHeatRadarState(): {
+  distance: number
+  rarity: string
+  itemId: string
+  itemX: number
+  itemZ: number
+} {
   return {
     distance: sceneState.nearestItemDistance,
     rarity: sceneState.nearestItemRarity,
-    itemId: sceneState.nearestItemId
+    itemId: sceneState.nearestItemId,
+    itemX: sceneState.nearestItemX,
+    itemZ: sceneState.nearestItemZ
   }
 }
 

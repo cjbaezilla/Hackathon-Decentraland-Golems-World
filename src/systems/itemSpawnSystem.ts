@@ -65,6 +65,8 @@ export function itemSpawnSystem(dt: number) {
   let nearestDistance = 9999
   let nearestRarity = 'common'
   let nearestItemId = ''
+  let nearestX = 0
+  let nearestZ = 0
 
   let playerPos = Vector3.Zero()
   if (Transform.has(engine.PlayerEntity)) {
@@ -93,11 +95,13 @@ export function itemSpawnSystem(dt: number) {
       (playerPos.z - transform.position.z) ** 2
     )
 
-    // Actualizar menor distancia para el Radar de Calor
+    // Actualizar menor distancia y coordenadas para el Radar de Calor
     if (dist < nearestDistance) {
       nearestDistance = dist
       nearestRarity = itemData.rarity
       nearestItemId = itemData.itemId
+      nearestX = transform.position.x
+      nearestZ = transform.position.z
     }
 
     // Emerger de la tierra (Y = -0.5 -> Y = originalY) al estar a menos de 4m
@@ -126,8 +130,8 @@ export function itemSpawnSystem(dt: number) {
     }
   }
 
-  // Actualizar estado global del radar de calor
-  updateHeatRadarState(nearestDistance, nearestRarity, nearestItemId)
+  // Actualizar estado global del radar de calor con coordenadas relativas
+  updateHeatRadarState(nearestDistance, nearestRarity, nearestItemId, nearestX, nearestZ)
 }
 
 /**

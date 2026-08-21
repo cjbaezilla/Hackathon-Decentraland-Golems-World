@@ -62,13 +62,16 @@ La experiencia se despliega en un Decentraland World de veinticinco por veintici
 
 Los materiales no están visibles a simple vista. Están enterrados o camuflados, y se revelan cuando el jugador se acerca lo suficiente utilizando el **Radar de Calor** y el **Minimapa 2D en tiempo real**.
 
-### 4.1 El Radar de Calor (React-ECS UI)
-- **Ubicación en Pantalla**: Esquina superior derecha (`top: 80, right: 240`), posicionado inmediatamente a la izquierda del Minimapa HUD.
-- **Gradiente Térmico**:
-  - **Lejos (> 30m)**: Sensor inactivo con tonalidades frías (`#0D1F38`) y pulso apagado.
-  - **Distancia Media (15m - 30m)**: Pulso rítmico suave en tonos amarillos (`#332E05`).
-  - **Cercanía (< 15m)**: Pulso acelerado en tonos naranjas y rojos brillantes (`#401700`).
-  - **Proximidad Inmediata (< 4m)**: Tono incandescente (`#380D00`) con identificación del material (`🔥 ¡OBJETO DETECTADO!`). La pieza emerge visualmente del suelo ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) con efecto emisivo.
+### 4.1 El Radar de Calor y Sonar 2D Táctico (React-ECS UI - 200px × 200px)
+- **Ubicación y Formato**: Widget táctico cuadrado de **`200px × 200px`** ubicado en la esquina superior derecha (`top: 80, right: 238`), posicionado simétricamente a la izquierda del Minimapa HUD (`top: 80, right: 28`).
+- **Pantalla Circular de Sonar (140px × 140px)**: Osciloscopio con retícula axial (ejes X y Z) y 4 anillos concéntricos de rango ($30\text{m}$, $20\text{m}$, $10\text{m}$ y zona de recolección $<4\text{m}$).
+- **Barrido de Onda Expansiva Animada**: Animación de pulso continuo conducida en tiempo real mediante `Date.now()`.
+- **Proyección Vectorial Táctica (Heading-UP Projection)**: Proyecta un punto palpitante (*Target Blip*) en la dirección relativa y distancia exactas derivadas de los vectores de orientación de la cámara/avatar.
+- **Gradiente Térmico e Indicador Digital de Distancia**:
+  - **Lejos (> 30m)**: Sensor inactivo con tonalidades frías (`#3380CC`) y lectura badge `>30m`.
+  - **Distancia Media (15m - 30m)**: Pulso rítmico suave en tonos amarillos (`#E6E633`) con lectura badge (ej. `📡 24.5m`).
+  - **Cercanía (4m - 15m)**: Pulso acelerado en tonos naranjas y rojos brillantes (`#FF8C1A`) con lectura badge (ej. `⚡ 12.4m`).
+  - **Proximidad Inmediata (< 4m)**: Tono incandescente emisivo (`#FF401A`) con lectura badge (ej. `🔥 3.1m`) e identificación del material. La pieza emerge visualmente del suelo ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) con efecto emisivo PBR.
 - **Recolección Táctil Mobile-First**: Hitbox amplia ($\ge 1.5\text{m}$) recolectable con un simple toque en pantalla táctil (`pointerEventsSystem.onPointerDown`).
 
 ### 4.2 Sistema de Minimapa 2D y Cartografía

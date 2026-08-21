@@ -62,13 +62,16 @@ The experience is deployed across a twenty-five by twenty-five parcel Decentrala
 
 Materials are camouflaged or buried, revealing themselves only when getting close using the **Heat Radar** and the **real-time 2D Minimap**.
 
-### 4.1 Heat Radar (React-ECS UI)
-- **Screen Position**: Top right safe area (`top: 80, right: 240`), positioned immediately to the left of the Minimap HUD.
-- **Thermal Gradient**:
-  - **Far (> 30m)**: Inactive sensor with cool blue tones (`#0D1F38`) and off pulse.
-  - **Medium Distance (15m - 30m)**: Gentle rhythmic pulse in yellow tones (`#332E05`).
-  - **Close (< 15m)**: Accelerated pulse in bright red/orange tones (`#401700`).
-  - **Immediate Proximity (< 4m)**: Incandescent glow (`#380D00`) with item detection readout (`🔥 ITEM DETECTED!`). Scrap part visually emerges from ground ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) with emissive glow.
+### 4.1 Tactical Heat Radar & 2D Sonar (React-ECS UI - 200px × 200px)
+- **Screen Position & Layout**: Designed as a **`200px × 200px` square tactical scope** placed in the top right HUD (`top: 80, right: 238`), positioned symmetrically beside the Minimap HUD (`top: 80, right: 28`).
+- **Circular Sonar Scope (140px × 140px)**: Scope featuring axial X/Z crosshairs and 4 concentric range rings (30m, 20m, 10m, and 4m harvest zone).
+- **Animated Sweep Wave**: Continuous expanding radar pulse wave driven in real-time via `Date.now()`.
+- **Heading-UP Vector Projection**: Projects a pulsating target dot (*Target Blip*) at the exact relative direction and distance derived from camera/avatar orientation vectors.
+- **Thermal Gradient & Digital Distance Readout**:
+  - **Far (> 30m)**: Cool blue inactive sensor (`#3380CC`) with `>30m` badge readout.
+  - **Medium Distance (15m - 30m)**: Gentle yellow pulse (`#E6E633`) with readout badge (e.g., `📡 24.5m`).
+  - **Close (4m - 15m)**: Accelerated bright orange pulse (`#FF8C1A`) with readout badge (e.g., `⚡ 12.4m`).
+  - **Immediate Proximity (< 4m)**: Intense emissive red/gold pulse (`#FF401A`) with readout badge (e.g., `🔥 3.1m`) and item identification. Scrap part visually emerges from ground ($Y = -0.5\text{m} \rightarrow Y = 0.25\text{m}$) with emissive PBR glow.
 - **Mobile-First Touch Scavenging**: Wide pointer hitbox ($\ge 1.5\text{m}$) collected with a single touchscreen tap (`pointerEventsSystem.onPointerDown`).
 
 ### 4.2 Real-Time 2D Minimap & Cartography
