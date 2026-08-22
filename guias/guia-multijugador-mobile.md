@@ -224,6 +224,12 @@ Ver especificación completa en la [Guía Maestra de Inventario y Botones de Acc
 3. **Selector Táctil de Idioma Bilingüe (`LanguageToggle`)**:
    - Ubicado en la esquina superior derecha (`top: 24px, right: 32px`) con un área táctil amplia de $140 \times 46\text{ px}$ (`pointerFilter: 'block'`), permitiendo a los jugadores alternar entre Español e Inglés sin interferir con la jugabilidad táctil ([guia-soporte-bilingue-i18n.md](guia-soporte-bilingue-i18n.md)).
 
+4. **Hitboxes Táctiles Ampliadas (Mínimo $50 \times 42\text{ px}$)**:
+   - Todo botón de acción interactivo en modales (como los botones `+` y `-` de la forja) debe poseer dimensiones amplias ($\ge 50 \times 42\text{ px}$) con `pointerFilter: 'block'` en el contenedor y `pointerFilter: 'none'` en las etiquetas de texto internas para evitar intercepciones de raycast en pantallas táctiles móviles.
+
+5. **Pausado Automático de Sistemas 3D per-frame durante Modales**:
+   - Para eliminar la latencia de entrada táctil en clientes móviles (Godot Explorer), los sistemas ECS que ejecutan mutaciones continuas de `Transform.getMutable` per-frame (como `factoryAnimationSystem`) detectan la apertura de ventanas modales (`getIsForgeUIOpen() === true`) y pausan su actualización per-frame mientras la interfaz permanece desplegada.
+
 ### 4.4 Carga Garantizada de Escena y Posicionamiento Inicial (`sceneLoaderSystem` y `LoadingScreenWidget`)
 
 Para evitar que el cliente móvil instancie al avatar del jugador en medio de un mapa incompleto mientras se descargan e instancian asíncronamente las mallas 3D y los 50 NPCs, se implementó una **Pantalla de Carga y Reposicionamiento Garantizado**:

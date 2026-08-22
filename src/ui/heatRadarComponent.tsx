@@ -3,7 +3,7 @@ import { Color4 } from '@dcl/sdk/math'
 import { getHeatRadarState, getIsBigMapOpen } from '../state'
 import { COLLECTABLE_ITEMS } from '../config/items'
 import { getPlayerMapState } from '../utils/mapUtils'
-import { getLanguage } from '../i18n'
+import { getLanguage, getLocalizedRarity, t } from '../i18n'
 
 /**
  * ============================================================================
@@ -27,7 +27,7 @@ export const HeatRadarWidget = () => {
   // Configuración de visualización según cercanía
   let themeColor = Color4.create(0.2, 0.5, 0.8, 1.0) // Azul frío (inactivo)
   let statusBadge = '>30m'
-  let itemTitle = getLanguage() === 'en' ? 'SCANNING...' : 'ESCANEO ACTIVO'
+  let itemTitle = t('radar.activeScan')
   let pulseSpeed = 2.0
 
   if (dist <= 4.0) {
@@ -135,7 +135,7 @@ export const HeatRadarWidget = () => {
         <UiEntity
           uiTransform={{ height: 18 }}
           uiText={{
-            value: '📡 SONAR TÉRMICO',
+            value: t('radar.title'),
             fontSize: 10,
             color: Color4.create(0.85, 0.9, 0.95, 0.9),
             textAlign: 'middle-left'
@@ -371,7 +371,7 @@ export const HeatRadarWidget = () => {
           }}
           uiText={{
             value: isDetected
-              ? `${itemTitle.toUpperCase()} (${radar.rarity.toUpperCase()})`
+              ? `${itemTitle.toUpperCase()} (${getLocalizedRarity(radar.rarity).toUpperCase()})`
               : itemTitle,
             fontSize: 10,
             color: isDetected ? themeColor : Color4.create(0.6, 0.7, 0.8, 0.75),

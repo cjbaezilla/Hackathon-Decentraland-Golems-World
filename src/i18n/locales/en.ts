@@ -106,6 +106,8 @@ export const en: TranslationSchema = {
     signSubtitle: 'Step on or touch to soar into the air!'
   },
   radar: {
+    title: '📡 THERMAL SONAR',
+    activeScan: 'ACTIVE SCAN',
     searching: 'Scanning for heat signatures...',
     cold: 'Distant signature detected',
     warm: 'Thermal signature nearby',

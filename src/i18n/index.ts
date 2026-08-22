@@ -138,6 +138,8 @@ export function getLocalizedAffinity(affinity: string, lang?: Language): string 
   }
 }
 
+import { COLLECTABLE_ITEMS, ItemConfig } from '../config/items'
+
 /**
  * Obtiene la etiqueta traducida de rareza de un elemento/golem.
  */
@@ -165,6 +167,35 @@ export function getLocalizedRarity(rarity: string, lang?: Language): string {
     default:
       return rarity
   }
+}
+
+/**
+ * Obtiene el nombre traducido de un ítem/material de chatarra según su id o configuración.
+ */
+export function getLocalizedItemName(itemOrId: ItemConfig | string, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+  const itemConfig = typeof itemOrId === 'string' ? COLLECTABLE_ITEMS[itemOrId] : itemOrId
+  if (!itemConfig) return typeof itemOrId === 'string' ? itemOrId : ''
+  return currentLang === 'en' ? itemConfig.nameEn : itemConfig.nameEs
+}
+
+/**
+ * Obtiene el nombre traducido de una zona del mapa.
+ */
+export function getLocalizedZone(zone: string, lang?: Language): string {
+  const dict = getTranslations(lang)
+  const z = zone.toLowerCase()
+  if (z.includes('forja') || z.includes('forge')) return dict.zones.forgeDistrict
+  if (z.includes('desierto') || z.includes('desert')) return dict.zones.scrapDesert
+  if (z.includes('minería') || z.includes('mining')) return dict.zones.miningReserve
+  if (z.includes('calderas') || z.includes('fundición') || z.includes('boilers')) return dict.zones.foundryBoilers
+  if (z.includes('corredor') || z.includes('vía sur') || z.includes('corridor')) return dict.zones.southCorridor
+  if (z.includes('chatarrales') || z.includes('scrapyards')) return dict.zones.chatarrales
+  if (z.includes('fábrica') || z.includes('factory')) return dict.zones.abandonedFactory
+  if (z.includes('subestación') || z.includes('substation')) return dict.zones.substation
+  if (z.includes('torre') || z.includes('radio')) return dict.zones.radioTower
+  if (z.includes('arena')) return dict.zones.arena
+  return zone
 }
 
 /**
@@ -198,3 +229,4 @@ export function getLocalizedGolemName(affinity: string, variantIndex: number, la
 }
 
 export * from './types'
+

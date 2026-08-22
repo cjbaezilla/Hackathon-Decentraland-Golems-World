@@ -106,6 +106,8 @@ export const es: TranslationSchema = {
     signSubtitle: '¡Pisa o toca para volar por los aires!'
   },
   radar: {
+    title: '📡 SONAR TÉRMICO',
+    activeScan: 'ESCANEO ACTIVO',
     searching: 'Buscando señales térmicas...',
     cold: 'Señal lejana detectada',
     warm: 'Señal térmica en las proximidades',

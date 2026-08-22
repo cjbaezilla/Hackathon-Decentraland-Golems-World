@@ -14,7 +14,7 @@ import { Vector3, Quaternion, Color4, Color3 } from '@dcl/sdk/math'
 import { COLLECTABLE_ITEMS, ItemConfig, ItemRarity } from '../config/items'
 import { CollectableItemComponent } from '../components/item'
 import { addMaterialToInventory, addCombatLog } from '../state'
-import { t } from '../i18n'
+import { t, getLanguage, getLocalizedRarity, onLanguageChange, Language } from '../i18n'
 import {
   broadcastItemPickup,
   setupItemSyncListeners,
@@ -106,8 +106,13 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
 /** Registro global de IDs de instancias recolectadas en el mapa */
 const collectedInstanceIds = new Set<string>()
 
-/** Registro global de entidades de ítems activos [instanceId -> Entity] */
-const activeItemEntities = new Map<string, Entity>()
+export interface ItemEntityRecord {
+  entity: Entity
+  beamEntity: Entity
+}
+
+/** Registro global de entidades de ítems activos [instanceId -> ItemEntityRecord] */
+const activeItemEntities = new Map<string, ItemEntityRecord>()
 
 /** Generador Pseudoaleatorio Determinista con Semilla (Mulberry32) */
 let currentSeed = 0x428913
@@ -126,6 +131,67 @@ export function deterministicRandom(): number {
 export function getCollectedItemInstanceIds(): string[] {
   return Array.from(collectedInstanceIds)
 }
+
+/**
+ * Obtiene la etiqueta de interacción del puntero para un ítem en el idioma activo o especificado.
+ */
+export function getItemHoverLabel(itemConfig: ItemConfig, lang?: Language): string {
+  const action = t('common.collect', undefined, lang)
+  const currentLang = lang || getLanguage()
+  const itemName = currentLang === 'en' ? itemConfig.nameEn : itemConfig.nameEs
+  const rarity = getLocalizedRarity(itemConfig.rarity, lang)
+  return `${action} ${itemName} (${rarity.toUpperCase()})`
+}
+
+/**
+ * Actualiza dinámicamente los rótulos hoverText de todos los ítems activos en el mapa al cambiar de idioma.
+ */
+export function updateAllGroundItemHoverTexts() {
+  for (const [instanceId, record] of activeItemEntities) {
+    if (!CollectableItemComponent.has(record.entity)) continue
+    const itemData = CollectableItemComponent.get(record.entity)
+    if (itemData.isCollected) continue
+    const itemConfig = COLLECTABLE_ITEMS[itemData.itemId]
+    if (!itemConfig) continue
+
+    const hoverLabel = getItemHoverLabel(itemConfig)
+
+    pointerEventsSystem.onPointerDown(
+      {
+        entity: record.entity,
+        opts: {
+          button: InputAction.IA_POINTER,
+          hoverText: hoverLabel,
+          maxDistance: 6.5
+        }
+      },
+      () => {
+        collectItem(record.entity, false)
+      }
+    )
+
+    if (record.beamEntity) {
+      pointerEventsSystem.onPointerDown(
+        {
+          entity: record.beamEntity,
+          opts: {
+            button: InputAction.IA_POINTER,
+            hoverText: hoverLabel,
+            maxDistance: 6.5
+          }
+        },
+        () => {
+          collectItem(record.entity, false)
+        }
+      )
+    }
+  }
+}
+
+// Suscripción global para actualización reactiva en tiempo real al cambiar el idioma
+onLanguageChange(() => {
+  updateAllGroundItemHoverTexts()
+})
 
 /**
  * Mapeo de zona canónica para emparejar con el campo `zone` de ItemConfig.
@@ -311,9 +377,6 @@ export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3, insta
   const entity = engine.addEntity()
   const finalInstanceId = instanceId || `item_inst_${Date.now()}_${Math.floor(Math.random() * 10000)}`
 
-  // Registrar en el mapa de entidades activas
-  activeItemEntities.set(finalInstanceId, entity)
-
   const originalY = 0.25
   Transform.create(entity, {
     position: Vector3.create(position.x, position.y, position.z),
@@ -341,7 +404,7 @@ export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3, insta
   // Hitbox de colisión explícita para la interacción del puntero de ratón en PC
   MeshCollider.setBox(entity)
 
-  const hoverLabel = `Recolectar ${itemConfig.nameEs} (${itemConfig.rarity.toUpperCase()})`
+  const hoverLabel = getItemHoverLabel(itemConfig)
 
   // Interacción de recolección táctil (Mobile First) y ratón (PC)
   pointerEventsSystem.onPointerDown(
@@ -392,6 +455,9 @@ export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3, insta
     }
   )
 
+  // Registrar en el mapa de entidades activas
+  activeItemEntities.set(finalInstanceId, { entity, beamEntity })
+
   return entity
 }
 
@@ -440,14 +506,21 @@ export function collectItem(entity: Entity, fromRemote: boolean = false) {
   if (itemData.isCollected || collectedInstanceIds.has(itemData.instanceId)) {
     // Si ya estaba recolectado, remover entidad local si aún existe
     if (activeItemEntities.has(itemData.instanceId)) {
+      const record = activeItemEntities.get(itemData.instanceId)
       activeItemEntities.delete(itemData.instanceId)
-      engine.removeEntity(entity)
+      if (record) {
+        engine.removeEntity(record.entity)
+      }
     }
     return
   }
 
   const config = COLLECTABLE_ITEMS[itemData.itemId]
-  const itemName = config ? config.nameEs : itemData.itemId
+  const currentLang = getLanguage()
+  const itemName = config
+    ? (currentLang === 'en' ? config.nameEn : config.nameEs)
+    : itemData.itemId
+  const localizedRarity = getLocalizedRarity(itemData.rarity)
 
   // Marcar como recolectado globalmente
   collectedInstanceIds.add(itemData.instanceId)
@@ -458,20 +531,28 @@ export function collectItem(entity: Entity, fromRemote: boolean = false) {
   if (!fromRemote) {
     // Recolección por el jugador local
     addMaterialToInventory(itemData.itemId, 1)
-    addCombatLog(`+1 ${itemName} (${itemData.rarity.toUpperCase()})`, itemConfigColorHex(itemData.rarity))
+    addCombatLog(`+1 ${itemName} (${localizedRarity.toUpperCase()})`, itemConfigColorHex(itemData.rarity))
     console.log(`🔨 [Material Recolectado Local]: ${itemName} (${itemData.instanceId}) en zona ${itemData.zone}`)
 
     // Difundir recolección a todos los peers conectados en la escena
     broadcastItemPickup(itemData.instanceId, itemData.itemId)
   } else {
     // Recolección por otro jugador remoto
-    addCombatLog(`🌐 [Multijugador] Un jugador recolectó ${itemName}`, '#A0A0A0')
+    const remoteLog = currentLang === 'en'
+      ? `🌐 [Multiplayer] A player collected ${itemName}`
+      : `🌐 [Multijugador] Un jugador recolectó ${itemName}`
+    addCombatLog(remoteLog, '#A0A0A0')
     console.log(`🔨 [Material Recolectado Remoto]: ${itemName} (${itemData.instanceId}) por peer.`)
   }
 
   // Ocultar y eliminar la entidad del mundo de forma inmediata
+  const record = activeItemEntities.get(itemData.instanceId)
   activeItemEntities.delete(itemData.instanceId)
-  engine.removeEntity(entity)
+  if (record) {
+    engine.removeEntity(record.entity)
+  } else {
+    engine.removeEntity(entity)
+  }
 }
 
 function itemConfigColorHex(rarity: string): string {
@@ -499,9 +580,9 @@ export function handleRemoteItemPickup(pickup: ItemPickupMessageDto) {
 
   collectedInstanceIds.add(pickup.instanceId)
 
-  const targetEntity = activeItemEntities.get(pickup.instanceId)
-  if (targetEntity) {
-    collectItem(targetEntity, true)
+  const record = activeItemEntities.get(pickup.instanceId)
+  if (record) {
+    collectItem(record.entity, true)
     return
   }
 
@@ -523,10 +604,10 @@ export function handleRemoteItemSync(collectedIds: string[]) {
 
   for (const id of collectedIds) {
     collectedInstanceIds.add(id)
-    const entity = activeItemEntities.get(id)
-    if (entity) {
+    const record = activeItemEntities.get(id)
+    if (record) {
       activeItemEntities.delete(id)
-      engine.removeEntity(entity)
+      engine.removeEntity(record.entity)
     }
   }
 }

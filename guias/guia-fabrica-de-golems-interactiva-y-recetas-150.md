@@ -73,14 +73,19 @@ La interfaz modal está diseñada respetando los principios **Mobile-First** (hi
 - **Columna Izquierda (Inventario de Chatarra)**:
   - Muestra las piezas disponibles en el inventario del jugador.
   - Cada fila incluye la **miniatura PNG de la pieza** (`assets/items/<rarity>/<id>.png`), el nombre traducido, la cantidad poseída y la cantidad insertada en el crisol.
-  - Botones táctiles `+` y `-` para ajustar cantidades.
+  - **Botones Táctiles Ampliados `+` y `-` (Mobile-First 50x42px)**: Diseñados con dimensiones amplias para pantallas táctiles (`width: 50`, `height: 42`), con `pointerFilter: 'block'` en el contenedor y `pointerFilter: 'none'` en la etiqueta de texto interna, evitando la intercepción de eventos de puntero en el cliente móvil Godot Explorer.
+  - **Inmutabilidad y Re-renderizado Inmediato**: Las funciones `addForgeMaterial` y `removeForgeMaterial` actualizan el mapa de seleccionados generando nuevas referencias de objeto (`sceneState.selectedForgeMaterials = { ... }`), garantizando la actualización instantánea de la UI en el mismo tick.
 
 - **Columna Derecha (Crisol Alquímico y Vista Previa)**:
+  - **Caché y Memoización de Recetas (`getMemoizedForgedGolem`)**: Almacena en memoria el resultado proyectado evaluado con la cadena canónica (`buildCanonicalRecipe`), evitando re-ejecutar el algoritmo de atributos y la búsqueda en el catálogo de 150 recetas durante interacciones táctiles continuas.
   - Fila visual con las miniaturas PNG e insignias con la cantidad de los ingredientes dentro del crisol.
   - **Banner de Estado**: Muestra *`✨ Receta Oficial Válida (#NNN)`* o *`⚠️ Receta No Válida: La mezcla de componentes no coincide con ninguna de las 150 recetas del catálogo`*.
   - **Render 3D PNG del Golem**: Muestra la miniatura PNG del autómata resultante ($88 \times 88\text{ px}$) si la receta es válida.
   - **Grilla de Atributos**: Muestra la proyección determinista de Vitalidad (HP), Ataque (ATK), Defensa (DEF) y Velocidad (SPD).
   - **Botón `¡FORJAR GOLEM!`**: Habilitado **únicamente** cuando hay entre 5 y 12 materiales y la mezcla coincide con una receta válida del catálogo.
+
+### 4.1 Pausa Automática de Animaciones 3D en Segundo Plano
+Para erradicar el lag en pantallas móviles mientras se manipula la interfaz, `factoryAnimationSystem` detecta automáticamente si la modal está abierta (`getIsForgeUIOpen() === true`). Cuando la UI está desplegada, **se pausan las mutaciones `Transform.getMutable` per-frame** sobre las 8 entidades de engranajes y la caldera, liberando el bus CRDT y la CPU en dispositivos móviles.
 
 ---
 

@@ -79,6 +79,8 @@ export interface TranslationSchema {
     signSubtitle: string
   }
   radar: {
+    title: string
+    activeScan: string
     searching: string
     cold: string
     warm: string
