@@ -25,6 +25,25 @@ export const SQUAD_MESSAGE_TYPES = {
   DEFEAT: 'golem_combat_defeat'
 } as const
 
+export const ITEM_MESSAGE_TYPES = {
+  PICKUP: 'golem_item_pickup',
+  SYNC_REQ: 'golem_item_sync_req',
+  SYNC_RES: 'golem_item_sync_res'
+} as const
+
+export interface ItemPickupMessageDto {
+  instanceId: string
+  collectorAddress: string
+  itemId: string
+  timestamp: number
+}
+
+export interface ItemSyncResponseDto {
+  senderAddress: string
+  collectedInstanceIds: string[]
+  timestamp: number
+}
+
 /** Registro local en memoria de escuadrones de jugadores remotos [address -> golems] */
 const remoteSquadRegistry = new Map<string, GolemSquadMemberDto[]>()
 
@@ -32,6 +51,8 @@ const remoteSquadRegistry = new Map<string, GolemSquadMemberDto[]>()
 let onSquadReceivedCallback: ((ownerAddress: string, squad: GolemSquadMemberDto[]) => void) | null = null
 let onAttackReceivedCallback: ((attack: GolemAttackMessageDto) => void) | null = null
 let onDefeatReceivedCallback: ((defeat: GolemDefeatMessageDto) => void) | null = null
+let onItemPickedUpCallback: ((pickup: ItemPickupMessageDto) => void) | null = null
+let onItemSyncReceivedCallback: ((collectedIds: string[]) => void) | null = null
 
 let cachedLocalId: string | null = null
 
@@ -228,4 +249,88 @@ export function setupSquadSyncListeners(
     }
   )
 }
+
+/**
+ * Difunde la recogida de un ítem a todos los peers de la escena.
+ */
+export function broadcastItemPickup(instanceId: string, itemId: string) {
+  const localId = getLocalPlayerId()
+  const payload: ItemPickupMessageDto = {
+    instanceId,
+    collectorAddress: localId,
+    itemId,
+    timestamp: Date.now()
+  }
+  sceneMessageBus.emit(ITEM_MESSAGE_TYPES.PICKUP, payload)
+}
+
+/**
+ * Solicita el estado de recolección de ítems a otros jugadores en la escena.
+ */
+export function requestItemSync() {
+  const localId = getLocalPlayerId()
+  sceneMessageBus.emit(ITEM_MESSAGE_TYPES.SYNC_REQ, { requester: localId, timestamp: Date.now() })
+}
+
+/**
+ * Responde con los IDs de ítems actualmente recolectados.
+ */
+export function broadcastItemSyncResponse(collectedInstanceIds: string[]) {
+  const localId = getLocalPlayerId()
+  const payload: ItemSyncResponseDto = {
+    senderAddress: localId,
+    collectedInstanceIds,
+    timestamp: Date.now()
+  }
+  sceneMessageBus.emit(ITEM_MESSAGE_TYPES.SYNC_RES, payload)
+}
+
+/**
+ * Inicializa los escuchadores de MessageBus para sincronización multijugador de ítems coleccionables.
+ */
+export function setupItemSyncListeners(
+  onItemPickedUp?: (pickup: ItemPickupMessageDto) => void,
+  onItemSyncReceived?: (collectedIds: string[]) => void,
+  getCollectedIdsProvider?: () => string[]
+) {
+  if (onItemPickedUp) onItemPickedUpCallback = onItemPickedUp
+  if (onItemSyncReceived) onItemSyncReceivedCallback = onItemSyncReceived
+
+  // Escuchar recogidas de ítems de peers
+  sceneMessageBus.on(ITEM_MESSAGE_TYPES.PICKUP, (payload: ItemPickupMessageDto) => {
+    if (!payload || !payload.instanceId) return
+    const localId = getLocalPlayerId()
+    if (payload.collectorAddress.toLowerCase() === localId) return
+
+    if (onItemPickedUpCallback) {
+      onItemPickedUpCallback(payload)
+    }
+  })
+
+  // Escuchar solicitudes de sincronización de ítems
+  sceneMessageBus.on(ITEM_MESSAGE_TYPES.SYNC_REQ, (payload: { requester: string }) => {
+    if (!payload || !payload.requester) return
+    const localId = getLocalPlayerId()
+    if (payload.requester.toLowerCase() === localId) return
+
+    if (getCollectedIdsProvider) {
+      const activeCollected = getCollectedIdsProvider()
+      if (activeCollected.length > 0) {
+        broadcastItemSyncResponse(activeCollected)
+      }
+    }
+  })
+
+  // Escuchar respuestas de sincronización de ítems
+  sceneMessageBus.on(ITEM_MESSAGE_TYPES.SYNC_RES, (payload: ItemSyncResponseDto) => {
+    if (!payload || !Array.isArray(payload.collectedInstanceIds)) return
+    const localId = getLocalPlayerId()
+    if (payload.senderAddress.toLowerCase() === localId) return
+
+    if (onItemSyncReceivedCallback) {
+      onItemSyncReceivedCallback(payload.collectedInstanceIds)
+    }
+  })
+}
+
 

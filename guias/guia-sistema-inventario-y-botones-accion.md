@@ -3,9 +3,9 @@
 ## 📋 Información de la Guía
 
 - **Módulo**: `src/ui/inventoryComponent.tsx`, `src/ui/actionBarComponent.tsx`, `src/state.ts`, `src/index.ts`
-- **Versión**: 1.0.0 (SDK7 / React-ECS 7.26.0+)
+- **Versión**: 2.0.0 (SDK7 / React-ECS 7.26.0+ Grid Redesign)
 - **Compatibilidad**: Mobile First (Godot Explorer) y Desktop Client
-- **Propósito**: Manual técnico y de arquitectura sobre el subsistema de **Inventario de Chatarra (46 materiales)** y la integración de **Botones de Acción** dinámicos para Desktop (debajo del minimapa) y Mobile (botón nativo de touchpad con textura personalizable).
+- **Propósito**: Manual técnico y de arquitectura sobre el subsistema de **Inventario de Chatarra (46 materiales)**, el rediseño de **Cuadrícula de Celdas Cuadradas al 100% de Ancho**, imágenes PNG reales (`assets/items/`), **Tarjeta Emergente de Tooltip** y la integración de **Botones de Acción** dinámicos.
 
 ---
 
@@ -14,13 +14,17 @@
 El sistema de **Inventario de Chatarra** permite al jugador inspeccionar y gestionar en tiempo real todas las piezas de chatarra, mecatrónica y utensilios recolectados en el mapa de 25x25 parcelas (400m × 400m). Su diseño responde a los tres principios rectores de la escena:
 
 1. **Diseño Mobile-First y Zonas Seguras**:
-   - **En Móviles (`isMobile()`)**: El inventario se activa mediante el botón nativo de la pantalla táctil (`TouchScreenControls` en `InputAction.IA_SECONDARY`), decorado con la textura de la mochila (`assets/images/backpack_icon.png`). Se oculta cualquier barra superflua debajo del minimapa para mantener la pantalla libre de obstrucciones.
-   - **En Escritorio (`isDesktop()`)**: El icono de la mochila se posiciona en la barra de acción (`DesktopActionBarWidget`) justificado a la derecha a `top: 286px, right: 28px`, inmediatamente debajo del minimapa. La barra utiliza un diseño adaptable `flexDirection: 'row'` + `justifyContent: 'flex-end'`, de modo que nuevos botones añadidos en el futuro se concatenarán automáticamente a la izquierda de la mochila.
-2. **Apertura y Cierre Bidireccional (Toggle Táctil)**:
-   - Presionar el botón de la mochila en la pantalla táctil o la tecla **F** en el teclado abre y cierra la interfaz inmediatamente, incluso cuando el modal está desplegado.
-3. **Centrado Absoluto e Inspección de Atributos**:
-   - La ventana modal (920px × 540px) se despliega **vertical y horizontalmente centrada** en pantalla mediante un contenedor wrapper `width: '100%', height: '100%'` con `justifyContent: 'center'` y `alignItems: 'center'`.
-   - Incluye filtros por rareza (*Todos, Común, Poco Común, Raro, Épico, Legendario*) y un panel de inspección de los aportes de estadísticas para la **Forja de Golems** (Ataque, Defensa, Vitalidad, Velocidad, Afinidad).
+   - **En Móviles (`isMobile()`)**: El inventario se activa mediante el botón nativo de la pantalla táctil (`TouchScreenControls` en `InputAction.IA_SECONDARY`), decorado con la textura de la mochila (`assets/images/backpack_icon.png`).
+   - **En Escritorio (`isDesktop()`)**: El icono de la mochila se posiciona en la barra de acción (`DesktopActionBarWidget`) justificado a la derecha a `top: 286px, right: 28px`, inmediatamente debajo del minimapa.
+2. **Rediseño de Cuadrícula al 100% de Ancho**:
+   - Se eliminó el panel lateral derecho de inspección fija y la barra inferior de consejo.
+   - El cuerpo del modal dedica el 100% del área horizontal a una **retícula/cuadrícula de celdas cuadradas grandes (98px × 98px)**.
+3. **Imágenes PNG Reales de Alta Definición**:
+   - Cada casillero renderiza la textura PNG oficial de 300×300px cargada desde `assets/items/<rareza>/<id_item>.png` (optimizada al 83.2% de compresión RGBA).
+4. **Tarjeta Emergente de Tooltip (`ItemTooltipCard`)**:
+   - Al pulsar o hacer clic en cualquier casillero, se despliega una superposición flotante con los bonos para la Forja (Ataque, Defensa, Vitalidad, Velocidad, Afinidad Elemental), zona de origen y frecuencia de aparición.
+5. **Manejo Aislado de Eventos (Sin Bucles de Burbujeo)**:
+   - Se aplicó `pointerFilter: 'none'` en todos los elementos hijos internos (imágenes, textos e insignias) y se eliminó el handler `onMouseDown` del contenedor envolvente raíz, garantizando respuesta inmediata al hacer clic en PC o tocar en móvil.
 
 ---
 
@@ -30,7 +34,6 @@ La memoria de sesión de la interfaz es gestionada en `sceneState`:
 
 ```typescript
 export interface SceneState {
-  // ...
   isInventoryOpen: boolean
   playerInventory: Record<string, number> // [itemId]: cantidad
 }
@@ -49,7 +52,7 @@ export function toggleInventory() {
 ```
 
 - `playerInventory`: Diccionario de clave-valor que mapea la ID canónica de cada uno de los 46 materiales de `src/config/items.ts` con la cantidad poseída.
-- `addMaterialToInventory(itemId: string, count: number)`: Incrementa la cantidad en posesión al recolectar ítems en el mundo 3D.
+- `addMaterialToInventory(itemId: string, count: number)`: Incrementa la cantidad en posesión al recolectar ítems en el mundo 3D de forma síncrona multijugador.
 
 ---
 
@@ -57,7 +60,7 @@ export function toggleInventory() {
 
 ### 3.1 Arquitectura de la Barra de Acción Desktop (`DesktopActionBarWidget`)
 
-Ubicada en `{ top: 286, right: 28 }`, la barra se ancla exactamente debajo del `MinimapWidget` (cuyo rango vertical abarca de `top: 80px` a `top: 280px`).
+Ubicada en `{ top: 286, right: 28 }`, la barra se ancla exactamente debajo del `MinimapWidget`:
 
 ```typescript
 export const DesktopActionBarWidget = () => {
@@ -79,7 +82,6 @@ export const DesktopActionBarWidget = () => {
         pointerFilter: 'none'
       }}
     >
-      {/* Botón de Robot / Reserva de Golems (Aparece a la IZQUIERDA de la mochila) */}
       <ActionIconButton
         keyId="btn_golem_inventory"
         textureSrc="assets/images/golem_icon.png"
@@ -87,8 +89,6 @@ export const DesktopActionBarWidget = () => {
         isActive={isGolemInventoryOpen}
         onClick={() => toggleGolemInventory()}
       />
-
-      {/* Botón de Mochila / Inventario de Chatarra (Extremo Derecho) */}
       <ActionIconButton
         keyId="btn_backpack_inventory"
         textureSrc="assets/images/backpack_icon.png"
@@ -101,125 +101,18 @@ export const DesktopActionBarWidget = () => {
 }
 ```
 
+---
 
-### 3.2 Botones de Acción Sin Marco Interno (`ActionIconButton`)
-
-Para maximizar el tamaño de los iconos y evitar recuadros blancos obstructivos, `ActionIconButton` utiliza un contenedor único de 48px × 48px con resplandor dorado (`Color4.create(1.0, 0.85, 0.3, 0.95)`) al estar activo:
+## 🖼️ 4. Estructura del Rediseño de Cuadrícula y Tooltip (`src/ui/inventoryComponent.tsx`)
 
 ```typescript
-export const ActionIconButton = ({ icon, textureSrc, tooltip, isActive, onClick, keyId }: ActionIconButtonProps) => {
-  return (
-    <UiEntity
-      key={keyId}
-      uiTransform={{
-        width: 48,
-        height: 48,
-        margin: { left: 8 },
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: { top: 2, bottom: 2, left: 2, right: 2 },
-        pointerFilter: 'block'
-      }}
-      uiBackground={{
-        color: isActive
-          ? Color4.create(1.0, 0.85, 0.3, 0.95) // Resplandor dorado activo
-          : Color4.create(0.12, 0.16, 0.22, 0.92)  // Fondo base
-      }}
-      onMouseDown={() => onClick()}
-    >
-      {textureSrc ? (
-        <UiEntity
-          uiTransform={{
-            width: '100%',
-            height: '100%',
-            pointerFilter: 'none'
-          }}
-          uiBackground={{
-            texture: { src: textureSrc },
-            textureMode: 'stretch'
-          }}
-        />
-      ) : (
-        <UiEntity
-          uiTransform={{
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            pointerFilter: 'none'
-          }}
-          uiText={{
-            value: icon || '',
-            fontSize: 26,
-            textAlign: 'middle-center'
-          }}
-        />
-      )}
-    </UiEntity>
-  )
+export function getItemIconPath(item: ItemConfig): string {
+  return `assets/items/${item.rarity}/${item.id}.png`
 }
-```
 
----
-
-## 📱 4. Integración Móvil y TouchScreenControls (`src/index.ts`)
-
-En dispositivos móviles, Decentraland SDK7 permite personalizar el HUD táctil reemplazando el glifo predeterminado de la tecla **F** (`InputAction.IA_SECONDARY`) con una textura de escena mediante la propiedad `icon`:
-
-```typescript
-TouchScreenControls.createOrReplace(engine.RootEntity, {
-  hideJoystick: false,
-  hideCrosshair: false,
-  touchInputs: [
-    {
-      inputAction: InputAction.IA_SECONDARY,
-      hide: false,
-      icon: { tex: { $case: 'texture', texture: { src: 'assets/images/backpack_icon.png' } } }
-    },
-    { inputAction: InputAction.IA_ACTION_3, hide: true },
-    { inputAction: InputAction.IA_ACTION_4, hide: true },
-    { inputAction: InputAction.IA_ACTION_5, hide: true },
-    { inputAction: InputAction.IA_ACTION_6, hide: true }
-  ]
-})
-```
-
-### 4.1 Listener de Teclado y Touchpad (`engine.addSystem`)
-
-Tanto para la tecla física **F** en escritorio como para el botón **F** personalizado con la mochila en móviles, se registra un sistema reactivo en `src/index.ts`:
-
-```typescript
-engine.addSystem(() => {
-  if (inputSystem.isTriggered(InputAction.IA_SECONDARY, PointerEventType.PET_DOWN)) {
-    toggleInventory()
-  }
-})
-```
-
----
-
-## 🖼️ 5. Especificaciones del Asset `backpack_icon.png`
-
-- **Ruta**: `assets/images/backpack_icon.png`
-- **Dimensiones**: 128px × 128px HD
-- **Formato**: PNG 32-bit RGBA
-- **Criterio de Diseño**:
-  - Sin círculo exterior ni marcos envolventes.
-  - Ilustración ampliada de la mochila de cuero y latón steampunk (ocupa ~85% del lienzo).
-  - Fondo oscuro sólido `#0E121A` acorde con el resto del HUD táctil.
-
----
-
-## 🖥️ 6. Modal de Inventario (`src/ui/inventoryComponent.tsx`)
-
-### 6.1 Regla de Centrado Absoluto y `pointerFilter`
-
-Para garantizar que el modal esté perfectamente centrado y que el botón de la mochila en el touchpad táctil móvil no quede bloqueado mientras la ventana está abierta, la estructura de React-ECS emplea dos niveles de `UiEntity`:
-
-```typescript
 export const InventoryModal = () => {
   if (!getIsInventoryOpen()) return null
-
+  // ...
   return (
     <UiEntity
       uiTransform={{
@@ -228,97 +121,55 @@ export const InventoryModal = () => {
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        pointerFilter: 'none' // ¡Permite que los controles táctiles del touchpad reciban toques!
+        pointerFilter: 'none'
       }}
-      uiBackground={{
-        color: Color4.create(0.02, 0.03, 0.06, 0.86)
-      }}
-      onMouseDown={() => toggleInventory()} // Tocar el fondo semitransparente cierra el inventario
+      uiBackground={{ color: Color4.create(0.02, 0.03, 0.06, 0.86) }}
     >
-      {/* Tarjeta Central del Inventario (920px × 540px Centrada) */}
       <UiEntity
         uiTransform={{
           width: 920,
           height: 540,
           flexDirection: 'column',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           alignItems: 'center',
           padding: { top: 16, bottom: 16, left: 20, right: 20 },
-          pointerFilter: 'block' // Absorbe la interacción dentro del modal
+          pointerFilter: 'block'
         }}
-        uiBackground={{
-          color: Color4.create(0.06, 0.08, 0.12, 0.96)
-        }}
+        uiBackground={{ color: Color4.create(0.06, 0.08, 0.12, 0.96) }}
       >
-        {/* Cabecera, Filtros por Rareza, Cuerpo en 2 Columnas y Pie de Modal */}
+        {/* Cabecera con título, variedades y botón ✖ */}
+        {/* Barra de Filtros por Rareza */}
+        {/* Cuadrícula continua 100% ancho con celdas de 98px x 98px */}
+        {/* Tarjeta de Tooltip emergente (activeTooltipConfig) */}
       </UiEntity>
     </UiEntity>
   )
 }
 ```
 
-### 6.2 Secciones de la Ventana Modal
-
-1. **Cabecera**:
-   - Título: `🎒 INVENTARIO DE CHATARRA`
-   - Badge de Variedades: Muestra la cantidad de tipos de materiales poseídos contra el total del catálogo (`X / 46 Variedades`).
-   - Botón de Cierre: `✖` táctil en la esquina superior derecha.
-2. **Barra de Filtros por Rareza**:
-   - Botones selectores: `[ Todos | Común | Poco Común | Raro | Épico | Legendario ]`.
-   - Aplica resaltado cromático activo en base a `RARITY_COLOR_MAP`.
-3. **Columna Izquierda (58% de ancho - Lista Rejilla)**:
-   - Muestra los materiales poseídos (cantidad > 0) con barra lateral de color según rareza, nombre traducido con `t()` y badge de cantidad `xN`.
-   - Estado vacío ("Empty state") con icono `📦` y mensaje explicativo si no hay ítems en la categoría seleccionada.
-4. **Columna Derecha (40% de ancho - Panel de Inspección)**:
-   - Muestra los detalles del material seleccionado: Nombre, rareza, zona de origen (`zone`), frecuencia de aparición (`spawnWeight`) y la **lista detallada de atributos para la Forja**:
-     - ⚔️ Bono de Ataque (`attackBonus`)
-     - 🛡️ Bono de Defensa (`defenseBonus`)
-     - 💚 Bono de Vitalidad (`hpBonus`)
-     - ⚡ Bono de Velocidad (`speedBonus`)
-     - 🔮 Afinidad Elemental Dominante (`affinityFocus` con su icono representativo `getAffinityIcon()`).
-5. **Pie de Modal**:
-   - Consejo táctico: *"💡 Combina de 5 a 12 piezas de chatarra en la Forja para dar vida a un Golem único."*
+### Secciones de la Ventana Modal:
+1. **Cabecera**: Título `🎒 INVENTARIO DE CHATARRA`, contador de variedades `X / 46` y botón `✖` aislado.
+2. **Barra de Filtros por Rareza**: `[ Todos | Común | Poco Común | Raro | Épico | Legendario ]`.
+3. **Rejilla Principal (100% de Ancho)**:
+   - Celdas cuadradas `98px × 98px` con borde del color de la rareza, previsualización PNG de 300x300px, nombre del material e insignia `xN` en la esquina inferior derecha.
+4. **Tarjeta Emergente de Tooltip**:
+   - Superposición lateral en `{ top: 60, right: 28 }` desplegada al presionar sobre un material.
+   - Contiene la imagen PNG en 56x56px, zona de origen, cantidad, porcentaje de aparición y el desglose de atributos para la **Forja de Golems** (Ataque, Defensa, Vitalidad, Velocidad, Afinidad).
 
 ---
 
-## 🌐 7. Internacionalización i18n (`src/i18n`)
+## 🌐 5. Internacionalización i18n (`src/i18n`)
 
-Toda la interfaz del inventario está completamente traducida a través de la sección `inventory` en los diccionarios canónicos `es.ts` y `en.ts`:
-
-```typescript
-inventory: {
-  title: '🎒 INVENTARIO DE CHATARRA',
-  empty: 'Tu inventario está vacío. Explora el mapa con el Radar Térmico para recolectar piezas de chatarra.',
-  filterAll: 'Todos',
-  totalTypes: 'Variedades',
-  itemDetails: 'Detalles del Material',
-  statContribution: 'Aporte para la Forja',
-  selectItem: 'Selecciona una pieza de chatarra para ver sus propiedades.',
-  forgeTip: '💡 Combina de 5 a 12 piezas de chatarra en la Forja para dar vida a un Golem único.',
-  backpackTooltip: 'Abrir Inventario (🎒)',
-  ownedQuantity: 'Cantidad en Posesión',
-  originZone: 'Zona de Origen',
-  spawnWeight: 'Frecuencia de Aparición',
-  statAttack: 'Bono de Ataque',
-  statDefense: 'Bono de Defensa',
-  statHp: 'Bono de Vitalidad',
-  statSpeed: 'Bono de Velocidad',
-  statAffinity: 'Afinidad Elemental'
-}
-```
+Toda la interfaz está conectada a los diccionarios canónicos `es.ts` y `en.ts` sin textos hardcodeados.
 
 ---
 
-## 🧪 8. Protocolo de Verificación y Pruebas
+## 🧪 6. Protocolo de Verificación
 
 1. **Compilación de Código**:
-   - Ejecutar `npm run build` para asegurar la resolución correcta de tipos React-ECS y `@dcl/sdk/platform`.
+   - Ejecutar `npx tsc --noEmit` para verificar cero errores de tipo.
 2. **Prueba en Escritorio**:
-   - Verificar que la barra de botones aparece justificada a la derecha a `top: 286px, right: 28px` mostrando el icono PNG de la mochila.
-   - Verificar que hacer clic en la mochila o presionar la tecla **F** abre/cierra la ventana modal centrada.
+   - Al pulsar la `✖` superior o el botón de mochila, el modal se abre/cierra limpiamente.
+   - Al hacer clic sobre cualquier casilla de la cuadrícula, se despliega el Tooltip con la imagen PNG real del objeto.
 3. **Prueba en Móviles (Godot Explorer)**:
-   - Verificar que la barra debajo del minimapa NO se renderiza (`isMobile() === true`).
-   - Comprobar que en la esquina inferior derecha aparece el botón de acción nativo con la textura de la mochila (`backpack_icon.png`).
-   - Comprobar que tocar la mochila en la pantalla táctil abre el inventario y que **volver a tocarla la cierra**.
-4. **Prueba de Inspección y Filtros**:
-   - Recolectar chatarra del suelo y verificar la actualización en tiempo real de las cantidades `xN`, la variedad `X / 46` y el desglose de estadísticas de forja.
+   - Comprobar que tocar los casilleros en la pantalla táctil abre el Tooltip sin cerrar la ventana.

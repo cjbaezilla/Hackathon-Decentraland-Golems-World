@@ -8,6 +8,7 @@ import { Schemas, engine } from '@dcl/sdk/ecs'
  * en el mundo (46 ítems posibles).
  */
 export const CollectableItemComponent = engine.defineComponent('golems::CollectableItemComponent', {
+  instanceId: Schemas.String,
   itemId: Schemas.String,
   rarity: Schemas.String,
   zone: Schemas.String,

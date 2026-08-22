@@ -65,7 +65,6 @@ export const GolemInventoryModal = () => {
       uiBackground={{
         color: Color4.create(0.02, 0.03, 0.06, 0.86)
       }}
-      onMouseDown={() => toggleGolemInventory()}
     >
       {/* Tarjeta Central del Inventario de Golems (920px × 540px Centrada) */}
       <UiEntity
@@ -140,12 +139,16 @@ export const GolemInventoryModal = () => {
               color: Color4.create(0.24, 0.1, 0.1, 0.9)
             }}
             onMouseDown={() => toggleGolemInventory()}
-            uiText={{
-              value: '✖',
-              fontSize: 16,
-              color: Color4.create(1.0, 0.4, 0.4, 1.0)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: '✖',
+                fontSize: 16,
+                color: Color4.create(1.0, 0.4, 0.4, 1.0)
+              }}
+            />
+          </UiEntity>
         </UiEntity>
 
         {/* ---------------------------------------------------------------------- */}

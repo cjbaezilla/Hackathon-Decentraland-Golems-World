@@ -6,6 +6,7 @@ import {
   pointerEventsSystem,
   InputAction,
   MeshRenderer,
+  MeshCollider,
   Material,
   MaterialTransparencyMode
 } from '@dcl/sdk/ecs'
@@ -14,6 +15,12 @@ import { COLLECTABLE_ITEMS, ItemConfig, ItemRarity } from '../config/items'
 import { CollectableItemComponent } from '../components/item'
 import { addMaterialToInventory, addCombatLog } from '../state'
 import { t } from '../i18n'
+import {
+  broadcastItemPickup,
+  setupItemSyncListeners,
+  requestItemSync,
+  ItemPickupMessageDto
+} from '../multiplayer'
 
 /**
  * ============================================================================
@@ -94,6 +101,30 @@ export const ITEM_ZONE_BOUNDS: Record<string, ZoneBounds> = {
     maxZ: 396,
     weight: 0.120 // 12.0% (18 ítems) - PK
   }
+}
+
+/** Registro global de IDs de instancias recolectadas en el mapa */
+const collectedInstanceIds = new Set<string>()
+
+/** Registro global de entidades de ítems activos [instanceId -> Entity] */
+const activeItemEntities = new Map<string, Entity>()
+
+/** Generador Pseudoaleatorio Determinista con Semilla (Mulberry32) */
+let currentSeed = 0x428913
+
+export function resetDeterministicSeed(seed: number = 0x428913) {
+  currentSeed = seed
+}
+
+export function deterministicRandom(): number {
+  let t = (currentSeed += 0x6d2b79f5)
+  t = Math.imul(t ^ (t >>> 15), t | 1)
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+}
+
+export function getCollectedItemInstanceIds(): string[] {
+  return Array.from(collectedInstanceIds)
 }
 
 /**
@@ -204,19 +235,17 @@ export function isPositionValidAndSeparated(x: number, z: number, minDistance: n
 
 /**
  * Genera una posición aleatoria optimizada dentro de la zona especificada.
- * Abarca los bordes del mapa (0..400m), garantiza una separación mínima entre ítems
- * y omite strictly la ciudad inicial de la Forja y la Gran Arena Central.
  */
-export function getRandomPositionInZone(zoneName: string): Vector3 {
+export function getRandomPositionInZone(zoneName: string, useDeterministic: boolean = false): Vector3 {
   const bounds = ITEM_ZONE_BOUNDS[zoneName] || ITEM_ZONE_BOUNDS['Los Chatarrales']
+  const randFunc = useDeterministic ? deterministicRandom : Math.random
 
-  // Probar separación de 7.5m, reduciendo progresivamente si la zona es muy densa
   const minDistances = [7.5, 6.0, 4.5, 3.0]
 
   for (const minDist of minDistances) {
     for (let attempts = 0; attempts < 60; attempts++) {
-      const x = bounds.minX + Math.random() * (bounds.maxX - bounds.minX)
-      const z = bounds.minZ + Math.random() * (bounds.maxZ - bounds.minZ)
+      const x = bounds.minX + randFunc() * (bounds.maxX - bounds.minX)
+      const z = bounds.minZ + randFunc() * (bounds.maxZ - bounds.minZ)
 
       if (isPositionValidAndSeparated(x, z, minDist)) {
         return Vector3.create(x, -0.5, z)
@@ -224,9 +253,8 @@ export function getRandomPositionInZone(zoneName: string): Vector3 {
     }
   }
 
-  // Fallback seguro con coordenadas aleatorias en los bordes de la zona
-  const fallbackX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX)
-  const fallbackZ = bounds.minZ + Math.random() * (bounds.maxZ - bounds.minZ)
+  const fallbackX = bounds.minX + randFunc() * (bounds.maxX - bounds.minX)
+  const fallbackZ = bounds.minZ + randFunc() * (bounds.maxZ - bounds.minZ)
   return Vector3.create(fallbackX, -0.5, fallbackZ)
 }
 
@@ -246,11 +274,11 @@ export function isUniqueItemActive(itemId: string): boolean {
 /**
  * Selecciona una pieza de material ponderada por spawnWeight dentro de la piscina temática de su zona.
  */
-export function pickRandomItemConfigForZone(zoneName: string): ItemConfig {
+export function pickRandomItemConfigForZone(zoneName: string, useDeterministic: boolean = false): ItemConfig {
   const allItems = Object.values(COLLECTABLE_ITEMS)
   const candidatePool = getThematicCandidatePool(zoneName, allItems)
+  const randFunc = useDeterministic ? deterministicRandom : Math.random
 
-  // Filtrar ítems únicos que ya estén activos en el mapa
   const availablePool = candidatePool.filter((item) => {
     if (item.isUniqueInstance) {
       return !isUniqueItemActive(item.id)
@@ -258,15 +286,13 @@ export function pickRandomItemConfigForZone(zoneName: string): ItemConfig {
     return true
   })
 
-  // Si todos los ítems únicos de la zona están activos, utilizar los no únicos de esa piscina temática
   const nonUniqueZoneItems = candidatePool.filter((item) => !item.isUniqueInstance)
   const finalPool = availablePool.length > 0 
     ? availablePool 
     : (nonUniqueZoneItems.length > 0 ? nonUniqueZoneItems : candidatePool)
 
-  // Calcular peso total de la piscina de esa zona específica
   const totalWeight = finalPool.reduce((sum, item) => sum + item.spawnWeight, 0)
-  let randomRoll = Math.random() * totalWeight
+  let randomRoll = randFunc() * totalWeight
 
   for (const item of finalPool) {
     if (randomRoll <= item.spawnWeight) {
@@ -279,12 +305,15 @@ export function pickRandomItemConfigForZone(zoneName: string): ItemConfig {
 }
 
 /**
- * Instancia una entidad SDK7 de ítem coleccionable en el mundo.
+ * Instancia una entidad SDK7 de ítem coleccionable en el mundo con instanceId síncrono.
  */
-export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3): Entity {
+export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3, instanceId?: string): Entity {
   const entity = engine.addEntity()
+  const finalInstanceId = instanceId || `item_inst_${Date.now()}_${Math.floor(Math.random() * 10000)}`
 
-  // Posición inicial enterrada
+  // Registrar en el mapa de entidades activas
+  activeItemEntities.set(finalInstanceId, entity)
+
   const originalY = 0.25
   Transform.create(entity, {
     position: Vector3.create(position.x, position.y, position.z),
@@ -292,13 +321,12 @@ export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3): Enti
     rotation: Quaternion.fromEulerDegrees(0, Math.random() * 360, 0)
   })
 
-  // Cargar modelo 3D GLB
   GltfContainer.create(entity, {
     src: itemConfig.modelSrc
   })
 
-  // Asignar componente metadatos
   CollectableItemComponent.create(entity, {
+    instanceId: finalInstanceId,
     itemId: itemConfig.id,
     rarity: itemConfig.rarity,
     zone: normalizeZoneName(itemConfig.zone),
@@ -310,24 +338,27 @@ export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3): Enti
     respawnMaxMinutes: itemConfig.respawnTimeMaxMinutes
   })
 
-  // Interacción de recolección táctil (Mobile First)
+  // Hitbox de colisión explícita para la interacción del puntero de ratón en PC
+  MeshCollider.setBox(entity)
+
+  const hoverLabel = `Recolectar ${itemConfig.nameEs} (${itemConfig.rarity.toUpperCase()})`
+
+  // Interacción de recolección táctil (Mobile First) y ratón (PC)
   pointerEventsSystem.onPointerDown(
     {
       entity: entity,
       opts: {
         button: InputAction.IA_POINTER,
-        hoverText: `Recolectar ${itemConfig.nameEs} (${itemConfig.rarity.toUpperCase()})`,
-        maxDistance: 4.5
+        hoverText: hoverLabel,
+        maxDistance: 6.5
       }
     },
     () => {
-      collectItem(entity)
+      collectItem(entity, false)
     }
   )
 
-  // --------------------------------------------------------------------------
-  // HAZ DE LUZ VERTICAL DE PRUEBA (TEST BEAM OF LIGHT / VERTICAL BEACON RAY 30m)
-  // --------------------------------------------------------------------------
+  // Haz de luz de rareza
   const beamEntity = engine.addEntity()
   const beamColors = getItemBeamColor(itemConfig.rarity)
 
@@ -346,12 +377,24 @@ export function spawnItemEntity(itemConfig: ItemConfig, position: Vector3): Enti
     transparencyMode: MaterialTransparencyMode.MTM_ALPHA_BLEND
   })
 
+  // Permite interactuar y ver el texto hoverText también al apuntar al haz de luz vertical
+  pointerEventsSystem.onPointerDown(
+    {
+      entity: beamEntity,
+      opts: {
+        button: InputAction.IA_POINTER,
+        hoverText: hoverLabel,
+        maxDistance: 6.5
+      }
+    },
+    () => {
+      collectItem(entity, false)
+    }
+  )
+
   return entity
 }
 
-/**
- * Auxiliar para obtener el esquema de colores del haz de luz según la rareza del ítem.
- */
 function getItemBeamColor(rarity: string): { albedo: Color4; emissive: Color3 } {
   switch (rarity) {
     case ItemRarity.COMMON:
@@ -388,30 +431,46 @@ function getItemBeamColor(rarity: string): { albedo: Color4; emissive: Color3 } 
 }
 
 /**
- * Lógica de recolección cuando el jugador toca/presiona el material.
+ * Lógica síncrona de recolección cuando un jugador (local o remoto) recoge un material.
  */
-export function collectItem(entity: Entity) {
+export function collectItem(entity: Entity, fromRemote: boolean = false) {
   if (!CollectableItemComponent.has(entity)) return
 
   const itemData = CollectableItemComponent.get(entity)
-  if (itemData.isCollected) return
+  if (itemData.isCollected || collectedInstanceIds.has(itemData.instanceId)) {
+    // Si ya estaba recolectado, remover entidad local si aún existe
+    if (activeItemEntities.has(itemData.instanceId)) {
+      activeItemEntities.delete(itemData.instanceId)
+      engine.removeEntity(entity)
+    }
+    return
+  }
 
   const config = COLLECTABLE_ITEMS[itemData.itemId]
   const itemName = config ? config.nameEs : itemData.itemId
 
-  // Marcar como recolectado
+  // Marcar como recolectado globalmente
+  collectedInstanceIds.add(itemData.instanceId)
+
   const mutItem = CollectableItemComponent.getMutable(entity)
   mutItem.isCollected = true
 
-  // Añadir al inventario local
-  addMaterialToInventory(itemData.itemId, 1)
+  if (!fromRemote) {
+    // Recolección por el jugador local
+    addMaterialToInventory(itemData.itemId, 1)
+    addCombatLog(`+1 ${itemName} (${itemData.rarity.toUpperCase()})`, itemConfigColorHex(itemData.rarity))
+    console.log(`🔨 [Material Recolectado Local]: ${itemName} (${itemData.instanceId}) en zona ${itemData.zone}`)
 
-  // Log de combate/recolección
-  addCombatLog(`+1 ${itemName} (${itemData.rarity.toUpperCase()})`, itemConfigColorHex(itemData.rarity))
+    // Difundir recolección a todos los peers conectados en la escena
+    broadcastItemPickup(itemData.instanceId, itemData.itemId)
+  } else {
+    // Recolección por otro jugador remoto
+    addCombatLog(`🌐 [Multijugador] Un jugador recolectó ${itemName}`, '#A0A0A0')
+    console.log(`🔨 [Material Recolectado Remoto]: ${itemName} (${itemData.instanceId}) por peer.`)
+  }
 
-  console.log(`🔨 [Material Recolectado]: ${itemName} (${itemData.rarity}) en zona ${itemData.zone}`)
-
-  // Ocultar y remover la entidad
+  // Ocultar y eliminar la entidad del mundo de forma inmediata
+  activeItemEntities.delete(itemData.instanceId)
   engine.removeEntity(entity)
 }
 
@@ -433,29 +492,82 @@ function itemConfigColorHex(rarity: string): string {
 }
 
 /**
- * Inicializa exactamente 150 ítems distribuidos por todo el mapa.
+ * Procesa la notificación de recolección enviada por un peer remoto.
+ */
+export function handleRemoteItemPickup(pickup: ItemPickupMessageDto) {
+  if (!pickup || !pickup.instanceId) return
+
+  collectedInstanceIds.add(pickup.instanceId)
+
+  const targetEntity = activeItemEntities.get(pickup.instanceId)
+  if (targetEntity) {
+    collectItem(targetEntity, true)
+    return
+  }
+
+  // Si no está en el mapa directo, buscar en las entidades registradas
+  for (const [entity] of engine.getEntitiesWith(CollectableItemComponent)) {
+    const itemData = CollectableItemComponent.get(entity)
+    if (itemData.instanceId === pickup.instanceId) {
+      collectItem(entity, true)
+      break
+    }
+  }
+}
+
+/**
+ * Procesa la lista de ítems recolectados recibida al sincronizar con peers.
+ */
+export function handleRemoteItemSync(collectedIds: string[]) {
+  if (!Array.isArray(collectedIds)) return
+
+  for (const id of collectedIds) {
+    collectedInstanceIds.add(id)
+    const entity = activeItemEntities.get(id)
+    if (entity) {
+      activeItemEntities.delete(id)
+      engine.removeEntity(entity)
+    }
+  }
+}
+
+/**
+ * Inicializa exactamente 150 ítems compartidos de forma síncrona en el mapa.
  */
 export function spawnInitialMapItems(targetTotalCount: number = 150) {
   let spawnedCount = 0
+  resetDeterministicSeed(0x428913)
 
   for (const [zoneName, zoneBounds] of Object.entries(ITEM_ZONE_BOUNDS)) {
     const zoneTarget = Math.max(1, Math.round(targetTotalCount * zoneBounds.weight))
 
     for (let i = 0; i < zoneTarget; i++) {
-      const itemConfig = pickRandomItemConfigForZone(zoneName)
-      const position = getRandomPositionInZone(zoneName)
-      spawnItemEntity(itemConfig, position)
+      const instanceId = `item_slot_${spawnedCount}`
+      const itemConfig = pickRandomItemConfigForZone(zoneName, true)
+      const position = getRandomPositionInZone(zoneName, true)
+      spawnItemEntity(itemConfig, position, instanceId)
       spawnedCount++
     }
   }
 
-  // Ajustar si falta o sobra para cumplir exactamente 90
   while (spawnedCount < targetTotalCount) {
-    const itemConfig = pickRandomItemConfigForZone('Los Chatarrales')
-    const position = getRandomPositionInZone('Los Chatarrales')
-    spawnItemEntity(itemConfig, position)
+    const instanceId = `item_slot_${spawnedCount}`
+    const itemConfig = pickRandomItemConfigForZone('Los Chatarrales', true)
+    const position = getRandomPositionInZone('Los Chatarrales', true)
+    spawnItemEntity(itemConfig, position, instanceId)
     spawnedCount++
   }
 
-  console.log(`📦 [Material Spawner] Inicializados exactamente ${spawnedCount} materiales coleccionables en el mapa (Target: ${targetTotalCount}).`)
+  // Configurar escuchadores de MessageBus para sincronización multijugador
+  setupItemSyncListeners(
+    handleRemoteItemPickup,
+    handleRemoteItemSync,
+    getCollectedItemInstanceIds
+  )
+
+  // Solicitar sincronización de estado de ítems a otros jugadores en la escena
+  requestItemSync()
+
+  console.log(`📦 [Material Spawner Multijugador] Inicializados exactamente ${spawnedCount} materiales síncronos compartidos (Target: ${targetTotalCount}).`)
 }
+
