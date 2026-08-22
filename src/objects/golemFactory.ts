@@ -145,6 +145,32 @@ export function updateGolemFloatingLabel(
 }
 
 /**
+ * Sincroniza la vida (HP) de una entidad 3D de golem en el mundo (GolemCombatComponent) y actualiza su barra flotante en el mapa.
+ */
+export function syncGolem3DEntityHp(golemId: string, newHp: number) {
+  for (const [entity] of engine.getEntitiesWith(GolemCombatComponent)) {
+    const combat = GolemCombatComponent.get(entity)
+    if (combat.golemId === golemId) {
+      const mutCombat = GolemCombatComponent.getMutable(entity)
+      mutCombat.currentHp = Math.max(0, Math.min(combat.maxHp, newHp))
+
+      const config = spawnedFollowerGolemConfigMap.get(entity)
+      const name = config ? getGolemDisplayName(config) : 'Golem'
+      updateGolemFloatingLabel(
+        entity,
+        name,
+        combat.affinity,
+        combat.level,
+        mutCombat.currentHp,
+        combat.maxHp,
+        combat.ownerAddress
+      )
+    }
+  }
+}
+
+
+/**
  * Crea una entidad de golem seguidor y de combate asociada a un jugador (local, remoto o sparring).
  */
 export function createFollowerGolem(

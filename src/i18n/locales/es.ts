@@ -24,8 +24,10 @@ export const es: TranslationSchema = {
     kills: 'Bajas',
     languageToggle: '🌐 ES | en',
     parcel: 'Parcela',
-    coords: 'Coord.'
+    coords: 'Coord.',
+    gears: 'Engranajes'
   },
+
   zones: {
     forgeDistrict: 'Distrito de la Forja',
     scrapDesert: 'Desierto de Chatarra',
@@ -277,8 +279,24 @@ export const es: TranslationSchema = {
     craftButton: '⚡ ¡FORJAR GOLEM!',
     golemActiveFollower: '🎉 ¡Nuevo autómata {name} forjado con éxito! Ahora te acompaña como tu único seguidor.',
     golemSentToVault: '📦 ¡Nuevo autómata {name} forjado! Guardado en la Bóveda / Reserva de Golems.'
+  },
+  tesla: {
+    title: '⚡ TORRE TESLA GALVÁNICA',
+    subtitle: 'Estación de Recarga Energética (1 🪙 por 1 HP)',
+    hoverText: '⚡ Usar Torre Tesla para Recargar HP',
+    restore: 'Restaurar',
+    restoreAll: 'RESTAURAR TODOS LOS GOLEMS',
+    fullHp: 'HP al Máximo',
+    notEnoughGears: 'Engranajes Insuficientes',
+    rechargeSuccess: '⚡ ¡{name} ha sido recargado a {hp} HP por {cost} 🪙!',
+    rechargeAllSuccess: '⚡ ¡Todos los golems restaurados con éxito por {cost} 🪙!',
+    noGolemsNeedHp: '✨ Todos tus golems están a su máxima salud.',
+    balanceLabel: 'Saldo Disponible',
+    rateInfo: 'Tarifa: 1 Engranaje de Latón por cada 1 HP recargado'
   }
+
 }
+
 
 
 

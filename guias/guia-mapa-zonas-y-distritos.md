@@ -141,11 +141,13 @@ Las cuatro esquinas del mapa están diseñadas con **dimensiones simétricas id�
   - **Calzada Sur-Central (Bulevar de Enlace [1,1] a [4,1])**: Camino adoquinado este-oeste continuo a lo largo de $Z \approx 25.5\text{m}$ desde $X = 19.1\text{m}$ (Parcela `[1, 1]`, empalme con ruta de Spawn $X=16\text{m}$) hasta $X = 66.5\text{m}$ (Parcela `[4, 1]`, empalme con Troncal Norte-Sur $X=70\text{m}$), equipado con farolas industriales triples a ambos márgenes.
   - **Puerta Norte ("Puerta de la Chatarra") en `(70, 140)`**: Bastiones industriales con marcador `SteamPunk_Number_01`.
   - **Puerta Este ("Puerta de las Calderas") en `(140, 70)`**: Bastiones industriales con marcador `SteamPunk_Number_02`.
-- **4 Talleres Satélites**:
+- **4 Talleres Satélites y Estación Galvánica**:
   - *Taller Mecánico* `(40, 105)`: Techado con techos elevados (`Ceiling 4x4M.glb`), bancos de engranajes finos y tanques.
   - *Taller de Vapor y Calderería* `(105, 40)`: Tanques de presión y cofres de placas blindadas.
   - *Pabellón de Maestros Forjadores* `(35, 45)`: Mesas de ensamble de golems.
   - *Puesto de Guardia y Vigía* `(105, 105)`: Plataforma con farolas de vigilancia y suministros.
+  - *Estación de Recarga Energética — Torre Tesla Galvánica* `(52.8m, 34.2m)` en Parcela `[3, 2]`: Torre metálica de recarga de salud para escuadrón y reserva de golems por 1 Engranaje de Latón por 1 HP restaurado. Posee rótulo 3D flotante (`Billboard`) con Stroke Color cian galvánico y resalte verde de selección (**hover stroke outline**) asignado directamente al cuerpo de la torre.
+
 - **Bulevares y Paseos Comerciales de Intercambio (10 Trading Posts)**:
   - *Sector 1 — Bulevar Comercial Sur (Eje X: 30.0m a 63.0m, Z: 7.0m a 10.6m)*:
     - *Puesto #01*: Parcela `[1, 0]` • `(X: 30.00m, Z: 7.00m)` con marcador `SteamPunk_Number_01`.

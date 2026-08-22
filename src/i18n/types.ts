@@ -28,7 +28,9 @@ export interface TranslationSchema {
     languageToggle: string
     parcel: string
     coords: string
+    gears: string
   }
+
   zones: {
     forgeDistrict: string
     scrapDesert: string
@@ -251,7 +253,22 @@ export interface TranslationSchema {
     golemActiveFollower: string
     golemSentToVault: string
   }
+  tesla: {
+    title: string
+    subtitle: string
+    hoverText: string
+    restore: string
+    restoreAll: string
+    fullHp: string
+    notEnoughGears: string
+    rechargeSuccess: string
+    rechargeAllSuccess: string
+    noGolemsNeedHp: string
+    balanceLabel: string
+    rateInfo: string
+  }
 }
+
 
 
 

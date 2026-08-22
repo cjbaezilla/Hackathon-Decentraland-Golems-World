@@ -1,5 +1,6 @@
 import { GolemConfig } from './config/golems'
 import { t } from './i18n'
+import { syncGolem3DEntityHp } from './objects/golemFactory'
 
 /**
  * ============================================================================
@@ -8,6 +9,7 @@ import { t } from './i18n'
  * Almacena el estado de sesión del jugador local, incluyendo su escuadrón
  * de 3 golems asignado aleatoriamente para la sesión actual.
  */
+
 
 export interface CombatLogEntry {
   id: string
@@ -58,6 +60,7 @@ export interface SceneState {
   isInventoryOpen: boolean
   isGolemInventoryOpen: boolean
   isForgeUIOpen: boolean
+  isTeslaTowerUIOpen: boolean
   selectedForgeMaterials: Record<string, number>
   golemReserve: GolemConfig[]
   playerInventory: Record<string, number>
@@ -87,7 +90,9 @@ export const sceneState: SceneState = {
   isInventoryOpen: false,
   isGolemInventoryOpen: false,
   isForgeUIOpen: false,
+  isTeslaTowerUIOpen: false,
   selectedForgeMaterials: {},
+
   golemReserve: [],
   isSilasTourActive: false,
   silasTourCurrentWaypoint: 0,
@@ -400,8 +405,10 @@ export function updateLocalGolemHp(golemId: string, newHp: number) {
   const golem = sceneState.localSquad.find((g) => g.id === golemId)
   if (golem) {
     golem.currentHp = Math.max(0, Math.min(golem.maxHp, newHp))
+    syncGolem3DEntityHp(golemId, golem.currentHp)
   }
 }
+
 
 /**
  * Agrega experiencia a un golem local específico y calcula si sube de nivel.
@@ -625,6 +632,88 @@ export function getIsFieldBattleModalOpen(): boolean {
 export function getActiveFieldTarget(): any | null {
   return sceneState.activeFieldTarget
 }
+
+/**
+ * Consulta si el modal de la Torre Tesla está abierto.
+ */
+export function getIsTeslaTowerUIOpen(): boolean {
+  return sceneState.isTeslaTowerUIOpen
+}
+
+/**
+ * Establece el estado de apertura del modal de la Torre Tesla.
+ */
+export function setIsTeslaTowerUIOpen(open: boolean) {
+  sceneState.isTeslaTowerUIOpen = open
+}
+
+/**
+ * Restaura la vida (HP) de un golem individual utilizando la Torre Tesla.
+ * Tarifa: 1 Engranaje de Latón por cada 1 HP recargado.
+ */
+export function restoreGolemHpTesla(golemId: string): { success: boolean; cost: number; messageKey: string } {
+  let golem: GolemConfig | undefined = sceneState.localSquad?.find((g) => g.id === golemId)
+  if (!golem) {
+    golem = sceneState.golemReserve.find((g) => g.id === golemId)
+  }
+  if (!golem) {
+    return { success: false, cost: 0, messageKey: 'noGolem' }
+  }
+
+  const missingHp = Math.max(0, golem.maxHp - golem.currentHp)
+  if (missingHp <= 0) {
+    return { success: false, cost: 0, messageKey: 'fullHp' }
+  }
+
+  const cost = Math.max(1, Math.ceil(missingHp * 1))
+  if (sceneState.playerBrassGears < cost) {
+    return { success: false, cost, messageKey: 'notEnoughGears' }
+  }
+
+  sceneState.playerBrassGears -= cost
+  golem.currentHp = golem.maxHp
+  syncGolem3DEntityHp(golem.id, golem.maxHp)
+  addCombatLog(t('tesla.rechargeSuccess', { name: golem.name, hp: golem.maxHp, cost }), '#00E5FF')
+  return { success: true, cost, messageKey: 'success' }
+}
+
+/**
+ * Restaura la vida (HP) de TODOS los golems del jugador (escuadrón y reserva).
+ */
+export function restoreAllGolemsHpTesla(): { success: boolean; totalCost: number; restoredCount: number } {
+  const allGolems: GolemConfig[] = []
+  if (sceneState.localSquad) {
+    allGolems.push(...sceneState.localSquad)
+  }
+  allGolems.push(...sceneState.golemReserve)
+
+  const damagedGolems = allGolems.filter((g) => g.currentHp < g.maxHp)
+  if (damagedGolems.length === 0) {
+    return { success: false, totalCost: 0, restoredCount: 0 }
+  }
+
+  let totalMissingHp = 0
+  damagedGolems.forEach((g) => {
+    totalMissingHp += (g.maxHp - g.currentHp)
+  })
+
+  const totalCost = Math.max(1, Math.ceil(totalMissingHp * 1))
+  if (sceneState.playerBrassGears < totalCost) {
+    return { success: false, totalCost, restoredCount: 0 }
+  }
+
+  sceneState.playerBrassGears -= totalCost
+  damagedGolems.forEach((g) => {
+    g.currentHp = g.maxHp
+    syncGolem3DEntityHp(g.id, g.maxHp)
+  })
+
+  addCombatLog(t('tesla.rechargeAllSuccess', { cost: totalCost }), '#00E5FF')
+  return { success: true, totalCost, restoredCount: damagedGolems.length }
+}
+
+
+
 
 
 

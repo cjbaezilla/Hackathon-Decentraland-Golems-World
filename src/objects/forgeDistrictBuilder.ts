@@ -6,6 +6,7 @@ import {
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
 import { FORGE_DISTRICT_CONFIG } from '../config/forgeDistrictConfig'
+import { createTeslaTower } from './teslaTower'
 
 /**
  * ============================================================================
@@ -18,6 +19,7 @@ import { FORGE_DISTRICT_CONFIG } from '../config/forgeDistrictConfig'
  * 4. 4 Talleres periféricos de artesanos, calderería y forja.
  * 5. Delimitación perimetral y Puertas monumentales (Norte 70,140 y Este 140,70).
  * 6. Cúmulos de escombros y chatarra de transición (Wreckages).
+ * 7. Torre Tesla de Recarga Energética (52.8m, 34.2m).
  */
 
 const ASSETS = FORGE_DISTRICT_CONFIG.assets
@@ -51,9 +53,13 @@ export function createForgeDistrict(): Entity {
   // 6. Cúmulos de Escombros y Chatarra (Wreckages de Transición)
   buildTransitionWreckages(root)
 
-  console.log('🏛️ [Distrito de la Forja] Ciudad inicial expandida a 140x140m instanciada con éxito.')
+  // 7. Torre Tesla Galvánica de Recarga de HP (Coordenadas 52.8m, 34.2m)
+  createTeslaTower(root)
+
+  console.log('🏛️ [Distrito de la Forja] Ciudad inicial expandida a 140x140m e instanciada con éxito con Torre Tesla.')
   return root
 }
+
 
 /**
  * Helper utilitario para instanciar elementos estáticos vinculados al nodo raíz.

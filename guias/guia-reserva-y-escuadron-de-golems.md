@@ -162,7 +162,16 @@ export const GolemInventoryModal = () => {
 
 ---
 
-## 🧪 5. Protocolo de Verificación
+## ⚡ 5. Restauración y Recarga de HP (Torre Tesla Galvánica)
+
+La salud (HP) consumida en batallas de campo o torneos por los golems del escuadrón y de la reserva se recupera acudiendo a la **Torre Tesla Galvánica** en el Distrito de la Forja (Parcela `[3, 2]` • `52.8m, 34.2m`):
+- **Costo de Recarga**: 1 Engranaje de Latón por cada 1 HP restaurado.
+- **Sincronización ECS**: La recarga desde el modal `TeslaTowerModal` o mediante `restoreGolemHpTesla` actualiza la salud del objeto en `sceneState.localSquad` / `golemReserve` y ejecuta `syncGolem3DEntityHp(golemId, maxHp)` para sincronizar la barra flotante de vida en la escena 3D en tiempo real.
+- Consulta los detalles completos en la [Guía Maestra: Torre Tesla Galvánica, Recarga Energética de HP, UI React-ECS y Sincronización 3D](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-torre-tesla-recarga-y-recuperacion-hp.md).
+
+---
+
+## 🧪 6. Protocolo de Verificación
 
 1. **Compilación de Código**:
    - Ejecutar `npx tsc --noEmit` para comprobar cero errores de tipo.
@@ -170,3 +179,4 @@ export const GolemInventoryModal = () => {
    - Abrir el inventario de golems mediante la tecla **E** o el botón del robot.
    - Comprobar la visualización de la cuadrícula al 100% de ancho y la carga de imágenes PNG de 300x300px desde `assets/models/`.
    - Probar los filtros por afinidad y el despliegue del Tooltip al presionar sobre cualquier autómata.
+

@@ -29,6 +29,8 @@ import { InventoryModal } from './ui/inventoryComponent'
 import { GolemInventoryModal } from './ui/golemInventoryComponent'
 import { GolemForgeModal } from './ui/golemForgeComponent'
 import { FieldBattleModal, PlayerStatusHudWidget } from './ui/fieldBattleComponent'
+import { TeslaTowerModal } from './ui/teslaTowerComponent'
+
 
 
 
@@ -1026,7 +1028,11 @@ export const uiComponent = () => {
       {/* Modal de Confirmación de Batalla de Campo contra Golem Salvaje */}
       <FieldBattleModal />
 
+      {/* Modal de Recarga Energética de Torre Tesla */}
+      <TeslaTowerModal />
+
       {/* Modal de Diálogo de Silas el Sobreviviente */}
+
       <NpcDialog />
 
       {/* Subtítulos Flotantes durante la Marcha del Tour de Silas */}

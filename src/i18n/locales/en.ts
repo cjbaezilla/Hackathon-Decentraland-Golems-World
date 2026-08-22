@@ -24,8 +24,10 @@ export const en: TranslationSchema = {
     kills: 'Kills',
     languageToggle: '🌐 es | EN',
     parcel: 'Parcel',
-    coords: 'Coord.'
+    coords: 'Coord.',
+    gears: 'Gears'
   },
+
   zones: {
     forgeDistrict: 'Forge District',
     scrapDesert: 'Scrap Desert',
@@ -277,8 +279,24 @@ export const en: TranslationSchema = {
     craftButton: '⚡ CRAFT GOLEM!',
     golemActiveFollower: '🎉 New automaton {name} successfully forged! It now accompanies you as your sole follower.',
     golemSentToVault: '📦 New automaton {name} forged! Saved to Vault / Golem Reserve.'
+  },
+  tesla: {
+    title: '⚡ GALVANIC TESLA TOWER',
+    subtitle: 'Energy Recharge Station (1 🪙 per 1 HP)',
+    hoverText: '⚡ Use Tesla Tower to Recharge HP',
+    restore: 'Restore',
+    restoreAll: 'RESTORE ALL GOLEMS',
+    fullHp: 'Full HP',
+    notEnoughGears: 'Not Enough Gears',
+    rechargeSuccess: '⚡ {name} has been recharged to {hp} HP for {cost} 🪙!',
+    rechargeAllSuccess: '⚡ All golems successfully restored for {cost} 🪙!',
+    noGolemsNeedHp: '✨ All your golems are at maximum health.',
+    balanceLabel: 'Available Balance',
+    rateInfo: 'Rate: 1 Brass Gear per 1 HP restored'
   }
+
 }
+
 
 
 
