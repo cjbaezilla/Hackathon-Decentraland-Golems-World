@@ -509,7 +509,10 @@ export function addForgeMaterial(itemId: string) {
   }
 
   if (selected < owned && currentTotalCount < 12) {
-    sceneState.selectedForgeMaterials[itemId] = selected + 1
+    sceneState.selectedForgeMaterials = {
+      ...sceneState.selectedForgeMaterials,
+      [itemId]: selected + 1
+    }
   }
 }
 
@@ -519,9 +522,13 @@ export function addForgeMaterial(itemId: string) {
 export function removeForgeMaterial(itemId: string) {
   const selected = sceneState.selectedForgeMaterials[itemId] || 0
   if (selected > 1) {
-    sceneState.selectedForgeMaterials[itemId] = selected - 1
+    const next = { ...sceneState.selectedForgeMaterials }
+    next[itemId] = selected - 1
+    sceneState.selectedForgeMaterials = next
   } else if (selected === 1) {
-    delete sceneState.selectedForgeMaterials[itemId]
+    const next = { ...sceneState.selectedForgeMaterials }
+    delete next[itemId]
+    sceneState.selectedForgeMaterials = next
   }
 }
 

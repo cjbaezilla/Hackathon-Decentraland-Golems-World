@@ -1,5 +1,6 @@
 import { engine, Transform, Entity, ComponentType } from '@dcl/sdk/ecs'
 import { Quaternion, Vector3 } from '@dcl/sdk/math'
+import { getIsForgeUIOpen } from '../state'
 
 /**
  * ============================================================================
@@ -10,6 +11,10 @@ import { Quaternion, Vector3 } from '@dcl/sdk/math'
  * Soporta dos estados de velocidad:
  * - IDLE: Rotación fluida constante (modo ambiente).
  * - FORGING: Rotación acelerada a 3.5x con ligera oscilación vertical de la caldera.
+ * 
+ * OPTIMIZACIÓN MOBILE: Si la UI de la forja está desplegada (getIsForgeUIOpen() === true),
+ * este sistema se pausa y no mutará los componentes Transform per-frame, eliminando
+ * la sobrecarga del motor 3D mientras el usuario interactúa con la UI.
  */
 
 export interface AnimatedGearData {
@@ -68,6 +73,11 @@ export function getIsFactoryForgingActive(): boolean {
  * Sistema ECS ejecutado en cada frame para actualizar la rotación de engranajes.
  */
 export function factoryAnimationSystem(dt: number) {
+  // Desactivar animaciones per-frame en 3D automáticamente si la UI de Forja está desplegada
+  if (getIsForgeUIOpen()) {
+    return
+  }
+
   const speedMultiplier = isForgingActive ? 3.5 : 1.0
 
   // 1. Rotación continua de engranajes

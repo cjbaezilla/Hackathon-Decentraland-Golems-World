@@ -19,9 +19,31 @@ import {
 } from '../state'
 import { getItemIconPath } from './inventoryComponent'
 import { getGolemIconPath } from './golemInventoryComponent'
-import { deriveForgedGolem } from '../utils/golemRecipeHash'
+import { deriveForgedGolem, buildCanonicalRecipe, ForgedGolemResult } from '../utils/golemRecipeHash'
 import { playFactoryForgingCinematic } from '../cinematics/factoryForgingCinematic'
 import { spawnActivePlayerGolem } from '../objects/golemFactory'
+
+let cachedRecipeKey: string = ''
+let cachedProjectedResult: ForgedGolemResult | null = null
+
+/**
+ * Obtiene el resultado proyectado memoizado para evitar recalcular la receta
+ * y buscar en el catálogo de 150 recetas durante cada interacción de UI táctil.
+ */
+function getMemoizedForgedGolem(selected: Record<string, number>): ForgedGolemResult | null {
+  const canonical = buildCanonicalRecipe(selected)
+  if (!canonical) {
+    cachedRecipeKey = ''
+    cachedProjectedResult = null
+    return null
+  }
+  if (canonical === cachedRecipeKey && cachedProjectedResult) {
+    return cachedProjectedResult
+  }
+  cachedRecipeKey = canonical
+  cachedProjectedResult = deriveForgedGolem(selected)
+  return cachedProjectedResult
+}
 
 /**
  * ============================================================================
@@ -44,9 +66,9 @@ export const GolemForgeModal = () => {
     totalSelectedCount += count
   }
 
-  // Derivar resultado proyectado si hay al menos 1 material
+  // Derivar resultado proyectado si hay al menos 1 material (usando versión memoizada)
   const hasMinItems = totalSelectedCount >= 5 && totalSelectedCount <= 12
-  const projectedResult = totalSelectedCount > 0 ? deriveForgedGolem(selected) : null
+  const projectedResult = totalSelectedCount > 0 ? getMemoizedForgedGolem(selected) : null
 
   const availableMaterialKeys = Object.keys(inventory).filter((id) => inventory[id] > 0)
 
@@ -112,7 +134,7 @@ export const GolemForgeModal = () => {
             />
           </UiEntity>
 
-          {/* Botón de Cierre (✖) */}
+          {/* Botón Táctil de Cierre (✖) */}
           <UiEntity
             uiTransform={{
               width: 38,
@@ -280,55 +302,65 @@ export const GolemForgeModal = () => {
                         </UiEntity>
                       </UiEntity>
 
-                      {/* Controles Táctiles + / - */}
+                      {/* Controles Táctiles Amplios + / - (Mobile-First 50x42px) */}
                       <UiEntity
                         uiTransform={{
                           flexDirection: 'row',
                           alignItems: 'center'
                         }}
                       >
+                        {/* Botón Disminuir (-) */}
                         <UiEntity
                           uiTransform={{
-                            width: 34,
-                            height: 32,
+                            width: 50,
+                            height: 42,
                             justifyContent: 'center',
                             alignItems: 'center',
                             margin: { right: 6 },
                             pointerFilter: 'block'
                           }}
                           uiBackground={{
-                            color: inForge > 0 ? Color4.create(0.35, 0.15, 0.15, 0.9) : Color4.create(0.2, 0.2, 0.2, 0.5)
+                            color: inForge > 0 ? Color4.create(0.4, 0.15, 0.15, 0.95) : Color4.create(0.2, 0.2, 0.2, 0.5)
                           }}
                           onMouseDown={() => {
                             removeForgeMaterial(itemId)
                           }}
-                          uiText={{
-                            value: '-',
-                            fontSize: 18,
-                            color: Color4.White()
-                          }}
-                        />
+                        >
+                          <UiEntity
+                            uiTransform={{ pointerFilter: 'none' }}
+                            uiText={{
+                              value: '-',
+                              fontSize: 22,
+                              color: Color4.White()
+                            }}
+                          />
+                        </UiEntity>
 
+                        {/* Botón Aumentar (+) */}
                         <UiEntity
                           uiTransform={{
-                            width: 34,
-                            height: 32,
+                            width: 50,
+                            height: 42,
                             justifyContent: 'center',
                             alignItems: 'center',
                             pointerFilter: 'block'
                           }}
                           uiBackground={{
-                            color: inForge < owned && totalSelectedCount < 12 ? Color4.create(0.15, 0.35, 0.2, 0.9) : Color4.create(0.2, 0.2, 0.2, 0.5)
+                            color: inForge < owned && totalSelectedCount < 12 ? Color4.create(0.18, 0.42, 0.22, 0.95) : Color4.create(0.2, 0.2, 0.2, 0.5)
                           }}
                           onMouseDown={() => {
                             addForgeMaterial(itemId)
                           }}
-                          uiText={{
-                            value: '+',
-                            fontSize: 18,
-                            color: Color4.White()
-                          }}
-                        />
+                        >
+                          <UiEntity
+                            uiTransform={{ pointerFilter: 'none' }}
+                            uiText={{
+                              value: '+',
+                              fontSize: 22,
+                              color: Color4.White()
+                            }}
+                          />
+                        </UiEntity>
                       </UiEntity>
                     </UiEntity>
                   )
