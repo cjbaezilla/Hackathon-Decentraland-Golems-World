@@ -22,6 +22,7 @@ Esta guía describe el sistema unificado de **Recolección Compartida de Materia
 5. **Celdas Cuadradas Grandes (98px × 98px)**: Cada casilla encaja la imagen PNG del material, su nombre, borde de color por rareza e insignia `xN` en la esquina inferior derecha.
 6. **Tarjeta Emergente de Tooltip (`ItemTooltipCard`)**: Información accesible mediante clic o tap táctil (Mobile-First) mostrando detalles del objeto y bonos de la Forja.
 7. **Resolución de Propagación de Eventos**: Corrección de filtros de puntero (`pointerFilter: 'none'` en hijos) y eliminación de handlers en contenedores wrapper para evitar cierres o bloqueos involuntarios de la interfaz.
+8. **Replicación en Inventario de Golems (`golemInventoryComponent.tsx`)**: Replicación idéntica en el modal de reserva y escuadrón de golems, renderizando 150 imágenes PNG de 300x300px optimizadas en un **83.7%** desde `assets/models/<afinidad>/<golem_id>.png` con celdas cuadradas de `98px × 98px` y tarjeta Tooltip de estadísticas RPG.
 
 ---
 

@@ -9,26 +9,38 @@ import {
 import { GolemConfig, GolemAffinity } from '../config/golems'
 import { getAffinityIcon } from '../ui'
 
-// Variables de estado local para el filtro por afinidad y el golem inspeccionado
+// Variables de estado local para filtros, selección y tooltip de golem activo
 let selectedAffinityFilter: 'all' | GolemAffinity = 'all'
-let selectedGolemId: string | null = null
+let tooltipGolemId: string | null = null
+
+/**
+ * Mapeo de colores principales por afinidad elemental para bordes e insignias.
+ */
+export const AFFINITY_COLOR_MAP: Record<GolemAffinity, { rgb: [number, number, number]; hex: string }> = {
+  [GolemAffinity.STEAM]: { rgb: [0.9, 0.45, 0.2], hex: '#E67333' },
+  [GolemAffinity.GALVANIC]: { rgb: [0.95, 0.85, 0.2], hex: '#F2D933' },
+  [GolemAffinity.MECHANICAL]: { rgb: [0.3, 0.7, 0.9], hex: '#4CB3E6' },
+  [GolemAffinity.LUMINOUS]: { rgb: [0.95, 0.9, 0.4], hex: '#F2E666' },
+  [GolemAffinity.AETHER]: { rgb: [0.75, 0.35, 0.9], hex: '#BF59E6' }
+}
+
+/**
+ * Obtiene la ruta relativa de la textura de imagen PNG 300x300 del golem en assets/models/<afinidad_folder>/<model_name>.png
+ */
+export function getGolemIconPath(golem: GolemConfig): string {
+  if (golem.modelSrc && golem.modelSrc.endsWith('.glb')) {
+    return golem.modelSrc.replace('.glb', '.png')
+  }
+  return golem.modelSrc || 'assets/images/golem_icon.png'
+}
 
 /**
  * ============================================================================
- * MODAL DE INVENTARIO Y RESERVA DE GOLEMS (REACT-ECS SDK7 - STEAMPUNK UI)
+ * MODAL DE INVENTARIO Y RESERVA DE GOLEMS (REACT-ECS SDK7 - STEAMPUNK GRID UI)
  * ============================================================================
- * Interfaz de usuario completa para inspeccionar, gestionar y equipar
- * los golems del escuadrón activo y la reserva del jugador.
- * 
- * Estructura:
- * 1. Envoltura full-screen centrada con `pointerFilter: 'none'` y tap en el backdrop para cerrar.
- * 2. Cabecera con Título "🤖 RESERVA Y ESCUADRÓN DE GOLEMS", badge de escuadrón (3/3) y botón ✖.
- * 3. Barra de Filtros por Afinidad Elemental [ Todos | Vapor | Galvánico | Mecánico | Luminoso | Éter ].
- * 4. Cuerpo en 2 Columnas:
- *    - Izquierda (58%): Lista de Golems con badges de nivel, barra de HP y etiqueta de escuadrón/reserva.
- *    - Derecha (40%): Panel de Inspección con estadísticas detalladas (ATK, DEF, HP, SPD, EXP),
- *      ventajas elementales del Pentágono y botones de acción.
- * 5. Pie de Modal con consejo informativo.
+ * Interfaz de usuario completa con retícula continua al 100% de ancho, casilleros
+ * cuadrados (98x98px), renderizado de imágenes PNG reales (assets/models) y
+ * tarjeta emergente Tooltip optimizada para pantallas táctiles y PC.
  */
 export const GolemInventoryModal = () => {
   if (!getIsGolemInventoryOpen()) return null
@@ -41,15 +53,13 @@ export const GolemInventoryModal = () => {
     ? activeSquad
     : activeSquad.filter((g) => g.affinity === selectedAffinityFilter)
 
-  // Seleccionar automáticamente el primer golem si no hay selección válida
-  if (selectedGolemId && !filteredGolems.some((g) => g.id === selectedGolemId)) {
-    selectedGolemId = filteredGolems.length > 0 ? filteredGolems[0].id : null
-  } else if (!selectedGolemId && filteredGolems.length > 0) {
-    selectedGolemId = filteredGolems[0].id
+  // Si el golem del tooltip activo ya no está en la lista filtrada, cerrarlo
+  if (tooltipGolemId && !filteredGolems.some((g) => g.id === tooltipGolemId)) {
+    tooltipGolemId = null
   }
 
-  const selectedGolem = selectedGolemId
-    ? activeSquad.find((g) => g.id === selectedGolemId) || null
+  const activeTooltipGolem = tooltipGolemId
+    ? activeSquad.find((g) => g.id === tooltipGolemId) || null
     : null
 
   return (
@@ -66,13 +76,13 @@ export const GolemInventoryModal = () => {
         color: Color4.create(0.02, 0.03, 0.06, 0.86)
       }}
     >
-      {/* Tarjeta Central del Inventario de Golems (920px × 540px Centrada) */}
+      {/* Tarjeta Central del Inventario de Golems (920px × 540px Centrada al 100% de Ancho) */}
       <UiEntity
         uiTransform={{
           width: 920,
           height: 540,
           flexDirection: 'column',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           alignItems: 'center',
           padding: { top: 16, bottom: 16, left: 20, right: 20 },
           pointerFilter: 'block'
@@ -91,16 +101,19 @@ export const GolemInventoryModal = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            margin: { bottom: 10 }
+            margin: { bottom: 12 },
+            pointerFilter: 'none'
           }}
         >
           <UiEntity
             uiTransform={{
               flexDirection: 'row',
-              alignItems: 'center'
+              alignItems: 'center',
+              pointerFilter: 'none'
             }}
           >
             <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
               uiText={{
                 value: t('golemInventory.title'),
                 fontSize: 19,
@@ -108,11 +121,12 @@ export const GolemInventoryModal = () => {
                 textAlign: 'middle-left'
               }}
             />
-            {/* Badge de Estado de Escuadrón (3/3) */}
+            {/* Badge de Estado de Escuadrón Activo (3/3) */}
             <UiEntity
               uiTransform={{
                 margin: { left: 14 },
-                padding: { top: 3, bottom: 3, left: 8, right: 8 }
+                padding: { top: 4, bottom: 4, left: 10, right: 10 },
+                pointerFilter: 'none'
               }}
               uiBackground={{
                 color: Color4.create(0.12, 0.18, 0.26, 0.9)
@@ -129,14 +143,14 @@ export const GolemInventoryModal = () => {
           {/* Botón Táctil de Cierre (✖) */}
           <UiEntity
             uiTransform={{
-              width: 36,
-              height: 34,
+              width: 38,
+              height: 36,
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
             }}
             uiBackground={{
-              color: Color4.create(0.24, 0.1, 0.1, 0.9)
+              color: Color4.create(0.28, 0.1, 0.1, 0.95)
             }}
             onMouseDown={() => toggleGolemInventory()}
           >
@@ -144,7 +158,7 @@ export const GolemInventoryModal = () => {
               uiTransform={{ pointerFilter: 'none' }}
               uiText={{
                 value: '✖',
-                fontSize: 16,
+                fontSize: 18,
                 color: Color4.create(1.0, 0.4, 0.4, 1.0)
               }}
             />
@@ -161,15 +175,16 @@ export const GolemInventoryModal = () => {
             flexDirection: 'row',
             justifyContent: 'flex-start',
             alignItems: 'center',
-            margin: { bottom: 12 }
+            margin: { bottom: 14 },
+            pointerFilter: 'none'
           }}
         >
           {/* Botón Todos */}
           <UiEntity
             uiTransform={{
               height: 32,
-              padding: { left: 12, right: 12 },
-              margin: { right: 6 },
+              padding: { left: 14, right: 14 },
+              margin: { right: 8 },
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
@@ -180,21 +195,25 @@ export const GolemInventoryModal = () => {
                 : Color4.create(0.10, 0.13, 0.18, 0.85)
             }}
             onMouseDown={() => { selectedAffinityFilter = 'all' }}
-            uiText={{
-              value: t('golemInventory.filterAll'),
-              fontSize: 13,
-              color: selectedAffinityFilter === 'all'
-                ? Color4.create(1.0, 0.9, 0.4, 1.0)
-                : Color4.create(0.7, 0.75, 0.8, 0.9)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: t('golemInventory.filterAll'),
+                fontSize: 13,
+                color: selectedAffinityFilter === 'all'
+                  ? Color4.create(1.0, 0.9, 0.4, 1.0)
+                  : Color4.create(0.7, 0.75, 0.8, 0.9)
+              }}
+            />
+          </UiEntity>
 
           {/* Botón Vapor ♨️ */}
           <UiEntity
             uiTransform={{
               height: 32,
-              padding: { left: 10, right: 10 },
-              margin: { right: 6 },
+              padding: { left: 12, right: 12 },
+              margin: { right: 8 },
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
@@ -205,19 +224,23 @@ export const GolemInventoryModal = () => {
                 : Color4.create(0.10, 0.13, 0.18, 0.85)
             }}
             onMouseDown={() => { selectedAffinityFilter = GolemAffinity.STEAM }}
-            uiText={{
-              value: `♨️ ${t('affinities.steam')}`,
-              fontSize: 12,
-              color: Color4.create(1.0, 0.65, 0.3, 1.0)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: `♨️ ${t('affinities.steam')}`,
+                fontSize: 12.5,
+                color: Color4.create(1.0, 0.65, 0.3, 1.0)
+              }}
+            />
+          </UiEntity>
 
           {/* Botón Galvánico ⚡ */}
           <UiEntity
             uiTransform={{
               height: 32,
-              padding: { left: 10, right: 10 },
-              margin: { right: 6 },
+              padding: { left: 12, right: 12 },
+              margin: { right: 8 },
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
@@ -228,19 +251,23 @@ export const GolemInventoryModal = () => {
                 : Color4.create(0.10, 0.13, 0.18, 0.85)
             }}
             onMouseDown={() => { selectedAffinityFilter = GolemAffinity.GALVANIC }}
-            uiText={{
-              value: `⚡ ${t('affinities.galvanic')}`,
-              fontSize: 12,
-              color: Color4.create(1.0, 0.9, 0.3, 1.0)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: `⚡ ${t('affinities.galvanic')}`,
+                fontSize: 12.5,
+                color: Color4.create(1.0, 0.9, 0.3, 1.0)
+              }}
+            />
+          </UiEntity>
 
           {/* Botón Mecánico ⚙️ */}
           <UiEntity
             uiTransform={{
               height: 32,
-              padding: { left: 10, right: 10 },
-              margin: { right: 6 },
+              padding: { left: 12, right: 12 },
+              margin: { right: 8 },
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
@@ -251,19 +278,23 @@ export const GolemInventoryModal = () => {
                 : Color4.create(0.10, 0.13, 0.18, 0.85)
             }}
             onMouseDown={() => { selectedAffinityFilter = GolemAffinity.MECHANICAL }}
-            uiText={{
-              value: `⚙️ ${t('affinities.mechanical')}`,
-              fontSize: 12,
-              color: Color4.create(0.4, 0.85, 1.0, 1.0)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: `⚙️ ${t('affinities.mechanical')}`,
+                fontSize: 12.5,
+                color: Color4.create(0.4, 0.85, 1.0, 1.0)
+              }}
+            />
+          </UiEntity>
 
           {/* Botón Luminoso ☀️ */}
           <UiEntity
             uiTransform={{
               height: 32,
-              padding: { left: 10, right: 10 },
-              margin: { right: 6 },
+              padding: { left: 12, right: 12 },
+              margin: { right: 8 },
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
@@ -274,18 +305,22 @@ export const GolemInventoryModal = () => {
                 : Color4.create(0.10, 0.13, 0.18, 0.85)
             }}
             onMouseDown={() => { selectedAffinityFilter = GolemAffinity.LUMINOUS }}
-            uiText={{
-              value: `☀️ ${t('affinities.luminous')}`,
-              fontSize: 12,
-              color: Color4.create(1.0, 0.95, 0.5, 1.0)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: `☀️ ${t('affinities.luminous')}`,
+                fontSize: 12.5,
+                color: Color4.create(1.0, 0.95, 0.5, 1.0)
+              }}
+            />
+          </UiEntity>
 
           {/* Botón Éter 🔮 */}
           <UiEntity
             uiTransform={{
               height: 32,
-              padding: { left: 10, right: 10 },
+              padding: { left: 12, right: 12 },
               justifyContent: 'center',
               alignItems: 'center',
               pointerFilter: 'block'
@@ -296,381 +331,435 @@ export const GolemInventoryModal = () => {
                 : Color4.create(0.10, 0.13, 0.18, 0.85)
             }}
             onMouseDown={() => { selectedAffinityFilter = GolemAffinity.AETHER }}
-            uiText={{
-              value: `🔮 ${t('affinities.aether')}`,
-              fontSize: 12,
-              color: Color4.create(0.85, 0.4, 1.0, 1.0)
-            }}
-          />
+          >
+            <UiEntity
+              uiTransform={{ pointerFilter: 'none' }}
+              uiText={{
+                value: `🔮 ${t('affinities.aether')}`,
+                fontSize: 12.5,
+                color: Color4.create(0.85, 0.4, 1.0, 1.0)
+              }}
+            />
+          </UiEntity>
         </UiEntity>
 
         {/* ---------------------------------------------------------------------- */}
-        {/* 3. CUERPO DEL INVENTARIO DE GOLEMS (2 COLUMNAS)                         */}
+        {/* 3. REJILLA/CUADRÍCULA CONTINUA DE GOLEMS EN CELDAS (98x98px)            */}
         {/* ---------------------------------------------------------------------- */}
         <UiEntity
           uiTransform={{
             width: '100%',
-            height: 380,
+            height: 420,
             flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'stretch'
+            flexWrap: 'wrap',
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
+            padding: { top: 8, bottom: 8, left: 8, right: 8 },
+            pointerFilter: 'none'
+          }}
+          uiBackground={{
+            color: Color4.create(0.04, 0.05, 0.08, 0.94)
           }}
         >
-          {/* COLUMNA IZQUIERDA: Lista de Golems (58% de ancho) */}
-          <UiEntity
-            uiTransform={{
-              width: '58%',
-              height: '100%',
-              flexDirection: 'column',
-              justifyContent: 'flex-start',
-              alignItems: 'stretch',
-              padding: { top: 8, bottom: 8, left: 8, right: 8 }
-            }}
-            uiBackground={{
-              color: Color4.create(0.04, 0.05, 0.08, 0.92)
-            }}
-          >
-            {filteredGolems.length === 0 ? (
-              /* Estado Vacío / Sin Golems */
+          {filteredGolems.length === 0 ? (
+            /* Estado Vacío / Sin Golems */
+            <UiEntity
+              uiTransform={{
+                width: '100%',
+                height: '100%',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: { left: 24, right: 24 },
+                pointerFilter: 'none'
+              }}
+            >
               <UiEntity
-                uiTransform={{
-                  width: '100%',
-                  height: '100%',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: { left: 24, right: 24 }
+                uiTransform={{ pointerFilter: 'none' }}
+                uiText={{
+                  value: '🤖',
+                  fontSize: 48,
+                  textAlign: 'middle-center'
                 }}
-              >
-                <UiEntity
-                  uiText={{
-                    value: '🤖',
-                    fontSize: 42,
-                    textAlign: 'middle-center'
-                  }}
-                />
-                <UiEntity
-                  uiTransform={{ margin: { top: 12 } }}
-                  uiText={{
-                    value: t('golemInventory.empty'),
-                    fontSize: 13.5,
-                    color: Color4.create(0.7, 0.75, 0.8, 0.9),
-                    textAlign: 'middle-center'
-                  }}
-                />
-              </UiEntity>
-            ) : (
-              /* Lista de Golems */
+              />
               <UiEntity
-                uiTransform={{
-                  width: '100%',
-                  height: '100%',
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  alignItems: 'stretch'
+                uiTransform={{ margin: { top: 12 }, pointerFilter: 'none' }}
+                uiText={{
+                  value: t('golemInventory.empty'),
+                  fontSize: 14,
+                  color: Color4.create(0.7, 0.75, 0.8, 0.9),
+                  textAlign: 'middle-center'
                 }}
-              >
-                {filteredGolems.map((golem) => {
-                  const isSelected = golem.id === selectedGolemId
-                  const hpPercent = Math.max(0, Math.min(100, Math.round((golem.currentHp / golem.maxHp) * 100)))
+              />
+            </UiEntity>
+          ) : (
+            /* Casilleros Cuadrados en Cuadrícula (98x98px) con Imagen PNG de Golem */
+            filteredGolems.map((golem) => {
+              const isTooltipActive = tooltipGolemId === golem.id
+              const affinityColor = AFFINITY_COLOR_MAP[golem.affinity] || AFFINITY_COLOR_MAP[GolemAffinity.STEAM]
 
-                  return (
+              return (
+                <UiEntity
+                  key={`golem_cell_${golem.id}`}
+                  uiTransform={{
+                    width: 98,
+                    height: 98,
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    margin: { right: 8, bottom: 8 },
+                    padding: { top: 4, bottom: 4, left: 4, right: 4 },
+                    pointerFilter: 'block'
+                  }}
+                  uiBackground={{
+                    color: isTooltipActive
+                      ? Color4.create(0.22, 0.30, 0.44, 0.98)
+                      : Color4.create(0.08, 0.10, 0.15, 0.95)
+                  }}
+                  onMouseDown={() => {
+                    tooltipGolemId = isTooltipActive ? null : golem.id
+                  }}
+                >
+                  {/* Barra Superior de Color de Afinidad */}
+                  <UiEntity
+                    uiTransform={{
+                      width: '100%',
+                      height: 4,
+                      margin: { bottom: 2 },
+                      pointerFilter: 'none'
+                    }}
+                    uiBackground={{
+                      color: Color4.create(
+                        affinityColor.rgb[0],
+                        affinityColor.rgb[1],
+                        affinityColor.rgb[2],
+                        1.0
+                      )
+                    }}
+                  />
+
+                  {/* Imagen PNG del Golem (assets/models/<afinidad>/<golem_id>.png) */}
+                  <UiEntity
+                    uiTransform={{
+                      width: 48,
+                      height: 48,
+                      margin: { top: 2, bottom: 2 },
+                      pointerFilter: 'none'
+                    }}
+                    uiBackground={{
+                      texture: { src: getGolemIconPath(golem) },
+                      textureMode: 'stretch'
+                    }}
+                  />
+
+                  {/* Nombre del Golem (Centrado) */}
+                  <UiEntity
+                    uiTransform={{
+                      width: '100%',
+                      height: 18,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      pointerFilter: 'none'
+                    }}
+                    uiText={{
+                      value: golem.name,
+                      fontSize: 9.5,
+                      color: isTooltipActive
+                        ? Color4.create(1.0, 0.9, 0.4, 1.0)
+                        : Color4.create(0.9, 0.92, 0.96, 1.0),
+                      textAlign: 'middle-center'
+                    }}
+                  />
+
+                  {/* Insignia Inferior Nivel y Estado de Escuadrón */}
+                  <UiEntity
+                    uiTransform={{
+                      width: '100%',
+                      height: 16,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      pointerFilter: 'none'
+                    }}
+                  >
                     <UiEntity
-                      key={`golem_item_${golem.id}`}
                       uiTransform={{
-                        width: '100%',
-                        height: 60,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: { left: 10, right: 10 },
-                        margin: { bottom: 6 },
-                        pointerFilter: 'block'
+                        padding: { top: 1, bottom: 1, left: 4, right: 4 },
+                        pointerFilter: 'none'
                       }}
                       uiBackground={{
-                        color: isSelected
-                          ? Color4.create(0.18, 0.24, 0.34, 0.95)
-                          : Color4.create(0.09, 0.11, 0.16, 0.88)
+                        color: Color4.create(0.14, 0.20, 0.28, 0.92)
                       }}
-                      onMouseDown={() => { selectedGolemId = golem.id }}
-                    >
-                      {/* Lado Izquierdo: Icono Afinidad + Nombre + HP Bar */}
-                      <UiEntity
-                        uiTransform={{
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          alignItems: 'flex-start'
-                        }}
-                      >
-                        <UiEntity
-                          uiTransform={{
-                            flexDirection: 'row',
-                            alignItems: 'center'
-                          }}
-                        >
-                          <UiEntity
-                            uiText={{
-                              value: `${getAffinityIcon(golem.affinity)} ${golem.name}`,
-                              fontSize: 14.5,
-                              color: isSelected
-                                ? Color4.create(1.0, 0.9, 0.4, 1.0)
-                                : Color4.create(0.95, 0.95, 0.95, 1.0),
-                              textAlign: 'middle-left'
-                            }}
-                          />
-                          <UiEntity
-                            uiTransform={{ margin: { left: 8 } }}
-                            uiText={{
-                              value: `${t('common.levelShort')} ${golem.level}`,
-                              fontSize: 12,
-                              color: Color4.create(0.4, 0.9, 1.0, 0.9),
-                              textAlign: 'middle-left'
-                            }}
-                          />
-                        </UiEntity>
+                      uiText={{
+                        value: `Nv.${golem.level}`,
+                        fontSize: 9.5,
+                        color: Color4.create(0.4, 0.9, 1.0, 1.0)
+                      }}
+                    />
+                    <UiEntity
+                      uiTransform={{
+                        padding: { top: 1, bottom: 1, left: 4, right: 4 },
+                        pointerFilter: 'none'
+                      }}
+                      uiBackground={{
+                        color: Color4.create(0.1, 0.25, 0.15, 0.92)
+                      }}
+                      uiText={{
+                        value: '⚔️ SQUAD',
+                        fontSize: 9,
+                        color: Color4.create(0.4, 1.0, 0.5, 1.0)
+                      }}
+                    />
+                  </UiEntity>
+                </UiEntity>
+              )
+            })
+          )}
+        </UiEntity>
 
-                        {/* Barra de Salud HP */}
-                        <UiEntity
-                          uiTransform={{ margin: { top: 4 } }}
-                          uiText={{
-                            value: `💚 HP: ${golem.currentHp}/${golem.maxHp} (${hpPercent}%)`,
-                            fontSize: 11.5,
-                            color: Color4.create(0.4, 1.0, 0.5, 0.9),
-                            textAlign: 'middle-left'
-                          }}
-                        />
-                      </UiEntity>
-
-                      {/* Lado Derecho: Badge de Escuadrón Activo */}
-                      <UiEntity
-                        uiTransform={{
-                          padding: { top: 3, bottom: 3, left: 8, right: 8 }
-                        }}
-                        uiBackground={{
-                          color: Color4.create(0.24, 0.20, 0.10, 0.95)
-                        }}
-                        uiText={{
-                          value: `🛡️ ${t('golemInventory.activeSquad')}`,
-                          fontSize: 11,
-                          color: Color4.create(1.0, 0.85, 0.35, 1.0),
-                          textAlign: 'middle-right'
-                        }}
-                      />
-                    </UiEntity>
-                  )
-                })}
-              </UiEntity>
-            )}
-          </UiEntity>
-
-          {/* COLUMNA DERECHA: Panel de Inspección del Golem Seleccionado (40% de ancho) */}
+        {/* ---------------------------------------------------------------------- */}
+        {/* 4. TARJETA DE TOOLTIP EMERGENTE DE GOLEM (GOLEM TOOLTIP CARD OVERLAY) */}
+        {/* ---------------------------------------------------------------------- */}
+        {activeTooltipGolem ? (
           <UiEntity
             uiTransform={{
-              width: '40%',
-              height: '100%',
+              positionType: 'absolute',
+              position: { top: 60, right: 28 },
+              width: 340,
               flexDirection: 'column',
               justifyContent: 'flex-start',
               alignItems: 'stretch',
-              padding: { top: 12, bottom: 12, left: 14, right: 14 }
+              padding: { top: 12, bottom: 12, left: 14, right: 14 },
+              pointerFilter: 'block'
             }}
             uiBackground={{
-              color: Color4.create(0.08, 0.10, 0.15, 0.94)
+              color: Color4.create(0.06, 0.09, 0.14, 0.98)
             }}
           >
-            {selectedGolem ? (
+            {/* Cabecera del Tooltip: Imagen PNG, Nombre, Afinidad y Cierre */}
+            <UiEntity
+              uiTransform={{
+                width: '100%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                margin: { bottom: 8 },
+                pointerFilter: 'none'
+              }}
+            >
               <UiEntity
                 uiTransform={{
-                  width: '100%',
-                  height: '100%',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start'
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  pointerFilter: 'none'
                 }}
               >
-                {/* Nombre y Afinidad */}
+                {/* Imagen PNG en Tooltip */}
                 <UiEntity
                   uiTransform={{
-                    width: '100%',
+                    width: 56,
+                    height: 56,
+                    margin: { right: 10 },
+                    pointerFilter: 'none'
+                  }}
+                  uiBackground={{
+                    texture: { src: getGolemIconPath(activeTooltipGolem) },
+                    textureMode: 'stretch'
+                  }}
+                />
+
+                <UiEntity
+                  uiTransform={{
                     flexDirection: 'column',
                     alignItems: 'flex-start',
-                    margin: { bottom: 6 }
+                    pointerFilter: 'none'
                   }}
                 >
                   <UiEntity
-                    uiTransform={{ width: '100%', height: 26 }}
+                    uiTransform={{ pointerFilter: 'none' }}
                     uiText={{
-                      value: `${getAffinityIcon(selectedGolem.affinity)} ${selectedGolem.name}`,
-                      fontSize: 17,
+                      value: activeTooltipGolem.name,
+                      fontSize: 16,
                       color: Color4.create(1.0, 0.88, 0.35, 1.0),
                       textAlign: 'middle-left'
                     }}
                   />
                   <UiEntity
-                    uiTransform={{ margin: { top: 2 } }}
+                    uiTransform={{
+                      padding: { top: 2, bottom: 2, left: 6, right: 6 },
+                      margin: { top: 4 },
+                      pointerFilter: 'none'
+                    }}
+                    uiBackground={{
+                      color: Color4.create(
+                        AFFINITY_COLOR_MAP[activeTooltipGolem.affinity].rgb[0] * 0.3,
+                        AFFINITY_COLOR_MAP[activeTooltipGolem.affinity].rgb[1] * 0.3,
+                        AFFINITY_COLOR_MAP[activeTooltipGolem.affinity].rgb[2] * 0.3,
+                        0.9
+                      )
+                    }}
                     uiText={{
-                      value: `${t('common.level')} ${selectedGolem.level} • Afinidad ${selectedGolem.affinity}`,
-                      fontSize: 12,
-                      color: Color4.create(0.4, 0.9, 1.0, 0.9)
+                      value: `${getAffinityIcon(activeTooltipGolem.affinity)} ${t(`affinities.${activeTooltipGolem.affinity.toLowerCase()}`).toUpperCase()}`,
+                      fontSize: 10.5,
+                      color: Color4.create(
+                        AFFINITY_COLOR_MAP[activeTooltipGolem.affinity].rgb[0],
+                        AFFINITY_COLOR_MAP[activeTooltipGolem.affinity].rgb[1],
+                        AFFINITY_COLOR_MAP[activeTooltipGolem.affinity].rgb[2],
+                        1.0
+                      )
                     }}
                   />
                 </UiEntity>
+              </UiEntity>
 
-                {/* Estadísticas de Combate RPG */}
+              {/* Botón ✖ de Cierre del Tooltip */}
+              <UiEntity
+                uiTransform={{
+                  width: 26,
+                  height: 26,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  pointerFilter: 'block'
+                }}
+                uiBackground={{
+                  color: Color4.create(0.24, 0.1, 0.1, 0.9)
+                }}
+                onMouseDown={() => { tooltipGolemId = null }}
+              >
                 <UiEntity
-                  uiTransform={{
-                    width: '100%',
-                    flexDirection: 'column',
-                    padding: { top: 8, bottom: 8, left: 10, right: 10 },
-                    margin: { bottom: 8 }
-                  }}
-                  uiBackground={{
-                    color: Color4.create(0.12, 0.15, 0.22, 0.88)
-                  }}
-                >
-                  <UiEntity
-                    uiText={{
-                      value: `⚔️ ${t('golemInventory.statAttack')}: ${selectedGolem.attack}`,
-                      fontSize: 12.5,
-                      color: Color4.create(1.0, 0.4, 0.4, 1.0),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                  <UiEntity
-                    uiTransform={{ margin: { top: 2 } }}
-                    uiText={{
-                      value: `🛡️ ${t('golemInventory.statDefense')}: ${selectedGolem.defense}`,
-                      fontSize: 12.5,
-                      color: Color4.create(0.4, 0.7, 1.0, 1.0),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                  <UiEntity
-                    uiTransform={{ margin: { top: 2 } }}
-                    uiText={{
-                      value: `💚 ${t('golemInventory.statHp')}: ${selectedGolem.currentHp} / ${selectedGolem.maxHp}`,
-                      fontSize: 12.5,
-                      color: Color4.create(0.4, 1.0, 0.5, 1.0),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                  <UiEntity
-                    uiTransform={{ margin: { top: 2 } }}
-                    uiText={{
-                      value: `⚡ ${t('golemInventory.statSpeed')}: ${selectedGolem.speed.toFixed(1)}`,
-                      fontSize: 12.5,
-                      color: Color4.create(1.0, 0.9, 0.3, 1.0),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                  <UiEntity
-                    uiTransform={{ margin: { top: 2 } }}
-                    uiText={{
-                      value: `⭐ ${t('golemInventory.statExp')}: ${selectedGolem.currentExp} / ${selectedGolem.level * 100}`,
-                      fontSize: 12,
-                      color: Color4.create(0.85, 0.85, 0.9, 0.85),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                </UiEntity>
-
-                {/* Diagrama de Ventaja Elemental */}
-                <UiEntity
-                  uiTransform={{
-                    width: '100%',
-                    flexDirection: 'column',
-                    padding: { top: 8, bottom: 8, left: 10, right: 10 },
-                    margin: { bottom: 8 }
-                  }}
-                  uiBackground={{
-                    color: Color4.create(0.14, 0.18, 0.26, 0.92)
-                  }}
-                >
-                  <UiEntity
-                    uiText={{
-                      value: `🔮 ${t('golemInventory.affinityAdvantage')}:`,
-                      fontSize: 12,
-                      color: Color4.create(0.9, 0.5, 1.0, 1.0),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                  <UiEntity
-                    uiTransform={{ margin: { top: 2 } }}
-                    uiText={{
-                      value: `• Ventaja ×1.40 vs Elementos Vulnerables`,
-                      fontSize: 11,
-                      color: Color4.create(0.4, 1.0, 0.6, 0.9),
-                      textAlign: 'middle-left'
-                    }}
-                  />
-                </UiEntity>
-
-                {/* Botón de Acción / Asignación */}
-                <UiEntity
-                  uiTransform={{
-                    width: '100%',
-                    height: 38,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    pointerFilter: 'block'
-                  }}
-                  uiBackground={{
-                    color: Color4.create(0.16, 0.32, 0.22, 0.95)
-                  }}
+                  uiTransform={{ pointerFilter: 'none' }}
                   uiText={{
-                    value: `✔ ${t('golemInventory.assignToSquad')}`,
+                    value: '✖',
                     fontSize: 13,
+                    color: Color4.create(1.0, 0.4, 0.4, 1.0)
+                  }}
+                />
+              </UiEntity>
+            </UiEntity>
+
+            {/* Nivel y Barra de Vida HP */}
+            <UiEntity
+              uiTransform={{
+                width: '100%',
+                flexDirection: 'column',
+                padding: { top: 6, bottom: 6, left: 8, right: 8 },
+                margin: { bottom: 8 },
+                pointerFilter: 'none'
+              }}
+              uiBackground={{
+                color: Color4.create(0.10, 0.14, 0.20, 0.9)
+              }}
+            >
+              <UiEntity
+                uiTransform={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  margin: { bottom: 4 },
+                  pointerFilter: 'none'
+                }}
+              >
+                <UiEntity
+                  uiTransform={{ pointerFilter: 'none' }}
+                  uiText={{
+                    value: `🌟 Nivel ${activeTooltipGolem.level}`,
+                    fontSize: 12,
+                    color: Color4.create(1.0, 0.9, 0.4, 1.0)
+                  }}
+                />
+                <UiEntity
+                  uiTransform={{ pointerFilter: 'none' }}
+                  uiText={{
+                    value: `💚 HP: ${activeTooltipGolem.currentHp} / ${activeTooltipGolem.maxHp}`,
+                    fontSize: 12,
                     color: Color4.create(0.4, 1.0, 0.5, 1.0)
                   }}
                 />
               </UiEntity>
-            ) : (
-              /* Mensaje sin Selección */
+
+              {/* Barra Proporcional de HP */}
               <UiEntity
                 uiTransform={{
                   width: '100%',
-                  height: '100%',
-                  justifyContent: 'center',
-                  alignItems: 'center'
+                  height: 6,
+                  pointerFilter: 'none'
+                }}
+                uiBackground={{
+                  color: Color4.create(0.2, 0.08, 0.08, 0.9)
                 }}
               >
                 <UiEntity
-                  uiText={{
-                    value: t('golemInventory.selectGolem'),
-                    fontSize: 13,
-                    color: Color4.create(0.6, 0.65, 0.7, 0.8),
-                    textAlign: 'middle-center'
+                  uiTransform={{
+                    width: `${Math.max(0, Math.min(100, (activeTooltipGolem.currentHp / activeTooltipGolem.maxHp) * 100))}%`,
+                    height: '100%',
+                    pointerFilter: 'none'
+                  }}
+                  uiBackground={{
+                    color: Color4.create(0.2, 0.9, 0.35, 1.0)
                   }}
                 />
               </UiEntity>
-            )}
-          </UiEntity>
-        </UiEntity>
+            </UiEntity>
 
-        {/* ---------------------------------------------------------------------- */}
-        {/* 4. PIE DE MODAL: Consejo Informativo                                   */}
-        {/* ---------------------------------------------------------------------- */}
-        <UiEntity
-          uiTransform={{
-            width: '100%',
-            height: 32,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: { left: 12, right: 12 },
-            margin: { top: 8 }
-          }}
-          uiBackground={{
-            color: Color4.create(0.12, 0.15, 0.20, 0.9)
-          }}
-        >
-          <UiEntity
-            uiText={{
-              value: t('golemInventory.golemTip'),
-              fontSize: 12,
-              color: Color4.create(1.0, 0.88, 0.5, 0.95),
-              textAlign: 'middle-center'
-            }}
-          />
-        </UiEntity>
+            {/* Estadísticas RPG de Combate */}
+            <UiEntity
+              uiTransform={{
+                width: '100%',
+                flexDirection: 'column',
+                padding: { top: 8, bottom: 8, left: 8, right: 8 },
+                pointerFilter: 'none'
+              }}
+              uiBackground={{
+                color: Color4.create(0.12, 0.16, 0.24, 0.95)
+              }}
+            >
+              <UiEntity
+                uiTransform={{ margin: { bottom: 4 }, pointerFilter: 'none' }}
+                uiText={{
+                  value: `📊 ${t('golemInventory.statsHeader')}:`,
+                  fontSize: 12,
+                  color: Color4.create(1.0, 0.85, 0.4, 1.0),
+                  textAlign: 'middle-left'
+                }}
+              />
+              <UiEntity
+                uiTransform={{ pointerFilter: 'none' }}
+                uiText={{
+                  value: `• ⚔️ ${t('golemInventory.statAttack')}: ${activeTooltipGolem.attack}`,
+                  fontSize: 11.5,
+                  color: Color4.create(1.0, 0.4, 0.4, 1.0),
+                  textAlign: 'middle-left'
+                }}
+              />
+              <UiEntity
+                uiTransform={{ pointerFilter: 'none' }}
+                uiText={{
+                  value: `• 🛡️ ${t('golemInventory.statDefense')}: ${activeTooltipGolem.defense}`,
+                  fontSize: 11.5,
+                  color: Color4.create(0.4, 0.7, 1.0, 1.0),
+                  textAlign: 'middle-left'
+                }}
+              />
+              <UiEntity
+                uiTransform={{ pointerFilter: 'none' }}
+                uiText={{
+                  value: `• ⚡ ${t('golemInventory.statSpeed')}: ${activeTooltipGolem.speed}`,
+                  fontSize: 11.5,
+                  color: Color4.create(1.0, 0.9, 0.3, 1.0),
+                  textAlign: 'middle-left'
+                }}
+              />
+              <UiEntity
+                uiTransform={{ pointerFilter: 'none' }}
+                uiText={{
+                  value: `• 🌟 ${t('golemInventory.statExp')}: ${activeTooltipGolem.currentExp} / ${activeTooltipGolem.level * 100} EXP`,
+                  fontSize: 11.5,
+                  color: Color4.create(0.85, 0.5, 1.0, 1.0),
+                  textAlign: 'middle-left'
+                }}
+              />
+            </UiEntity>
+          </UiEntity>
+        ) : null}
       </UiEntity>
     </UiEntity>
   )
