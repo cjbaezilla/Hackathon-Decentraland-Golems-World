@@ -255,12 +255,15 @@ Maneja la animación de números de daño que ascienden verticalmente sobre el p
 ## 7. Ciclo de Vida de Daño, Barras de Salud y Eliminación a 0 HP
 
 ### 7.1 Etiquetas Flotantes en Billboard con ASCII Dinámico
-Cada golem cuenta con una entidad hija con componentes `TextShape` y `Billboard` a $Y = +1.5\text{m}$:
+Cada Golem cuenta con una entidad hija con componentes `TextShape` y `Billboard` a $Y = +1.6\text{m} - 1.8\text{m}$:
 
 ```text
-Calderón Blindado [Vapor]
-Nv.1 [████████░░] 85/120 HP
+Lv.1 Calderón Blindado
+[████████░░] 85/120
 ```
+
+- **Línea 1**: `Lv.X NombreLimpio` (se eliminan números de serie `#001` y etiquetas de tipo `[Galvanic]` ya que la criatura y el color de texto identifican su tipo).
+- **Línea 2**: `[██████████] currentHp/maxHp` (barra ASCII + vida numérica).
 
 La función `getHealthBarAscii(currentHp, maxHp)` en `src/objects/golemFactory.ts` recalcula la proporción de 10 bloques `█` / `░` en tiempo real tras cada impacto.
 

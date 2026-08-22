@@ -39,6 +39,11 @@ export function mapGolemPatrolSystem(dt: number) {
     const patrol = MapGolemPatrolComponent.get(entity)
     const transform = Transform.get(entity)
 
+    // Omitir movimiento de patrulla si el Golem está derrotado u oculto (Y < -50)
+    if (patrol.state === 'DEFEATED' || transform.position.y < -50) {
+      continue
+    }
+
     if (patrol.state === 'IDLE') {
       const newIdleTimer = patrol.idleTimer - dt
       if (newIdleTimer <= 0) {

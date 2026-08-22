@@ -16,6 +16,7 @@ import { calculateWildGolemMatrix } from './levelMatrix'
 
 export interface MapGolemDefinition {
   id: string
+  index: number
   recipeNumber: number
   name: string
   affinity: GolemAffinity
@@ -127,10 +128,28 @@ const ZONES_CONFIG: ZoneConfig[] = [
 ]
 
 /** Comprueba si un punto cae dentro del radio del suelo de la Arena Central (r < 38m de (200, 200)) */
-function isInsideArenaGround(x: number, z: number): boolean {
+export function isInsideArenaGround(x: number, z: number): boolean {
   const dx = x - 200
   const dz = z - 200
   return Math.sqrt(dx * dx + dz * dz) < 38.0
+}
+
+/**
+ * Genera una nueva coordenada procedural aleatoria (Vector3) dentro de la zona especificada.
+ */
+export function getRandomPositionInZone(zoneName: string): Vector3 {
+  const zone = ZONES_CONFIG.find((z) => z.name === zoneName) || ZONES_CONFIG[0]
+  let attempts = 0
+  let spawnX = zone.minX
+  let spawnZ = zone.minZ
+
+  do {
+    spawnX = zone.minX + Math.random() * (zone.maxX - zone.minX)
+    spawnZ = zone.minZ + Math.random() * (zone.maxZ - zone.minZ)
+    attempts++
+  } while (isInsideArenaGround(spawnX, spawnZ) && attempts < 20)
+
+  return Vector3.create(spawnX, 0, spawnZ)
 }
 
 /**
@@ -186,6 +205,7 @@ export function generateRandomMapGolemsCatalog(): MapGolemDefinition[] {
 
       mapGolems.push({
         id: `map_golem_${globalIndex}_rec${recipeNum}`,
+        index: globalIndex - 1,
         recipeNumber: recipeNum,
         name,
         affinity,

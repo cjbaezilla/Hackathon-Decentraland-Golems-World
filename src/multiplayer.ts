@@ -31,6 +31,13 @@ export const ITEM_MESSAGE_TYPES = {
   SYNC_RES: 'golem_item_sync_res'
 } as const
 
+export const FIELD_GOLEM_MESSAGE_TYPES = {
+  DEFEAT: 'field_golem_defeat',
+  LOCK: 'field_golem_lock',
+  SYNC_REQ: 'field_golem_sync_req',
+  SYNC_RES: 'field_golem_sync_res'
+} as const
+
 export interface ItemPickupMessageDto {
   instanceId: string
   collectorAddress: string
@@ -41,6 +48,28 @@ export interface ItemPickupMessageDto {
 export interface ItemSyncResponseDto {
   senderAddress: string
   collectedInstanceIds: string[]
+  timestamp: number
+}
+
+export interface FieldGolemDefeatMessageDto {
+  golemIndex: number
+  golemId: string
+  winnerAddress: string
+  timestamp: number
+}
+
+export interface FieldGolemLockMessageDto {
+  golemIndex: number
+  golemId: string
+  isLocked: boolean
+  lockedByAddress: string
+  timestamp: number
+}
+
+export interface FieldGolemSyncResponseDto {
+  senderAddress: string
+  defeatedGolemIndices: { golemIndex: number; remainingMs: number }[]
+  lockedGolemIndices: { golemIndex: number; lockedByAddress: string }[]
   timestamp: number
 }
 
@@ -329,6 +358,110 @@ export function setupItemSyncListeners(
 
     if (onItemSyncReceivedCallback) {
       onItemSyncReceivedCallback(payload.collectedInstanceIds)
+    }
+  })
+}
+
+// Callbacks para Golems salvajes de campo
+let onFieldGolemDefeatCallback: ((defeat: FieldGolemDefeatMessageDto) => void) | null = null
+let onFieldGolemLockCallback: ((lock: FieldGolemLockMessageDto) => void) | null = null
+let onFieldGolemSyncResCallback: ((syncRes: FieldGolemSyncResponseDto) => void) | null = null
+
+export function broadcastFieldGolemDefeat(golemIndex: number, golemId: string) {
+  const localId = getLocalPlayerId()
+  const payload: FieldGolemDefeatMessageDto = {
+    golemIndex,
+    golemId,
+    winnerAddress: localId,
+    timestamp: Date.now()
+  }
+  sceneMessageBus.emit(FIELD_GOLEM_MESSAGE_TYPES.DEFEAT, payload)
+}
+
+export function broadcastFieldGolemLock(golemIndex: number, golemId: string, isLocked: boolean) {
+  const localId = getLocalPlayerId()
+  const payload: FieldGolemLockMessageDto = {
+    golemIndex,
+    golemId,
+    isLocked,
+    lockedByAddress: localId,
+    timestamp: Date.now()
+  }
+  sceneMessageBus.emit(FIELD_GOLEM_MESSAGE_TYPES.LOCK, payload)
+}
+
+export function broadcastFieldGolemSyncRequest() {
+  const localId = getLocalPlayerId()
+  sceneMessageBus.emit(FIELD_GOLEM_MESSAGE_TYPES.SYNC_REQ, { requester: localId, timestamp: Date.now() })
+}
+
+export function broadcastFieldGolemSyncResponse(
+  defeatedGolemIndices: { golemIndex: number; remainingMs: number }[],
+  lockedGolemIndices: { golemIndex: number; lockedByAddress: string }[]
+) {
+  const localId = getLocalPlayerId()
+  const payload: FieldGolemSyncResponseDto = {
+    senderAddress: localId,
+    defeatedGolemIndices,
+    lockedGolemIndices,
+    timestamp: Date.now()
+  }
+  sceneMessageBus.emit(FIELD_GOLEM_MESSAGE_TYPES.SYNC_RES, payload)
+}
+
+export function setupFieldGolemSyncListeners(
+  onDefeatReceived?: (defeat: FieldGolemDefeatMessageDto) => void,
+  onLockReceived?: (lock: FieldGolemLockMessageDto) => void,
+  onSyncResReceived?: (syncRes: FieldGolemSyncResponseDto) => void,
+  getSyncProvider?: () => {
+    defeated: { golemIndex: number; remainingMs: number }[]
+    locked: { golemIndex: number; lockedByAddress: string }[]
+  }
+) {
+  if (onDefeatReceived) onFieldGolemDefeatCallback = onDefeatReceived
+  if (onLockReceived) onFieldGolemLockCallback = onLockReceived
+  if (onSyncResReceived) onFieldGolemSyncResCallback = onSyncResReceived
+
+  sceneMessageBus.on(FIELD_GOLEM_MESSAGE_TYPES.DEFEAT, (payload: FieldGolemDefeatMessageDto) => {
+    if (!payload || payload.golemIndex === undefined) return
+    const localId = getLocalPlayerId()
+    if (payload.winnerAddress.toLowerCase() === localId) return
+
+    if (onFieldGolemDefeatCallback) {
+      onFieldGolemDefeatCallback(payload)
+    }
+  })
+
+  sceneMessageBus.on(FIELD_GOLEM_MESSAGE_TYPES.LOCK, (payload: FieldGolemLockMessageDto) => {
+    if (!payload || payload.golemIndex === undefined) return
+    const localId = getLocalPlayerId()
+    if (payload.lockedByAddress.toLowerCase() === localId) return
+
+    if (onFieldGolemLockCallback) {
+      onFieldGolemLockCallback(payload)
+    }
+  })
+
+  sceneMessageBus.on(FIELD_GOLEM_MESSAGE_TYPES.SYNC_REQ, (payload: { requester: string }) => {
+    if (!payload || !payload.requester) return
+    const localId = getLocalPlayerId()
+    if (payload.requester.toLowerCase() === localId) return
+
+    if (getSyncProvider) {
+      const activeState = getSyncProvider()
+      if (activeState.defeated.length > 0 || activeState.locked.length > 0) {
+        broadcastFieldGolemSyncResponse(activeState.defeated, activeState.locked)
+      }
+    }
+  })
+
+  sceneMessageBus.on(FIELD_GOLEM_MESSAGE_TYPES.SYNC_RES, (payload: FieldGolemSyncResponseDto) => {
+    if (!payload) return
+    const localId = getLocalPlayerId()
+    if (payload.senderAddress.toLowerCase() === localId) return
+
+    if (onFieldGolemSyncResCallback) {
+      onFieldGolemSyncResCallback(payload)
     }
   })
 }

@@ -7,6 +7,8 @@ import { ARENA_CONFIG } from '../config/arenaConfig'
 import { getLocalPlayerId, getRemoteSquad } from '../multiplayer'
 import { spawnPlayerSquad, removePlayerSquad } from '../objects/golemFactory'
 import { isPositionInsideArena } from './golemCombatSystem'
+import { GolemCombatComponent, GolemCombatState } from '../components/combat'
+import { getActiveFieldEngagement } from './fieldCombatSystem'
 
 /**
  * ============================================================================
@@ -266,7 +268,21 @@ export function golemFollowerSystem(dt: number) {
   // --------------------------------------------------------------------------
   // 4. ACTUALIZACIÓN DEL MOVIMIENTO LERP/SLERP DE CADA GOLEM SEGUIDOR
   // --------------------------------------------------------------------------
+  const activeField = getActiveFieldEngagement()
+
   for (const [entity] of engine.getEntitiesWith(GolemFollowerComponent, Transform)) {
+    // A) Omitir movimiento de seguimiento si el Golem está combatiendo en campo abierto
+    if (activeField && !activeField.isFinished && activeField.playerGolemEntity === entity) {
+      continue
+    }
+
+    // B) Omitir movimiento de seguimiento si el Golem está en combate activo en la arena
+    if (GolemCombatComponent.has(entity)) {
+      const combatState = GolemCombatComponent.get(entity).state
+      if (combatState !== GolemCombatState.FOLLOWING) {
+        continue
+      }
+    }
     const follower = GolemFollowerComponent.get(entity)
     const ownerKey = follower.ownerAddress.toLowerCase()
 

@@ -9,25 +9,41 @@
 ## 📜 1. Arquitectura de Batallas de Campo (Field Battles)
 
 ### 1.1 Flujo de Interacción y Reglas de Proximidad
-1. **Detección Táctil por Puntero (`pointerEventsSystem`)**: Cada Golem salvaje que patrulla el mapa posee un componente de interacción primaria en el botón de puntero (`InputAction.IA_POINTER`).
-2. **Validación de Proximidad (< 6.0 metros)**:
+1. **Interacción Táctil por Puntero (`pointerEventsSystem`)**:
+   - Cada Golem salvaje que patrulla el mapa y su etiqueta 3D poseen un colisionador de caja explícito (`MeshCollider.setBox`) y un componente de interacción primaria (`InputAction.IA_POINTER`).
+   - Queda deshabilitado el despliegue automático por proximidad. El usuario debe seleccionar explícitamente el Golem salvaje a atacar.
+2. **Requisito Obligatorio de Golem Activo**:
+   - Antes de desplegar la interfaz, `hasActivePlayerGolem()` evalúa si el jugador posee al menos 1 Golem vivo ($HP > 0$) en su escuadrón local. Si no cuenta con unidades activas, emite: `"⚠️ Necesitas tener al menos 1 Golem activo en tu escuadrón para combatir."`.
+3. **Validación de Proximidad Táctil ($\le 6.0$ metros)**:
    - Al hacer clic o tocar sobre un Golem salvaje, el sistema evalúa la distancia euclidiana entre el avatar del jugador y la entidad del Golem:
      $$d = \sqrt{(X_{jugador} - X_{golem})^2 + (Z_{jugador} - Z_{golem})^2}$$
    - Si $d > 6.0\text{m}$, se cancela la interacción y se emite la advertencia: `"⚠️ Estás demasiado lejos para atacar (Distancia máxima: 6.0m)"`.
-   - Si $d \le 6.0\text{m}$, se abre la ventana modal flotante React-ECS (`FieldBattleModal`).
-3. **Modal de Confirmación React-ECS (`FieldBattleModal`)**:
-   - Muestra el nombre, nivel, zona, afinidad elemental, rareza, estadísticas base ($HP, Atk, Def$) y recompensas proyectadas ($XP + \text{Engranajes de Latón}$).
-   - Ofrece dos acciones táctiles: `[⚔️ ¡ATACAR!]` para iniciar el combate en tiempo real o `[❌ Cancelar]` para retirarse.
-4. **Bucle de Combate en Campo (`fieldCombatSystem`)**:
-   - Transcurre en tiempo real en la posición exacta del mapa sin pantallas de carga.
-   - Enfrenta al **Golem acompañante activo** del jugador contra el **Golem salvaje**.
-   - **Tasa de Ataque**: Cada 1.6 segundos los golems intercambian ataques.
-   - **Daño y Pentágono de Afinidades**:
-     $$\text{DañoFinal} = \text{Math.max}\left(2, \text{Math.round}\left((\text{Atacante}_{Atk} - \text{Defensor}_{Def} \times 0.4) \times \text{MultAfinidad}\right)\right)$$
-     - Ventaja Elemental: $\text{MultAfinidad} = 1.40\times$ (Golpe Crítico)
-     - Desventaja Elemental: $\text{MultAfinidad} = 0.75\times$
-     - Neutral: $\text{MultAfinidad} = 1.00\times$
-5. **Condición de Escape**: Si el jugador o su golem se alejan a más de $16.0\text{m}$ durante el combate, la batalla se cancela automáticamente por retirada.
+   - Si $d \le 6.0\text{m}$ y cuenta con Golem activo, se abre la ventana modal flotante React-ECS (`FieldBattleModal`).
+4. **Formato de Rótulos 3D Flotantes (Billboard)**:
+   - **Línea 1**: `Lv.X NombreLimpio` (se eliminan números de serie `#001` / `(#001)` y corchetes de afinidad `[Galvanic]` ya que la criatura y el color de texto identifican su tipo).
+   - **Línea 2**: `[██████████] currentHp/maxHp` (barra ASCII + vida numérica).
+5. **Bucle de Combate y Animaciones Procedurales (`fieldCombatSystem`)**:
+   - **Clash Lunge (Embestida)**: El atacante se abalanza hacia adelante ($+1.3\text{m}$ en golems veloces $\text{Speed} \ge 20$, $+0.85\text{m}$ en golems pesados).
+   - **Recoil (Retroceso)**: La víctima sufre un desplazamiento reactivo hacia atrás de $-0.6\text{m}$.
+   - **Refresco de Vida en Tiempo Real**: Tanto la etiqueta del Golem salvaje como la del Golem del jugador refrescan sus barras de vida 3D en cada impacto recibido.
+6. **Restauración de Salud de Golems Salvajes Supervivientes**:
+   - Si el combate finaliza sin la muerte del Golem salvaje (retirada del jugador, cancelación, escape por distancia o derrota del Golem del jugador), la salud del Golem salvaje se restablece automáticamente al **100% (`maxHp`)** y su etiqueta flotante 3D vuelve a estar llena (`[██████████] MaxHP/MaxHP`).
+7. **Sistema de Reaparición Temporizada (Respawn) en Nuevas Coordenadas**:
+   - Si el Golem salvaje es derrotado ($HP \le 0$), se oculta bajo el mapa ($Y = -100$) y entra en la cola de reaparición `defeatedRespawnQueue`.
+   - **Temporizadores por Tier**: Tier 1 = 2 min, Tier 2 = 3 min, Tier 3 = 4 min, Tier 4 = 5 min.
+   - **Nuevas Coordenadas Procedurales**: Al expirar el tiempo de respawn, el Golem reaparece en una **coordenada $(X, Z)$ completamente nueva** dentro de su Zona (fuera de la Gran Arena), con salud al 100% y rótulo restaurado.
+8. **Mecánica de Persecución Táctica, Huida y Retorno al Territorio**:
+   - **Persecución en Territorio**: Durante la batalla de campo, si el jugador se desplaza caminando ($d > 2.2\text{m}$), el Golem salvaje persigue activamente al avatar/golem a su velocidad de movimiento `moveSpeed` mientras permanezca en su rango de territorio.
+   - **Umbral de Huida Exitosa**: Si la distancia entre el avatar y el ancla original del Golem supera los $14.0\text{m}$ (o si la separación excede los $12.0\text{m}$), el combate se cancela automáticamente notificando: `"🏃 ¡Lograste huir del territorio del Golem salvaje!"`.
+   - **Retorno al Territorio de Patrulla**: Al huir o al ser derrotado el jugador, la vida del Golem salvaje se restablece al 100%, su rótulo 3D se llena completamente y la entidad gira y regresa caminando orgánicamente a su punto de patrulla original (`anchorX`, `anchorZ`).
+9. **Bloqueo Exclusivo de Combate Multijugador (`field_golem_lock`)**:
+   - Al iniciar un combate de campo, se emite el evento P2P `field_golem_lock` por MessageBus para bloquear la criatura salvaje.
+   - Mientras un Golem salvaje esté en combate con un jugador, **ningún otro avatar conectado puede atacarlo o interactuar con él**.
+   - Si otro jugador intenta desafiarlo, el sistema bloquea la interacción y notifica: `"🔒 Este Golem salvaje ya está en combate con otro jugador."`.
+   - Al finalizar la batalla (por victoria, derrota o huida), se transmite el desbloqueo (`isLocked: false`) para permitir nuevos desafíos.
+10. **Desaparición Síncrona Multijugador P2P (`field_golem_defeat`)**:
+    - Cuando un jugador derrota a un Golem salvaje en el mapa, se emite inmediatamente el evento `field_golem_defeat` por MessageBus.
+    - Todos los clientes conectados reciben la notificación y ocultan instantáneamente esa entidad salvaje ($Y = -100$) en sus pantallas, iniciando de forma síncrona el temporizador de reaparición (*Respawn*) según su Tier.
 
 ---
 

@@ -29,6 +29,21 @@ import { openFieldBattleModal, addCombatLog, hasActivePlayerGolem } from '../sta
 const spawnedMapGolemEntities: Entity[] = []
 export const spawnedMapGolemDataMap = new Map<Entity, { golemDef: MapGolemDefinition; labelEntity: Entity }>()
 
+const lockedFieldGolemsMap = new Map<number, string>()
+
+export function isFieldGolemLocked(golemIndex: number): { isLocked: boolean; lockedBy: string } {
+  const lockedBy = lockedFieldGolemsMap.get(golemIndex)
+  return { isLocked: !!lockedBy, lockedBy: lockedBy || '' }
+}
+
+export function setFieldGolemLockState(golemIndex: number, lockedBy: string, isLocked: boolean) {
+  if (isLocked) {
+    lockedFieldGolemsMap.set(golemIndex, lockedBy)
+  } else {
+    lockedFieldGolemsMap.delete(golemIndex)
+  }
+}
+
 /**
  * Actualiza las etiquetas flotantes 3D de todos los golems ambientales del mapa al cambiar el idioma.
  * Formato:
@@ -106,6 +121,13 @@ export function spawnMapGolems(count: number = 150): Entity[] {
 
     // Manejador común de interacción para iniciar combate
     const triggerBattleInteraction = () => {
+      // 0. Verificar si el golem salvaje ya está bloqueado en combate por otro jugador
+      const lockStatus = isFieldGolemLocked(golemDef.index)
+      if (lockStatus.isLocked) {
+        addCombatLog(`🔒 Este Golem salvaje ya está en combate con otro jugador.`, '#FFCC00')
+        return
+      }
+
       // 1. Verificar si el usuario tiene al menos 1 golem activo en su escuadrón
       if (!hasActivePlayerGolem()) {
         addCombatLog('⚠️ Necesitas tener al menos 1 Golem activo en tu escuadrón para combatir.', '#FFCC00')
