@@ -93,6 +93,19 @@ export interface TranslationSchema {
     insufficientMaterials: string
     successCraft: string
     slotsCount: string
+    openPrompt: string
+    inventoryTitle: string
+    emptyInventoryWarning: string
+    inCrucible: string
+    crucibleTitle: string
+    totalSelected: string
+    minRequired: string
+    selectItemsHint: string
+    clearButton: string
+    golemActiveFollower: string
+    golemSentToVault: string
+    invalidRecipeWarning: string
+    validRecipeBadge: string
   }
   npc: {
     name: string
@@ -219,6 +232,22 @@ export interface TranslationSchema {
     affinityAdvantage: string
     golemTip: string
     selectGolem: string
+  }
+  forgeModal: {
+    openPrompt: string
+    title: string
+    subtitle: string
+    inventoryTitle: string
+    emptyInventoryWarning: string
+    inCrucible: string
+    crucibleTitle: string
+    totalSelected: string
+    minRequired: string
+    selectItemsHint: string
+    clearButton: string
+    craftButton: string
+    golemActiveFollower: string
+    golemSentToVault: string
   }
 }
 

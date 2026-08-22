@@ -2,10 +2,17 @@ import {
   engine,
   Transform,
   GltfContainer,
-  Entity
+  Entity,
+  pointerEventsSystem,
+  InputAction,
+  PointerEventType
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion } from '@dcl/sdk/math'
 import { WRECKAGE_LAB_CONFIG } from '../config/wreckageLabConfig'
+import { t } from '../i18n'
+import { setIsForgeUIOpen } from '../state'
+import { registerFactoryGear, registerFactoryBoiler } from '../systems/factoryAnimationSystem'
+import { registerPrototypeGolemDisplay } from '../cinematics/factoryForgingCinematic'
 
 const ASSETS = WRECKAGE_LAB_CONFIG.assets
 
@@ -207,13 +214,14 @@ function buildCoreFusionMechanisms(parent: Entity) {
   const centerPos = Vector3.create(35.0, 0.05, 34.0)
 
   // Gran tanque caldera principal de alta temperatura
-  spawnProp(
+  const boilerEntity = spawnProp(
     parent,
     ASSETS.tank,
     Vector3.create(centerPos.x, 0.05, centerPos.z - 2.0),
     Quaternion.fromEulerDegrees(0, 180, 0),
     Vector3.create(1.8, 2.0, 1.8)
   )
+  registerFactoryBoiler(boilerEntity, 0.05)
 
   // Tanque secundario lateral de presurización
   spawnProp(
@@ -248,55 +256,82 @@ function buildCoreFusionMechanisms(parent: Entity) {
     Quaternion.Identity(),
     Vector3.create(1.6, 1.8, 1.6)
   )
-  spawnProp(
+  const gearBigEntity = spawnProp(
     parent,
     ASSETS.gearBig,
     Vector3.create(centerPos.x, 0.8, centerPos.z + 0.2),
     Quaternion.fromEulerDegrees(90, 0, 0),
     Vector3.create(2.2, 2.2, 2.2)
   )
+  registerFactoryGear(gearBigEntity, 'Z', 40)
 
   // Engranajes interconectados laterales y en ángulo
-  spawnProp(
+  const g1 = spawnProp(
     parent,
     ASSETS.gear10Teeth,
     Vector3.create(centerPos.x - 2.2, 0.6, centerPos.z + 0.2),
     Quaternion.fromEulerDegrees(0, 45, 0),
     Vector3.create(1.4, 1.4, 1.4)
   )
-  spawnProp(
+  registerFactoryGear(g1, 'Y', -60)
+
+  const g2 = spawnProp(
     parent,
     ASSETS.gearAngled10Teeth,
     Vector3.create(centerPos.x + 2.2, 0.6, centerPos.z + 0.2),
     Quaternion.fromEulerDegrees(45, 0, 0),
     Vector3.create(1.4, 1.4, 1.4)
   )
-  spawnProp(
+  registerFactoryGear(g2, 'X', 55)
+
+  const g3 = spawnProp(
     parent,
     ASSETS.gear8Teeth,
     Vector3.create(centerPos.x, 1.8, centerPos.z - 0.8),
     Quaternion.fromEulerDegrees(0, 0, 90),
     Vector3.create(1.2, 1.2, 1.2)
   )
-  spawnProp(
+  registerFactoryGear(g3, 'X', -70)
+
+  const g4 = spawnProp(
     parent,
     ASSETS.gear5Teeth,
     Vector3.create(centerPos.x + 1.5, 1.4, centerPos.z - 0.8),
     Quaternion.fromEulerDegrees(30, 30, 0)
   )
+  registerFactoryGear(g4, 'Y', 80)
 
-  // Consola frontal de comando maestro de la forja
-  spawnProp(
+  // Consola frontal de comando maestro de la forja (CLICABLE / INTERACTIVA)
+  const masterConsoleEntity = spawnProp(
     parent,
     ASSETS.chestGear,
     Vector3.create(centerPos.x, 0.05, centerPos.z + 2.5),
     Quaternion.fromEulerDegrees(0, 180, 0)
   )
-  spawnProp(parent, ASSETS.lever, Vector3.create(centerPos.x - 1.2, 0.05, centerPos.z + 2.5), Quaternion.fromEulerDegrees(0, 180, 0))
-  spawnProp(parent, ASSETS.lever, Vector3.create(centerPos.x + 1.2, 0.05, centerPos.z + 2.5), Quaternion.fromEulerDegrees(0, 180, 0))
+
+  const l1 = spawnProp(parent, ASSETS.lever, Vector3.create(centerPos.x - 1.2, 0.05, centerPos.z + 2.5), Quaternion.fromEulerDegrees(0, 180, 0))
+  const l2 = spawnProp(parent, ASSETS.lever, Vector3.create(centerPos.x + 1.2, 0.05, centerPos.z + 2.5), Quaternion.fromEulerDegrees(0, 180, 0))
   spawnProp(parent, ASSETS.switch, Vector3.create(centerPos.x - 0.6, 0.05, centerPos.z + 2.7), Quaternion.fromEulerDegrees(0, 180, 0))
   spawnProp(parent, ASSETS.switch, Vector3.create(centerPos.x + 0.6, 0.05, centerPos.z + 2.7), Quaternion.fromEulerDegrees(0, 180, 0))
   spawnProp(parent, ASSETS.tableLamp, Vector3.create(centerPos.x, 0.85, centerPos.z + 2.5))
+
+  // Asignar interacción clicable in-world a la consola y palancas
+  const clickEntities = [masterConsoleEntity, l1, l2, boilerEntity]
+  clickEntities.forEach((ent) => {
+    pointerEventsSystem.onPointerDown(
+      {
+        entity: ent,
+        opts: {
+          button: InputAction.IA_POINTER,
+          hoverText: t('forge.openPrompt'),
+          maxDistance: 8.0
+        }
+      },
+      () => {
+        setIsForgeUIOpen(true)
+      }
+    )
+  })
 }
 
 /**
@@ -314,28 +349,32 @@ function buildGolemOutputBay(parent: Entity) {
     Vector3.create(1.05, 1.2, 1.05)
   )
 
-  // Golem de Vapor Prototipo en exhibición estática en el centro del podio
-  spawnProp(
+  // Golem de Vapor Prototipo en exhibición estática en el centro del podio (Registrado para la cinemática)
+  const prototypeEntity = spawnProp(
     parent,
     ASSETS.prototypeGolem,
     Vector3.create(bayCenter.x, 0.45, bayCenter.z),
     Quaternion.fromEulerDegrees(0, 165, 0), // Ligeramente orientado hacia el acceso del jugador
     Vector3.create(1.35, 1.35, 1.35)
   )
+  registerPrototypeGolemDisplay(prototypeEntity)
 
   // Rampa / Engranajes de guía perimetrales en la bahía de salida
-  spawnProp(
+  const gs1 = spawnProp(
     parent,
     ASSETS.gearSmall01,
     Vector3.create(bayCenter.x - 1.8, 0.25, bayCenter.z + 1.5),
     Quaternion.fromEulerDegrees(90, 0, 0)
   )
-  spawnProp(
+  registerFactoryGear(gs1, 'Z', 50)
+
+  const gs2 = spawnProp(
     parent,
     ASSETS.gearSmall02,
     Vector3.create(bayCenter.x + 1.8, 0.25, bayCenter.z + 1.5),
     Quaternion.fromEulerDegrees(90, 45, 0)
   )
+  registerFactoryGear(gs2, 'Z', -50)
 
   // Estación de enfriamiento por vapor, hidrante y purga
   spawnProp(parent, ASSETS.hidrant, Vector3.create(bayCenter.x + 2.6, 0.05, bayCenter.z - 1.5))

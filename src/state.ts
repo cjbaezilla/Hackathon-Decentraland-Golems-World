@@ -54,6 +54,9 @@ export interface SceneState {
   hasTriggeredProximityIntro: boolean
   isInventoryOpen: boolean
   isGolemInventoryOpen: boolean
+  isForgeUIOpen: boolean
+  selectedForgeMaterials: Record<string, number>
+  golemReserve: GolemConfig[]
   playerInventory: Record<string, number>
   nearestItemDistance: number
   nearestItemRarity: string
@@ -77,6 +80,9 @@ export const sceneState: SceneState = {
   isBigMapOpen: false,
   isInventoryOpen: false,
   isGolemInventoryOpen: false,
+  isForgeUIOpen: false,
+  selectedForgeMaterials: {},
+  golemReserve: [],
   isSilasTourActive: false,
   silasTourCurrentWaypoint: 0,
   silasTourSubtitle: '',
@@ -460,6 +466,99 @@ export function getHeatRadarState(): {
     itemZ: sceneState.nearestItemZ
   }
 }
+
+/**
+ * Consulta si la ventana modal de la forja de golems está abierta.
+ */
+export function getIsForgeUIOpen(): boolean {
+  return sceneState.isForgeUIOpen
+}
+
+/**
+ * Establece el estado de apertura de la ventana de la forja de golems.
+ */
+export function setIsForgeUIOpen(open: boolean) {
+  sceneState.isForgeUIOpen = open
+}
+
+/**
+ * Alterna el estado de apertura de la ventana de la forja de golems.
+ */
+export function toggleForgeUI() {
+  sceneState.isForgeUIOpen = !sceneState.isForgeUIOpen
+}
+
+/**
+ * Obtiene el objeto de materiales actualmente seleccionados en la forja.
+ */
+export function getSelectedForgeMaterials(): Record<string, number> {
+  return sceneState.selectedForgeMaterials
+}
+
+/**
+ * Incrementa la cantidad seleccionada de un material en la forja (hasta el límite disponible en inventario).
+ */
+export function addForgeMaterial(itemId: string) {
+  const owned = sceneState.playerInventory[itemId] || 0
+  const selected = sceneState.selectedForgeMaterials[itemId] || 0
+
+  // Contar el total acumulado en la bahía (máximo 12 ítems totales)
+  let currentTotalCount = 0
+  for (const count of Object.values(sceneState.selectedForgeMaterials)) {
+    currentTotalCount += count
+  }
+
+  if (selected < owned && currentTotalCount < 12) {
+    sceneState.selectedForgeMaterials[itemId] = selected + 1
+  }
+}
+
+/**
+ * Decrementa la cantidad seleccionada de un material en la forja.
+ */
+export function removeForgeMaterial(itemId: string) {
+  const selected = sceneState.selectedForgeMaterials[itemId] || 0
+  if (selected > 1) {
+    sceneState.selectedForgeMaterials[itemId] = selected - 1
+  } else if (selected === 1) {
+    delete sceneState.selectedForgeMaterials[itemId]
+  }
+}
+
+/**
+ * Limpia la bahía de materiales seleccionados en la forja.
+ */
+export function clearForgeMaterials() {
+  sceneState.selectedForgeMaterials = {}
+}
+
+/**
+ * Descuenta una cantidad de un material del inventario del jugador.
+ */
+export function removeMaterialFromInventory(itemId: string, count: number) {
+  const current = sceneState.playerInventory[itemId] || 0
+  const next = Math.max(0, current - count)
+  if (next > 0) {
+    sceneState.playerInventory[itemId] = next
+  } else {
+    delete sceneState.playerInventory[itemId]
+  }
+}
+
+/**
+ * Agrega un golem a la reserva del jugador.
+ */
+export function addGolemToReserve(golem: GolemConfig) {
+  sceneState.golemReserve.push(golem)
+}
+
+/**
+ * Obtiene la lista de golems en la reserva del jugador.
+ */
+export function getGolemReserve(): GolemConfig[] {
+  return sceneState.golemReserve
+}
+
 
 
 

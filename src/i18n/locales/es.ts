@@ -114,12 +114,25 @@ export const es: TranslationSchema = {
     distanceMeters: '{distance}m de distancia'
   },
   forge: {
-    title: 'FORJA DE GOLEMS',
-    subtitle: 'Combina entre 5 y 12 piezas de chatarra',
-    craftButton: 'Insuflar Vida',
+    title: 'FÁBRICA DE GOLEMS & CRISOL ALQUÍMICO',
+    subtitle: 'Inserta de 5 a 12 componentes de chatarra para dar vida a un autómata único.',
+    craftButton: '⚡ ¡FORJAR GOLEM!',
     insufficientMaterials: 'Se requieren entre 5 y 12 materiales',
     successCraft: '¡Nuevo golem forjado exitosamente!',
-    slotsCount: 'Piezas: {count}/12'
+    slotsCount: 'Piezas: {count}/12',
+    openPrompt: '🔥 Mezclar y Crear Golem',
+    inventoryTitle: 'Piezas de Chatarra Disponibles',
+    emptyInventoryWarning: 'No posees piezas de chatarra en tu inventario. Recolecta materiales por el mapa.',
+    inCrucible: 'En Crisol',
+    crucibleTitle: 'Bahía de Mezcla Alquímica',
+    totalSelected: 'Materiales Insertados',
+    minRequired: 'Mínimo',
+    selectItemsHint: 'Selecciona de 5 a 12 piezas de chatarra para previsualizar el autómata resultante.',
+    clearButton: 'Limpiar',
+    golemActiveFollower: '🎉 ¡Nuevo autómata {name} forjado con éxito! Ahora te acompaña como tu único seguidor.',
+    golemSentToVault: '📦 ¡Nuevo autómata {name} forjado! Guardado en la Bóveda / Reserva de Golems.',
+    invalidRecipeWarning: '⚠️ Receta No Válida: La mezcla de componentes no coincide con ninguna de las 150 recetas del catálogo.',
+    validRecipeBadge: '✨ Receta Oficial Válida'
   },
   npc: {
     name: 'Silas',
@@ -246,6 +259,22 @@ export const es: TranslationSchema = {
     affinityAdvantage: 'Ventaja Elemental',
     golemTip: '💡 Puedes mantener hasta 3 Golems en tu escuadrón activo para explorar y combatir.',
     selectGolem: 'Selecciona un golem para inspeccionar sus estadísticas de combate.'
+  },
+  forgeModal: {
+    openPrompt: '🔥 Mezclar y Crear Golem',
+    title: 'FÁBRICA DE GOLEMS & CRISOL ALQUÍMICO',
+    subtitle: 'Inserta de 5 a 12 componentes de chatarra para dar vida a un autómata único.',
+    inventoryTitle: 'Piezas de Chatarra Disponibles',
+    emptyInventoryWarning: 'No posees piezas de chatarra en tu inventario. Recolecta materiales por el mapa.',
+    inCrucible: 'En Crisol',
+    crucibleTitle: 'Bahía de Mezcla Alquímica',
+    totalSelected: 'Materiales Insertados',
+    minRequired: 'Mínimo',
+    selectItemsHint: 'Selecciona de 5 a 12 piezas de chatarra para previsualizar el autómata resultante.',
+    clearButton: 'Limpiar',
+    craftButton: '⚡ ¡FORJAR GOLEM!',
+    golemActiveFollower: '🎉 ¡Nuevo autómata {name} forjado con éxito! Ahora te acompaña como tu único seguidor.',
+    golemSentToVault: '📦 ¡Nuevo autómata {name} forjado! Guardado en la Bóveda / Reserva de Golems.'
   }
 }
 

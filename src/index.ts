@@ -42,6 +42,8 @@ import { npcPatrolSystem } from './systems/npcPatrolSystem'
 import { mapGolemPatrolSystem } from './systems/mapGolemPatrolSystem'
 import { spawnInitialMapItems } from './objects/itemGenerator'
 import { itemSpawnSystem } from './systems/itemSpawnSystem'
+import { factoryAnimationSystem } from './systems/factoryAnimationSystem'
+import { initForgeCinematicCamera } from './cinematics/factoryForgingCinematic'
 
 
 import {
@@ -153,19 +155,21 @@ export function main() {
   // 12. Instanciar exactamente 150 materiales coleccionables distribuidos por las zonas del mapa
   spawnInitialMapItems(150)
 
-  // 13. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado
+  // 13. Inicializar la cámara cinemática de presentación y cámaras de tour/mercado/forja
   initSilasCinematicCamera()
   initTourFollowCamera()
   initMarketOrbitalCamera()
+  initForgeCinematicCamera()
 
   // 14. Disparo inmediato al primer input del usuario (con temporizador de seguridad de respaldo)
   scheduleSilasIntroCinematic()
 
-  // 15. Registrar los sistemas de carga, seguimiento, combate, animación, trampolín, NPCs, materiales y tour guiado
+  // 15. Registrar los sistemas de carga, seguimiento, combate, animación, trampolín, NPCs, materiales, forja y tour guiado
   engine.addSystem(sceneLoaderSystem)
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
   engine.addSystem(arenaAnimationSystem)
+  engine.addSystem(factoryAnimationSystem)
   engine.addSystem(trampolineSystem)
   engine.addSystem(welcomeNpcAnimationSystem)
   engine.addSystem(silasTourSystem)

@@ -216,13 +216,37 @@ export function spawnPlayerSquad(
       ? GOLEM_TEAMS.PLAYER
       : `${GOLEM_TEAMS.REMOTE_PREFIX}${normAddress}`
 
-  squadConfig.forEach((config, index) => {
-    const spawnPos = Vector3.create(basePos.x, Math.max(0.1, basePos.y), basePos.z - config.followDistance)
+  // Garantizar que ÚNICAMENTE 1 golem acompañe al jugador por el mapa (no 3)
+  const activeGolemConfig = squadConfig.slice(0, 1)
+
+  activeGolemConfig.forEach((config, index) => {
+    const spawnPos = Vector3.create(basePos.x, Math.max(0.1, basePos.y), basePos.z - (config.followDistance || 2.0))
     const entity = createFollowerGolem(config, index, spawnPos, normAddress, teamId)
     entities.push(entity)
   })
 
   return entities
+}
+
+/**
+ * Instancia 1 ÚNICO golem seguidor activo para el jugador local por el mapa.
+ */
+export function spawnActivePlayerGolem(
+  config: GolemConfig | GolemSquadMemberDto,
+  ownerAddress: string = 'local'
+): Entity {
+  removePlayerSquad(ownerAddress)
+  removePlayerSquad('local')
+  removePlayerSquad('local_player')
+
+  let spawnBase = Vector3.create(16, 0.1, 16)
+  if (Transform.has(engine.PlayerEntity)) {
+    const pPos = Transform.get(engine.PlayerEntity).position
+    spawnBase = Vector3.create(pPos.x, Math.max(0.1, pPos.y), pPos.z)
+  }
+
+  const spawnPos = Vector3.create(spawnBase.x, spawnBase.y, spawnBase.z - (config.followDistance || 2.0))
+  return createFollowerGolem(config, 0, spawnPos, ownerAddress.toLowerCase(), GOLEM_TEAMS.PLAYER)
 }
 
 /**

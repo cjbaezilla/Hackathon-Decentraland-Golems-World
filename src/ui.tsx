@@ -27,6 +27,7 @@ import { HeatRadarWidget } from './ui/heatRadarComponent'
 import { DesktopActionBarWidget } from './ui/actionBarComponent'
 import { InventoryModal } from './ui/inventoryComponent'
 import { GolemInventoryModal } from './ui/golemInventoryComponent'
+import { GolemForgeModal } from './ui/golemForgeComponent'
 
 
 
@@ -1016,6 +1017,9 @@ export const uiComponent = () => {
 
       {/* Modal de Reserva e Inventario de Golems */}
       <GolemInventoryModal />
+
+      {/* Modal de Mezcla y Forja de Golems */}
+      <GolemForgeModal />
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />

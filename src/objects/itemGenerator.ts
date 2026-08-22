@@ -568,6 +568,48 @@ export function spawnInitialMapItems(targetTotalCount: number = 150) {
   // Solicitar sincronización de estado de ítems a otros jugadores en la escena
   requestItemSync()
 
+  // Instanciar materiales de prueba para Golem #001 en X: 40.0m, Z: 21.1m (Parcela [2, 1])
+  spawnGolem1TestMaterials()
+
   console.log(`📦 [Material Spawner Multijugador] Inicializados exactamente ${spawnedCount} materiales síncronos compartidos (Target: ${targetTotalCount}).`)
+}
+
+/**
+ * Instancia en las coordenadas exactas X: 40.0m | Z: 21.1m (Parcela [2, 1]) los 10 materiales necesarios
+ * para forjar el Golem #001 (Baluarte Eléctrico):
+ * 2x palancas_interruptor, 2x tuercas_gigantes, 2x cadenas_hierro, 2x manometros, 2x tornillos_pernos
+ */
+export function spawnGolem1TestMaterials(centerPos: Vector3 = Vector3.create(40.0, 0.25, 21.1)) {
+  const recipeMaterials = [
+    { id: 'palancas_interruptor', offset: Vector3.create(-0.6, 0, -0.6) },
+    { id: 'palancas_interruptor', offset: Vector3.create(-0.3, 0, -0.4) },
+    { id: 'tuercas_gigantes', offset: Vector3.create(0.4, 0, -0.6) },
+    { id: 'tuercas_gigantes', offset: Vector3.create(0.6, 0, -0.4) },
+    { id: 'cadenas_hierro', offset: Vector3.create(-0.6, 0, 0.4) },
+    { id: 'cadenas_hierro', offset: Vector3.create(-0.4, 0, 0.6) },
+    { id: 'manometros', offset: Vector3.create(0.4, 0, 0.4) },
+    { id: 'manometros', offset: Vector3.create(0.6, 0, 0.6) },
+    { id: 'tornillos_pernos', offset: Vector3.create(0.0, 0, -0.8) },
+    { id: 'tornillos_pernos', offset: Vector3.create(0.0, 0, 0.8) }
+  ]
+
+  recipeMaterials.forEach((mat, idx) => {
+    const itemConfig = COLLECTABLE_ITEMS[mat.id]
+    if (!itemConfig) return
+
+    const pos = Vector3.add(centerPos, mat.offset)
+    pos.y = 0.25
+    const instanceId = `test_golem1_item_${idx}_${Date.now()}`
+    const entity = spawnItemEntity(itemConfig, pos, instanceId)
+
+    // Revelar inmediatamente para visibilidad instantánea
+    if (CollectableItemComponent.has(entity)) {
+      const data = CollectableItemComponent.getMutable(entity)
+      data.isRevealed = true
+      data.originalY = 0.25
+    }
+  })
+
+  console.log('🧪 [Test Materials] Instanciados 10 materiales para el Golem #001 en Parcela [2, 1] (X: 40.0m, Z: 21.1m).')
 }
 

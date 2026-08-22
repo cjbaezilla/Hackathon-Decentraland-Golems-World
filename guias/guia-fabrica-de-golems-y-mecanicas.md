@@ -1,6 +1,8 @@
 # 🏭 Guía Técnica: Fábrica de Golems (Golem Factory) y Mecánicas de Instanciación en Decentraland SDK7
 
-Esta guía documenta en detalle el diseño, arquitectura y funcionamiento del patrón **Factory** implementado en `src/objects/golemFactory.ts`, el sistema de parametrización en `src/config/golems.ts`, la jerarquía de entidades padre-hijo con componentes `Billboard`/`TextShape`, la relación con los modelos 3D generados y la futura integración con la **Forja Determinista** del GDD de Golems.
+> 📌 **DOCUMENTO COMPLEMENTARIO**: Para consultar la documentación maestra de la fábrica interactiva, la interfaz modal de forja React-ECS, las animaciones mecánicas, las cinemáticas de 3 perspectivas y la validación estricta de las 150 recetas del catálogo, ver la nueva guía maestra: [**`guia-fabrica-de-golems-interactiva-y-recetas-150.md`**](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-fabrica-de-golems-interactiva-y-recetas-150.md).
+
+Esta guía documenta en detalle el diseño, arquitectura y funcionamiento del patrón **Factory** implementado en `src/objects/golemFactory.ts`, el sistema de parametrización en `src/config/golems.ts`, la jerarquía de entidades padre-hijo con componentes `Billboard`/`TextShape`, la relación con los modelos 3D generados y la integración con la **Forja Determinista** del GDD de Golems.
 
 ---
 

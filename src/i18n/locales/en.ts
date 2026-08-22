@@ -114,12 +114,25 @@ export const en: TranslationSchema = {
     distanceMeters: '{distance}m away'
   },
   forge: {
-    title: 'GOLEM FORGE',
-    subtitle: 'Combine 5 to 12 pieces of scrap',
-    craftButton: 'Breathe Life',
+    title: 'GOLEM FACTORY & ALCHEMICAL CRUCIBLE',
+    subtitle: 'Insert 5 to 12 scrap components to bring a unique automaton to life.',
+    craftButton: '⚡ CRAFT GOLEM!',
     insufficientMaterials: 'Requires between 5 and 12 materials',
     successCraft: 'New golem successfully forged!',
-    slotsCount: 'Parts: {count}/12'
+    slotsCount: 'Parts: {count}/12',
+    openPrompt: '🔥 Mix & Craft Golem',
+    inventoryTitle: 'Available Scrap Parts',
+    emptyInventoryWarning: 'No scrap items in your inventory. Collect materials around the map.',
+    inCrucible: 'In Crucible',
+    crucibleTitle: 'Alchemical Mixing Bay',
+    totalSelected: 'Inserted Materials',
+    minRequired: 'Min',
+    selectItemsHint: 'Select 5 to 12 scrap items to preview the resulting automaton.',
+    clearButton: 'Clear',
+    golemActiveFollower: '🎉 New automaton {name} successfully forged! It now accompanies you as your sole follower.',
+    golemSentToVault: '📦 New automaton {name} forged! Saved to Vault / Golem Reserve.',
+    invalidRecipeWarning: '⚠️ Invalid Recipe: The component mixture does not match any of the 150 official recipes in the catalog.',
+    validRecipeBadge: '✨ Valid Official Recipe'
   },
   npc: {
     name: 'Silas',
@@ -246,6 +259,22 @@ export const en: TranslationSchema = {
     affinityAdvantage: 'Elemental Advantage',
     golemTip: '💡 You can keep up to 3 Golems in your active squad to explore and battle.',
     selectGolem: 'Select a golem to inspect its combat stats.'
+  },
+  forgeModal: {
+    openPrompt: '🔥 Mix & Craft Golem',
+    title: 'GOLEM FACTORY & ALCHEMICAL CRUCIBLE',
+    subtitle: 'Insert 5 to 12 scrap components to bring a unique automaton to life.',
+    inventoryTitle: 'Available Scrap Parts',
+    emptyInventoryWarning: 'No scrap items in your inventory. Collect materials around the map.',
+    inCrucible: 'In Crucible',
+    crucibleTitle: 'Alchemical Mixing Bay',
+    totalSelected: 'Inserted Materials',
+    minRequired: 'Min',
+    selectItemsHint: 'Select 5 to 12 scrap items to preview the resulting automaton.',
+    clearButton: 'Clear',
+    craftButton: '⚡ CRAFT GOLEM!',
+    golemActiveFollower: '🎉 New automaton {name} successfully forged! It now accompanies you as your sole follower.',
+    golemSentToVault: '📦 New automaton {name} forged! Saved to Vault / Golem Reserve.'
   }
 }
 
