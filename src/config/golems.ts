@@ -271,14 +271,16 @@ function randomRange(min: number, max: number): number {
 }
 
 /**
- * Genera estadísticas aleatorias balanceadas para un golem según su afinidad elemental.
+ * Genera estadísticas aleatorias balanceadas en Nivel 1 para un golem según su afinidad elemental
+ * e incorporando una varianza individual del 90% al 115%.
  */
 export function generateRandomStats(affinity: GolemAffinity): GolemStats {
   const v = GOLEM_AFFINITY_VARIANTS[affinity]
-  const maxHp = randomRange(v.minHp, v.maxHp)
-  const attack = randomRange(v.minAtk, v.maxAtk)
-  const defense = randomRange(v.minDef, v.maxDef)
-  const speed = randomRange(v.minSpd, v.maxSpd)
+  const roll = 0.9 + Math.random() * 0.25 // Varianza aleatoria 90% - 115%
+  const maxHp = Math.round(randomRange(v.minHp, v.maxHp) * roll)
+  const attack = Math.round(randomRange(v.minAtk, v.maxAtk) * roll)
+  const defense = Math.round(randomRange(v.minDef, v.maxDef) * roll)
+  const speed = Math.round(randomRange(v.minSpd, v.maxSpd) * (0.95 + Math.random() * 0.15))
   const expReward = randomRange(v.minExp, v.maxExp)
 
   return {

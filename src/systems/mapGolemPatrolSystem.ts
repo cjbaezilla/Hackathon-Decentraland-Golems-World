@@ -29,11 +29,10 @@ export const MapGolemPatrolComponent = engine.defineComponent('MapGolemPatrolCom
  * ============================================================================
  * SISTEMA ECS: PATRULLA AMBIENTAL DE GOLEMS (MAP GOLEM PATROL SYSTEM)
  * ============================================================================
- * Procesa el patrullaje orgánico y pausado de los 150 golems del mapa:
+ * Procesa el patrullaje orgánico y pausado de los golems del mapa:
  * 1. Alterna entre caminata ('WALKING') y reposo ('IDLE') con temporizadores aleatorios.
- * 2. Mantiene a cada golem en un radio de patrulla seguro (3.5m - 6.0m) alrededor de su punto de spawn.
+ * 2. Mantiene a cada golem en un radio de patrulla seguro alrededor de su punto de spawn.
  * 3. Orienta de forma suave el modelo 3D GLTF en el sentido de la marcha.
- * 4. Optimizado para móvil siguiendo el patrón DOP (Data Oriented Programming).
  */
 export function mapGolemPatrolSystem(dt: number) {
   for (const [entity] of engine.getEntitiesWith(MapGolemPatrolComponent, Transform)) {

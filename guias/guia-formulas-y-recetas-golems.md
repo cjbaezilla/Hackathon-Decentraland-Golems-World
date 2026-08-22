@@ -11,9 +11,13 @@
 En **Golems World**, la creación de criaturas mecánicas no depende de la aleatoriedad generada en el servidor (*RNG*) ni de datos volátiles no reproducibles. El motor de forja utiliza un **algoritmo determinista estricto** basado en combinaciones de componentes.
 
 ### Criterios Clave de Diseño:
-1. **Reproducibilidad Absoluta**: Cualquier jugador que introduzca exactamente la misma combinación de materiales en el *Wreckage Lab* obtendrá idéntico golem (mismos atributos, mismo nombre, misma afinidad, misma escala física y mismo color emisivo).
+1. **Reproducibilidad Absoluta**: Cualquier jugador que introduzca exactamente la misma combinación de materiales en el *Wreckage Lab* obtendrá idéntico golem (mismos atributos base, mismo nombre, misma afinidad, misma escala física y mismo color emisivo).
 2. **Diversidad sin Colisiones**: Con un catálogo de 46 materiales de chatarra, el espacio de combinaciones posibles es de millones de variantes. Las 150 recetas del catálogo maestro han sido validadas matemáticamente para garantizar **cero colisiones de hash**.
-3. **Progresión por Tiers**: Los ingredientes determinan directamente el nivel de poder del golem, estructurado en 4 niveles tácticos (Tier 1 a Tier 4).
+3. **Progresión por Tiers e Inicio en Nivel 1**: Todos los golems creados en la Forja nacen estrictamente en **Nivel 1**, con estadísticas derivadas de la rareza de sus piezas, la complejidad de la receta ($1.0\times$ a $1.90\times$) y un roll de variabilidad aleatoria ($90\% \le roll \le 115\%$).
+
+> [!TIP]
+> **TABLA COMPLETA DE ATRIBUTOS Y FÓRMULAS EN NIVEL 1**:
+> Para consultar la matriz técnica exhaustiva de los 46 materiales y el algoritmo de cálculo de estadísticas iniciales, lee la [Guía Maestra: Batallas de Campo y Matrices de Nivel](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-batallas-de-campo-y-matrices-de-nivel.md#5-algoritmo-determinista-de-forja-en-nivel-1-player-golems).
 
 ---
 

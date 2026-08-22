@@ -78,12 +78,27 @@ export function getHealthBarAscii(currentHp: number, maxHp: number): string {
 }
 
 /**
+ * Limpia el nombre del golem removiendo números de serie (#001, (#001)) y etiquetas de afinidad ([Galvanic]).
+ */
+export function cleanGolemName(name: string): string {
+  if (!name) return ''
+  return name
+    .replace(/\s*\(\s*#?\d+\s*\)/gi, '')
+    .replace(/\s*#\d+/gi, '')
+    .replace(/\s*\[.*?\]/gi, '')
+    .trim()
+}
+
+/**
  * Mapa en memoria de etiquetas flotantes asociadas a cada golem [golemEntity -> labelEntity].
  */
 const golemLabelMap = new Map<Entity, Entity>()
 
 /**
  * Actualiza el texto de la etiqueta flotante de un golem con su vida actual y nivel.
+ * Formato:
+ * Línea 1: Lv.X Nombre
+ * Línea 2: [██████████] HP/MaxHP
  */
 export function updateGolemFloatingLabel(
   golemEntity: Entity,
@@ -102,11 +117,10 @@ export function updateGolemFloatingLabel(
     const hpBar = getHealthBarAscii(currentHp, maxHp)
     const hpInt = Math.max(0, Math.round(currentHp))
     const maxHpInt = Math.round(maxHp)
-    const levelTag = t('common.levelShort')
-    const affTag = getLocalizedAffinity(affinity)
+    const cleanName = cleanGolemName(name)
 
     TextShape.getMutable(labelEntity).text =
-      `${name}${ownerTag} [${affTag}]\n${levelTag}${level} [${hpBar}] ${hpInt}/${maxHpInt}`
+      `Lv.${level} ${cleanName}${ownerTag}\n[${hpBar}] ${hpInt}/${maxHpInt}`
   }
 }
 
@@ -176,7 +190,7 @@ export function createFollowerGolem(
     isDefeated: false
   })
 
-  // 5. Etiqueta flotante con barra de salud, nivel y afinidad (Billboard)
+  // 5. Etiqueta flotante con barra de salud y nivel (Billboard)
   const labelEntity = engine.addEntity()
   Transform.create(labelEntity, {
     parent: golemEntity,
@@ -185,12 +199,11 @@ export function createFollowerGolem(
 
   const ownerTag = formatShortAddress(ownerAddress)
   const hpBar = getHealthBarAscii(currentHp, maxHp)
-  const affTag = getLocalizedAffinity(config.affinity)
-  const levelTag = t('common.levelShort')
-  const name = getGolemDisplayName(config)
+  const rawName = getGolemDisplayName(config)
+  const cleanName = cleanGolemName(rawName)
 
   TextShape.create(labelEntity, {
-    text: `${name}${ownerTag} [${affTag}]\n${levelTag}${level} [${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
+    text: `Lv.${level} ${cleanName}${ownerTag}\n[${hpBar}] ${Math.round(currentHp)}/${Math.round(maxHp)}`,
     fontSize: 2.1,
     textColor: getAffinityTextColor(config.affinity)
   })

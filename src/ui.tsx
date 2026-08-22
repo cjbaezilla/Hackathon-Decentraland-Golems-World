@@ -28,6 +28,7 @@ import { DesktopActionBarWidget } from './ui/actionBarComponent'
 import { InventoryModal } from './ui/inventoryComponent'
 import { GolemInventoryModal } from './ui/golemInventoryComponent'
 import { GolemForgeModal } from './ui/golemForgeComponent'
+import { FieldBattleModal, PlayerStatusHudWidget } from './ui/fieldBattleComponent'
 
 
 
@@ -1004,10 +1005,11 @@ export const uiComponent = () => {
       {/* Widget de Minimapa Compacto (Esquina Superior Derecha, bajo TopHeaderBar) */}
       <MinimapWidget />
 
+      {/* Widget HUD de Estado del Jugador (Nivel, XP, Engranajes de Latón) */}
+      <PlayerStatusHudWidget />
+
       {/* Barra de Botones de Acción Desktop (Debajo del Minimapa) */}
       <DesktopActionBarWidget />
-
-
 
       {/* Widget de Radar de Calor (Esquina Superior Derecha, 200x200 px junto al minimapa) */}
       <HeatRadarWidget />
@@ -1020,6 +1022,9 @@ export const uiComponent = () => {
 
       {/* Modal de Mezcla y Forja de Golems */}
       <GolemForgeModal />
+
+      {/* Modal de Confirmación de Batalla de Campo contra Golem Salvaje */}
+      <FieldBattleModal />
 
       {/* Modal de Diálogo de Silas el Sobreviviente */}
       <NpcDialog />

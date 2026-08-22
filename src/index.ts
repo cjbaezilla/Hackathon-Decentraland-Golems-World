@@ -44,6 +44,7 @@ import { spawnInitialMapItems } from './objects/itemGenerator'
 import { itemSpawnSystem } from './systems/itemSpawnSystem'
 import { factoryAnimationSystem } from './systems/factoryAnimationSystem'
 import { initForgeCinematicCamera } from './cinematics/factoryForgingCinematic'
+import { fieldCombatSystem } from './systems/fieldCombatSystem'
 
 
 import {
@@ -168,6 +169,7 @@ export function main() {
   engine.addSystem(sceneLoaderSystem)
   engine.addSystem(golemFollowerSystem)
   engine.addSystem(golemCombatSystem)
+  engine.addSystem(fieldCombatSystem)
   engine.addSystem(arenaAnimationSystem)
   engine.addSystem(factoryAnimationSystem)
   engine.addSystem(trampolineSystem)

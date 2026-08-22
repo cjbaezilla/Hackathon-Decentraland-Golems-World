@@ -25,6 +25,8 @@ El **Sistema de Reserva e Inventario de Golems** permite al jugador inspeccionar
    - Al pulsar o hacer clic en cualquier casillero de golem, se despliega una superposición flotante con estadísticas RPG (Ataque, Defensa, HP actual/máximo, Velocidad y Experiencia), afinidad y nivel.
 5. **Manejo Aislado de Eventos (Sin Bucles de Burbujeo)**:
    - Se aplicó `pointerFilter: 'none'` en todos los elementos hijos internos y se eliminó el handler `onMouseDown` del contenedor envolvente raíz, garantizando respuesta inmediata al hacer clic en PC o tocar en móvil.
+6. **HUD de Nivel de Jugador y Moneda (Engranajes de Latón)**:
+   - El estado del jugador rastrea permanentemente su **Nivel de Jugador (1 a 50)**, su **Experiencia (XP)** acumulada y su saldo de **Engranajes de Latón (🪙)** obtenidos en combates de campo y en la arena. Consulta la [Guía Maestra: Batallas de Campo y Matrices de Nivel](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-batallas-de-campo-y-matrices-de-nivel.md).
 
 ---
 

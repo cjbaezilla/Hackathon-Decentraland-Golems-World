@@ -1,12 +1,13 @@
 import { Vector3 } from '@dcl/sdk/math'
 import { GolemAffinity, GOLEM_RECIPES_BY_AFFINITY } from '../config/golems'
 import { getLocalizedGolemName } from '../i18n'
+import { calculateWildGolemMatrix } from './levelMatrix'
 
 /**
  * ============================================================================
  * CATÁLOGO Y GENERADOR PROCEDURAL DE GOLEMS EN EL MAPA (MAP GOLEMS CATALOG)
  * ============================================================================
- * Genera dinámicamente 100 golems distribuidos aleatoriamente en el mapa de 400m x 400m.
+ * Genera dinámicamente 150 golems distribuidos aleatoriamente en el mapa de 400m x 400m.
  * Implementa dos gradientes concéntricos principales desde el Distrito de la Forja (20m, 20m):
  *   1. Gradiente de Densidad: Anillo 1 (40%), Anillo 2 (30%), Anillo 3 (20%), Anillo 4 (10%).
  *   2. Gradiente de Rareza: Tier 1 (Común), Tier 2 (Poco Común), Tier 3 (Raro), Tier 4 (Épico/Legendario).
@@ -25,6 +26,15 @@ export interface MapGolemDefinition {
   position: Vector3
   rotationY: number
   zoneName: string
+  level: number
+  maxHp: number
+  currentHp: number
+  attack: number
+  defense: number
+  speed: number
+  expReward: number
+  minBrassGears: number
+  maxBrassGears: number
 }
 
 /** Mapeo inverso rápido: Número de receta (1..150) -> Afinidad elemental */
@@ -170,6 +180,8 @@ export function generateRandomMapGolemsCatalog(): MapGolemDefinition[] {
 
       const rotationY = Math.random() * 360
       const scale = getScaleForTier(zone.tier)
+      const spawnPos = Vector3.create(spawnX, 0, spawnZ)
+      const matrix = calculateWildGolemMatrix(spawnPos, zone.tier, zone.name)
       globalIndex++
 
       mapGolems.push({
@@ -181,9 +193,18 @@ export function generateRandomMapGolemsCatalog(): MapGolemDefinition[] {
         tier: zone.tier,
         modelSrc,
         scale,
-        position: Vector3.create(spawnX, 0, spawnZ),
+        position: spawnPos,
         rotationY,
-        zoneName: zone.name
+        zoneName: zone.name,
+        level: matrix.level,
+        maxHp: matrix.maxHp,
+        currentHp: matrix.maxHp,
+        attack: matrix.attack,
+        defense: matrix.defense,
+        speed: matrix.speed,
+        expReward: matrix.expReward,
+        minBrassGears: matrix.minBrassGears,
+        maxBrassGears: matrix.maxBrassGears
       })
     }
   }

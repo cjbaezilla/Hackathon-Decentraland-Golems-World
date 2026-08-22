@@ -41,6 +41,9 @@ export interface SceneState {
   isInsideArena: boolean
   playerTotalExp: number
   playerTotalKills: number
+  playerBrassGears: number
+  activeFieldTarget: any | null
+  isFieldBattleModalOpen: boolean
   combatLogs: CombatLogEntry[]
   isNpcDialogOpen: boolean
   npcDialogStep: NpcDialogStep
@@ -71,6 +74,9 @@ export const sceneState: SceneState = {
   isInsideArena: false,
   playerTotalExp: 0,
   playerTotalKills: 0,
+  playerBrassGears: 50, // Moneda inicial de cortesía
+  activeFieldTarget: null,
+  isFieldBattleModalOpen: false,
   combatLogs: [],
   isNpcDialogOpen: false,
   npcDialogStep: 'firstTimeCheck',
@@ -312,6 +318,16 @@ export function setLocalActiveSquad(squad: GolemConfig[]) {
  */
 export function getLocalActiveSquad(): GolemConfig[] | null {
   return sceneState.localSquad
+}
+
+/**
+ * Verifica si el jugador local posee al menos 1 golem activo con HP mayor a 0 en su escuadrón.
+ */
+export function hasActivePlayerGolem(): boolean {
+  if (sceneState.localSquad && sceneState.localSquad.length > 0) {
+    return sceneState.localSquad.some((g) => g.currentHp > 0)
+  }
+  return false
 }
 
 /**
@@ -565,6 +581,51 @@ export function addGolemToReserve(golem: GolemConfig) {
 export function getGolemReserve(): GolemConfig[] {
   return sceneState.golemReserve
 }
+
+/**
+ * Otorga una cantidad de Engranajes de Latón (moneda del juego) al jugador.
+ */
+export function awardPlayerBrassGears(amount: number) {
+  sceneState.playerBrassGears += Math.max(0, Math.round(amount))
+}
+
+/**
+ * Obtiene el saldo actual de Engranajes de Latón del jugador.
+ */
+export function getPlayerBrassGears(): number {
+  return sceneState.playerBrassGears
+}
+
+/**
+ * Abre el modal de confirmación de batalla contra un golem salvaje del mapa.
+ */
+export function openFieldBattleModal(targetData: any) {
+  sceneState.activeFieldTarget = targetData
+  sceneState.isFieldBattleModalOpen = true
+}
+
+/**
+ * Cierra el modal de confirmación de batalla de campo.
+ */
+export function closeFieldBattleModal() {
+  sceneState.activeFieldTarget = null
+  sceneState.isFieldBattleModalOpen = false
+}
+
+/**
+ * Consulta si el modal de confirmación de batalla de campo está abierto.
+ */
+export function getIsFieldBattleModalOpen(): boolean {
+  return sceneState.isFieldBattleModalOpen
+}
+
+/**
+ * Obtiene los datos del golem salvaje objetivo seleccionado.
+ */
+export function getActiveFieldTarget(): any | null {
+  return sceneState.activeFieldTarget
+}
+
 
 
 

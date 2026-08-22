@@ -6,6 +6,10 @@ Esta guía documenta exhaustivamente la arquitectura técnica, las fórmulas mat
 
 ## 📑 Tabla de Contenidos
 
+> [!NOTE]
+> **COMPATIBILIDAD CON BATALLAS DE CAMPO EN EL MAPA**:
+> Además del modo **Free For All (FFA)** en la Gran Arena, la escena implementa el sistema de **Batallas de Campo 1v1 contra Golems Salvajes del Mapa** (`fieldCombatSystem.ts`). Para consultar la especificación completa de la matriz de niveles (1 a 50), fórmulas por distancia, drop de **Engranajes de Latón** y la tabla de forja, consulta la [Guía Maestra: Batallas de Campo y Matrices de Nivel](file:///d:/DECENTRALAND/Scenes/Hackathon/guias/guia-batallas-de-campo-y-matrices-de-nivel.md).
+
 1. [Visión General y Modo "Free For All" (FFA)](#1-visión-general-y-modo-free-for-all-ffa)
 2. [Pentágono de Afinidades Elementales y Fórmulas Matemáticas](#2-pentágono-de-afinidades-elementales-y-fórmulas-matemáticas)
    - [2.1 Relaciones del Pentágono Energético](#21-relaciones-del-pentágono-energético)
