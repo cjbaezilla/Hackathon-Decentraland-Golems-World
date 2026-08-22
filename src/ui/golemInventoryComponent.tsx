@@ -6,7 +6,8 @@ import {
   toggleGolemInventory,
   getLocalActiveSquad
 } from '../state'
-import { GolemConfig, GolemAffinity } from '../config/golems'
+import { GolemConfig, GolemAffinity, getGolemDisplayName } from '../config/golems'
+
 import { getAffinityIcon } from '../ui'
 
 // Variables de estado local para filtros, selección y tooltip de golem activo
@@ -462,7 +463,7 @@ export const GolemInventoryModal = () => {
                       pointerFilter: 'none'
                     }}
                     uiText={{
-                      value: golem.name,
+                      value: getGolemDisplayName(golem),
                       fontSize: 9.5,
                       color: isTooltipActive
                         ? Color4.create(1.0, 0.9, 0.4, 1.0)
@@ -578,7 +579,7 @@ export const GolemInventoryModal = () => {
                   <UiEntity
                     uiTransform={{ pointerFilter: 'none' }}
                     uiText={{
-                      value: activeTooltipGolem.name,
+                      value: getGolemDisplayName(activeTooltipGolem),
                       fontSize: 16,
                       color: Color4.create(1.0, 0.88, 0.35, 1.0),
                       textAlign: 'middle-left'

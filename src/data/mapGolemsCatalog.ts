@@ -19,7 +19,10 @@ export interface MapGolemDefinition {
   index: number
   recipeNumber: number
   name: string
+  nameEs?: string
+  nameEn?: string
   affinity: GolemAffinity
+
   rarity: 'Común' | 'Poco Común' | 'Raro' | 'Épico' | 'Legendario'
   tier: 1 | 2 | 3 | 4
   modelSrc: string
@@ -153,6 +156,28 @@ export function getRandomPositionInZone(zoneName: string): Vector3 {
 }
 
 /**
+ * Genera una nueva coordenada procedural cercana a la posición de derrota (radio de 5m a 12m en la misma zona).
+ */
+export function getRespawnPositionNearAnchor(anchorPos: Vector3, zoneName: string): Vector3 {
+  const zone = ZONES_CONFIG.find((z) => z.name === zoneName) || ZONES_CONFIG[0]
+  let attempts = 0
+
+  while (attempts < 20) {
+    attempts++
+    const angle = Math.random() * Math.PI * 2
+    const radius = 5.0 + Math.random() * 7.0 // Offset de 5m a 12m
+    const x = Math.max(zone.minX, Math.min(zone.maxX, anchorPos.x + Math.cos(angle) * radius))
+    const z = Math.max(zone.minZ, Math.min(zone.maxZ, anchorPos.z + Math.sin(angle) * radius))
+
+    if (!isInsideArenaGround(x, z)) {
+      return Vector3.create(x, 0, z)
+    }
+  }
+
+  return Vector3.create(anchorPos.x, 0, anchorPos.z)
+}
+
+/**
  * Genera aleatoriamente el catálogo de 100 golems en posiciones procedurales únicas por zona.
  */
 export function generateRandomMapGolemsCatalog(): MapGolemDefinition[] {
@@ -178,8 +203,9 @@ export function generateRandomMapGolemsCatalog(): MapGolemDefinition[] {
 
       // 2. Nombre del golem basado en afinidad y variante
       const variantIdx = (recipeNum - 1) % 5
-      const localizedName = getLocalizedGolemName(affinity, variantIdx)
-      const name = `${localizedName} #${String(recipeNum).padStart(3, '0')}`
+      const nameEs = `${getLocalizedGolemName(affinity, variantIdx, 'es')} #${String(recipeNum).padStart(3, '0')}`
+      const nameEn = `${getLocalizedGolemName(affinity, variantIdx, 'en')} #${String(recipeNum).padStart(3, '0')}`
+      const name = `${getLocalizedGolemName(affinity, variantIdx)} #${String(recipeNum).padStart(3, '0')}`
 
       // 3. Generación de coordenadas procedurales dentro de la zona (reintentando si cae dentro de la arena)
       let spawnX = 0
@@ -208,6 +234,8 @@ export function generateRandomMapGolemsCatalog(): MapGolemDefinition[] {
         index: globalIndex - 1,
         recipeNumber: recipeNum,
         name,
+        nameEs,
+        nameEn,
         affinity,
         rarity,
         tier: zone.tier,

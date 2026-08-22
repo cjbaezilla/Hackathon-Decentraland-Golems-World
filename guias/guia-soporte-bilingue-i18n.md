@@ -41,6 +41,8 @@ Define las secciones semánticas de la experiencia:
 - `trampoline`: Textos de activación y carteles flotantes del trampolín de vapor.
 - `radar`: Estados térmicos del radar de calor y distancias euclidianas.
 - `forge`: Títulos, instrucciones y estados de la forja determinista.
+- `golemRecipeHash` & `recipesCatalog`: Nombres bilingües de las 150 recetas oficiales (`nameEs` y `nameEn`) y generador procedural.
+
 
 ---
 
@@ -91,7 +93,13 @@ const unsubscribe = onLanguageChange(() => {
 ### 3.5 Helpers de Afinidades y Nombres de Golems
 - `getLocalizedAffinity(affinity: string, lang?: Language): string`: Devuelve el nombre de la afinidad traducido al idioma activo o solicitado.
 - `getLocalizedGolemName(affinity: string, variantIndex: number, lang?: Language): string`: Devuelve el nombre del golem según su afinidad y variante (0 a 4).
-- `getGolemDisplayName(golem: { name?: string; affinity: string; variantIndex?: number }, lang?: Language): string`: Resuelve de forma inteligente el nombre a mostrar.
+- `translateOfficialRecipeNameEs(nameEn: string): string`: Traduce deterministamente los 150 nombres oficiales en inglés de 2 palabras (*"Electric Bulwark"* $\rightarrow$ *"Baluarte Eléctrico"*, *"Filament Hunter"* $\rightarrow$ *"Cazador de Filamento"*).
+- `generateProceduralGolemName(affinity: GolemAffinity, hash: number, lang?: Language): string`: Genera nombres procedurales algorítmicos en español (*"Baluarte Presurizado"*) e inglés (*"Pressurized Bulwark"*).
+- `getGolemDisplayName(golem: { name?: string; nameEs?: string; nameEn?: string; affinity: string; variantIndex?: number }, lang?: Language): string`: Resuelve de forma inteligente el nombre a mostrar priorizando `nameEn` en inglés y `nameEs` en español, con fallbacks para variantes y `name`.
+
+### 3.6 Actualización 3D en Tiempo Real de Etiquetas Flotantes (`onLanguageChange`)
+Los golems seguidores activos y los golems salvajes del mapa se suscriben al evento `onLanguageChange` en [`src/objects/golemFactory.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/golemFactory.ts) y [`src/objects/mapGolemsGenerator.ts`](file:///d:/DECENTRALAND/Scenes/Hackathon/src/objects/mapGolemsGenerator.ts). Al conmutar de idioma en la UI, sus etiquetas flotantes `TextShape` 3D se actualizan al instante en el mundo sin necesidad de reinstanciar las entidades.
+
 
 ---
 

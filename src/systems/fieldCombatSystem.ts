@@ -5,7 +5,7 @@ import {
   TextShape
 } from '@dcl/sdk/ecs'
 import { Vector3, Quaternion, Color4 } from '@dcl/sdk/math'
-import { MapGolemDefinition, getRandomPositionInZone } from '../data/mapGolemsCatalog'
+import { MapGolemDefinition, getRandomPositionInZone, getRespawnPositionNearAnchor } from '../data/mapGolemsCatalog'
 import { GolemCombatComponent, GolemCombatState } from '../components/combat'
 import { GolemFollowerComponent } from '../components/follower'
 import { getAffinityMultiplier } from '../config/golems'
@@ -98,8 +98,8 @@ function processDefeatedGolemsRespawn() {
       // 1. Restaurar salud al 100%
       entry.golemDef.currentHp = entry.golemDef.maxHp
 
-      // 2. Generar nueva ubicación procedural aleatoria dentro de su zona (diferente a la posición de derrota)
-      const newPos = getRandomPositionInZone(entry.golemDef.zoneName)
+      // 2. Generar nueva ubicación procedural cercana a la posición de derrota (radio de 5m a 12m)
+      const newPos = getRespawnPositionNearAnchor(entry.golemDef.position, entry.golemDef.zoneName)
       entry.golemDef.position = newPos
 
       // 3. Actualizar Transform 3D en la superficie (Y = 0)

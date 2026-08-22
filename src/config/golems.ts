@@ -6,7 +6,7 @@
  * velocidades de interpolación (LERP/SLERP) y catálogo de las 5 afinidades.
  */
 
-import { getLocalizedGolemName, getLocalizedAffinity, Language } from '../i18n'
+import { getLocalizedGolemName, getLocalizedAffinity, getLanguage, Language } from '../i18n'
 
 export enum GolemAffinity {
   STEAM = 'Vapor',
@@ -30,6 +30,8 @@ export interface GolemStats {
 export interface GolemConfig extends GolemStats {
   id: string
   name: string
+  nameEs?: string
+  nameEn?: string
   affinity: GolemAffinity
   modelSrc: string
   scale: number
@@ -42,6 +44,7 @@ export interface GolemConfig extends GolemStats {
   /** Índice de variante visual (0 a 4) para traducciones dinámicas */
   variantIndex?: number
 }
+
 
 /**
  * Nombres y metadatos temáticos por afinidad y variante (01 a 05),
@@ -349,12 +352,26 @@ export function generateRandomSquad(ownerSeed?: string): GolemConfig[] {
 /**
  * Obtiene el nombre y afinidad traducidos de un golem para mostrar en la interfaz o etiquetas.
  */
-export function getGolemDisplayName(golem: { name?: string; affinity: string; variantIndex?: number }, lang?: Language): string {
-  if (golem.variantIndex !== undefined) {
-    return getLocalizedGolemName(golem.affinity, golem.variantIndex, lang)
+export function getGolemDisplayName(
+  golem: { name?: string; nameEs?: string; nameEn?: string; affinity: string; variantIndex?: number },
+  lang?: Language
+): string {
+  const currentLang = lang || getLanguage()
+
+  if (currentLang === 'en' && golem.nameEn) {
+    return golem.nameEn
   }
-  return golem.name || getLocalizedAffinity(golem.affinity, lang)
+  if (currentLang === 'es' && golem.nameEs) {
+    return golem.nameEs
+  }
+
+  if (golem.variantIndex !== undefined) {
+    return getLocalizedGolemName(golem.affinity, golem.variantIndex, currentLang)
+  }
+
+  return golem.name || getLocalizedAffinity(golem.affinity, currentLang)
 }
+
 
 export const FOLLOW_SYSTEM_SETTINGS = {
   /** Distancia mínima recorrida por el jugador para registrar un nuevo punto de migaja (m) */

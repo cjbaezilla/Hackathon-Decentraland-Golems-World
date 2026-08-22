@@ -4,12 +4,15 @@ export interface OfficialRecipeData {
   number: number
   numberStr: string
   name: string
+  nameEn: string
+  nameEs: string
   tier: number
   affinity: GolemAffinity
   modelSrc: string
   scale: number
   components: { id: string; qty: number }[]
 }
+
 
 const rawCatalog: Record<string, any> = {
   "cadenas_hierro:2|manometros:2|palancas_interruptor:2|tornillos_pernos:2|tuercas_gigantes:2": {
@@ -5501,6 +5504,109 @@ const rawCatalog: Record<string, any> = {
 }
 
 /**
+ * Traductor determinista de nombres oficiales de recetas de 2 palabras (Inglés -> Español).
+ */
+export function translateOfficialRecipeNameEs(nameEn: string): string {
+  const parts = nameEn.split(' ')
+  if (parts.length !== 2) return nameEn
+
+  const prefixEn = parts[0]
+  const nounEn = parts[1]
+
+  const PREFIX_ES: Record<string, string> = {
+    Aetheric: 'Etérico',
+    Arcane: 'Arcano',
+    Articulated: 'Articulado',
+    Astral: 'Astral',
+    Automaton: 'Autómata',
+    Batterion: 'Bateriónico',
+    Boiler: 'Calderero',
+    Brazen: 'de Latón',
+    Bright: 'Brillante',
+    Clockwork: 'de Relojería',
+    Conductive: 'Conductivo',
+    Cosmic: 'Cósmico',
+    Diodic: 'Diódico',
+    Dragonic: 'Dragónico',
+    Electric: 'Eléctrico',
+    Ferrous: 'Férreo',
+    Filament: 'de Filamento',
+    Galvanic: 'Galvánico',
+    Geared: 'Engranado',
+    Igneous: 'Ígneo',
+    Lumen: 'Luminoso',
+    Luminous: 'Luminoso',
+    Manatic: 'Manaico',
+    Mechanical: 'Mecánico',
+    Mirrored: 'Especular',
+    Mystic: 'Místico',
+    Optical: 'Óptico',
+    Photonic: 'Fotónico',
+    Pinion: 'de Piñón',
+    Piston: 'de Pistón',
+    Plasmatic: 'Plasmático',
+    Pneumatic: 'Neumático',
+    Pressurized: 'Presurizado',
+    Primordial: 'Primigenio',
+    Raying: 'Radiante',
+    Reliquary: 'Relicario',
+    Resonant: 'Resonante',
+    Rotor: 'de Rotor',
+    Singular: 'Singular',
+    Smoky: 'Brumoso',
+    Sparking: 'Chispeante',
+    Sparkling: 'Chispeante',
+    Steamy: 'Vaporoso',
+    Teslic: 'Téslico',
+    Thermal: 'Térmico',
+    Titanic: 'Titánico',
+    Vaporized: 'Vaporizado',
+    Volcanic: 'Volcánico',
+    Voltaic: 'Voltaico'
+  }
+
+  const NOUN_ES: Record<string, string> = {
+    Assembly: 'Ensamble',
+    Automaton: 'Autómata',
+    Basilisk: 'Basilisco',
+    Bearer: 'Portador',
+    Bulwark: 'Baluarte',
+    Colossus: 'Coloso',
+    Crusader: 'Cruzado',
+    Defender: 'Defensor',
+    Destroyer: 'Destructor',
+    Excavator: 'Excavador',
+    Executor: 'Ejecutor',
+    Forger: 'Forjador',
+    Golem: 'Golem',
+    Guard: 'Guardia',
+    Guardian: 'Guardián',
+    Gunner: 'Artillero',
+    Hunter: 'Cazador',
+    Leviathan: 'Leviatán',
+    Monolith: 'Monolito',
+    Patroller: 'Patrullero',
+    Protector: 'Protector',
+    Scavenger: 'Chatarrero',
+    Sentinel: 'Centinela',
+    Servant: 'Sirviente',
+    Settler: 'Colono',
+    Smelter: 'Fundidor',
+    Titan: 'Titán',
+    Tracker: 'Rastreador',
+    Vanguard: 'Vanguardia',
+    Walker: 'Caminante',
+    Watcher: 'Vigilante',
+    Wraith: 'Espectro'
+  }
+
+  const prefixEs = PREFIX_ES[prefixEn] || prefixEn
+  const nounEs = NOUN_ES[nounEn] || nounEn
+
+  return `${nounEs} ${prefixEs}`
+}
+
+/**
  * Catálogo completo de las 150 recetas deterministas oficiales indexadas por su cadena canónica.
  */
 export const OFFICIAL_RECIPES_CATALOG: Record<string, OfficialRecipeData> = {}
@@ -5512,10 +5618,15 @@ for (const [canonical, data] of Object.entries(rawCatalog)) {
   else if (data.affinityCode === 'LUMINOUS') aff = GolemAffinity.LUMINOUS
   else if (data.affinityCode === 'AETHER') aff = GolemAffinity.AETHER
 
+  const nameEn = data.name
+  const nameEs = translateOfficialRecipeNameEs(nameEn)
+
   OFFICIAL_RECIPES_CATALOG[canonical] = {
     number: data.number,
     numberStr: data.numberStr,
-    name: data.name,
+    name: nameEn,
+    nameEn,
+    nameEs,
     tier: data.tier,
     affinity: aff,
     modelSrc: data.modelSrc,
@@ -5530,3 +5641,4 @@ for (const [canonical, data] of Object.entries(rawCatalog)) {
 export function findOfficialRecipe(canonicalRecipe: string): OfficialRecipeData | undefined {
   return OFFICIAL_RECIPES_CATALOG[canonicalRecipe]
 }
+

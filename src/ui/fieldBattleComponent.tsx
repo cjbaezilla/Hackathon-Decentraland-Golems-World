@@ -9,6 +9,8 @@ import {
 } from '../state'
 import { getPlayerLevelFromTotalExp, getPlayerExpForNextLevel } from '../data/levelMatrix'
 import { getLocalizedAffinity, getLocalizedRarity, t } from '../i18n'
+import { getGolemDisplayName } from '../config/golems'
+
 import { startFieldCombat } from '../systems/fieldCombatSystem'
 
 /**
@@ -71,7 +73,7 @@ export function FieldBattleModal(): ReactEcs.JSX.Element | null {
           uiBackground={{ color: Color4.create(0.06, 0.07, 0.09, 0.9) }}
         >
           <Label
-            value={`🤖 ${def.name}`}
+            value={`🤖 ${getGolemDisplayName(def)}`}
             fontSize={24}
             color={Color4.create(1, 1, 1, 1)}
           />

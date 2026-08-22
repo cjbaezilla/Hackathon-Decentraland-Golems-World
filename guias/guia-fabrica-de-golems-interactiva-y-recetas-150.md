@@ -17,6 +17,8 @@ El sistema integra 6 ejes tecnológicos principales:
 4. **Vista Previa Visual con Render 3D PNG**: Despliegue de la imagen PNG ($300 \times 300\text{ px}$) almacenada en `assets/models/<afinidad>/golem_<NNN>.png` previa a la forja.
 5. **Animación Estructural Mecánica (`factoryAnimationSystem`)**: Sistema ECS que hace girar engranajes y vibrar la caldera en modo *Idle* (ambiente) y modo *Forging* (acelerado a 3.5x).
 6. **Cinemática de Cámara en 3 Perspectivas (`playFactoryForgingCinematic`)**: Barrido automatizado con `VirtualCamera` e `InputModifier` que enfoca tolvas de admisión, gran caldera central y podio de salida.
+7. **Compatibilidad Bilingüe Nativa (Dual Language Compatibility `nameEs` / `nameEn`)**: Generación simultánea de nombres en Español e Inglés durante la forja para recetas oficiales (vía `translateOfficialRecipeNameEs`) y mezclas procedurales (vía `generateProceduralGolemName(affinity, hash, lang)`), almacenados de forma persistente en `GolemConfig`.
+
 
 ---
 
@@ -57,11 +59,13 @@ const official = findOfficialRecipe(canonical)
 
 if (official) {
   // Receta oficial válida (#001 a #150)
+  // nameEn = official.nameEn ("Electric Bulwark")
+  // nameEs = official.nameEs ("Baluarte Eléctrico")
   // modelSrc = assets/models/<afinidad>/golem_<NNN>.glb
-  // imageSrc = assets/models/<afinidad>/golem_<NNN>.png
 } else {
   // Receta no válida: UI bloquea el botón de forja y muestra advertencia
 }
+
 ```
 
 ---

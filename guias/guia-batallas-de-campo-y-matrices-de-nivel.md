@@ -31,7 +31,7 @@
 7. **Sistema de Reaparición Temporizada (Respawn) en Nuevas Coordenadas**:
    - Si el Golem salvaje es derrotado ($HP \le 0$), se oculta bajo el mapa ($Y = -100$) y entra en la cola de reaparición `defeatedRespawnQueue`.
    - **Temporizadores por Tier**: Tier 1 = 2 min, Tier 2 = 3 min, Tier 3 = 4 min, Tier 4 = 5 min.
-   - **Nuevas Coordenadas Procedurales**: Al expirar el tiempo de respawn, el Golem reaparece en una **coordenada $(X, Z)$ completamente nueva** dentro de su Zona (fuera de la Gran Arena), con salud al 100% y rótulo restaurado.
+   - **Coordenadas de Respawn Cercanas**: Al expirar el tiempo de respawn (2 min para Tier 1), el Golem reaparece en una **ubicación cercana al punto de derrota (radio de 5m a 12m)** dentro de su misma Zona, garantizando que el jugador lo encuentre fácilmente sin teletransportes lejanos.
 8. **Mecánica de Persecución Táctica, Huida y Retorno al Territorio**:
    - **Persecución en Territorio**: Durante la batalla de campo, si el jugador se desplaza caminando ($d > 2.2\text{m}$), el Golem salvaje persigue activamente al avatar/golem a su velocidad de movimiento `moveSpeed` mientras permanezca en su rango de territorio.
    - **Umbral de Huida Exitosa**: Si la distancia entre el avatar y el ancla original del Golem supera los $14.0\text{m}$ (o si la separación excede los $12.0\text{m}$), el combate se cancela automáticamente notificando: `"🏃 ¡Lograste huir del territorio del Golem salvaje!"`.

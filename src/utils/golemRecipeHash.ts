@@ -1,6 +1,7 @@
 import { GolemAffinity, GolemConfig } from '../config/golems'
 import { COLLECTABLE_ITEMS, ItemRarity } from '../config/items'
-import { getLocalizedAffinity, t } from '../i18n'
+import { getLocalizedAffinity, getLanguage, Language, t } from '../i18n'
+
 
 /**
  * ============================================================================
@@ -133,25 +134,42 @@ export function calculateDominantAffinity(materials: Record<string, number>, has
 }
 
 /**
- * Genera un nombre procedural algorítmico determinista derivado del hash FNV-1a.
+ * Genera un nombre procedural algorítmico determinista derivado del hash FNV-1a con soporte bilingüe (ES / EN).
  */
-export function generateProceduralGolemName(affinity: GolemAffinity, hash: number): string {
-  const nounsEs = ['Baluarte', 'Cazador', 'Artillero', 'Titán', 'Coloso', 'Guardian', 'Centinela', 'Vanguardia', 'Forjador', 'Autómata']
+export function generateProceduralGolemName(affinity: GolemAffinity, hash: number, lang?: Language): string {
+  const currentLang = lang || getLanguage()
+
+  const nounsEs = ['Baluarte', 'Cazador', 'Artillero', 'Titán', 'Coloso', 'Guardián', 'Centinela', 'Vanguardia', 'Forjador', 'Autómata']
+  const nounsEn = ['Bulwark', 'Hunter', 'Gunner', 'Titan', 'Colossus', 'Guardian', 'Sentinel', 'Vanguard', 'Forger', 'Automaton']
+
   const prefixesEs: Record<GolemAffinity, string[]> = {
     [GolemAffinity.STEAM]: ['Vaporoso', 'Calderero', 'Térmico', 'de Brasas', 'Presurizado'],
     [GolemAffinity.GALVANIC]: ['Eléctrico', 'Voltaico', 'Relámpago', 'Galvánico', 'de Plasma'],
-    [GolemAffinity.MECHANICAL]: ['de Relojería', 'Engranado', 'Blindado', 'Latón', 'Mecánico'],
+    [GolemAffinity.MECHANICAL]: ['de Relojería', 'Engranado', 'Blindado', 'de Latón', 'Mecánico'],
     [GolemAffinity.LUMINOUS]: ['Solar', 'Fotónico', 'Brillante', 'Prismático', 'Luminoso'],
-    [GolemAffinity.AETHER]: ['Primigenio', 'Astral', 'Maná', 'Místico', 'Etérico']
+    [GolemAffinity.AETHER]: ['Primigenio', 'Astral', 'de Maná', 'Místico', 'Etérico']
+  }
+
+  const prefixesEn: Record<GolemAffinity, string[]> = {
+    [GolemAffinity.STEAM]: ['Steam', 'Boiler', 'Thermal', 'Embers', 'Pressurized'],
+    [GolemAffinity.GALVANIC]: ['Electric', 'Voltaic', 'Lightning', 'Galvanic', 'Plasma'],
+    [GolemAffinity.MECHANICAL]: ['Clockwork', 'Geared', 'Armored', 'Brass', 'Mechanical'],
+    [GolemAffinity.LUMINOUS]: ['Solar', 'Photonic', 'Bright', 'Prismatic', 'Luminous'],
+    [GolemAffinity.AETHER]: ['Primeval', 'Astral', 'Mana', 'Mystic', 'Aetheric']
   }
 
   const nounIdx = (hash * 7) % nounsEs.length
-  const noun = nounsEs[nounIdx]
-  const prefixList = prefixesEs[affinity] || prefixesEs[GolemAffinity.STEAM]
+  const noun = currentLang === 'en' ? nounsEn[nounIdx] : nounsEs[nounIdx]
+
+  const prefixList = currentLang === 'en'
+    ? (prefixesEn[affinity] || prefixesEn[GolemAffinity.STEAM])
+    : (prefixesEs[affinity] || prefixesEs[GolemAffinity.STEAM])
+
   const prefix = prefixList[hash % prefixList.length]
 
-  return `${noun} ${prefix}`
+  return currentLang === 'en' ? `${prefix} ${noun}` : `${noun} ${prefix}`
 }
+
 
 /**
  * Mapeo de carpetas de modelos por afinidad.
@@ -261,15 +279,26 @@ export function deriveForgedGolem(materials: Record<string, number>): ForgedGole
   const finalHp = Math.max(80, Math.round(baseHp * (1 + hashMod)))
   const finalSpd = Math.max(2, Math.round(baseSpd * (1 + hashMod)))
 
-  // 4. Escala física y ruta de modelo GLTF oficial
+  // 4. Escala física y nombres traducidos en ambos idiomas (ES y EN)
   const scale = official ? official.scale : (0.9 + (hash % 41) * 0.01)
-  const name = official ? `${official.name} (#${official.numberStr})` : generateProceduralGolemName(affinity, hash)
+
+  const nameEn = official
+    ? `${official.nameEn} (#${official.numberStr})`
+    : generateProceduralGolemName(affinity, hash, 'en')
+
+  const nameEs = official
+    ? `${official.nameEs} (#${official.numberStr})`
+    : generateProceduralGolemName(affinity, hash, 'es')
+
+  const name = getLanguage() === 'en' ? nameEn : nameEs
   const modelSrc = official ? official.modelSrc : selectGolemModelSrc(affinity, hash)
   const id = `golem_forged_${hash}_${Date.now()}`
 
   const config: GolemConfig = {
     id,
     name,
+    nameEn,
+    nameEs,
     affinity,
     modelSrc,
     scale,
@@ -285,6 +314,7 @@ export function deriveForgedGolem(materials: Record<string, number>): ForgedGole
     currentExp: 0,
     expReward: 50 + tier * 25
   }
+
 
   return {
     config,

@@ -3,6 +3,8 @@ import { Color4 } from '@dcl/sdk/math'
 import { COLLECTABLE_ITEMS, ItemRarity, getRarityColorHex } from '../config/items'
 import { getAffinityIcon } from '../ui'
 import { getLocalizedAffinity, t, getLanguage } from '../i18n'
+import { getGolemDisplayName } from '../config/golems'
+
 import {
   getIsForgeUIOpen,
   setIsForgeUIOpen,
@@ -432,7 +434,7 @@ export const GolemForgeModal = () => {
                     margin: { bottom: 2 }
                   }}
                   uiText={{
-                    value: `${getAffinityIcon(projectedResult.config.affinity)} ${projectedResult.config.name}`,
+                    value: `${getAffinityIcon(projectedResult.config.affinity)} ${getGolemDisplayName(projectedResult.config)}`,
                     fontSize: 16,
                     color: projectedResult.isValidRecipe ? Color4.create(1.0, 0.85, 0.3, 1.0) : Color4.create(1.0, 0.4, 0.4, 1.0),
                     textAlign: 'middle-center'
@@ -718,11 +720,11 @@ export const GolemForgeModal = () => {
                           // El usuario no tenía golem activo: asignarlo como su único seguidor por el mapa
                           setLocalActiveSquad([createdConfig])
                           spawnActivePlayerGolem(createdConfig)
-                          addCombatLog(t('forge.golemActiveFollower', { name: createdConfig.name }), '#00FF66')
+                          addCombatLog(t('forge.golemActiveFollower', { name: getGolemDisplayName(createdConfig) }), '#00FF66')
                         } else {
                           // El usuario ya tiene 1 golem seguidor: guardar en reserva
                           addGolemToReserve(createdConfig)
-                          addCombatLog(t('forge.golemSentToVault', { name: createdConfig.name }), '#FFE600')
+                          addCombatLog(t('forge.golemSentToVault', { name: getGolemDisplayName(createdConfig) }), '#FFE600')
                         }
                       })
 

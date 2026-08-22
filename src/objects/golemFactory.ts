@@ -17,7 +17,8 @@ import {
   GOLEM_TEAMS
 } from '../components/combat'
 import { ARENA_CONFIG } from '../config/arenaConfig'
-import { t, getLocalizedAffinity } from '../i18n'
+import { t, getLocalizedAffinity, onLanguageChange } from '../i18n'
+
 
 /**
  * ============================================================================
@@ -93,6 +94,25 @@ export function cleanGolemName(name: string): string {
  * Mapa en memoria de etiquetas flotantes asociadas a cada golem [golemEntity -> labelEntity].
  */
 const golemLabelMap = new Map<Entity, Entity>()
+const spawnedFollowerGolemConfigMap = new Map<Entity, GolemConfig | GolemSquadMemberDto>()
+
+// Suscripción al cambio global de idioma para actualizar etiquetas 3D en tiempo real
+onLanguageChange(() => {
+  for (const [golemEntity, labelEntity] of golemLabelMap.entries()) {
+    const config = spawnedFollowerGolemConfigMap.get(golemEntity)
+    if (config && TextShape.has(labelEntity) && GolemCombatComponent.has(golemEntity)) {
+      const combat = GolemCombatComponent.get(golemEntity)
+      const ownerTag = formatShortAddress(combat.ownerAddress)
+      const hpBar = getHealthBarAscii(combat.currentHp, combat.maxHp)
+      const rawName = getGolemDisplayName(config)
+      const cleanName = cleanGolemName(rawName)
+
+      TextShape.getMutable(labelEntity).text =
+        `Lv.${combat.level} ${cleanName}${ownerTag}\n[${hpBar}] ${Math.round(combat.currentHp)}/${Math.round(combat.maxHp)}`
+    }
+  }
+})
+
 
 /**
  * Actualiza el texto de la etiqueta flotante de un golem con su vida actual y nivel.
@@ -210,6 +230,7 @@ export function createFollowerGolem(
 
   Billboard.create(labelEntity, {})
   golemLabelMap.set(golemEntity, labelEntity)
+  spawnedFollowerGolemConfigMap.set(golemEntity, config)
 
   return golemEntity
 }
@@ -278,6 +299,7 @@ export function removePlayerSquad(ownerAddress: string) {
 
   for (const entity of entitiesToRemove) {
     golemLabelMap.delete(entity)
+    spawnedFollowerGolemConfigMap.delete(entity)
     removeEntityWithChildren(engine, entity)
   }
 }
